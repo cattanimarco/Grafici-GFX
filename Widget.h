@@ -10,7 +10,7 @@ class Widget
 
 	draw(Display display, Data data, CircularArea area);
 	draw(Display display, Data data, SquareArea area);
-	draw(Display display, Data data, LinearArea area);
+	draw(Display display, Data data, Line line);
 
 };
 

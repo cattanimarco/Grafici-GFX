@@ -2,23 +2,21 @@
 #define ARDUPLOT_GFX_DISPLAY_INTERFACE_H
 
 
-class DISPLAY
+class Display
 {
-  public:
+
+public:
 
 	Display();
 
-	drawPoint(Point point, Marker marker);
-	drawLine(Point startPoint, Point endPoint);
-	drawCircle(Point centerPoint, Length radius);
-	fillCircle(Point centerPoint, Length radius);
-	drawSquare(Point topLeft, Point topRight, Point BottomLeft, Point BottomRight);
-	fillSquare(Point topLeft, Point topRight, Point BottomLeft, Point BottomRight);
+	drawPoint(Point point);
 
+	drawLine(Line line);
+	drawCircle(CircleArea area);
+	drawSquare(RectangleArea area);
 
-	ColorPalette colors;
-	DrawSizes sizes;
-	LinkedList<Pattern> pattern;
+	fillCircle(CircleArea area);
+	fillSquare(RectangleArea area);
 
 
 };
