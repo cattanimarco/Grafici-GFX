@@ -1,17 +1,15 @@
-#ifndef ARDUPLOT_GFX_WIDGET_INTERFACE_H
-#define ARDUPLOT_GFX_WIDGET_INTERFACE_H
+#ifndef ARDUPLOT_GFX_WIDGET_H
+#define ARDUPLOT_GFX_WIDGET_H
 
 
 class Widget
 {
   public:
 
-	Widget();
-
-	draw(Display display, Data data, CircularArea area);
-	draw(Display display, Data data, SquareArea area);
-	draw(Display display, Data data, Line line);
+	draw(Display &display, Data &data, Line boundaries);
+	draw(Display &display, Data &data, Square boundaries);
+	draw(Display &display, Data &data, Circle boundaries);
 
 };
 
-#endif //ARDUPLOT_GFX_WIDGETINTERFACE_H
+#endif //ARDUPLOT_GFX_WIDGET_H

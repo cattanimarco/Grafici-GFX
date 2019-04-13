@@ -11,8 +11,8 @@ struct Point
 
 struct Line
 {
-	Point start;
-	Point stop;
+	Point begin;
+	Point end;
 };
 
 struct Square
@@ -25,11 +25,11 @@ struct Square
 
 struct Circle
 {
-	Point centre;
+	Point center;
 	float innerRadius = 0.0;
 	float outerRadius;
-	float startAngle = 0.0;
-	float stopAngle = 0.0;
+	float beginAngle = 0.0;
+	float endAngle = 0.0;
 };
 
 #endif //ARDUPLOT_GFX_GEOMETRY_H

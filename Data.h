@@ -1,20 +1,23 @@
 #ifndef ARDUPLOT_GFX_DATA_H
 #define ARDUPLOT_GFX_DATA_H
 
-typedef *Point DataIterator;
+typedef *Point PointIterator;
 
 class Data
 {
   public:
-	Data();
 	addPoint(Point point);
-	DataIterator begin();
-	DataIterator end();
+	addPoints(Point *pointArray, int size);
+	addPoints(float * x, float * y, float * value, int size);
+	PointIterator begin();
+	PointIterator end();
 
   private:
 	LinkedList<Point> data;
-	Point min; // store min x, y, value
-	Point max; // store max x, y, value
+	Point minPoint;
+	Point maxPoint;
+	Point avgPoint;
+	int size = 0;
 };
 
 #endif //ARDUPLOT_GFX_GEOMETRY_H
