@@ -1,21 +1,24 @@
-#ifndef ARDUPLOT_GFX_DISPLAY_H
-#define ARDUPLOT_GFX_DISPLAY_H
+#ifndef ARDU_DATAVIS_DISPLAY_H
+#define ARDU_DATAVIS_DISPLAY_H
+
+#include "Geometry.h"
+#include "Driver.h"
+#include "Style.h"
 
 class Display
 {
-
-  public:
+public:
 	Display(Driver &driver, Style &style);
-	drawPoint(Point point);
-	drawLine(Line line);
-	drawCircle(Circle circle);
-	drawSquare(Rectangle rectangle);
-	fillCircle(CircleArea area);
-	fillSquare(RectangleArea area);
+	void drawPoint(Point point);
+	void drawLine(Line line);
+	void drawCircle(Circle circle);
+	void drawSquare(Rectangle rectangle);
+	void fillCircle(Circle area);
+	void fillSquare(Rectangle area);
 
-  private:
+private:
 	Driver driver;
 	Style style;
 };
 
-#endif //ARDUPLOT_GFX_DISPLAY_H
+#endif //ARDU_DATAVIS_DISPLAY_H

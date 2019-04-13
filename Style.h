@@ -1,5 +1,5 @@
-#ifndef ARDUPLOT_GFX_STYLE_H
-#define ARDUPLOT_GFX_STYLE_H
+#ifndef ARDU_DATAVIS_STYLE_H
+#define ARDU_DATAVIS_STYLE_H
 
 struct Color
 {
@@ -31,4 +31,4 @@ private:
 	Palette palette;
 }
 
-#endif //ARDUPLOT_GFX_STYLE_H
+#endif //ARDU_DATAVIS_STYLE_H

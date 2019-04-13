@@ -1,5 +1,5 @@
-#ifndef ARDUPLOT_GFX_LAYOUT_H
-#define ARDUPLOT_GFX_LAYOUT_H
+#ifndef ARDU_DATAVIS_LAYOUT_H
+#define ARDU_DATAVIS_LAYOUT_H
 
 class Layout
 {
@@ -19,4 +19,4 @@ class Layout
 	LinkedList<WidgetAssociation> registeredWidgets;
 };
 
-#endif //ARDUPLOT_GFX_LAYOUT_H
+#endif //ARDU_DATAVIS_LAYOUT_H

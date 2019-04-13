@@ -1,5 +1,5 @@
-#ifndef ARDUPLOT_GFX_DRIVERGFX_H
-#define ARDUPLOT_GFX_DRIVERGFX_H
+#ifndef ARDU_DATAVIS_DRIVERGFX_H
+#define ARDU_DATAVIS_DRIVERGFX_H
 
 #include "Adafruit_GFX.h"
 
@@ -19,4 +19,4 @@ private:
 	uint16_t colorTo16b(Color color);
 };
 
-#endif //ARDUPLOT_GFX_DRIVER_H
+#endif //ARDU_DATAVIS_DRIVER_H

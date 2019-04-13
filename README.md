@@ -1,2 +1,2 @@
-# ArduDataVisLib
-Data plotting library for Arduino GFX compatible displays
+# Ardu DataVis
+Data plotting library for Arduino driven displays

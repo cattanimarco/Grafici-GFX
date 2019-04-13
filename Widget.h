@@ -1,15 +1,18 @@
-#ifndef ARDUPLOT_GFX_WIDGET_H
-#define ARDUPLOT_GFX_WIDGET_H
+#ifndef ARDU_DATAVIS_WIDGET_H
+#define ARDU_DATAVIS_WIDGET_H
 
+#include "Display.h"
+#include "Data.h"
+#include "Geometry.h"
 
 class Widget
 {
   public:
 
-	draw(Display &display, Data &data, Line boundaries);
-	draw(Display &display, Data &data, Square boundaries);
-	draw(Display &display, Data &data, Circle boundaries);
+	void draw(Display &display, Data &data, Line boundaries);
+	void draw(Display &display, Data &data, Rectangle boundaries);
+	void draw(Display &display, Data &data, Circle boundaries);
 
 };
 
-#endif //ARDUPLOT_GFX_WIDGET_H
+#endif //ARDU_DATAVIS_WIDGET_H

@@ -1,5 +1,5 @@
-#ifndef ARDUPLOT_GFX_GEOMETRY_H
-#define ARDUPLOT_GFX_GEOMETRY_H
+#ifndef ARDU_DATAVIS_GEOMETRY_H
+#define ARDU_DATAVIS_GEOMETRY_H
 
 
 struct Point
@@ -15,7 +15,7 @@ struct Line
 	Point end;
 };
 
-struct Square
+struct Rectangle
 {
 	Point topLeft;
 	Point topRight;
@@ -32,4 +32,4 @@ struct Circle
 	float endAngle = 0.0;
 };
 
-#endif //ARDUPLOT_GFX_GEOMETRY_H
+#endif //ARDU_DATAVIS_GEOMETRY_H

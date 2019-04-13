@@ -1,5 +1,7 @@
-#ifndef ARDUPLOT_GFX_DRIVER_H
-#define ARDUPLOT_GFX_DRIVER_H
+#ifndef ARDU_DATAVIS_DRIVER_H
+#define ARDU_DATAVIS_DRIVER_H
+
+#include "Style.h"
 
 class Driver
 {
@@ -12,4 +14,4 @@ class Driver
 	void fillCircle(float x0, float y0, float r, Color color);
 };
 
-#endif //ARDUPLOT_GFX_DRIVER_H
+#endif //ARDU_DATAVIS_DRIVER_H
