@@ -10,8 +10,25 @@ struct Color
 
 struct Palette
 {
-	Color * colors;
+	Color *colors;
 	int size;
-};
+}
+
+struct DrawSizes
+{
+	float pointSize;
+	float lineTickness;
+}
+
+class Style
+{
+public:
+	Style(Palette palette, PlotSizes sizes);
+	Color getColor(float value);
+
+private:
+	DrawSizes sizes;
+	Palette palette;
+}
 
 #endif //ARDUPLOT_GFX_STYLE_H
