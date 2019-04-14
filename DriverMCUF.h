@@ -1,12 +1,13 @@
-#ifndef ARDU_DATAVIS_DRIVERGFX_H
-#define ARDU_DATAVIS_DRIVERGFX_H
+#ifndef ARDU_DATAVIS_DRIVER_MCUF_H
+#define ARDU_DATAVIS_DRIVER_MCUF_H
 
 #include "Adafruit_GFX.h"
+#include <MCUFRIEND_kbv.h>
 
-class DriverGFX : public Driver
+class DriverMCUF : public Driver
 {
 public:
-	DriverGFX();
+	DriverMCUF();
 	void drawPixel(int x, int y, Color color);
 	void drawLine(int x0, int y0, int x1, int y1, Color color);
 	void drawCircle(int x0, int y0, int r, Color color);
@@ -17,8 +18,8 @@ public:
 	int height();
 
 private:
-	Adafruit_GFX tft;
+	MCUFRIEND_kbv tft;
 	uint16_t colorTo16b(Color color);
 };
 
-#endif //ARDU_DATAVIS_DRIVER_H
+#endif //ARDU_DATAVIS_DRIVER_MCUF_H

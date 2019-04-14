@@ -1,51 +1,51 @@
 #include "DriverGFX.h"
 
-DriverGFX::DriverGFX(void)
+DriverMCUF::DriverMCUF(void)
 {
-	tft.begin();
+	tft.begin(0x7575);
 }
 
-void DriverGFX::drawPixel(int x, int y, Color color)
+void DriverMCUF::drawPixel(int x, int y, Color color)
 {
 	tft.drawPixel(x, y, colorTo16b(color));
 }
 
-void DriverGFX::drawLine(int x0, int y0, int x1, int y1, Color color)
+void DriverMCUF::drawLine(int x0, int y0, int x1, int y1, Color color)
 {
 	tft.drawLine(x0, y0, x1, y1, colorTo16b(color));
 }
 
-void DriverGFX::drawCircle(int x0, int y0, int r, Color color)
+void DriverMCUF::drawCircle(int x0, int y0, int r, Color color)
 {
 	tft.drawCircle(x0, y0, r, colorTo16b(color));
 }
 
-void DriverGFX::drawRect(int x, int y, int w, int h, Color color)
+void DriverMCUF::drawRect(int x, int y, int w, int h, Color color)
 {
 	tft.drawRect(x * tft.width(), y, w * tft.width(), h * tft.height(), colorTo16b(color));
 }
 
-void DriverGFX::fillRect(int x, int y, int w, int h, Color color)
+void DriverMCUF::fillRect(int x, int y, int w, int h, Color color)
 {
 	tft.fillRect(x * tft.width(), y, w * tft.width(), h * tft.height(), colorTo16b(color));
 }
 
-void DriverGFX::fillCircle(int x0, int y0, int r, Color color)
+void DriverMCUF::fillCircle(int x0, int y0, int r, Color color)
 {
 
 	tft.fillCircle(x0, y0, r, colorTo16b(color));
 }
 
-int DriverGFX::width()
+int DriverMCUF::width()
 {
 	return tft.width();
 }
-int DriverGFX::height()
+int DriverMCUF::height()
 {
 	return tft.height();
 }
 
-uint16_t DriverGFX::colorTo16b(Color color)
+uint16_t DriverMCUF::colorTo16b(Color color)
 {
 	uint16_t c = 0;
 	uint8_t r = (color.red / 256.0) * 31;

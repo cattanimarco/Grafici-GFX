@@ -17,8 +17,8 @@ public:
 	void fillSquare(Rectangle area);
 
 private:
-	Driver driver;
-	Style style;
+	Driver *driver;
+	Style *style;
 };
 
 #endif //ARDU_DATAVIS_DISPLAY_H

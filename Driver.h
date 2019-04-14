@@ -6,12 +6,14 @@
 class Driver
 {
   public:
-	void drawPixel(float x, float y, Color color);
-	void drawLine(float x0, float y0, float x1, float y1, Color color);
-	void drawCircle(float x0, float y0, float r, Color color);
-	void drawRect(float x, float y, float w, float h, Color color);
-	void fillRect(float x, float y, float w, float h, Color color);
-	void fillCircle(float x0, float y0, float r, Color color);
+	void drawPixel(int x, int y, Color color);
+	void drawLine(int x0, int y0, int x1, int y1, Color color);
+	void drawCircle(int x0, int y0, int r, Color color);
+	void drawRect(int x, int y, int w, int h, Color color);
+	void fillRect(int x, int y, int w, int h, Color color);
+	void fillCircle(int x0, int y0, int r, Color color);
+	int width();
+	int height();
 };
 
 #endif //ARDU_DATAVIS_DRIVER_H
