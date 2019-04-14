@@ -18,7 +18,7 @@ struct Palette
 
 struct DrawSizes
 {
-	int pointSize;
+	int pointTickness;
 	int lineTickness;
 };
 

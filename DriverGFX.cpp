@@ -5,22 +5,22 @@ DriverGFX::DriverGFX(void)
 	tft.begin();
 }
 
-void DriverGFX::drawPixel(int x, int y, Color color)
+void DriverGFX::drawPixel(int x, int y, int thickness, Color color)
 {
 	tft.drawPixel(x, y, colorTo16b(color));
 }
 
-void DriverGFX::drawLine(int x0, int y0, int x1, int y1, Color color)
+void DriverGFX::drawLine(int x0, int y0, int x1, int y1, int thickness, Color color)
 {
 	tft.drawLine(x0, y0, x1, y1, colorTo16b(color));
 }
 
-void DriverGFX::drawCircle(int x0, int y0, int r, Color color)
+void DriverGFX::drawCircle(int x0, int y0, int r, int thickness, Color color)
 {
 	tft.drawCircle(x0, y0, r, colorTo16b(color));
 }
 
-void DriverGFX::drawRect(int x, int y, int w, int h, Color color)
+void DriverGFX::drawRect(int x, int y, int w, int h, int thickness, Color color)
 {
 	tft.drawRect(x * tft.width(), y, w * tft.width(), h * tft.height(), colorTo16b(color));
 }

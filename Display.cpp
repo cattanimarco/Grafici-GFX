@@ -8,31 +8,12 @@ Display::Display(Driver &driver, Style &style)
 
 void Display::drawPoint(Point point)
 {
-	if (style->sizes.pointSize <= 1)
-	{
-		driver->drawPixel(point.x * driver->width(), point.y * driver->height(), getPointColor(point.value));
-	}
-	else
-	{
-		driver->fillCircle(point.x * driver->width(), point.y * driver->height(), style->sizes.pointSize, getPointColor(point.value));
-	}
+	driver->drawPixel(point.x, point.y, style->sizes.pointTickness, style->getPointColor(point.value));
 }
 
 void Display::drawLine(Line line)
 {
-
-	if (style->sizes.lineTickness <= 1)
-	{
-		driver->drawLine(line.begin.x* driver->width(), line.begin.y* driver->height(), line.end.x* driver->width(), line.end.y* driver->height(), getLineColor(point.begin.value));
-	}
-	else
-	{
-		// compute distance in drawPixel
-
-		// draw a circle per pixel distance
-
-		//driver->fillCircle(point.x, point.y, style->sizes.pointSize, getColor(point.value));
-	}
+	driver->drawLine(line.begin.x, line.begin.y, line.end.x, line.end.y, style->sizes.lineTickness, getLineColor(point.begin.value));
 }
 void Display::drawCircle(Circle circle) {}
 void Display::drawSquare(Rectangle rectangle) {}
