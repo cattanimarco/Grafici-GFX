@@ -7,32 +7,45 @@ DriverMCUF::DriverMCUF(void)
 
 void DriverMCUF::drawPixel(float x, float y, int thickness, Color color)
 {
+	//compute pixel coordinates
+	int pixelX = x * tft.width();
+	int pixelY = y * tft.height();
+
 	if (thickness <= 1)
 	{
-		tft.drawPixel(x * tft.width(), y * tft.height(), gcolorTo16b(color));
+		tft.drawPixel(pixelX, pixelY, gcolorTo16b(color));
 	}
 	else
 	{
-		tft.fillCircle(x * tft.width(), y * tft.height(), thickness / 2, gcolorTo16b(color));
+		tft.fillCircle(pixelX, pixelY, round(thickness / 2.0), gcolorTo16b(color));
 	}
 }
 
 void DriverMCUF::drawLine(float x0, float y0, float x1, float y1, int thickness, Color color)
 {
-		if (style->sizes.lineTickness <= 1)
+	//compute pixel coordinates
+	int pixelX0 = x0 * driver->width();
+	int pixelY0 = y0 * driver->height();
+	int pixelX1 = x1 * driver->width();
+	int pixelY1 = y1 * driver->height();
+
+	if (style->sizes.lineTickness <= 1)
 	{
-		driver->drawLine(line.begin.x * driver->width(), line.begin.y * driver->height(), line.end.x * driver->width(), line.end.y * driver->height(), getLineColor(point.begin.value));
+		tft.drawLine(pixelX0, pixelY0, pixelX1, pixelY1, gcolorTo16b(color));
 	}
 	else
 	{
-		// compute distance in drawPixel
+		// compute distance in pixels
+		int pixelDistance = round(sqrt(pow(pixelX0 - pixelX1, 2) + pow(pixelY0 - pixelY1, 2)));
 
 		// draw a circle per pixel distance
-
-		//driver->fillCircle(point.x, point.y, style->sizes.pointSize, getColor(point.value));
+		for (float i = 0; i <= pixelDistance; i++)
+		{
+			int pixelXInterpolated = (x0 * ((i * 1.0) / pixelDistance)) + (x1 * ((pixelDistance - i) * 1.0) / pixelDistance);
+			int pixelYInterpolated = (y0 * ((i * 1.0) / pixelDistance)) + (y1 * ((pixelDistance - i) * 1.0) / pixelDistance);
+			tft.fillCircle(pixelXInterpolated, pixelYInterpolated, round(thickness / 2.0), gcolorTo16b(color));
+		}
 	}
-	
-	tft.drawLine(x0, y0, x1, y1, colorTo16b(color));
 }
 
 void DriverMCUF::drawCircle(float x0, float y0, float r, int thickness, Color color)
