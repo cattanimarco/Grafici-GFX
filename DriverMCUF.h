@@ -8,16 +8,17 @@ class DriverMCUF : public Driver
 {
 public:
 	DriverMCUF();
-	void drawPixel(float x, float y, int thickness, Color color);
-	void drawLine(float x0, float y0, float x1, float y1, int thickness, Color color);
-	void drawCircle(float x0, float y0, float r, int thickness, Color color);
-	void drawRect(float x, float y, float w, float h, int thickness, Color color);
-	void fillRect(float x, float y, float w, float h, Color color);
-	void fillCircle(float x0, float y0, float r, Color color);
+	void drawPixel(Point point, int thickness, Color color);
+	void drawLine(Line line, int thickness, Color color);
+	void drawCircle(Circle circle, int thickness, Color color);
+	void drawRect(Rectangle rectangle, int thickness, Color color);
+	void fillRect(Rectangle rectangle, Color color);
+	void fillCircle(Circle circle, Color color);
 
 private:
 	MCUFRIEND_kbv tft;
 	ufloat16_t colorTo16b(Color color);
 };
+
 
 #endif //ARDU_DATAVIS_DRIVER_MCUF_H

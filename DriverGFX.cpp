@@ -4,12 +4,11 @@ DriverGFX::DriverGFX(void)
 {
 	tft.begin();
 }
-
-void DriverGFX::drawPixel(float x, float y, int thickness, Color color)
+void DriverGFX::drawPixel(Point point, int thickness, Color color)
 {
 	//compute pixel coordinates
-	int pixelX = x * tft.width();
-	int pixelY = y * tft.height();
+	int pixelX = point.x * tft.width();
+	int pixelY = point.y * tft.height();
 
 	if (thickness <= 1)
 	{
@@ -23,13 +22,13 @@ void DriverGFX::drawPixel(float x, float y, int thickness, Color color)
 	}
 }
 
-void DriverGFX::drawLine(float x0, float y0, float x1, float y1, int thickness, Color color)
+void DriverGFX::drawLine(Line line, int thickness, Color color)
 {
 	//compute pixel coordinates
-	int pixelX0 = x0 * tft.width();
-	int pixelY0 = y0 * tft.height();
-	int pixelX1 = x1 * tft.width();
-	int pixelY1 = y1 * tft.height();
+	int pixelX0 = line.begin.x * tft.width();
+	int pixelY0 = line.begin.y * tft.height();
+	int pixelX1 = line.end.x * tft.width();
+	int pixelY1 = line.end.y * tft.height();
 
 	if (thickness <= 1)
 	{
@@ -49,49 +48,54 @@ void DriverGFX::drawLine(float x0, float y0, float x1, float y1, int thickness, 
 	}
 }
 
-void DriverGFX::drawCircle(float x0, float y0, float r, int thickness, Color color)
+void DriverGFX::drawCircle(Circle circle, int thickness, Color color)
 {
+
 	//compute pixel coordinates
-	int pixelX0 = x0 * tft.width();
-	int pixelY0 = y0 * tft.height();
+	int pixelX0 = circle.center.x * tft.width();
+	int pixelY0 = circle.center.y * tft.height();
+
 	// compute radius using the smalles tft dimension. This way, a radius of 1.0 can be fully visualized
 	if (tft.height() < tft.width())
-	{
-		int pixelR = r * tft.height();
-	}
+		int pixelR = circle.outerRadius * tft.height();
 	else
-	{
-		int pixelR = r * tft.width();
-	}
+		int pixelR = circle.outerRadius * tft.width();
 
-	if (thickness <= 1)
+	// for each pixel of the perimeter, draw a circle (or a pixel)
+	int pixelPerimeter = 2 * PI * pixelR;
+	for (int i = 0; i < pixelPerimeter; i++)
 	{
-		// use raw drawing service
-		tft.drawCircle(pixelX0, pixelY0, pixelR, colorTo16b(color));
-	}
-	else
-	{
-		// draw using circle as a "brush"
-		int pixelPerimeter = 2 * PI * pixelR;
-		for (int i = 0; i < pixelPerimeter; i++)
+		// compute angle in radians
+		float angularIterator = (2 * PI * i) / pixelPerimeter;
+		// compute normalized angle
+		float normalizedAngle = angularIterator / (2 * PI);
+		if ((normalizedAngle >= circle.beginAngle) && (normalizedAngle <= circle.endAngle))
 		{
-			float angularWeight = (2 * PI * i) / pixelPerimeter;
-			int pixelXPerimeter = pixelX0 + cos(angularWeight) * pixelR;
-			int pixelYPerimeter = pixelY0 + sin(angularWeight) * pixelR;
-			tft.fillCircle(pixelXPerimeter, pixelYPerimeter, round(thickness / 2.0), gcolorTo16b(color));
+			int pixelXPerimeter = pixelX0 + cos(angularIterator) * pixelR;
+			int pixelYPerimeter = pixelY0 + sin(angularIterator) * pixelR;
+			if (thickness <= 1)
+			{
+				// use raw drawing service
+				tft.drawPixel(pixelXPerimeter, pixelYPerimeter, colorTo16b(color));
+			}
+			else
+			{
+				// draw using circle as a "brush"
+				tft.fillCircle(pixelXPerimeter, pixelYPerimeter, round(thickness / 2.0), gcolorTo16b(color));
+			}
 		}
 	}
 }
 
-void DriverGFX::drawRect(float x, float y, float w, float h, int thickness, Color color)
+void DriverGFX::drawRect(Rectangle rectangle, int thickness, Color color)
 {
 	//compute pixel coordinates
-	int pixelX0 = x * driver->width();
-	int pixelY0 = y * driver->height();
-	int pixelX1 = (x + w) * driver->width();
-	int pixelY1 = (y + h) * driver->height();
-	int pixelW = w * driver->width();
-	int pixelH = h * driver->height();
+	int pixelX0 = rectangle.topLeft.x * tft.width();
+	int pixelY0 = rectangle.topLeft.y * tft.height();
+	int pixelX1 = rectangle.bottomRight.x * tft.width();
+	int pixelY1 = rectangle.bottomRight.Y * tft.height();
+	int pixelW = (rectangle.bottomRight.x - rectangle.topLeft.x) * tft.width();
+	int pixelH = (rectangle.bottomRight.y - rectangle.topLeft.y) * tft.height();
 
 	if (thickness <= 1)
 	{
@@ -119,19 +123,19 @@ void DriverGFX::fillRect(float x, float y, float w, float h, Color color)
 	tft.fillRect(pixelX0, pixelY0, pixelW, pixelH, colorTo16b(color));
 }
 
-void DriverGFX::fillCircle(float x0, float y0, float r, Color color)
+void DriverGFX::fillCircle(Circle circle, Color color)
 {
 	//compute pixel coordinates
-	int pixelX0 = x0 * tft.width();
-	int pixelY0 = y0 * tft.height();
+	int pixelX0 = circle.center.x * tft.width();
+	int pixelY0 = circle.center.y * tft.height();
 	// compute radius using the smalles tft dimension. This way, a radius of 1.0 can be fully visualized
 	if (tft.height() < tft.width())
 	{
-		int pixelR = r * tft.height();
+		int pixelR = circle.outerRadius * tft.height();
 	}
 	else
 	{
-		int pixelR = r * tft.width();
+		int pixelR = circle.outerRadius * tft.width();
 	}
 
 	// use raw filler service
