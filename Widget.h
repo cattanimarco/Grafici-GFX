@@ -9,9 +9,9 @@ class Widget
 {
   public:
 
-	void draw(Display &display, Data &data, Line boundaries);
-	void draw(Display &display, Data &data, Rectangle boundaries);
-	void draw(Display &display, Data &data, Circle boundaries);
+	virtual void draw(Driver &driver, Data &data, Line boundaries);
+	virtual void draw(Driver &driver, Data &data, Rectangle boundaries);
+	virtual void draw(Driver &driver, Data &data, Circle boundaries);
 
 };
 

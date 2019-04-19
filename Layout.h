@@ -1,20 +1,21 @@
 #ifndef ARDU_DATAVIS_LAYOUT_H
 #define ARDU_DATAVIS_LAYOUT_H
 
+#include "Geometry.h"
+#include "Boundaries.h"
+
 class Layout
 {
-  public:
-	draw(Display display, Square area);
-	addWidget(Widget &widget, Data&data, int position);
-	clearWidget(int position);
-	clearWidget(Widget &widget);
+public:
+	virtual void draw(Driver driver, Boundaries boundaries);
+	void setWidget(Widget &widget, Data &data, Point position);
 
-  private:
+private:
 	struct WidgetAssociation
 	{
 		Widget *widget;
 		Data *data;
-		int position;
+		Boundaries boundaries;
 	};
 	LinkedList<WidgetAssociation> registeredWidgets;
 };
