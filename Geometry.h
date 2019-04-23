@@ -4,7 +4,7 @@
 
 struct Point
 {
-	float value = 1.0;
+	float value;
 	float x;
 	float y;
 };
@@ -26,10 +26,10 @@ struct Rectangle
 struct Circle
 {
 	Point center;
-	float innerRadius = 0.0;
+	float innerRadius;
 	float outerRadius;
-	float beginAngle = 0.0;
-	float endAngle = 0.0;
+	float beginAngle;
+	float endAngle;
 };
 
 #endif //ARDU_DATAVIS_GEOMETRY_H

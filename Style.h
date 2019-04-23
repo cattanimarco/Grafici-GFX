@@ -36,6 +36,6 @@ private:
 	DrawSizes sizes;
 	Palette palette;
 	bool colorByValue;
-}
+};
 
 #endif //ARDU_DATAVIS_STYLE_H

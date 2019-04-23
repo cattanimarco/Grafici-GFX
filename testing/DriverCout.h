@@ -1,13 +1,12 @@
-#ifndef ARDU_DATAVIS_DRIVER_PNG_H
-#define ARDU_DATAVIS_DRIVER_PNG_H
+#ifndef ARDU_DATAVIS_DRIVER_COUT_H
+#define ARDU_DATAVIS_DRIVER_COUT_H
 
-#include "Adafruit_GFX.h"
-#include <MCUFRIEND_kbv.h>
+#include "../Driver.h"
 
-class DriverPNG : public Driver
+class DriverCout : public Driver
 {
 public:
-	DriverPNG();
+	DriverCout();
 	void drawPixel(Point point, int thickness, Color color);
 	void drawLine(Line line, int thickness, Color color);
 	void drawCircle(Circle circle, int thickness, Color color);
@@ -16,8 +15,7 @@ public:
 	void fillCircle(Circle circle, Color color);
 
 private:
-	ufloat16_t colorTo16b(Color color);
 };
 
 
-#endif //ARDU_DATAVIS_DRIVER_PNG_H
+#endif //ARDU_DATAVIS_DRIVER_COUT_H
