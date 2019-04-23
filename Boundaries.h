@@ -7,9 +7,9 @@
 class Boundaries
 {
 public:
-	bool isInside(Point point);
+	virtual bool isInside(Point point) = 0;
 	// method to draw graph
-	void accept(Visitor *visitor);
-}
-#endif //ARDU_DATAVIS_BOUNDARIES_H
+	virtual void accept(Visitor *visitor) = 0;
+};
 
+#endif //ARDU_DATAVIS_BOUNDARIES_H

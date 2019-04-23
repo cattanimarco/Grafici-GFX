@@ -1,13 +1,13 @@
-#include "DriverMCUF.h"
+#include "DriverPNG.h"
 
 #define PI (3.14159265)
 
-DriverMCUF::DriverMCUF(void)
+DriverPNG::DriverPNG(void)
 {
 	tft.begin(0x7575);
 }
 
-void DriverMCUF::drawPixel(Point point, int thickness, Color color)
+void DriverPNG::drawPixel(Point point, int thickness, Color color)
 {
 	//compute pixel coordinates
 	int pixelX = point.x * tft.width();
@@ -25,7 +25,7 @@ void DriverMCUF::drawPixel(Point point, int thickness, Color color)
 	}
 }
 
-void DriverMCUF::drawLine(Line line, int thickness, Color color)
+void DriverPNG::drawLine(Line line, int thickness, Color color)
 {
 	//compute pixel coordinates
 	int pixelX0 = line.begin.x * tft.width();
@@ -51,7 +51,7 @@ void DriverMCUF::drawLine(Line line, int thickness, Color color)
 	}
 }
 
-void DriverMCUF::drawCircle(Circle circle, int thickness, Color color)
+void DriverPNG::drawCircle(Circle circle, int thickness, Color color)
 {
 
 	//compute pixel coordinates
@@ -90,7 +90,7 @@ void DriverMCUF::drawCircle(Circle circle, int thickness, Color color)
 	}
 }
 
-void DriverMCUF::drawRect(Rectangle rectangle, int thickness, Color color)
+void DriverPNG::drawRect(Rectangle rectangle, int thickness, Color color)
 {
 	//compute pixel coordinates
 	int pixelX0 = rectangle.topLeft.x * tft.width();
@@ -115,7 +115,7 @@ void DriverMCUF::drawRect(Rectangle rectangle, int thickness, Color color)
 	}
 }
 
-void DriverMCUF::fillRect(float x, float y, float w, float h, Color color)
+void DriverPNG::fillRect(float x, float y, float w, float h, Color color)
 {
 	int pixelX0 = x * driver->width();
 	int pixelY0 = y * driver->height();
@@ -126,7 +126,7 @@ void DriverMCUF::fillRect(float x, float y, float w, float h, Color color)
 	tft.fillRect(pixelX0, pixelY0, pixelW, pixelH, colorTo16b(color));
 }
 
-void DriverMCUF::fillCircle(Circle circle, Color color)
+void DriverPNG::fillCircle(Circle circle, Color color)
 {
 	//compute pixel coordinates
 	int pixelX0 = circle.center.x * tft.width();
@@ -145,7 +145,7 @@ void DriverMCUF::fillCircle(Circle circle, Color color)
 	tft.fillCircle(pixelX0, pixelY0, pixelR, colorTo16b(color));
 }
 
-ufloat16_t DriverMCUF::colorTo16b(Color color)
+ufloat16_t DriverPNG::colorTo16b(Color color)
 {
 	ufloat16_t c = 0;
 	ufloat8_t r = (color.red / 256.0) * 31;

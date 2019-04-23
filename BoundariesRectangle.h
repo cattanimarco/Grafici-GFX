@@ -8,9 +8,9 @@ class BoundariesRectangle : public Boundaries
 {
 	public:
 	bool isInside(Point point);
-	
-	private:
-	Rectangle boundaries;
+	void accept(Visitor *visitor);
+
+	Rectangle rectangle;
 
 }
 #endif //ARDU_DATAVIS_BOUNDARIES_RECTANGLE_H

@@ -6,11 +6,10 @@
 
 class BoundariesCircle : public Boundaries
 {
-	public:
+public:
 	bool isInside(Point point);
-	
-	private:
-	Circle boundaries;
+	void accept(Visitor *visitor);
 
+	Circle circle;
 }
 #endif //ARDU_DATAVIS_BOUNDARIES_CIRCLE_H
