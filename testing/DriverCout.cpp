@@ -5,17 +5,19 @@
 
 DriverCout::DriverCout(void)
 {
-	std::cout << "Driver Cout init" << std::endl;
+	std::cout << "DriverCout::init" << std::endl;
 }
 
 void DriverCout::drawPixel(Point point, int thickness, Color color)
 {
-	std::cout << "x: " << point.x
+	std::cout << "DriverCout::drawPoint x: " << point.x
 			  << " y: " << point.y
 			  << " value: " << point.value
 			  << " tickness: " << thickness
-			  << " color: (" << color.red << "," << color.green << "," << color.blue << ")"
-			  << std::endl;
+			  << " color: (" << (int)color.red 
+			  << "," << (int)color.green 
+			  << "," << (int)color.blue 
+			  << ")" << std::endl;
 }
 
 void DriverCout::drawLine(Line line, int thickness, Color color)
@@ -108,7 +110,7 @@ void DriverCout::drawRect(Rectangle rectangle, int thickness, Color color)
 	// }
 }
 
-void DriverCout::fillRect(float x, float y, float w, float h, Color color)
+void DriverCout::fillRect(Rectangle rectangle, Color color)
 {
 	// int pixelX0 = x * driver->width();
 	// int pixelY0 = y * driver->height();

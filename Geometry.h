@@ -4,9 +4,9 @@
 
 struct Point
 {
-	float value;
 	float x;
 	float y;
+	float value;
 };
 
 struct Line
