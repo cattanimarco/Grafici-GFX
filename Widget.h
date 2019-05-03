@@ -8,13 +8,14 @@
 class Widget
 {
 public:
-	Data *getData(void);
-	Boundaries *getBoundaries(void);
-	void accept(Visitor *visitor);
+	Widget(Data *data, Boundaries *boundaries, Visitor *defaultVisitor) : data(data), boundaries(boundaries), defaultVisitor(defaultVisitor){};
+	
+	// visitor patttern
+	void accept(Visitor *visitor) { visitor->visit(this); };
 
-protected:
 	Data *data;
 	Boundaries *boundaries;
+	Visitor *defaultVisitor;
 };
 
 #endif //ARDU_DATAVIS_WIDGET_H

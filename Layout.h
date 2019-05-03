@@ -8,16 +8,9 @@ class Layout
 {
 public:
 	virtual void draw(Driver driver, Boundaries boundaries);
-	void setWidget(Widget &widget, Data &data, Point position);
+	void setWidget(Widget *widget, Point position);
 
-private:
-	struct WidgetAssociation
-	{
-		Widget *widget;
-		Data *data;
-		Boundaries boundaries;
-	};
-	LinkedList<WidgetAssociation> registeredWidgets;
+
 };
 
 #endif //ARDU_DATAVIS_LAYOUT_H

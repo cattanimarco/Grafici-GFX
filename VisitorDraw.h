@@ -21,9 +21,9 @@ public:
 
 protected:
 	// draw functions should be overridden
-	void draw(Driver *driver, Data *data, Line *boundaries);
-	void draw(Driver *driver, Data *data, Rectangle *boundaries);
-	void draw(Driver *driver, Data *data, Circle *boundaries);
+	void draw(Driver *driver, Data *data, Line *boundaries){};
+	void draw(Driver *driver, Data *data, Rectangle *boundaries){};
+	void draw(Driver *driver, Data *data, Circle *boundaries){};
 
 	Driver *driver = nullptr;
 	Data *data = nullptr;

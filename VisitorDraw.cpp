@@ -30,8 +30,8 @@ void VisitorDraw::visit(BoundariesCircle *const boundaries)
 void VisitorDraw::visit(Widget *const widget)
 {
 	// create a temporary visitor for boundaries enriched with the widget associated data
-	VisitorDraw dataEnrichedVisitor(driver, widget->getData());
+	VisitorDraw dataEnrichedVisitor(driver, widget->data);
 
-	// visit boundaries with temporary visitor
-	widget->getBoundaries()->accept(&dataEnrichedVisitor);
+	// visit boundaries with temporary data-enriched visitor
+	(widget->boundaries)->accept(&dataEnrichedVisitor);
 }

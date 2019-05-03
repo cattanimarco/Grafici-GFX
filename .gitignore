@@ -1,3 +1,5 @@
 
 *.bin
 .vscode
+testing/*.o
+testing/test
