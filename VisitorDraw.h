@@ -1,7 +1,6 @@
 #ifndef ARDU_DATAVIS_VISITOR_DRAW_H
 #define ARDU_DATAVIS_VISITOR_DRAW_H
 
-#include "Visitor.h"
 #include "Widget.h"
 #include "Driver.h"
 

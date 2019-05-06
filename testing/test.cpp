@@ -2,20 +2,18 @@
 #include "DriverCout.h"
 #include "VisitorDrawCout.h"
 #include "../Data.h"
-#include "../BoundariesRectangle.h"
-#include "../Widget.h"
+#include "../WidgetLine.h"
 
 int main()
 {
 DriverCout driver;
 
 Data data;
-BoundariesRectangle boundaries;
-VisitorDrawCout visitor(driver);
+VisitorDrawCout visitor(&driver);
 
-Widget widget(&data, &boundaries, &visitor);
+WidgetLine widget;
 
-widget.accept(widget.visitorDraw);
+widget.accept(&visitor);
 
 // Point p = {0,0.5,1.0};
 // Color c = {10,20,30};
