@@ -15,11 +15,11 @@ public:
 	PointIterator end();
 
 private:
-	LinkedList<Point> data;
+	//LinkedList<Point> data;
 	Point minPoint;
 	Point maxPoint;
 	Point avgPoint;
-	int size = 0;
+	int size;
 };
 
 #endif //ARDU_DATAVIS_GEOMETRY_H

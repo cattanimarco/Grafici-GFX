@@ -12,5 +12,6 @@ class BoundariesRectangle : public Boundaries
 
 	Rectangle rectangle;
 
-}
+};
+
 #endif //ARDU_DATAVIS_BOUNDARIES_RECTANGLE_H

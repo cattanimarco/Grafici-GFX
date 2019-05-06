@@ -11,5 +11,6 @@ public:
 	void accept(Visitor *visitor);
 
 	Circle circle;
-}
+};
+
 #endif //ARDU_DATAVIS_BOUNDARIES_CIRCLE_H

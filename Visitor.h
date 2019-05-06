@@ -9,11 +9,13 @@
 class Visitor
 {
 public:
-	virtual void visit(Widget *const widget) = 0;
+Visitor(void);
 
-	virtual void visit(BoundariesLine *const boundaries) = 0;
-	virtual void visit(BoundariesRectangle *const boundaries) = 0;
-	virtual void visit(BoundariesCircle *const boundaries) = 0;
+	void visit(Widget *const widget);
+
+	void visit(BoundariesLine *const boundaries);
+	void visit(BoundariesRectangle *const boundaries);
+	void visit(BoundariesCircle *const boundaries);
 };
 
 #endif //ARDU_DATAVIS_VISITOR_H

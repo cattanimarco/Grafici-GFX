@@ -1,18 +1,19 @@
-CC=g++
-CFLAGS=-I.
-DEPS = DriverCout.h
-OBJ = test.o DriverCout.o 
+CSRC = $(wildcard *.c) \
+	$(wildcard ../*.c) \
 
-%.o: %.cpp $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+CCSRC = $(wildcard *.cpp) \
+	$(wildcard ../*.cpp) \
+
+OBJ = $(CSRC:.c=.o) $(CCSRC:.cpp=.o)
+
+CFLAGS=-I.
 
 test: $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS)
+	$(CXX) -o $@ $^ $(CFLAGS)
 
 run: test
 	@./test
 
 .PHONY: clean
-
-clean: 
-	rm *.o
+clean:
+	rm -f $(obj) test

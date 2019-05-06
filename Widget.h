@@ -3,19 +3,15 @@
 
 #include "Boundaries.h"
 #include "Data.h"
-#include "Visitor.h"
+#include "VisitorDraw.h"
 
 class Widget
 {
-public:
-	Widget(Data *data, Boundaries *boundaries, Visitor *defaultVisitor) : data(data), boundaries(boundaries), defaultVisitor(defaultVisitor){};
-	
+public:	
 	// visitor patttern
-	void accept(Visitor *visitor) { visitor->visit(this); };
+	virtual void accept(VisitorDraw *visitor) = 0;
 
 	Data *data;
-	Boundaries *boundaries;
-	Visitor *defaultVisitor;
 };
 
 #endif //ARDU_DATAVIS_WIDGET_H

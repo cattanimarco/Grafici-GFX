@@ -1,0 +1,19 @@
+#ifndef ARDU_DATAVIS_WIDGET_LINE_H
+#define ARDU_DATAVIS_WIDGET_LINE_H
+
+#include "GeometrY.h"
+#include "Data.h"
+#include "VisitorDraw.h"
+#include "Widget.h"
+
+class WidgetLine : public Widget
+{
+public:
+	
+	// visitor patttern
+	void accept(VisitorDraw *visitor);
+
+	Line *lineBoundaries;
+};
+
+#endif //ARDU_DATAVIS_WIDGET_LINE_H

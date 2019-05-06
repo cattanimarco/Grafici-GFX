@@ -11,5 +11,6 @@ public:
 	void accept(Visitor *visitor);
 
 	Line line;
-}
+};
+
 #endif //ARDU_DATAVIS_BOUNDARIES_LINE_H
