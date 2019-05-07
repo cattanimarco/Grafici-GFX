@@ -9,11 +9,11 @@ int main()
 DriverCout driver;
 
 Data data;
-VisitorDrawCout visitor(&driver);
+VisitorDraw* visitor = new VisitorDrawCout(&driver);
 
-WidgetLine widget;
+Widget* widget = new WidgetLine();
 
-widget.accept(&visitor);
+widget->accept(visitor);
 
 // Point p = {0,0.5,1.0};
 // Color c = {10,20,30};

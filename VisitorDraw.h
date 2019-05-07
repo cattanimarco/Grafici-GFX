@@ -11,9 +11,9 @@ public:
 	VisitorDraw();
 	VisitorDraw(Driver *driver);
 
-	void visit(Data *data, Line *const boundaries);
-	void visit(Data *data, Rectangle *const boundaries);
-	void visit(Data *data, Circle *const boundaries);
+	virtual void visit(Data *data, Line * boundaries);
+	virtual void visit(Data *data, Rectangle * boundaries);
+	virtual void visit(Data *data, Circle * boundaries);
 
 	Driver *driver;
 };

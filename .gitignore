@@ -1,5 +1,6 @@
 
 *.bin
 .vscode
+*.o
 testing/*.o
 testing/test

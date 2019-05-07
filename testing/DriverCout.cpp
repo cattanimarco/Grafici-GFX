@@ -4,12 +4,12 @@
 
 DriverCout::DriverCout(void)
 {
-	std::cout << "DriverCout::init" << std::endl;
+std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
 
 void DriverCout::drawPixel(Point point, int thickness, Color color)
 {
-	std::cout << "DriverCout::drawPoint x: " << point.x
+	std::cout << "DriverCout::drawPixel x: " << point.x
 			  << " y: " << point.y
 			  << " value: " << point.value
 			  << " tickness: " << thickness
