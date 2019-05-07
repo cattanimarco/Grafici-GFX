@@ -4,3 +4,4 @@
 *.o
 testing/*.o
 testing/test
+testing/test.exe

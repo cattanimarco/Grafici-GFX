@@ -1,7 +1,7 @@
 #ifndef ARDU_DATAVIS_VISITOR_DRAW_SCATTER_H
 #define ARDU_DATAVIS_VISITOR_DRAW_SCATTER_H
 
-#include "VisitorDraw.h"
+#include "VisitorDrawScatter.h"
 
 class VisitorDrawScatter : public VisitorDraw
 {

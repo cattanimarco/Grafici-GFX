@@ -2,7 +2,7 @@
 #include "DriverCout.h"
 #include "VisitorDrawCout.h"
 #include "../Data.h"
-#include "../WidgetLine.h"
+#include "../Widgets/WidgetLine.h"
 
 int main()
 {
