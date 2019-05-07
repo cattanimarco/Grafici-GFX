@@ -1,8 +1,9 @@
 #ifndef ARDU_DATAVIS_VISITOR_DRAW_H
 #define ARDU_DATAVIS_VISITOR_DRAW_H
 
-#include "Widget.h"
+#include "Geometry.h"
 #include "Driver.h"
+#include "Data.h"
 
 class VisitorDraw 
 {

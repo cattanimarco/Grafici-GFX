@@ -1,9 +1,7 @@
 #ifndef ARDU_DATAVIS_WIDGET_LINE_H
 #define ARDU_DATAVIS_WIDGET_LINE_H
 
-#include "GeometrY.h"
-#include "Data.h"
-#include "VisitorDraw.h"
+#include "Geometry.h"
 #include "Widget.h"
 
 class WidgetLine : public Widget
