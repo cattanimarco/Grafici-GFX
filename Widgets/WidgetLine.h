@@ -7,8 +7,7 @@
 class WidgetLine : public Widget
 {
 public:
-	
-	// visitor patttern
+		// visitor patttern
 	void accept(VisitorDraw *visitor);
 
 	Line *lineBoundaries;

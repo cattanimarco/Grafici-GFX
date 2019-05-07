@@ -18,4 +18,4 @@ run: test
 
 .PHONY: clean
 clean:
-	rm -f $(obj) test
+	rm -f $(OBJ) test

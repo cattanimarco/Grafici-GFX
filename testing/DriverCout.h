@@ -17,5 +17,4 @@ public:
 private:
 };
 
-
 #endif //ARDU_DATAVIS_DRIVER_COUT_H

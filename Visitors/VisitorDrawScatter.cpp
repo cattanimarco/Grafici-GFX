@@ -18,13 +18,16 @@ VisitorDrawScatter::VisitorDrawScatter(Driver *driver)
     this->driver = driver;
 }
 
-void VisitorDrawScatter::visit(Data *data, Line *const boundaries) 
-{}
+void VisitorDrawScatter::visit(Data *data, Line *const boundaries)
+{
+}
 
-void VisitorDrawScatter::visit(Data *data, Rectangle *const boundaries) 
-{}
+void VisitorDrawScatter::visit(Data *data, Rectangle *const boundaries)
+{
+}
 
-void VisitorDrawScatter::visit(Data *data, Circle *const boundaries) 
-{}
+void VisitorDrawScatter::visit(Data *data, Circle *const boundaries)
+{
+}
 
 #endif //ARDU_DATAVIS_VISITOR_DRAW_SCATTER_H

@@ -5,15 +5,15 @@
 #include "Driver.h"
 #include "Data.h"
 
-class VisitorDraw 
+class VisitorDraw
 {
 public:
 	VisitorDraw();
 	VisitorDraw(Driver *driver);
 
-	virtual void visit(Data *data, Line * boundaries);
-	virtual void visit(Data *data, Rectangle * boundaries);
-	virtual void visit(Data *data, Circle * boundaries);
+	virtual void visit(Data *data, Line *boundaries);
+	virtual void visit(Data *data, Rectangle *boundaries);
+	virtual void visit(Data *data, Circle *boundaries);
 
 	Driver *driver;
 };

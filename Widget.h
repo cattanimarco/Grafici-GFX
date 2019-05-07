@@ -6,7 +6,7 @@
 
 class Widget
 {
-public:	
+public:
 	// visitor patttern
 	virtual void accept(VisitorDraw *visitor) = 0;
 
