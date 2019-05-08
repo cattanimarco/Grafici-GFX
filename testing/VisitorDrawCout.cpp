@@ -12,15 +12,15 @@ VisitorDrawCout::VisitorDrawCout(Driver *driver)
 void VisitorDrawCout::visit(Data *data, Line boundaries)
 {
 	std::cout << __PRETTY_FUNCTION__ << std::endl;
-	Color c = {0,127,255};
-	driver->drawLine(boundaries,1,c);
+	Color c = {0, 127, 255};
+	driver->drawLine(boundaries, 1, c);
 }
 
 void VisitorDrawCout::visit(Data *data, Rectangle boundaries)
 {
 	std::cout << __PRETTY_FUNCTION__ << std::endl;
-	Color c = {0,127,255};
-	driver->drawRectangle(boundaries,1,c);
+	Color c = {0, 127, 255};
+	driver->drawRectangle(boundaries, 1, c);
 }
 
 void VisitorDrawCout::visit(Data *data, Circle boundaries)

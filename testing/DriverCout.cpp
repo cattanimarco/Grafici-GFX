@@ -17,14 +17,13 @@ void DriverCout::drawPixel(Point point, int thickness, Color color)
 	// 		  << "," << (int)color.green
 	// 		  << "," << (int)color.blue
 	// 		  << ")" << std::endl;
-			  	std::cout << __PRETTY_FUNCTION__ << std::endl;
-
+	std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
 
 void DriverCout::drawLine(Line line, int thickness, Color color)
 {
-		std::cout << __PRETTY_FUNCTION__ << std::endl;
-		//drawPixel(line.begin,thickness,color);
+	std::cout << __PRETTY_FUNCTION__ << std::endl;
+	//drawPixel(line.begin,thickness,color);
 }
 
 void DriverCout::drawCircle(Circle circle, int thickness, Color color)
@@ -33,8 +32,7 @@ void DriverCout::drawCircle(Circle circle, int thickness, Color color)
 
 void DriverCout::drawRectangle(Rectangle rectangle, int thickness, Color color)
 {
-			std::cout << __PRETTY_FUNCTION__ << std::endl;
-
+	std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
 
 void DriverCout::fillRectangle(Rectangle rectangle, Color color)
