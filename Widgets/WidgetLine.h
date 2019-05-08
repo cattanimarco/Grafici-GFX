@@ -10,7 +10,7 @@ public:
 		// visitor patttern
 	void accept(VisitorDraw *visitor);
 
-	Line *lineBoundaries;
+	Line lineBoundaries;
 };
 
 #endif //ARDU_DATAVIS_WIDGET_LINE_H

@@ -3,21 +3,20 @@
 #include "VisitorDrawCout.h"
 #include "../Data.h"
 #include "../Widgets/WidgetLine.h"
+#include "../Widgets/WidgetRectangle.h"
 
 int main()
 {
-    DriverCout driver;
+    Driver* driver = new DriverCout();
 
     Data data;
-    VisitorDraw *visitor = new VisitorDrawCout(&driver);
+    VisitorDraw *visitor = new VisitorDrawCout(driver);
 
-    Widget *widget = new WidgetLine();
+    Widget *widgetLine = new WidgetLine();
+    Widget *widgetRectangle = new WidgetRectangle();
 
-    widget->accept(visitor);
+    widgetLine->accept(visitor);
+    widgetRectangle->accept(visitor);
 
-    // Point p = {0,0.5,1.0};
-    // Color c = {10,20,30};
-
-    // driver.drawPixel(p,2,c);
     return 0;
 }

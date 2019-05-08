@@ -10,8 +10,8 @@ public:
 	void drawPixel(Point point, int thickness, Color color);
 	void drawLine(Line line, int thickness, Color color);
 	void drawCircle(Circle circle, int thickness, Color color);
-	void drawRect(Rectangle rectangle, int thickness, Color color);
-	void fillRect(Rectangle rectangle, Color color);
+	void drawRectangle(Rectangle rectangle, int thickness, Color color);
+	void fillRectangle(Rectangle rectangle, Color color);
 	void fillCircle(Circle circle, Color color);
 
 private:
