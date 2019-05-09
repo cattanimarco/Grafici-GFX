@@ -1,16 +1,18 @@
 CSRC = $(wildcard *.c) \
 	$(wildcard ../*.c) \
-	$(wildcard ../Widgets/*.c) \
+	$(wildcard ../widgets/*.c) \
 
 CCSRC = $(wildcard *.cpp) \
 	$(wildcard ../*.cpp) \
-	$(wildcard ../Widgets/*.cpp) \
+	$(wildcard ../widgets/*.cpp) \
+	$(wildcard ../drivers/*File.cpp) \
+	$(wildcard ../visitors/*Cout.cpp) \
 
 OBJ = $(CSRC:.c=.o) $(CCSRC:.cpp=.o)
 
 CFLAGS=-I.
 
-test: $(OBJ)
+test: $(OBJ) ../lib/ezdib.o
 	$(CXX) -o $@ $^ $(CFLAGS)
 
 run: test

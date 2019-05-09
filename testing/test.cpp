@@ -1,13 +1,13 @@
 
-#include "DriverCout.h"
-#include "VisitorDrawCout.h"
+#include "../drivers/DriverFile.h"
+#include "../visitors/VisitorDrawCout.h"
 #include "../Data.h"
-#include "../Widgets/WidgetLine.h"
-#include "../Widgets/WidgetRectangle.h"
+#include "../widgets/WidgetLine.h"
+#include "../widgets/WidgetRectangle.h"
 
 int main()
 {
-    Driver* driver = new DriverCout();
+    Driver* driver = new DriverFile();
 
     Data data;
     VisitorDraw *visitor = new VisitorDrawCout(driver);
