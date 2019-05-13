@@ -5,3 +5,5 @@
 testing/*.o
 testing/test
 testing/test.exe
+testing/.DS_Store
+testing/*.bmp
