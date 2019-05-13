@@ -7,7 +7,7 @@
 
 int main()
 {
-    Driver* driver = new DriverFile();
+    Driver* driver = new DriverFile(320,240,"prova.bmp");
 
     Data data;
     VisitorDraw *visitor = new VisitorDrawCout(driver);

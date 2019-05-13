@@ -7,7 +7,7 @@
 class DriverFile : public Driver
 {
 public:
-	DriverFile();
+	DriverFile(int width, int height, char *filename);
 	void drawPixel(Point point, int thickness, Color color);
 	void drawLine(Line line, int thickness, Color color);
 	void drawCircle(Circle circle, int thickness, Color color);
@@ -16,6 +16,12 @@ public:
 	void fillCircle(Circle circle, Color color);
 
 private:
+	int colorTo24b(Color color);
+
+	HEZDIMAGE hDib;
+	char *filename;
+	int width;
+	int height;
 };
 
 #endif //ARDU_DATAVIS_DRIVER_FILE_H
