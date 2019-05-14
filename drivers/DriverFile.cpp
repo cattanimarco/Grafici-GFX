@@ -2,135 +2,54 @@
 #include <math.h>
 #include "DriverFile.h"
 
-DriverFile::DriverFile(int width, int height, char *filename) : width(width), height(height), filename(filename)
+DriverFile::DriverFile(int width, int height, char *filename) : _width(width), _height(height), _filename(filename)
 {
 	// Create image
-	hDib = ezd_create(width, height, 24, 0);
+	_hDib = ezd_create(_width, _height, 24, 0);
 
 	// Save the test image
-	ezd_save(hDib, filename);
+	ezd_save(_hDib, _filename);
 }
 
-void DriverFile::drawPixel(Point point, int thickness, Color color)
+void DriverFile::drawPixel(int x, int y, Color color)
 {
-	//compute pixel coordinates
-	int pixelX = point.x * width;
-	int pixelY = point.y * height;
-
-	if (thickness <= 1)
-	{
-		// use raw drawing service
-		ezd_set_pixel(hDib, pixelX, pixelY, colorTo24b(color));
-	}
-	else
-	{
-		// draw using circle as a "brush"
-		ezd_circle(hDib, pixelX, pixelY, round(thickness / 2.0), colorTo24b(color));
-	}
+	ezd_set_pixel(_hDib, x, y, colorTo24b(color));
+	ezd_save(_hDib, _filename);
+}
+void DriverFile::drawLine(int x1, int y1, int x2, int y2, Color color)
+{
+	ezd_line(_hDib, x1, y1, x2, y2, colorTo24b(color));
+	ezd_save(_hDib, _filename);
+}
+void DriverFile::drawCircle(int x, int y, int radius, Color color)
+{
+	ezd_circle(_hDib, x, y, radius, colorTo24b(color));
+	ezd_save(_hDib, _filename);
+}
+void DriverFile::fillCircle(int x, int y, int radius, Color color)
+{
+	ezd_circle(_hDib, x, y, radius, colorTo24b(color));
+	ezd_save(_hDib, _filename);
+}
+void DriverFile::drawRectangle(int xTopLeft, int yTopLeft, int xBottomRight, int yBottomRight, Color color)
+{
+	ezd_rect(_hDib, xTopLeft, yTopLeft, xBottomRight, yBottomRight, colorTo24b(color));
+	ezd_save(_hDib, _filename);
+}
+void DriverFile::fillRectangle(int xTopLeft, int yTopLeft, int xBottomRight, int yBottomRight, Color color)
+{
+	ezd_fill_rect(_hDib, xTopLeft, yTopLeft, xBottomRight, yBottomRight, colorTo24b(color));
+	ezd_save(_hDib, _filename);
 }
 
-void DriverFile::drawLine(Line line, int thickness, Color color)
+int DriverFile::width(void)
 {
-	//compute pixel coordinates
-	int pixelX0 = line.begin.x * width;
-	int pixelY0 = line.begin.y * height;
-	int pixelX1 = line.end.x * width;
-	int pixelY1 = line.end.y * height;
-
-	if (thickness <= 1)
-	{
-		// use raw drawing service
-		ezd_line(hDib, pixelX0, pixelY0, pixelX1, pixelY1, colorTo24b(color));
-	}
-	else
-	{
-		// draw using circle as a "brush"
-		int pixelDistance = round(sqrt(pow(pixelX0 - pixelX1, 2) + pow(pixelY0 - pixelY1, 2)));
-		for (int i = 0; i <= pixelDistance; i++)
-		{
-			int pixelXInterpolated = (pixelX0 * 1.0 * i) / pixelDistance + (pixelX1 * 1.0 * (pixelDistance - i)) / pixelDistance;
-			int pixelYInterpolated = (pixelY0 * 1.0 * i) / pixelDistance + (pixelY1 * 1.0 * (pixelDistance - i)) / pixelDistance;
-			ezd_circle(hDib, pixelXInterpolated, pixelYInterpolated, round(thickness / 2.0), colorTo24b(color));
-		}
-	}
+	return _width;
 }
 
-void DriverFile::drawCircle(Circle circle, int thickness, Color color)
+int DriverFile::height(void)
 {
-	//compute pixel coordinates
-	int pixelX0 = circle.center.x * width;
-	int pixelY0 = circle.center.y * height;
-	int pixelR;
-
-	// compute radius using the smalles tft dimension. This way, a radius of 1.0 can be fully visualized
-	if (height < width)
-		pixelR = circle.outerRadius * height;
-	else
-		pixelR = circle.outerRadius * width;
-
-	// for each pixel of the perimeter, draw a circle (or a pixel)
-	int pixelPerimeter = 2 * M_PI * pixelR;
-	for (int i = 0; i < pixelPerimeter; i++)
-	{
-		// compute angle in radians
-		float angularIterator = (2 * M_PI * i) / pixelPerimeter;
-		// compute normalized angle
-		float normalizedAngle = angularIterator / (2 * M_PI);
-		if ((normalizedAngle >= circle.beginAngle) && (normalizedAngle <= circle.endAngle))
-		{
-			int pixelXPerimeter = pixelX0 + cos(angularIterator) * pixelR;
-			int pixelYPerimeter = pixelY0 + sin(angularIterator) * pixelR;
-			if (thickness <= 1)
-			{
-				// use raw drawing service
-				ezd_set_pixel(hDib, pixelXPerimeter, pixelYPerimeter, colorTo24b(color));
-			}
-			else
-			{
-				// draw using circle as a "brush"
-				ezd_circle(hDib, pixelXPerimeter, pixelYPerimeter, round(thickness / 2.0), colorTo24b(color));
-			}
-		}
-	}
-	ezd_save(hDib, filename);
-}
-
-void DriverFile::drawRectangle(Rectangle rectangle, int thickness, Color color)
-{
-	//compute pixel coordinates
-	int pixelX0 = rectangle.topLeft.x * tft.width();
-	int pixelY0 = rectangle.topLeft.y * tft.height();
-	int pixelX1 = rectangle.bottomRight.x * tft.width();
-	int pixelY1 = rectangle.bottomRight.Y * tft.height();
-	int pixelW = (rectangle.bottomRight.x - rectangle.topLeft.x) * tft.width();
-	int pixelH = (rectangle.bottomRight.y - rectangle.topLeft.y) * tft.height();
-
-	if (thickness <= 1)
-	{
-		// use raw drawing service
-		tft.drawRect(pixelX0, pixelY0, pixelW, pixelH, colorTo16b(color));
-	}
-	else
-	{
-		// draw using circle as a "brush"
-		drawLine(x0, y0, x0, y1, thickness, color);
-		drawLine(x0, y0, x1, y0, thickness, color);
-		drawLine(x1, y0, x1, y1, thickness, color);
-		drawLine(x0, y1, x1, y1, thickness, color);
-	}
-	
-	ezd_rect(hDib, rectangle.topLeft.x, rectangle.topLeft.y, rectangle.bottomRight.x, rectangle.bottomRight.y, colorTo24b(color));
-	ezd_save(hDib, filename);
-}
-
-void DriverFile::fillRectangle(Rectangle rectangle, Color color)
-{
-	ezd_fill_rect(hDib, rectangle.topLeft.x, rectangle.topLeft.y, rectangle.bottomRight.x, rectangle.bottomRight.y, colorTo24b(color));
-	ezd_save(hDib, filename);
-}
-
-void DriverFile::fillCircle(Circle circle, Color color)
-{
+	return _height;
 }
 
 int DriverFile::colorTo24b(Color color)

@@ -8,20 +8,25 @@ class DriverFile : public Driver
 {
 public:
 	DriverFile(int width, int height, char *filename);
-	void drawPixel(Point point, int thickness, Color color);
-	void drawLine(Line line, int thickness, Color color);
-	void drawCircle(Circle circle, int thickness, Color color);
-	void drawRectangle(Rectangle rectangle, int thickness, Color color);
-	void fillRectangle(Rectangle rectangle, Color color);
-	void fillCircle(Circle circle, Color color);
+
+protected:
+	void drawPixel(int x, int y, Color color);
+	void drawLine(int x1, int y1, int x2, int y2, Color color);
+	void drawCircle(int x, int y, int radius, Color color);
+	void fillCircle(int x, int y, int radius, Color color);
+	void drawRectangle(int xTopLeft, int yTopLeft, int xBottomRight, int yBottomRight, Color color);
+	void fillRectangle(int xTopLeft, int yTopLeft, int xBottomRight, int yBottomRight, Color color);
+	
+	int width(void);
+	int height(void);
 
 private:
 	int colorTo24b(Color color);
 
-	HEZDIMAGE hDib;
-	char *filename;
-	int width;
-	int height;
+	HEZDIMAGE _hDib;
+	char *_filename;
+	int _width;
+	int _height;
 };
 
 #endif //ARDU_DATAVIS_DRIVER_FILE_H

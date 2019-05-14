@@ -7,7 +7,7 @@
 
 int main()
 {
-    Driver* driver = new DriverFile(320,240,"prova.bmp");
+    Driver *driver = new DriverFile(320, 240, "prova.bmp");
 
     Data data;
     VisitorDraw *visitor = new VisitorDrawCout(driver);
@@ -17,6 +17,10 @@ int main()
 
     widgetLine->accept(visitor);
     widgetRectangle->accept(visitor);
+
+    Point p = {0.5, 0.5, 1.0};
+    Color c = {255, 0, 0};
+    driver->drawPixel(p, 50, c);
 
     return 0;
 }
