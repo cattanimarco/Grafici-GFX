@@ -26,11 +26,7 @@ void DriverFile::drawCircle(int x, int y, int radius, Color color)
 	ezd_circle(_hDib, x, y, radius, colorTo24b(color));
 	ezd_save(_hDib, _filename);
 }
-void DriverFile::fillCircle(int x, int y, int radius, Color color)
-{
-	ezd_circle(_hDib, x, y, radius, colorTo24b(color));
-	ezd_save(_hDib, _filename);
-}
+
 void DriverFile::drawRectangle(int xTopLeft, int yTopLeft, int xBottomRight, int yBottomRight, Color color)
 {
 	ezd_rect(_hDib, xTopLeft, yTopLeft, xBottomRight, yBottomRight, colorTo24b(color));

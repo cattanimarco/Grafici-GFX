@@ -1,6 +1,11 @@
 #include "Driver.h"
 #include <math.h>
 
+//#define PI ( M_PI )
+#define PI ( 3.14 )
+
+
+
 void Driver::drawPixel(Point point, int thickness, Color color)
 {
 	//compute pixel coordinates
@@ -47,7 +52,6 @@ void Driver::drawLine(Line line, int thickness, Color color)
 
 void Driver::drawCircle(Circle circle, int thickness, Color color)
 {
-
 	//compute pixel coordinates
 	int pixelX0 = circle.center.x * width();
 	int pixelY0 = circle.center.y * height();
@@ -60,13 +64,13 @@ void Driver::drawCircle(Circle circle, int thickness, Color color)
 		pixelR = circle.outerRadius * width();
 
 	// for each pixel of the perimeter, draw a circle (or a pixel)
-	int pixelPerimeter = 2 * M_PI * pixelR;
+	int pixelPerimeter = 2 * PI * pixelR;
 	for (int i = 0; i < pixelPerimeter; i++)
 	{
 		// compute angle in radians
-		float angularIterator = (2 * M_PI * i) / pixelPerimeter;
+		float angularIterator = (2 * PI * i) / pixelPerimeter;
 		// compute normalized angle
-		float normalizedAngle = angularIterator / (2 * M_PI);
+		float normalizedAngle = angularIterator / (2 * PI);
 		if ((normalizedAngle >= circle.beginAngle) && (normalizedAngle <= circle.endAngle))
 		{
 			int pixelXPerimeter = pixelX0 + cos(angularIterator) * pixelR;
@@ -149,6 +153,44 @@ void Driver::fillCircle(Circle circle, int thickness, Color color)
 		int pixelR = circle.outerRadius * width();
 	}
 
-	fillCircle(pixelX0, pixelY0, pixelR, color);
-	drawCircle(circle, thickness, color);
+fillCircle(pixelX0, pixelY0, pixelR, color);
+drawCircle( circle,  thickness,  color);
+
 }
+
+
+void Driver::fillCircle(int xc, int yc, int radius, Color color)
+{
+
+// Function for circle-generation using Bresenham's algorithm from https://www.geeksforgeeks.org/bresenhams-circle-drawing-algorithm/
+    int x = 0;
+	int y = radius; 
+    int d = 3 - (2 * radius); 
+    BresenhamFillCircle(xc, yc, x, y, color); 
+    while (y >= x) 
+    { 
+        // for each pixel we will draw all eight pixels 
+        x++; 
+        // check for decision parameter and correspondingly update d, x, y 
+        if (d > 0) 
+        { 
+            y--;  
+            d = d + 4 * (x - y) + 10; 
+        } 
+        else
+            d = d + 4 * x + 6; 
+        BresenhamFillCircle(xc, yc, x, y, color); 
+    }
+}
+
+/* local helper function */
+void Driver::BresenhamFillCircle(int xc, int yc, int x, int y, Color color) 
+{ 
+	// Function for circle-generation using Bresenham's algorithm from https://www.geeksforgeeks.org/bresenhams-circle-drawing-algorithm/
+
+drawLine(xc-x, yc+y, xc+x, yc+y, color);
+drawLine(xc-x, yc-y, xc+x, yc-y, color);
+drawLine(xc-y, yc+x, xc+y, yc+x, color);
+drawLine(xc-y, yc-x, xc+y, yc-x, color);
+
+} 

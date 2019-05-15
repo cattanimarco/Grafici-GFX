@@ -13,7 +13,6 @@ protected:
 	void drawPixel(int x, int y, Color color);
 	void drawLine(int x1, int y1, int x2, int y2, Color color);
 	void drawCircle(int x, int y, int radius, Color color);
-	void fillCircle(int x, int y, int radius, Color color);
 	void drawRectangle(int xTopLeft, int yTopLeft, int xBottomRight, int yBottomRight, Color color);
 	void fillRectangle(int xTopLeft, int yTopLeft, int xBottomRight, int yBottomRight, Color color);
 	
