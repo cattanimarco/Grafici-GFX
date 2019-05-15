@@ -50,10 +50,6 @@ int DriverFile::height(void)
 
 int DriverFile::colorTo24b(Color color)
 {
-	int c = 0;
-	uint8_t r = (color.red / 256.0) * 63;
-	uint8_t g = (color.green / 256.0) * 63;
-	uint8_t b = (color.blue / 256.0) * 63;
-	c = (r << 16) | (g << 8) | (b);
+	int c = (color.red << 16) | (color.green << 8) | (color.blue);
 	return (c);
 }

@@ -28,6 +28,7 @@ protected:
 private:
 	/* local utility function */
 	void BresenhamFillCircle(int xc, int yc, int x, int y, Color color);
+	void BresenhamDrawCircle(int xc, int yc, int x, int y, int thickness, Color color);
 };
 
 #endif //ARDU_DATAVIS_DRIVER_H
