@@ -13,10 +13,13 @@ OBJ = $(CSRC:.c=.o) $(CCSRC:.cpp=.o)
 
 CFLAGS=-I.
 
-test: $(OBJ) ../lib/ezdib.o
+lib:
+	gcc -g -O -c ../lib/ezdib.c
+
+test: $(OBJ) ezdib.o
 	$(CXX) -o $@ $^ $(CFLAGS)
 
-run: test
+run: lib test
 	@./test
 
 .PHONY: clean
