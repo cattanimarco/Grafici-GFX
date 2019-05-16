@@ -1,10 +1,13 @@
 
 *.bin
 .vscode
-*.o
+visitors/*.o
+widgets/*.o
 testing/*.o
 testing/test
 testing/test.exe
 testing/.DS_Store
 testing/*.bmp
 .DS_Store
+drivers/*.o
+/*.o
