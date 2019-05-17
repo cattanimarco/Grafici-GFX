@@ -21,6 +21,7 @@ protected:
 	virtual void fillRectangle(int xTopLeft, int yTopLeft, int xBottomRight, int yBottomRight, Color color)=0;
 	
 	void fillCircle(int x, int y, int radius, Color color);
+	void fillTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color color);
 
 	virtual int width(void) = 0;
 	virtual int height(void) = 0;
@@ -29,6 +30,7 @@ private:
 	/* local utility function */
 	void BresenhamFillCircle(int xc, int yc, int x, int y, Color color);
 	void BresenhamDrawCircle(int xc, int yc, int x, int y, int thickness, Color color);
+
 };
 
 #endif //ARDU_DATAVIS_DRIVER_H

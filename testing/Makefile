@@ -14,7 +14,7 @@ OBJ = $(CSRC:.c=.o) $(CCSRC:.cpp=.o)
 CFLAGS=-I.
 
 lib:
-	gcc -g -O -c ../lib/ezdib.c
+	gcc -O -c ../lib/ezdib.c
 
 test: $(OBJ) ezdib.o
 	$(CXX) -o $@ $^ $(CFLAGS)

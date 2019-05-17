@@ -21,11 +21,12 @@ int main()
     Point p = {0.5, 0.5, 1.0};
     Circle pc = {p,0,0.3,0,1};
     Line l = {{0.2,0.2},{0.8,0.8}};
+    Line l2 = {{0.15,0.2},{0.09,0.5}};
     Color c = {0, 0, 255};
     Color c2 = {255, 0, 255};
     driver->drawPixel(p, 50, c);
-    driver->drawCircle(pc, 10, c);
-    driver->drawLine(l, 20, c2);
-
+    driver->drawCircle(pc, 30, c);
+    driver->drawLine(l, 10, c2);
+driver->drawLine(l2, 20, c);
     return 0;
 }

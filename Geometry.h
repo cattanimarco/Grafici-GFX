@@ -1,7 +1,6 @@
 #ifndef ARDU_DATAVIS_GEOMETRY_H
 #define ARDU_DATAVIS_GEOMETRY_H
 
-
 struct Point
 {
 	float x;
