@@ -46,8 +46,8 @@ void Driver::drawLine(Line line, int thickness, Color color)
 
 		drawLine(pixelX0, pixelY0, pixelX1, pixelY1, color);
 
- // compute line angle
- float angle = atan2(pixelY1 - pixelY0,pixelX1 - pixelX0);
+		// compute line angle
+		float angle = atan2(pixelY1 - pixelY0, pixelX1 - pixelX0);
 
 		// compute point on line perpendicular to start and end ad distance thickness/2
 		// float dx = (pixelX1 - pixelX0);
@@ -58,9 +58,8 @@ void Driver::drawLine(Line line, int thickness, Color color)
 		float angle1 = angle - (3.14 / 2);
 		float angle2 = angle + (3.14 / 2);
 
- 
-float bottomLeftX = pixelX0 + cos(angle1) * (thickness / 2);
-float bottomLeftY = pixelY0 + sin(angle1) * (thickness / 2);
+		float bottomLeftX = pixelX0 + cos(angle1) * (thickness / 2);
+		float bottomLeftY = pixelY0 + sin(angle1) * (thickness / 2);
 
 		drawPixel(bottomLeftX, bottomLeftY, color);
 
@@ -68,12 +67,12 @@ float bottomLeftY = pixelY0 + sin(angle1) * (thickness / 2);
 		float bottomRightY = pixelY1 + sin(angle1) * (thickness / 2);
 		drawPixel(bottomRightX, bottomRightY, color);
 
-float topLeftX  = pixelX0 + cos(angle2) * (thickness / 2);
-float topLeftY  = pixelY0 + sin(angle2) * (thickness / 2);
+		float topLeftX = pixelX0 + cos(angle2) * (thickness / 2);
+		float topLeftY = pixelY0 + sin(angle2) * (thickness / 2);
 		drawPixel(topLeftX, topLeftY, color);
 
-float topRightX  = pixelX1 + cos(angle2) * (thickness / 2);
-float topRightY  = pixelY1 + sin(angle2) * (thickness / 2);
+		float topRightX = pixelX1 + cos(angle2) * (thickness / 2);
+		float topRightY = pixelY1 + sin(angle2) * (thickness / 2);
 		drawPixel(topRightX, topRightY, color);
 
 		// float step;
@@ -230,36 +229,58 @@ void Driver::BresenhamFillCircle(int xc, int yc, int x, int y, Color color)
 	drawLine(xc - y, yc - x, xc + y, yc - x, color);
 }
 
-
 void Driver::fillTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color color)
 {
 	// from http://www-users.mat.uni.torun.pl/~wrona/3d_tutor/tri_fillers.html
 
-// 	the coordinates of vertices are (A.x,A.y), (B.x,B.y), (C.x,C.y); we assume that A.y<=B.y<=C.y (you should sort them first)
-// dx1,dx2,dx3 are deltas used in interpolation
-// horizline draws horizontal segment with coordinates (S.x,Y), (E.x,Y)
-// S.x, E.x are left and right x-coordinates of the segment we have to draw
-// S=A means that S.x=A.x; S.y=A.y;
-// *** begin triangle filler ***
+	// 	the coordinates of vertices are (A.x,A.y), (B.x,B.y), (C.x,C.y); we assume that A.y<=B.y<=C.y (you should sort them first)
+	// dx1,dx2,dx3 are deltas used in interpolation
+	// horizline draws horizontal segment with coordinates (S.x,Y), (E.x,Y)
+	// S.x, E.x are left and right x-coordinates of the segment we have to draw
+	// S=A means that S.x=A.x; S.y=A.y;
+	// *** begin triangle filler ***
 
-// 	if (B.y-A.y > 0) dx1=(B.x-A.x)/(B.y-A.y) else dx1=0;
-// 	if (C.y-A.y > 0) dx2=(C.x-A.x)/(C.y-A.y) else dx2=0;
-// 	if (C.y-B.y > 0) dx3=(C.x-B.x)/(C.y-B.y) else dx3=0;
+	Point A, B, C, S, E;
+	float dx1, dx2, dx3;
 
-// 	S=E=A;
-// 	if(dx1 > dx2) {
-// 		for(;S.y<=B.y;S.y++,E.y++,S.x+=dx2,E.x+=dx1)
-// 			horizline(S.x,E.x,S.y,color);
-// 		E=B;
-// 		for(;S.y<=C.y;S.y++,E.y++,S.x+=dx2,E.x+=dx3)
-// 			horizline(S.x,E.x,S.y,color);
-// 	} else {
-// 		for(;S.y<=B.y;S.y++,E.y++,S.x+=dx1,E.x+=dx2)
-// 			horizline(S.x,E.x,S.y,color);
-// 		S=B;
-// 		for(;S.y<=C.y;S.y++,E.y++,S.x+=dx3,E.x+=dx2)
-// 			horizline(S.x,E.x,S.y,color);
-// 	}
+	//TODO order points
+	A.x = x0;
+	A.y = y0;
+	B.x = x1;
+	B.y = y1;
+	C.x = x2;
+	C.y = y2;
 
-// *** end triangle filler ***
+	if (B.y - A.y > 0)
+		dx1 = (B.x - A.x) / (B.y - A.y);
+	else
+		dx1 = 0;
+
+	if (C.y - A.y > 0)
+		dx2 = (C.x - A.x) / (C.y - A.y);
+	else
+		dx2 = 0;
+
+	if (C.y - B.y > 0)
+		dx3 = (C.x - B.x) / (C.y - B.y);
+	else
+		dx3 = 0;
+
+	S=E=A;
+	
+	// 	if(dx1 > dx2) {
+	// 		for(;S.y<=B.y;S.y++,E.y++,S.x+=dx2,E.x+=dx1)
+	// 			horizline(S.x,E.x,S.y,color);
+	// 		E=B;
+	// 		for(;S.y<=C.y;S.y++,E.y++,S.x+=dx2,E.x+=dx3)
+	// 			horizline(S.x,E.x,S.y,color);
+	// 	} else {
+	// 		for(;S.y<=B.y;S.y++,E.y++,S.x+=dx1,E.x+=dx2)
+	// 			horizline(S.x,E.x,S.y,color);
+	// 		S=B;
+	// 		for(;S.y<=C.y;S.y++,E.y++,S.x+=dx3,E.x+=dx2)
+	// 			horizline(S.x,E.x,S.y,color);
+	// 	}
+
+	// *** end triangle filler ***
 }
