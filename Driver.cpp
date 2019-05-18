@@ -75,6 +75,9 @@ void Driver::drawLine(Line line, int thickness, Color color)
 		float topRightY = pixelY1 + sin(angle2) * (thickness / 2);
 		drawPixel(topRightX, topRightY, color);
 
+fillTriangle(bottomLeftX,  bottomLeftY, bottomRightX, bottomRightY, topLeftX, topLeftY, color);
+fillTriangle(topLeftX, topLeftY, topRightX, topRightY, bottomRightX, bottomRightY, color);
+
 		// float step;
 
 		// if (abs(dx) >= abs(dy))
@@ -243,13 +246,36 @@ void Driver::fillTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color 
 	Point A, B, C, S, E;
 	float dx1, dx2, dx3;
 
-	//TODO order points
 	A.x = x0;
 	A.y = y0;
 	B.x = x1;
 	B.y = y1;
 	C.x = x2;
 	C.y = y2;
+
+// order points
+if (A.y > B.y)
+{
+	Point tmp;
+	tmp = A;
+	A = B;
+	B = tmp;
+}
+if (A.y > C.y)
+{
+	Point tmp;
+	tmp = A;
+	A = C;
+	C = tmp;
+}
+if (B.y > C.y)
+{
+	Point tmp;
+	tmp = B;
+	B = C;
+	C = tmp;
+}
+
 
 	if (B.y - A.y > 0)
 		dx1 = (B.x - A.x) / (B.y - A.y);
@@ -268,19 +294,19 @@ void Driver::fillTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color 
 
 	S=E=A;
 	
-	// 	if(dx1 > dx2) {
-	// 		for(;S.y<=B.y;S.y++,E.y++,S.x+=dx2,E.x+=dx1)
-	// 			horizline(S.x,E.x,S.y,color);
-	// 		E=B;
-	// 		for(;S.y<=C.y;S.y++,E.y++,S.x+=dx2,E.x+=dx3)
-	// 			horizline(S.x,E.x,S.y,color);
-	// 	} else {
-	// 		for(;S.y<=B.y;S.y++,E.y++,S.x+=dx1,E.x+=dx2)
-	// 			horizline(S.x,E.x,S.y,color);
-	// 		S=B;
-	// 		for(;S.y<=C.y;S.y++,E.y++,S.x+=dx3,E.x+=dx2)
-	// 			horizline(S.x,E.x,S.y,color);
-	// 	}
+		if(dx1 > dx2) {
+			for(;S.y<=B.y;S.y++,E.y++,S.x+=dx2,E.x+=dx1)
+				drawLine(S.x,S.y,E.x,S.y,color);
+			E=B;
+			for(;S.y<=C.y;S.y++,E.y++,S.x+=dx2,E.x+=dx3)
+				drawLine(S.x,S.y,E.x,S.y,color);
+		} else {
+			for(;S.y<=B.y;S.y++,E.y++,S.x+=dx1,E.x+=dx2)
+				drawLine(S.x,S.y,E.x,S.y,color);
+			S=B;
+			for(;S.y<=C.y;S.y++,E.y++,S.x+=dx3,E.x+=dx2)
+				drawLine(S.x,S.y,E.x,S.y,color);
+		}
 
 	// *** end triangle filler ***
 }

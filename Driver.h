@@ -13,6 +13,7 @@ class Driver
 	void drawRectangle(Rectangle rectangle, int thickness, Color color);
 	void fillRectangle(Rectangle rectangle, int thickness, Color color);
 	void fillCircle(Circle circle, int thickness, Color color);
+	
 protected:
 	virtual void drawPixel(int x, int y, Color color) =0;
 	virtual void drawLine(int x1, int y1, int x2, int y2, Color color)=0;
