@@ -29,5 +29,7 @@ int main()
     driver->drawLine(l, 10, c2);
 driver->drawLine(l2, 20, c);
 
+Rectangle r = {{0.5,0},{0.0,0.5},{1.0,0.5},{0.5,1}};
+//driver->fillRectangle(r,1,c);
     return 0;
 }

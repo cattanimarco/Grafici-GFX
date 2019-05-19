@@ -75,8 +75,8 @@ void Driver::drawLine(Line line, int thickness, Color color)
 		float topRightY = pixelY1 + sin(angle2) * (thickness / 2);
 		drawPixel(topRightX, topRightY, color);
 
-fillTriangle(bottomLeftX,  bottomLeftY, bottomRightX, bottomRightY, topLeftX, topLeftY, color);
-fillTriangle(topLeftX, topLeftY, topRightX, topRightY, bottomRightX, bottomRightY, color);
+		fillTriangle(bottomLeftX, bottomLeftY, bottomRightX, bottomRightY, topLeftX, topLeftY, color);
+		fillTriangle(topLeftX, topLeftY, topRightX, topRightY, bottomRightX, bottomRightY, color);
 
 		// float step;
 
@@ -165,12 +165,22 @@ void Driver::drawRectangle(Rectangle rectangle, int thickness, Color color)
 void Driver::fillRectangle(Rectangle rectangle, int thickness, Color color)
 {
 	//compute pixel coordinates
-	int pixelX0 = rectangle.topLeft.x * width();
-	int pixelY0 = rectangle.topLeft.y * height();
-	int pixelX1 = rectangle.bottomRight.x * width();
-	int pixelY1 = rectangle.bottomRight.y * height();
+	int topLeftX = rectangle.topLeft.x * width();
+	int topLeftY = rectangle.topLeft.y * height();
 
-	fillRectangle(pixelX0, pixelY0, pixelX1, pixelY1, color);
+	int topRightX = rectangle.topRight.x * width();
+	int topRightY = rectangle.topRight.y * height();
+
+	int bottomLeftX = rectangle.bottomLeft.x * width();
+	int bottomLeftY = rectangle.bottomLeft.y * height();
+
+	int bottomRightX = rectangle.bottomRight.x * width();
+	int bottomRightY = rectangle.bottomRight.y * height();
+
+	fillTriangle(bottomLeftX, bottomLeftY, bottomRightX, bottomRightY, topLeftX, topLeftY, color);
+	fillTriangle(topLeftX, topLeftY, topRightX, topRightY, bottomRightX, bottomRightY, color);
+
+	//fillRectangle(pixelX0, pixelY0, pixelX1, pixelY1, color);
 	drawRectangle(rectangle, thickness, color);
 }
 
@@ -197,7 +207,7 @@ void Driver::fillCircle(Circle circle, int thickness, Color color)
 
 void Driver::fillCircle(int xc, int yc, int radius, Color color)
 {
-	/* Function for circle-generation using Bresenham's algorithm from 
+	/* Part of Bresenham's algorithm for circle-generation sourced from 
 	https://www.geeksforgeeks.org/bresenhams-circle-drawing-algorithm/ */
 
 	int x = 0;
@@ -223,7 +233,7 @@ void Driver::fillCircle(int xc, int yc, int radius, Color color)
 /* local helper function */
 void Driver::BresenhamFillCircle(int xc, int yc, int x, int y, Color color)
 {
-	/* Function for circle-generation using Bresenham's algorithm from 
+	/* Part of Bresenham's algorithm for circle-generation sourced from 
 	https://www.geeksforgeeks.org/bresenhams-circle-drawing-algorithm/ */
 
 	drawLine(xc - x, yc + y, xc + x, yc + y, color);
@@ -253,29 +263,28 @@ void Driver::fillTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color 
 	C.x = x2;
 	C.y = y2;
 
-// order points
-if (A.y > B.y)
-{
-	Point tmp;
-	tmp = A;
-	A = B;
-	B = tmp;
-}
-if (A.y > C.y)
-{
-	Point tmp;
-	tmp = A;
-	A = C;
-	C = tmp;
-}
-if (B.y > C.y)
-{
-	Point tmp;
-	tmp = B;
-	B = C;
-	C = tmp;
-}
-
+	// order points
+	if (A.y > B.y)
+	{
+		Point tmp;
+		tmp = A;
+		A = B;
+		B = tmp;
+	}
+	if (A.y > C.y)
+	{
+		Point tmp;
+		tmp = A;
+		A = C;
+		C = tmp;
+	}
+	if (B.y > C.y)
+	{
+		Point tmp;
+		tmp = B;
+		B = C;
+		C = tmp;
+	}
 
 	if (B.y - A.y > 0)
 		dx1 = (B.x - A.x) / (B.y - A.y);
@@ -292,21 +301,24 @@ if (B.y > C.y)
 	else
 		dx3 = 0;
 
-	S=E=A;
-	
-		if(dx1 > dx2) {
-			for(;S.y<=B.y;S.y++,E.y++,S.x+=dx2,E.x+=dx1)
-				drawLine(S.x,S.y,E.x,S.y,color);
-			E=B;
-			for(;S.y<=C.y;S.y++,E.y++,S.x+=dx2,E.x+=dx3)
-				drawLine(S.x,S.y,E.x,S.y,color);
-		} else {
-			for(;S.y<=B.y;S.y++,E.y++,S.x+=dx1,E.x+=dx2)
-				drawLine(S.x,S.y,E.x,S.y,color);
-			S=B;
-			for(;S.y<=C.y;S.y++,E.y++,S.x+=dx3,E.x+=dx2)
-				drawLine(S.x,S.y,E.x,S.y,color);
-		}
+	S = E = A;
+
+	if (dx1 > dx2)
+	{
+		for (; S.y <= B.y; S.y++, E.y++, S.x += dx2, E.x += dx1)
+			drawLine(S.x, S.y, E.x, S.y, color);
+		E = B;
+		for (; S.y <= C.y; S.y++, E.y++, S.x += dx2, E.x += dx3)
+			drawLine(S.x, S.y, E.x, S.y, color);
+	}
+	else
+	{
+		for (; S.y <= B.y; S.y++, E.y++, S.x += dx1, E.x += dx2)
+			drawLine(S.x, S.y, E.x, S.y, color);
+		S = B;
+		for (; S.y <= C.y; S.y++, E.y++, S.x += dx3, E.x += dx2)
+			drawLine(S.x, S.y, E.x, S.y, color);
+	}
 
 	// *** end triangle filler ***
 }
