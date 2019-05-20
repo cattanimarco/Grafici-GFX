@@ -3,70 +3,66 @@
 
 #include "Geometry.h"
 
-class PointIterator
+class DataContainer
 {
 public:
-	Data *parent;
-	int index;
-
-	 Point &operator*(void) 
-     {
-          return parent->getPoint(index);
-     }
-
-	 bool operator==(PointIterator it1, PointIterator it2)
-{
-	return (it1.index == it2.index);
-}
-
-bool operator!=(PointIterator it1, PointIterator it2)
-{
-	return (it1.index != it2.index);
-
-}
-
+	virtual Point getPoint(int index) = 0;
+	virtual int size(void) = 0;
 };
 
-	/* override * and ++ == !=*/
+template <class T>
+struct DataSourceDescriptor
+{
+	T *xData;
+	T *yData;
+	T xMin;
+	T yMin;
+	T xMax;
+	T yMax;
+	int size;
+};
+
+class DataContainerFloat : public DataContainer
+{
+public:
+	DataContainerFloat(DataSourceDescriptor<float> dataSourceDescriptor) : dataSourceDescriptor(dataSourceDescriptor){};
+	Point getPoint(int index);
+	int size(void);
+
+private:
+	DataSourceDescriptor<float> dataSourceDescriptor;
+};
 
 
+class PointIterator
+{
+/* Inspired by https://www.boost.org/doc/libs/1_70_0/libs/iterator/doc/iterator_facade.html#tutorial-example */
 
+public:
+	PointIterator(DataContainer *dataContainer, int dataIndex) : dataContainer(dataContainer), dataIndex(dataIndex){};
+
+	Point operator*();
+	PointIterator &operator++();
+	PointIterator operator++(int postfix);
+	bool operator!=(PointIterator const &other);
+	/*TODO complete operator overriding*/
+
+private:
+	DataContainer *dataContainer;
+	int dataIndex;
+
+	//implement operator overrides
+};
 
 class Data
 {
 public:
-	Point *getPoint(int index);
-
+	Data(DataContainer *dataContainer) : dataContainer(dataContainer){};
 	PointIterator begin();
 	PointIterator end();
 
 private:
-	int size;
+	DataContainer *dataContainer;
 };
 
-class DataSimpleFloat : public Data
-{
-	/* for unsigned floating point data in the range of 0.0 .. 1.0 */
-};
-
-class DataSimpleChar : public Data
-{
-	/* for unsigned char data in the range of 0 .. 255 */
-};
-
-class DataSimpleInt : public Data
-{
-	/* for unsigned int data in the range of 0 ..  */
-};
-
-class DataCustomFloat : public Data
-{
-	/* for floating point data with custom range */
-};
-
-class DataCustomInt : public Data
-{
-	/* for int data with custom range */
-};
-
-#endif //ARDU_DATAVIS_GEOMETRY_H
+#endif //ARDU_DATAVIS_DATA_H

@@ -11,6 +11,7 @@ public:
 	void accept(VisitorDraw *visitor);
 
 	Line lineBoundaries;
+	Data *data;
 };
 
 #endif //ARDU_DATAVIS_WIDGET_LINE_H

@@ -8,9 +8,9 @@ class VisitorDrawScatter : public VisitorDraw
 public:
     VisitorDrawScatter(Driver *driver);
 
-    void visit(Data *data, Line *const boundaries);
-    void visit(Data *data, Rectangle *const boundaries);
-    void visit(Data *data, Circle *const boundaries);
+	void visit(Data *data, Line boundaries);
+	void visit(Data *data, Rectangle boundaries);
+	void visit(Data *data, Circle boundaries);
 };
 
 

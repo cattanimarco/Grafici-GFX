@@ -7,10 +7,13 @@
 class WidgetRectangle : public Widget
 {
 public:
-		// visitor patttern
+	WidgetRectangle(Data &data);
+
+	// visitor patttern
 	void accept(VisitorDraw *visitor);
 
 	Rectangle boundaries;
+	Data *data;
 };
 
 #endif //ARDU_DATAVIS_WIDGET_RECTANGLE_H

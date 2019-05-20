@@ -10,7 +10,6 @@ public:
 	// visitor patttern
 	virtual void accept(VisitorDraw *visitor) = 0;
 
-	Data *data;
 };
 
 #endif //ARDU_DATAVIS_WIDGET_H
