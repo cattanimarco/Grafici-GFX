@@ -3,17 +3,15 @@
 
 #include <math.h>
 
-struct Point
+struct Rectangle;
+
+class Point
 {
+	public:
 	float x;
 	float y;
 	float value;
-};
-
-struct Line
-{
-	Point begin;
-	Point end;
+	Point projectPoint(Rectangle rectangle);
 };
 
 struct Rectangle
@@ -22,6 +20,12 @@ struct Rectangle
 	Point topRight;
 	Point bottomLeft;
 	Point bottomRight;
+};
+
+struct Line
+{
+	Point begin;
+	Point end;
 };
 
 struct Circle
@@ -33,15 +37,7 @@ struct Circle
 	float endAngle;
 };
 
-// Point projectPoint(Point normalizedPoint, Rectangle rectangle)
-// {
-// 	Point p;
 
-// 	p.x = (rectangle.bottomRight.x - rectangle.bottomLeft.x) * normalizedPoint.x + rectangle.bottomLeft.x;
-// 	p.y = (rectangle.topLeft.y - rectangle.bottomLeft.y) * normalizedPoint.y + rectangle.bottomLeft.y;
-
-// 	return p;
-// };
 
 	// float distance(Point a, Point b)
 	// {

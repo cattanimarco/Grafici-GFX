@@ -4,7 +4,7 @@
 #include <iostream>
 
 //#define PI ( M_PI )
-#define PI (3.14)
+#define PI (3.14159265359)
 
 void Driver::drawPixel(Point point, int thickness, Color color)
 {
@@ -39,67 +39,33 @@ void Driver::drawLine(Line line, int thickness, Color color)
 	}
 	else
 	{
-
-		Color c = {50, 50, 50};
-		fillCircle(pixelX0, pixelY0, thickness / 2, c);
-		fillCircle(pixelX1, pixelY1, thickness / 2, c);
-
-		drawLine(pixelX0, pixelY0, pixelX1, pixelY1, color);
+		fillCircle(pixelX0, pixelY0, thickness / 2, color);
+		fillCircle(pixelX1, pixelY1, thickness / 2, color);
 
 		// compute line angle
 		float angle = atan2(pixelY1 - pixelY0, pixelX1 - pixelX0);
 
 		// compute point on line perpendicular to start and end ad distance thickness/2
-		// float dx = (pixelX1 - pixelX0);
-		// float dy = (pixelY1 - pixelY0);
-
-		// float angle = atan(dy / dx);
-
 		float angle1 = angle - (3.14 / 2);
 		float angle2 = angle + (3.14 / 2);
 
 		float bottomLeftX = pixelX0 + cos(angle1) * (thickness / 2);
 		float bottomLeftY = pixelY0 + sin(angle1) * (thickness / 2);
-
-		drawPixel(bottomLeftX, bottomLeftY, color);
-
 		float bottomRightX = pixelX1 + cos(angle1) * (thickness / 2);
 		float bottomRightY = pixelY1 + sin(angle1) * (thickness / 2);
-		drawPixel(bottomRightX, bottomRightY, color);
-
 		float topLeftX = pixelX0 + cos(angle2) * (thickness / 2);
 		float topLeftY = pixelY0 + sin(angle2) * (thickness / 2);
-		drawPixel(topLeftX, topLeftY, color);
-
 		float topRightX = pixelX1 + cos(angle2) * (thickness / 2);
 		float topRightY = pixelY1 + sin(angle2) * (thickness / 2);
-		drawPixel(topRightX, topRightY, color);
+
+		//drawLine(pixelX0, pixelY0, pixelX1, pixelY1, color);
+		// drawPixel(bottomLeftX, bottomLeftY, color);
+		// drawPixel(bottomRightX, bottomRightY, color);
+		// drawPixel(topLeftX, topLeftY, color);
+		// drawPixel(topRightX, topRightY, color);
 
 		fillTriangle(bottomLeftX, bottomLeftY, bottomRightX, bottomRightY, topLeftX, topLeftY, color);
 		fillTriangle(topLeftX, topLeftY, topRightX, topRightY, bottomRightX, bottomRightY, color);
-
-		// float step;
-
-		// if (abs(dx) >= abs(dy))
-		// 	step = abs(dx);
-		// else
-		// 	step = abs(dy);
-
-		// dx /= step;
-		// dy /= step;
-
-		// float x = -dy;
-		// float y = dx;
-		// float distance = sqrt( x*x + y*y);
-
-		// for (int i = 0; i < step; i++)
-		// {
-		// 	// drawLine(pixelX0+x, pixelY0+y,pixelX1+x, pixelY1+y, color);
-		// 	// drawLine(pixelX0-x, pixelY0-y,pixelX1-x, pixelY1-y, color);
-		// 	x -= dy;
-		// 	y += dx;
-		// 	distance = sqrt( x*x + y*y);
-		// }
 	}
 }
 
@@ -181,7 +147,10 @@ void Driver::fillRectangle(Rectangle rectangle, int thickness, Color color)
 	fillTriangle(topLeftX, topLeftY, topRightX, topRightY, bottomRightX, bottomRightY, color);
 
 	//fillRectangle(pixelX0, pixelY0, pixelX1, pixelY1, color);
-	drawRectangle(rectangle, thickness, color);
+	if (thickness > 1)
+	{
+		drawRectangle(rectangle, thickness, color);
+	}
 }
 
 void Driver::fillCircle(Circle circle, int thickness, Color color)

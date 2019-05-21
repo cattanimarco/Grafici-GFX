@@ -25,10 +25,10 @@ int main()
 	DataContainer *dataContainer = new DataContainerFloat(dataFloatDescriptor);
 	Data data(dataContainer);
 
-	Rectangle rr = {{0, 0}, {0, 1}, {1, 0}, {1, 1}};
+	//Rectangle rr = {{0, 0}, {0, 1}, {1, 0}, {1, 1}};
 
 	VisitorDraw *visitor = new VisitorDrawScatter(driver);
-	visitor->visit(&data, rr);
+	//visitor->visit(&data, rr);
 
 	//Widget *widgetLine = new WidgetLine();
 	Widget *widgetRectangle = new WidgetRectangle(data);
@@ -36,6 +36,12 @@ int main()
 	// widgetLine->accept(visitor);
 	widgetRectangle->accept(visitor);
 
+	// Circle circle;
+	// Color c = {0, 0, 255};
+
+	// circle.center = {0.5, 0.5};
+	// circle.outerRadius = 0.5;
+	// driver->drawCircle(circle, 10.0, c);
 	// Point p = {0.5, 0.5, 1.0};
 	// Circle pc = {p, 0, 0.3, 0, 1};
 	// Line l = {{0.2, 0.2}, {0.8, 0.8}};

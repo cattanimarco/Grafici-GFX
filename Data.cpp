@@ -1,8 +1,7 @@
 #include "Data.h"
-#include <iostream>
+
 Point DataContainerFloat::getPoint(int index)
 {
-	std::cout << "getpoint" << std::endl;
 	Point p;
 	if (index < dataSourceDescriptor.size)
 	{
@@ -15,16 +14,12 @@ Point DataContainerFloat::getPoint(int index)
 
 int DataContainerFloat::size(void)
 {
-	std::cout << "size" << std::endl;
 	return dataSourceDescriptor.size;
 }
 
 Point PointIterator::operator*()
 {
-	std::cout << "*" << std::endl;
-	Point result = dataContainer->getPoint(dataIndex);
-	std::cout << "*" << std::endl;
-	return result;
+	return dataContainer->getPoint(dataIndex);
 }
 
 PointIterator &PointIterator::operator++()
