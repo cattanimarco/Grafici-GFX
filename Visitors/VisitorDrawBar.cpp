@@ -18,6 +18,7 @@ void VisitorDrawBar::visit(Data *data, Rectangle boundaries)
 		Line l;
 		l.begin = l.end = *it;
 		(l.begin).y = 0;
+		// l.projectLine(boundaries)
 		driver->drawLine(l, 10, c);
 	}
 }

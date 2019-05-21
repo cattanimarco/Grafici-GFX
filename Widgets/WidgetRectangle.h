@@ -11,9 +11,10 @@ public:
 
 	// visitor patttern
 	void accept(VisitorDraw *visitor);
+	// void accept(VisitorDraw *visitor, Rectangle boundaries);
 
 	Rectangle boundaries;
-	Data *data;
+	//Data *data;
 };
 
 #endif //ARDU_DATAVIS_WIDGET_RECTANGLE_H

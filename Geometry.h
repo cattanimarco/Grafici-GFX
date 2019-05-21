@@ -14,11 +14,18 @@ class Point
 	Point projectPoint(Rectangle rectangle);
 };
 
+//rename quadrilateral
 struct Rectangle
 {
-	Point topLeft;
-	Point topRight;
+	Point topLeft; // rename first
+	Point topRight; // rename second (second needs to be linked to first and third)
 	Point bottomLeft;
+	Point bottomRight;
+};
+
+struct Boundaries
+{
+	Point topLeft; //change point to int
 	Point bottomRight;
 };
 

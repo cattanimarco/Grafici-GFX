@@ -15,7 +15,8 @@ void VisitorDrawScatter::visit(Data *data, Rectangle boundaries)
 
 	for (PointIterator it = data->begin(); it != data->end(); it++)
 	{
-		driver->drawPixel(*it, 10, c);
+		//todo drivers with relative sizes need to ask for absolute coordinate boundaries
+		driver->drawPixel((*it).projectPoint(boundaries), 10, c);
 	}
 }
 
