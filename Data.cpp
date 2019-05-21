@@ -51,3 +51,8 @@ PointIterator Data::end()
 	PointIterator ret(dataContainer, dataContainer->size());
 	return ret;
 }
+
+int Data::len()
+{
+	return dataContainer->size();
+}

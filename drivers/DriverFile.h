@@ -15,12 +15,14 @@ protected:
 	void drawCircle(int x, int y, int radius, Color color);
 	void drawRectangle(int xTopLeft, int yTopLeft, int xBottomRight, int yBottomRight, Color color);
 	void fillRectangle(int xTopLeft, int yTopLeft, int xBottomRight, int yBottomRight, Color color);
-	
+	void fillCircle(int x, int y, int radius, Color color);
+
 	int width(void);
 	int height(void);
 
 private:
 	int colorTo24b(Color color);
+	void BresenhamFillCircle(int xc, int yc, int x, int y, Color color);
 
 	HEZDIMAGE _hDib;
 	char *_filename;

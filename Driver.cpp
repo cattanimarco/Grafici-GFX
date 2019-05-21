@@ -39,6 +39,8 @@ void Driver::drawLine(Line line, int thickness, Color color)
 	}
 	else
 	{
+		/* TODO optimized version in case it is horizontal or vertical */
+	
 		fillCircle(pixelX0, pixelY0, thickness / 2, color);
 		fillCircle(pixelX1, pixelY1, thickness / 2, color);
 
@@ -88,6 +90,7 @@ void Driver::drawCircle(Circle circle, int thickness, Color color)
 	}
 	else
 	{
+		/* TODO fix this */
 		for (int t = 0; t < thickness; t++)
 			drawCircle(pixelX0, pixelY0, (pixelR - t / 2) + t, color);
 	}
@@ -143,6 +146,7 @@ void Driver::fillRectangle(Rectangle rectangle, int thickness, Color color)
 	int bottomRightX = rectangle.bottomRight.x * width();
 	int bottomRightY = rectangle.bottomRight.y * height();
 
+	/* TODO optimized version in case it is horizontal or vertical */
 	fillTriangle(bottomLeftX, bottomLeftY, bottomRightX, bottomRightY, topLeftX, topLeftY, color);
 	fillTriangle(topLeftX, topLeftY, topRightX, topRightY, bottomRightX, bottomRightY, color);
 
@@ -174,42 +178,7 @@ void Driver::fillCircle(Circle circle, int thickness, Color color)
 	drawCircle(circle, thickness, color);
 }
 
-void Driver::fillCircle(int xc, int yc, int radius, Color color)
-{
-	/* Part of Bresenham's algorithm for circle-generation sourced from 
-	https://www.geeksforgeeks.org/bresenhams-circle-drawing-algorithm/ */
 
-	int x = 0;
-	int y = radius;
-	int d = 3 - (2 * radius);
-	BresenhamFillCircle(xc, yc, x, y, color);
-	while (y >= x)
-	{
-		// for each pixel we will draw all eight pixels
-		x++;
-		// check for decision parameter and correspondingly update d, x, y
-		if (d > 0)
-		{
-			y--;
-			d = d + 4 * (x - y) + 10;
-		}
-		else
-			d = d + 4 * x + 6;
-		BresenhamFillCircle(xc, yc, x, y, color);
-	}
-}
-
-/* local helper function */
-void Driver::BresenhamFillCircle(int xc, int yc, int x, int y, Color color)
-{
-	/* Part of Bresenham's algorithm for circle-generation sourced from 
-	https://www.geeksforgeeks.org/bresenhams-circle-drawing-algorithm/ */
-
-	drawLine(xc - x, yc + y, xc + x, yc + y, color);
-	drawLine(xc - x, yc - y, xc + x, yc - y, color);
-	drawLine(xc - y, yc + x, xc + y, yc + x, color);
-	drawLine(xc - y, yc - x, xc + y, yc - x, color);
-}
 
 void Driver::fillTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color color)
 {

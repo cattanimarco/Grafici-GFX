@@ -22,16 +22,16 @@ protected:
 	virtual void drawCircle(int x, int y, int radius, Color color)=0;
 	virtual void drawRectangle(int xTopLeft, int yTopLeft, int xBottomRight, int yBottomRight, Color color)=0;
 	virtual void fillRectangle(int xTopLeft, int yTopLeft, int xBottomRight, int yBottomRight, Color color)=0;
+	virtual	void fillCircle(int x, int y, int radius, Color color) = 0;
+
 	virtual int width(void) = 0;
 	virtual int height(void) = 0;
 
 	// implemented low level api
-	void fillCircle(int x, int y, int radius, Color color);
 	void fillTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color color);
 private:
 
-	/* low level utility function */
-	void BresenhamFillCircle(int xc, int yc, int x, int y, Color color);
+
 
 };
 

@@ -60,6 +60,7 @@ public:
 	Data(DataContainer *dataContainer) : dataContainer(dataContainer){};
 	PointIterator begin();
 	PointIterator end();
+	int len();
 
 private:
 	DataContainer *dataContainer;

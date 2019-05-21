@@ -38,6 +38,43 @@ void DriverFile::fillRectangle(int xTopLeft, int yTopLeft, int xBottomRight, int
 	ezd_save(_hDib, _filename);
 }
 
+void DriverFile::fillCircle(int xc, int yc, int radius, Color color)
+{
+	/* Part of Bresenham's algorithm for circle-generation sourced from 
+	https://www.geeksforgeeks.org/bresenhams-circle-drawing-algorithm/ */
+
+	int x = 0;
+	int y = radius;
+	int d = 3 - (2 * radius);
+	BresenhamFillCircle(xc, yc, x, y, color);
+	while (y >= x)
+	{
+		// for each pixel we will draw all eight pixels
+		x++;
+		// check for decision parameter and correspondingly update d, x, y
+		if (d > 0)
+		{
+			y--;
+			d = d + 4 * (x - y) + 10;
+		}
+		else
+			d = d + 4 * x + 6;
+		BresenhamFillCircle(xc, yc, x, y, color);
+	}
+}
+
+/* local helper function */
+void DriverFile::BresenhamFillCircle(int xc, int yc, int x, int y, Color color)
+{
+	/* Part of Bresenham's algorithm for circle-generation sourced from 
+	https://www.geeksforgeeks.org/bresenhams-circle-drawing-algorithm/ */
+
+	drawLine(xc - x, yc + y, xc + x, yc + y, color);
+	drawLine(xc - x, yc - y, xc + x, yc - y, color);
+	drawLine(xc - y, yc + x, xc + y, yc + x, color);
+	drawLine(xc - y, yc - x, xc + y, yc - x, color);
+}
+
 int DriverFile::width(void)
 {
 	return _width;
