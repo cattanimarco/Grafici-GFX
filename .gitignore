@@ -1,3 +1,6 @@
+Adafruit_GFX.h
+Adafruit_GFX.cpp
+gfxfont.h
 
 *.bin
 .vscode

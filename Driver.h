@@ -3,35 +3,35 @@
 
 #include "Style.h"
 #include "Geometry.h"
+#include "Adafruit_GFX.h"
 
 class Driver
 {
-  public:
-  	// implemented high level api
-	void drawPixel(Point point, int thickness, Color color);
-	void drawLine(Line line, int thickness, Color color);
-	void drawCircle(Circle circle, int thickness, Color color);
-	void drawRectangle(Rectangle rectangle, int thickness, Color color);
-	void fillRectangle(Rectangle rectangle, int thickness, Color color);
-	void fillCircle(Circle circle, int thickness, Color color);
-	
-protected:
-	// low level api interface 
-	virtual void drawPixel(int x, int y, Color color) =0;
-	virtual void drawLine(int x1, int y1, int x2, int y2, Color color)=0;
-	virtual void drawCircle(int x, int y, int radius, Color color)=0;
-	virtual void drawRectangle(int xTopLeft, int yTopLeft, int xBottomRight, int yBottomRight, Color color)=0;
-	virtual void fillRectangle(int xTopLeft, int yTopLeft, int xBottomRight, int yBottomRight, Color color)=0;
-	virtual	void fillCircle(int x, int y, int radius, Color color) = 0;
+public:
 
-	virtual int width(void) = 0;
-	virtual int height(void) = 0;
+	Driver(Adafruit_GFX *tft);
 
-	// implemented low level api
-	void fillTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color color);
+	void drawPixel(Pixel c);
+	void drawLine(Pixel a, Pixel b);
+	void drawCircle(Pixel c, int r);
+	void drawTriangle(Pixel a, Pixel b, Pixel c);
+	void drawRectangle(Pixel bl, int w, int h);
+	void drawRoundRectangle(Pixel bl, int w, int h, int r);
+
+	void fillRectangle(Pixel bl, int w, int h);
+	void fillCircle(Pixel c, int r);
+	void fillTriangle(Pixel a, Pixel b, Pixel c);
+	void fillRoundRectangle(Pixel bl, int w, int h, int r);
+
+	void fillScreen(Color c);
+
+	int width(void);
+	int height(void);
+
 private:
+	Adafruit_GFX * tft;
 
-
+	int colorTo16b(Color color);
 
 };
 

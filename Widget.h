@@ -7,9 +7,10 @@
 class Widget
 {
 public:
-	Widget(Data *data);
+	Widget(Data &data);
 	// visitor patttern
-	virtual void accept(VisitorDraw *visitor) = 0;
+	void accept(VisitorDraw *visitor);
+	void accept(VisitorDraw *visitor, Boundaries boundaries);
 
 protected:
 	Data *data;

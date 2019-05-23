@@ -1,7 +1,19 @@
 #include "Widget.h"
 
 
-Widget::Widget(Data *data): data(data)
+Widget::Widget(Data &data): data(&data)
 {
 
+}
+
+void Widget::accept(VisitorDraw *visitorDraw)
+{
+	// use input parameter boundaries
+	visitorDraw->visit(data);
+}
+
+void Widget::accept(VisitorDraw *visitorDraw, Boundaries boundaries)
+{
+	// use input parameter boundaries
+	visitorDraw->visit(data, boundaries);
 }

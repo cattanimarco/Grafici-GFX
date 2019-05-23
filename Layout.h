@@ -2,12 +2,12 @@
 #define ARDU_DATAVIS_LAYOUT_H
 
 #include "Geometry.h"
-#include "Boundaries.h"
+#include "Widget.h"
 
 class Layout
 {
 public:
-	virtual void draw(Driver driver, Boundaries boundaries);
+	virtual void draw(Boundaries boundaries);
 	void setWidget(Widget *widget, Point position);
 
 

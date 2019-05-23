@@ -8,12 +8,10 @@
 class VisitorDraw
 {
 public:
-	VisitorDraw();
-	VisitorDraw(Driver *driver);
+	VisitorDraw(Driver &driver);
 
-	virtual void visit(Data *data, Line boundaries);
-	virtual void visit(Data *data, Rectangle boundaries);
-	virtual void visit(Data *data, Circle boundaries);
+	void visit(Data *data);
+	virtual void visit(Data *data, Boundaries boundaries);
 
 	Driver *driver;
 };

@@ -1,11 +1,12 @@
 #include "Geometry.h"
 
-Point Point::projectPoint(Rectangle rectangle)
+Pixel Point::projectPoint(Boundaries boundaries)
 {
-	Point p;
+	Pixel p;
 
-	p.x = (rectangle.bottomRight.x - rectangle.bottomLeft.x) * x + rectangle.bottomLeft.x;
-	p.y = (rectangle.topLeft.y - rectangle.bottomLeft.y) * y + rectangle.bottomLeft.y;
+	p.x = (boundaries.tr.x - boundaries.bl.x) * x + boundaries.bl.x;
+	p.y = (boundaries.tr.y - boundaries.bl.y) * y + boundaries.bl.y;
+	p.color = {255,255,255};
 
 	return p;
 };
