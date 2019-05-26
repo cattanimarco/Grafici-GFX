@@ -7,6 +7,7 @@
 class Widget
 {
 public:
+	Widget(void){};
 	Widget(Data &data);
 	// visitor patttern
 	void accept(VisitorDraw *visitor);
