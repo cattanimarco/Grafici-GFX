@@ -27,21 +27,14 @@ int main()
 	DataContainer *dataContainer = new DataContainerFloat(dataFloatDescriptor);
 	Data data(dataContainer);
 
-//	VisitorDraw *visitorBar = new VisitorDrawBar(driver);
 	VisitorDraw *visitorScatter = new VisitorDrawScatter(driver);
 
 	Widget * widget = new Widget(data);
 
 	DecoratorWidgetBorder * border = new DecoratorWidgetBorder(*widget);
 
-	Boundaries b;
-	b.bl.x = 0;
-	b.bl.y = 0;
-	b.tr.x = driver.width()-1;
-	b.tr.y = driver.height()-1;
-
 	//widget->accept(visitorScatter);
-	border->accept(visitorScatter, b);
+	border->accept(visitorScatter, driver.fullScreen);
 
 	//flush to file 
 	((File_GFX*)gfx)->flush();

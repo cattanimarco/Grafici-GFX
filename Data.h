@@ -50,8 +50,6 @@ public:
 private:
 	DataContainer *dataContainer;
 	int dataIndex;
-
-	//implement operator overrides
 };
 
 class Data

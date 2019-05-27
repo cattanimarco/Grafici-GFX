@@ -27,7 +27,7 @@ struct Line
 
 struct Boundaries
 {
-	Pixel bl; //change point to int
+	Pixel bl;
 	Pixel tr;
 };
 

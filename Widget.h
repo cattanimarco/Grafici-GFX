@@ -10,7 +10,6 @@ public:
 	Widget(void){};
 	Widget(Data &data);
 	// visitor patttern
-	void accept(VisitorDraw *visitor);
 	void accept(VisitorDraw *visitor, Boundaries boundaries);
 
 protected:

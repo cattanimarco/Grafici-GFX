@@ -10,7 +10,6 @@ class VisitorDraw
 public:
 	VisitorDraw(Driver &driver);
 
-	void visit(Data *data);
 	virtual void visit(Data *data, Boundaries boundaries);
 
 	Driver *driver;

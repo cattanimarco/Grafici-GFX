@@ -10,7 +10,6 @@ class DecoratorWidgetBorder : public Widget
 public:
 	DecoratorWidgetBorder(Widget &widget);
 	// visitor pattern
-	void accept(VisitorDraw *visitor);
 	void accept(VisitorDraw *visitor, Boundaries boundaries);
 
 private:
