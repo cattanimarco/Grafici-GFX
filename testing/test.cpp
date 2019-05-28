@@ -8,15 +8,15 @@
 
 float dataArrayX[11] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-DataSourceDescriptor<float> dataFloatDescriptor =
-	{
-		dataArrayX,
-		dataArrayX,
-		0,
-		0,
-		10,
-		10,
-		11};
+DataSourceDescriptor<float> dataFloatDescriptor = {
+	dataArrayX,
+	dataArrayX,
+	0,
+	0,
+	10,
+	10,
+	11,
+};
 
 int main()
 {
@@ -29,15 +29,15 @@ int main()
 
 	VisitorDraw *visitorScatter = new VisitorDrawScatter(driver);
 
-	Widget * widget = new Widget(data);
+	Widget *widget = new Widget(data);
 
-	DecoratorWidgetBorder * border = new DecoratorWidgetBorder(*widget);
+	DecoratorWidgetBorder *border = new DecoratorWidgetBorder(*widget);
 
 	//widget->accept(visitorScatter);
 	border->accept(visitorScatter, driver.fullScreen);
 
-	//flush to file 
-	((File_GFX*)gfx)->flush();
+	//flush to file
+	((File_GFX *)gfx)->flush();
 
 	return 0;
 }
