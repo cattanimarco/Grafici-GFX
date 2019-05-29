@@ -3,40 +3,40 @@
 
 #include "Geometry.h"
 
+class PointIterator;
+
 class DataContainer
 {
 public:
 	virtual Point getPoint(int index) = 0;
 	virtual int size(void) = 0;
-};
-
-template <class T>
-struct DataSourceDescriptor
-{
-	T *xData;
-	T *yData;
-	T xMin;
-	T yMin;
-	T xMax;
-	T yMax;
-	int size;
+	virtual void refresh() = 0;
+	PointIterator begin();
+	PointIterator end();
 };
 
 class DataContainerFloat : public DataContainer
 {
 public:
-	DataContainerFloat(DataSourceDescriptor<float> dataSourceDescriptor) : dataSourceDescriptor(dataSourceDescriptor){};
+	DataContainerFloat(float *xData, int len) : xData(xData), numElem(len) { refresh(); };
+	DataContainerFloat(float *xData, float *yData, int len) : xData(xData), yData(yData), numElem(len) { refresh(); };
 	Point getPoint(int index);
+	void refresh();
 	int size(void);
 
 private:
-	DataSourceDescriptor<float> dataSourceDescriptor;
+	float *xData;
+	float *yData;
+	float xMin;
+	float yMin;
+	float xMax;
+	float yMax;
+	int numElem;
 };
-
 
 class PointIterator
 {
-/* Inspired by https://www.boost.org/doc/libs/1_70_0/libs/iterator/doc/iterator_facade.html#tutorial-example */
+	/* Inspired by https://www.boost.org/doc/libs/1_70_0/libs/iterator/doc/iterator_facade.html#tutorial-example */
 
 public:
 	PointIterator(DataContainer *dataContainer, int dataIndex) : dataContainer(dataContainer), dataIndex(dataIndex){};
@@ -52,16 +52,16 @@ private:
 	int dataIndex;
 };
 
-class Data
-{
-public:
-	Data(DataContainer *dataContainer) : dataContainer(dataContainer){};
-	PointIterator begin();
-	PointIterator end();
-	int len();
+// class Data
+// {
+// public:
+// 	Data(DataContainer *dataContainer) : dataContainer(dataContainer){};
+// 	PointIterator begin();
+// 	PointIterator end();
+// 	int len();
 
-private:
-	DataContainer *dataContainer;
-};
+// private:
+// 	DataContainer *dataContainer;
+// };
 
 #endif //ARDU_DATAVIS_DATA_H
