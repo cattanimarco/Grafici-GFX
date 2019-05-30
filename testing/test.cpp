@@ -1,22 +1,15 @@
 #include "File_GFX.h"
 #include "../visitors/VisitorDrawScatter.h"
+#include "../visitors/VisitorDrawBar.h"
 #include "../Data.h"
-#include "../widget.h"
+#include "../Widget.h"
 #include "../decorators/DecoratorWidgetBorder.h"
 
 #include <iostream>
 
-float dataArrayX[11] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+float dataArrayX[11] = {0, 2, 1, 4, 3, 6, 5, 8, 7, 10, 9};
 
-DataSourceDescriptor<float> dataFloatDescriptor = {
-	dataArrayX,
-	dataArrayX,
-	0,
-	0,
-	10,
-	10,
-	11,
-};
+
 
 int main()
 {
@@ -24,17 +17,17 @@ int main()
 	Adafruit_GFX *gfx = new File_GFX(320, 240, "prova.bmp");
 	Driver driver(gfx);
 
-	DataContainer *dataContainer = new DataContainerFloat(dataFloatDescriptor);
-	Data data(dataContainer);
+	DataContainer *data = new DataContainerFloat(dataArrayX,0,11);
 
 	VisitorDraw *visitorScatter = new VisitorDrawScatter(driver);
+	VisitorDraw *visitorBar = new VisitorDrawBar(driver);
 
-	Widget *widget = new Widget(data);
+	Widget * widget = new Widget(*data);
 
 	DecoratorWidgetBorder *border = new DecoratorWidgetBorder(*widget);
 
 	//widget->accept(visitorScatter);
-	border->accept(visitorScatter, driver.fullScreen);
+	border->accept(visitorBar, driver.fullScreen);
 
 	//flush to file
 	((File_GFX *)gfx)->flush();
