@@ -13,11 +13,9 @@ ifdef OS
 	FixPath = $(subst /,\,$(OBJ))
 	exec = test.exe
 else
-	ifeq ($(shell uname), Linux)
-		RM = rm -f
-		FixPath = $(OBJ)
-		exec = test
-	endif
+	RM = rm -f
+	FixPath = $(OBJ)
+	exec = test
 endif
 
 lib:
