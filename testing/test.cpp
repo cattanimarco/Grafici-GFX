@@ -1,6 +1,7 @@
 #include "File_GFX.h"
 #include "../visitors/VisitorDrawScatter.h"
 #include "../visitors/VisitorDrawBar.h"
+#include "../visitors/VisitorDrawLine.h"
 #include "../data/DataFloat.h"
 #include "../data/DecoratorDataSpline.h"
 #include "../widgets/DecoratorWidgetBorder.h"
@@ -24,6 +25,7 @@ int main()
 	// plotter
 	VisitorDraw *visitorScatter = new VisitorDrawScatter(driver);
 	VisitorDraw *visitorBar = new VisitorDrawBar(driver);
+	VisitorDraw *visitorLine = new VisitorDrawLine(driver);
 
 	// widget (data + space)
 	Widget * widget = new Widget(*data2);
@@ -31,6 +33,7 @@ int main()
 
 	// plot action
 	border->accept(visitorBar, driver.fullScreen);
+	border->accept(visitorLine, driver.fullScreen);
 
 	//flush to file
 	((File_GFX *)gfx)->flush();
