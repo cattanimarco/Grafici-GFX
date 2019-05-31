@@ -3,10 +3,10 @@
 
 #include "../Data.h"
 
-class DataSpline : public Data
+class DecoratorDataSpline : public Data
 {
 public:
-	DataSpline(Data *data);
+	DecoratorDataSpline(Data *data, int interpolationSteps);
 	Point getPoint(int index);
 	void refresh();
 	int size(void);
@@ -18,6 +18,11 @@ private:
 	float xMax;
 	float yMax;
 	int numElem;
+
+	//spline support array
+	float *b;
+	float *c;
+	float *d;
 };
 
 #endif //ARDU_DATAVIS_DATA_DECORATOR_SPLINE_H

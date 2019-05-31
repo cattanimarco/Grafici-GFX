@@ -2,12 +2,13 @@
 #define ARDU_DATAVIS_DATA_FLOAT_H
 
 #include "../Data.h"
+#include <iostream>
 
 class DataFloat : public Data
 {
 public:
-	DataFloat(float *xData, int len) : xData(xData), numElem(len) { refresh(); };
-	DataFloat(float *xData, float *yData, int len) : xData(xData), yData(yData), numElem(len) { refresh(); };
+	DataFloat(float *yData, int len);
+	DataFloat(float *xData, float *yData, int len);
 	Point getPoint(int index);
 	void refresh();
 	int size(void);

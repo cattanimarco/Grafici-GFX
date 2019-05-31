@@ -1,4 +1,5 @@
 #include "DataFloat.h"
+#include <iostream>
 
 #ifndef min
 #define min(a, b) (((a) < (b)) ? (a) : (b))
@@ -8,20 +9,31 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
+DataFloat::DataFloat(float *yData, int len) : xData(NULL), yData(yData), numElem(len)
+{
+	refresh();
+};
+DataFloat::DataFloat(float *xData, float *yData, int len) : xData(xData), yData(yData), numElem(len)
+{
+	//TODO make sure x axis is in increasing order
+	refresh();
+};
+
 Point DataFloat::getPoint(int index)
 {
 	Point p;
 	if (index < numElem)
 	{
 		// normalize data to a 0.0 .. 1.0 value
-		p.x = (xData[index] - xMin) / (xMax - xMin);
-		if (yData != 0)
+		p.y = (yData[index] - yMin) / (yMax - yMin);
+
+		if (xData != NULL)
 		{
-			p.y = (yData[index] - yMin) / (yMax - yMin);
+			p.x = (xData[index] - xMin) / (xMax - xMin);
 		}
 		else
 		{
-			p.y = index / (numElem - 1.0);
+			p.x = (1.0 * index) / (numElem - 1);
 		}
 	}
 	return p;
@@ -36,7 +48,7 @@ void DataFloat::refresh(void)
 {
 	if (numElem > 0)
 	{
-		if (yData != 0)
+		if (yData != NULL)
 		{
 			yMin = yMax = yData[0];
 			for (int i = 1; i < numElem; ++i)
@@ -46,7 +58,7 @@ void DataFloat::refresh(void)
 			}
 		}
 
-		if (xData != 0)
+		if (xData != NULL)
 		{
 			xMin = xMax = xData[0];
 			for (int i = 1; i < numElem; ++i)
@@ -57,5 +69,3 @@ void DataFloat::refresh(void)
 		}
 	}
 }
-
-

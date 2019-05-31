@@ -17,19 +17,17 @@ public:
 
 class PointIterator
 {
-	/* Inspired by https://www.boost.org/doc/libs/1_70_0/libs/iterator/doc/iterator_facade.html#tutorial-example */
 
 public:
-	PointIterator(Data *Data, int dataIndex) : Data(Data), dataIndex(dataIndex){};
+	PointIterator(Data *data, int dataIndex) : data(data), dataIndex(dataIndex){};
 
 	Point operator*();
 	PointIterator &operator++();
 	PointIterator operator++(int postfix);
 	bool operator!=(PointIterator const &other);
-	/*TODO complete operator overriding*/
 
 private:
-	Data *Data;
+	Data *data;
 	int dataIndex;
 };
 

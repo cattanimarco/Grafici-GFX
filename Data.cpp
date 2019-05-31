@@ -14,7 +14,7 @@ PointIterator Data::end()
 
 Point PointIterator::operator*()
 {
-	return Data->getPoint(dataIndex);
+	return data->getPoint(dataIndex);
 }
 
 PointIterator &PointIterator::operator++()
@@ -32,6 +32,5 @@ PointIterator PointIterator::operator++(int postfix)
 
 bool PointIterator::operator!=(PointIterator const &other)
 {
-	return (((this->Data) != (other.Data)) || ((this->dataIndex) != (other.dataIndex)));
+	return (((this->data) != (other.data)) || ((this->dataIndex) != (other.dataIndex)));
 }
-
