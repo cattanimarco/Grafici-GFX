@@ -15,7 +15,6 @@ DataFloat::DataFloat(float *yData, int len) : xData(NULL), yData(yData), numElem
 };
 DataFloat::DataFloat(float *xData, float *yData, int len) : xData(xData), yData(yData), numElem(len)
 {
-	//TODO make sure x axis is in increasing order
 	refresh();
 };
 
