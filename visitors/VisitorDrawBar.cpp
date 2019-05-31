@@ -5,7 +5,7 @@ VisitorDrawBar::VisitorDrawBar(Driver &driver):VisitorDraw(driver)
 }
 
 
-void VisitorDrawBar::visit(DataContainer *data, Boundaries boundaries)
+void VisitorDrawBar::visit(Data *data, Boundaries boundaries)
 {
 	for (PointIterator it = data->begin(); it != data->end(); ++it)
 	{

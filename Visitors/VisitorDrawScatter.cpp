@@ -5,7 +5,7 @@ VisitorDrawScatter::VisitorDrawScatter(Driver &driver):VisitorDraw(driver)
 }
 
 
-void VisitorDrawScatter::visit(DataContainer *data, Boundaries boundaries)
+void VisitorDrawScatter::visit(Data *data, Boundaries boundaries)
 {
 	for (PointIterator it = data->begin(); it != data->end(); ++it)
 	{

@@ -1,9 +1,8 @@
 #include "File_GFX.h"
 #include "../visitors/VisitorDrawScatter.h"
 #include "../visitors/VisitorDrawBar.h"
-#include "../Data.h"
-#include "../Widget.h"
-#include "../decorators/DecoratorWidgetBorder.h"
+#include "../data/DataFloat.h"
+#include "../widgets/DecoratorWidgetBorder.h"
 
 #include <iostream>
 
@@ -17,7 +16,7 @@ int main()
 	Adafruit_GFX *gfx = new File_GFX(320, 240, "prova.bmp");
 	Driver driver(gfx);
 
-	DataContainer *data = new DataContainerFloat(dataArrayX,0,11);
+	Data *data = new DataFloat(dataArrayX,0,11);
 
 	VisitorDraw *visitorScatter = new VisitorDrawScatter(driver);
 	VisitorDraw *visitorBar = new VisitorDrawBar(driver);

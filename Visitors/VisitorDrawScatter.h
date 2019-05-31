@@ -8,7 +8,7 @@ class VisitorDrawScatter : public VisitorDraw
 public:
     VisitorDrawScatter(Driver &driver);
 
-	void visit(DataContainer *data, Boundaries boundaries);
+	void visit(Data *data, Boundaries boundaries);
 };
 
 

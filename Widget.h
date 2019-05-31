@@ -8,12 +8,12 @@ class Widget
 {
 public:
 	Widget(void){};
-	Widget(DataContainer &data);
+	Widget(Data &data);
 	// visitor patttern
 	void accept(VisitorDraw *visitor, Boundaries boundaries);
 
 protected:
-	DataContainer *data;
+	Data *data;
 };
 
 #endif //ARDU_DATAVIS_WIDGET_H

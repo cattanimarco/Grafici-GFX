@@ -1,6 +1,6 @@
 #include "Widget.h"
 
-Widget::Widget(DataContainer &data) : data(&data)
+Widget::Widget(Data &data) : data(&data)
 {
 }
 

@@ -1,11 +1,12 @@
 CSRC = $(wildcard *.c) \
 	$(wildcard ../*.c) \
-	$(wildcard ../decorators/*.c) \
+	$(wildcard ../widgets/*.c) \
 	$(wildcard ../visitors/*.c) \
 
 CCSRC = $(wildcard *.cpp) \
 	$(wildcard ../*.cpp) \
-	$(wildcard ../decorators/*.cpp) \
+	$(wildcard ../widgets/*.cpp) \
+	$(wildcard ../data/*.cpp) \
 	$(wildcard ../visitors/*.cpp) \
 
 OBJ = $(CSRC:.c=.o) $(CCSRC:.cpp=.o)
