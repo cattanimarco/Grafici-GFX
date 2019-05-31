@@ -1,25 +1,22 @@
-CSRC = $(wildcard *.c) \
-	$(wildcard ../*.c) \
-	$(wildcard ../widgets/*.c) \
-	$(wildcard ../visitors/*.c) \
-
 CCSRC = $(wildcard *.cpp) \
 	$(wildcard ../*.cpp) \
 	$(wildcard ../widgets/*.cpp) \
 	$(wildcard ../data/*.cpp) \
 	$(wildcard ../visitors/*.cpp) \
 
-OBJ = $(CSRC:.c=.o) $(CCSRC:.cpp=.o)
+OBJ = $(CCSRC:.cpp=.o)
 
 CFLAGS=-I.
 
 ifdef OS
 	RM = del /Q
 	FixPath = $(subst /,\,$(OBJ))
+	exec = test.exe
 else
 	ifeq ($(shell uname), Linux)
 		RM = rm -f
 		FixPath = $(OBJ)
+		exec = test
 	endif
 endif
 
@@ -35,4 +32,4 @@ run: lib test
 .PHONY: clean
 
 clean:$
-	$(RM) $(FixPath) test
+	$(RM) $(FixPath) $(exec) prova.bmp
