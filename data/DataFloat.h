@@ -7,20 +7,20 @@
 class DataFloat : public Data
 {
 public:
-	DataFloat(float *yData, int len);
-	DataFloat(float *xData, float *yData, int len);
+	void begin(float *yData, int len);
+	void begin(float *xData, float *yData, int len);
 	Point getPoint(int index);
 	void refresh();
 	int size(void);
 
 private:
-	float *xData;
-	float *yData;
-	float xMin;
-	float yMin;
-	float xMax;
-	float yMax;
-	int numElem;
+	float *_xData;
+	float *_yData;
+	float _xMin;
+	float _yMin;
+	float _xMax;
+	float _yMax;
+	int _numElem;
 };
 
 #endif //ARDU_DATAVIS_DATA_FLOAT_H

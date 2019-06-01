@@ -9,30 +9,37 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-DataFloat::DataFloat(float *yData, int len) : xData(NULL), yData(yData), numElem(len)
+void DataFloat::begin(float *yData, int len)
 {
+	_xData = NULL;
+	_yData = yData;
+	_numElem = len;
 	refresh();
 };
-DataFloat::DataFloat(float *xData, float *yData, int len) : xData(xData), yData(yData), numElem(len)
+
+void DataFloat::begin(float *xData, float *yData, int len)
 {
+	_xData = xData;
+	_yData = yData;
+	_numElem = len;
 	refresh();
 };
 
 Point DataFloat::getPoint(int index)
 {
 	Point p;
-	if (index < numElem)
+	if (index < _numElem)
 	{
 		// normalize data to a 0.0 .. 1.0 value
-		p.y = (yData[index] - yMin) / (yMax - yMin);
+		p.y = (_yData[index] - _yMin) / (_yMax - _yMin);
 
-		if (xData != NULL)
+		if (_xData != NULL)
 		{
-			p.x = (xData[index] - xMin) / (xMax - xMin);
+			p.x = (_xData[index] - _xMin) / (_xMax - _xMin);
 		}
 		else
 		{
-			p.x = (1.0 * index) / (numElem - 1);
+			p.x = (1.0 * index) / (_numElem - 1);
 		}
 	}
 	return p;
@@ -40,30 +47,30 @@ Point DataFloat::getPoint(int index)
 
 int DataFloat::size(void)
 {
-	return numElem;
+	return _numElem;
 }
 
 void DataFloat::refresh(void)
 {
-	if (numElem > 0)
+	if (_numElem > 0)
 	{
-		if (yData != NULL)
+		if (_yData != NULL)
 		{
-			yMin = yMax = yData[0];
-			for (int i = 1; i < numElem; ++i)
+			_yMin = _yMax = _yData[0];
+			for (int i = 1; i < _numElem; ++i)
 			{
-				yMin = min(yMin, yData[i]);
-				yMax = max(yMax, yData[i]);
+				_yMin = min(_yMin, _yData[i]);
+				_yMax = max(_yMax, _yData[i]);
 			}
 		}
 
-		if (xData != NULL)
+		if (_xData != NULL)
 		{
-			xMin = xMax = xData[0];
-			for (int i = 1; i < numElem; ++i)
+			_xMin = _xMax = _xData[0];
+			for (int i = 1; i < _numElem; ++i)
 			{
-				xMin = min(xMin, xData[i]);
-				xMax = max(xMax, xData[i]);
+				_xMin = min(_xMin, _xData[i]);
+				_xMax = max(_xMax, _xData[i]);
 			}
 		}
 	}

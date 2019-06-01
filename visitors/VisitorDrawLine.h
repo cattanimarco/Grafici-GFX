@@ -6,9 +6,7 @@
 class VisitorDrawLine : public VisitorDraw
 {
 public:
-    VisitorDrawLine(Driver &driver);
-
-	void visit(Data *data, Boundaries boundaries);
+	void visit(Data *data, Style *style,Boundaries boundaries);
 };
 
 

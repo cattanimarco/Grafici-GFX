@@ -8,12 +8,12 @@
 class DecoratorWidgetBorder : public Widget
 {
 public:
-	DecoratorWidgetBorder(Widget &widget);
+	void begin(Widget &widget);
 	// visitor pattern
 	void accept(VisitorDraw *visitor, Boundaries boundaries);
 
 private:
-	Widget *widget;
+	Widget *_widget;
 };
 
 #endif //ARDU_DATAVIS_DECORATOR_WIDGET_BORDER_H

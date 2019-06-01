@@ -9,7 +9,7 @@ class Driver
 {
 public:
 
-	Driver(Adafruit_GFX *tft);
+	void begin(Adafruit_GFX *tft);
 
 	void drawPixel(Pixel c);
 	void drawLine(Pixel a, Pixel b);
@@ -31,8 +31,7 @@ public:
 	Boundaries fullScreen;
 
 private:
-	Adafruit_GFX * tft;
-
+	Adafruit_GFX * _tft;
 	int colorTo16b(Color color);
 
 };

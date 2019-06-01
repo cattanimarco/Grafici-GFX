@@ -6,9 +6,7 @@
 class VisitorDrawHeat : public VisitorDraw
 {
 public:
-    VisitorDrawHeat(Driver &driver);
-
-	void visit(Data *data, Boundaries boundaries);
+	void visit(Data *data, Style *style,Boundaries boundaries);
 };
 
 

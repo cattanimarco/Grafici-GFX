@@ -19,7 +19,7 @@ class PointIterator
 {
 
 public:
-	PointIterator(Data *data, int dataIndex) : data(data), dataIndex(dataIndex){};
+	PointIterator(Data *data, int dataIndex) : _data(data), _dataIndex(dataIndex){};
 
 	Point operator*();
 	PointIterator &operator++();
@@ -27,8 +27,8 @@ public:
 	bool operator!=(PointIterator const &other);
 
 private:
-	Data *data;
-	int dataIndex;
+	Data *_data;
+	int _dataIndex;
 };
 
 #endif //ARDU_DATAVIS_DATA_H

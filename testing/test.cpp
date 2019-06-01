@@ -10,30 +10,38 @@
 
 float dataArrayY[11] = {0, 2, 1, 15, 3, 6, 5, 8, 7, 10, 9};
 
-
-
 int main()
 {
+	Driver driver;
+	DataFloat data;
+	DecoratorDataSpline data2;
+	VisitorDrawScatter visitorScatter;
+	VisitorDrawBar visitorBar;
+	VisitorDrawLine visitorLine;
+	Widget widget;
+	DecoratorWidgetBorder widgetBorder;
+
 	// driver
 	Adafruit_GFX *gfx = new File_GFX(320, 240, "prova.bmp");
-	Driver driver(gfx);
+	driver.begin(gfx);
 
 	// data
-	Data *data = new DataFloat(dataArrayY,11);
-	Data *data2 = new DecoratorDataSpline(data, 40);
+	data.begin(dataArrayY, 11);
+	data2.begin(&data, 40);
 
 	// plotter
-	VisitorDraw *visitorScatter = new VisitorDrawScatter(driver);
-	VisitorDraw *visitorBar = new VisitorDrawBar(driver);
-	VisitorDraw *visitorLine = new VisitorDrawLine(driver);
+
+	visitorScatter.begin(driver);
+	visitorBar.begin(driver);
+	visitorLine.begin(driver);
 
 	// widget (data + space)
-	Widget * widget = new Widget(*data2);
-	DecoratorWidgetBorder *border = new DecoratorWidgetBorder(*widget);
+	widget.begin(data2);
+	widgetBorder.begin(widget);
 
 	// plot action
-	border->accept(visitorBar, driver.fullScreen);
-	border->accept(visitorLine, driver.fullScreen);
+	widgetBorder.accept(&visitorBar, driver.fullScreen);
+	widgetBorder.accept(&visitorLine, driver.fullScreen);
 
 	//flush to file
 	((File_GFX *)gfx)->flush();

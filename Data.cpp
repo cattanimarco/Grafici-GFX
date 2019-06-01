@@ -14,23 +14,23 @@ PointIterator Data::end()
 
 Point PointIterator::operator*()
 {
-	return data->getPoint(dataIndex);
+	return _data->getPoint(_dataIndex);
 }
 
 PointIterator &PointIterator::operator++()
 {
-	++dataIndex;
+	++_dataIndex;
 	return *this;
 }
 
 PointIterator PointIterator::operator++(int postfix)
 {
 	PointIterator result = *this;
-	++dataIndex;
+	++_dataIndex;
 	return result;
 }
 
 bool PointIterator::operator!=(PointIterator const &other)
 {
-	return (((this->data) != (other.data)) || ((this->dataIndex) != (other.dataIndex)));
+	return (((this->_data) != (other._data)) || ((this->_dataIndex) != (other._dataIndex)));
 }

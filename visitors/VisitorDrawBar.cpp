@@ -1,11 +1,7 @@
 #include "VisitorDrawBar.h"
 
-VisitorDrawBar::VisitorDrawBar(Driver &driver):VisitorDraw(driver)
-{
-}
 
-
-void VisitorDrawBar::visit(Data *data, Boundaries boundaries)
+void VisitorDrawBar::visit(Data *data, Style *style,Boundaries boundaries)
 {
 	for (PointIterator it = data->begin(); it != data->end(); ++it)
 	{
@@ -14,7 +10,7 @@ void VisitorDrawBar::visit(Data *data, Boundaries boundaries)
 
 		basePoint.y = 0;
 
-		driver->drawLine(basePoint.projectPoint(boundaries),topPoint.projectPoint(boundaries));
+		_driver->drawLine(basePoint.projectPoint(boundaries),topPoint.projectPoint(boundaries));
 	}
 }
 

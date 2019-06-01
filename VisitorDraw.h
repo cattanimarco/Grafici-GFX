@@ -8,11 +8,11 @@
 class VisitorDraw
 {
 public:
-	VisitorDraw(Driver &driver);
+	void begin(Driver &driver);
+	virtual void visit(Data *data, Style *style, Boundaries boundaries) = 0;
 
-	virtual void visit(Data *data, Boundaries boundaries);
-
-	Driver *driver;
+protected:
+	Driver *_driver;
 };
 
 #endif //ARDU_DATAVIS_VISITOR_DRAW_H

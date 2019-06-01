@@ -12,15 +12,24 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-DecoratorDataSpline::DecoratorDataSpline(Data *data, int interpolationSteps) : data(data), numElem(interpolationSteps)
+void DecoratorDataSpline::begin(Data *data, int interpolationSteps) 
 {
-	b = (float *)malloc(sizeof(float) * data->size());
-	c = (float *)malloc(sizeof(float) * data->size());
-	d = (float *)malloc(sizeof(float) * data->size());
+	_data = data;
+	_numElem = interpolationSteps;
+	_b = (float *)malloc(sizeof(float) * data->size());
+	_c = (float *)malloc(sizeof(float) * data->size());
+	_d = (float *)malloc(sizeof(float) * data->size());
 
 	//TODO make sure x axis is in increasing order
 
 	refresh();
+}
+
+void DecoratorDataSpline::end(void) 
+{
+	free(_b);
+	free(_c);
+	free(_d);
 }
 
 Point DecoratorDataSpline::getPoint(int index)
@@ -28,24 +37,24 @@ Point DecoratorDataSpline::getPoint(int index)
 	int bin = 0;
 	Point p;
 
-	if (index < numElem)
+	if (index < _numElem)
 	{
-		p.x = (1.0 * index) / numElem;
+		p.x = (1.0 * index) / _numElem;
 
 		// check that we are in the correct bin
-		while ((p.x > data->getPoint(bin + 1).x))
+		while ((p.x > _data->getPoint(bin + 1).x))
 		{
 			bin++;
 		}
 
 		// compute interpolated y value
-		p.y = data->getPoint(bin).y +
-			  b[bin] * (p.x - data->getPoint(bin).x) +
-			  c[bin] * (p.x - data->getPoint(bin).x) * (p.x - data->getPoint(bin).x) +
-			  d[bin] * (p.x - data->getPoint(bin).x) * (p.x - data->getPoint(bin).x) * (p.x - data->getPoint(bin).x);
+		p.y = _data->getPoint(bin).y +
+			  _b[bin] * (p.x - _data->getPoint(bin).x) +
+			  _c[bin] * (p.x - _data->getPoint(bin).x) * (p.x - _data->getPoint(bin).x) +
+			  _d[bin] * (p.x - _data->getPoint(bin).x) * (p.x - _data->getPoint(bin).x) * (p.x - _data->getPoint(bin).x);
 
 		// normalize data to a 0.0 .. 1.0 value
-		p.y = (p.y - yMin) / (yMax - yMin);
+		p.y = (p.y - _yMin) / (_yMax - _yMin);
 	}
 
 	return p;
@@ -53,23 +62,23 @@ Point DecoratorDataSpline::getPoint(int index)
 
 int DecoratorDataSpline::size(void)
 {
-	return numElem;
+	return _numElem;
 }
 
 void DecoratorDataSpline::refresh(void)
 {
 	// compute spline parameter, than scan all x values to find new min max
-	yMax = 1;
-	yMin = 0;
+	_yMax = 1;
+	_yMin = 0;
 
-	memset(b, sizeof(float) * data->size(), 0);
-	memset(c, sizeof(float) * data->size(), 0);
-	memset(d, sizeof(float) * data->size(), 0);
+	// memset(_b, sizeof(float) * _data->size(), 0);
+	// memset(_c, sizeof(float) * _data->size(), 0);
+	// memset(_d, sizeof(float) * _data->size(), 0);
 
-	if (numElem >= data->size())
+	if (_numElem >= _data->size())
 	{
 		int bin = 0;
-		int n = (data->size() - 1);
+		int n = (_data->size() - 1);
 		float yInter;
 
 		/** Step 0 */
@@ -79,14 +88,14 @@ void DecoratorDataSpline::refresh(void)
 		/** Step 1 */
 		for (int i = 0; i <= n - 1; ++i)
 		{
-			h[i] = data->getPoint(i + 1).x - data->getPoint(i).x;
+			h[i] = _data->getPoint(i + 1).x - _data->getPoint(i).x;
 		}
 
 		/** Step 2 */
 		for (int i = 1; i <= n - 1; ++i)
 		{
 			/* we do not care if a has type int as it will always be divided by a float and become a float */
-			A[i] = 3 * (data->getPoint(i + 1).y - data->getPoint(i).y) / h[i] - 3 * (data->getPoint(i).y - data->getPoint(i - 1).y) / h[i - 1];
+			A[i] = 3 * (_data->getPoint(i + 1).y - _data->getPoint(i).y) / h[i] - 3 * (_data->getPoint(i).y - _data->getPoint(i - 1).y) / h[i - 1];
 		}
 
 		/** Step 3 */
@@ -97,7 +106,7 @@ void DecoratorDataSpline::refresh(void)
 		/** Step 4 */
 		for (int i = 1; i <= n - 1; ++i)
 		{
-			l[i] = 2 * (data->getPoint(i + 1).x - data->getPoint(i - 1).x) - h[i - 1] * u[i - 1];
+			l[i] = 2 * (_data->getPoint(i + 1).x - _data->getPoint(i - 1).x) - h[i - 1] * u[i - 1];
 			u[i] = h[i] / l[i];
 			z[i] = (A[i] - h[i - 1] * z[i - 1]) / l[i];
 		}
@@ -105,41 +114,41 @@ void DecoratorDataSpline::refresh(void)
 		/** Step 5 */
 		l[n] = 1;
 		z[n] = 0;
-		c[n] = 0;
+		_c[n] = 0;
 
 		/** Step 6 */
 		for (int j = n - 1; j >= 0; --j)
 		{
-			c[j] = z[j] - u[j] * c[j + 1];
+			_c[j] = z[j] - u[j] * _c[j + 1];
 			/* we do not care if a has type int as it will always be divided by a float and become a float */
-			b[j] = (data->getPoint(j + 1).y - data->getPoint(j).y) / h[j] - h[j] * (c[j + 1] + 2 * c[j]) / 3;
-			d[j] = (c[j + 1] - c[j]) / (3 * h[j]);
+			_b[j] = (_data->getPoint(j + 1).y - _data->getPoint(j).y) / h[j] - h[j] * (_c[j + 1] + 2 * _c[j]) / 3;
+			_d[j] = (_c[j + 1] - _c[j]) / (3 * h[j]);
 		}
 
 		/* Interpolation done, check for new yMin yMax*/
 
 		bin = 0;
-		for (float px = 0; px < 1; px += (1.0 / numElem))
+		for (float px = 0; px < 1; px += (1.0 / _numElem))
 		{
 
 			/* check that we are in the correct bin */
-			while ((px > data->getPoint(bin + 1).x))
+			while ((px > _data->getPoint(bin + 1).x))
 			{
 				bin++;
 			}
 
 			/* compute interpolated y value */
 
-			yInter = data->getPoint(bin).y +
-					 b[bin] * (px - data->getPoint(bin).x) +
-					 c[bin] * (px - data->getPoint(bin).x) * (px - data->getPoint(bin).x) +
-					 d[bin] * (px - data->getPoint(bin).x) * (px - data->getPoint(bin).x) * (px - data->getPoint(bin).x);
+			yInter = _data->getPoint(bin).y +
+					 _b[bin] * (px - _data->getPoint(bin).x) +
+					 _c[bin] * (px - _data->getPoint(bin).x) * (px - _data->getPoint(bin).x) +
+					 _d[bin] * (px - _data->getPoint(bin).x) * (px - _data->getPoint(bin).x) * (px - _data->getPoint(bin).x);
 
 			/* Updated data min/max */
-			if (yInter < yMin)
-				yMin = yInter;
-			if (yInter > yMax)
-				yMax = yInter;
+			if (yInter < _yMin)
+				_yMin = yInter;
+			if (yInter > _yMax)
+				_yMax = yInter;
 		}
 	}
 }
