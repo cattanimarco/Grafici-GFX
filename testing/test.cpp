@@ -12,6 +12,8 @@ float dataArrayY[11] = {0, 2, 1, 15, 3, 6, 5, 8, 7, 10, 9};
 
 int main()
 {
+	//TODO create factory that takes in input just driver, data (, style)
+
 	Driver driver;
 	DataFloat data;
 	DecoratorDataSpline data2;
@@ -30,12 +32,11 @@ int main()
 	data2.begin(&data, 40);
 
 	// plotter
-
 	visitorScatter.begin(driver);
 	visitorBar.begin(driver);
 	visitorLine.begin(driver);
 
-	// widget (data + space)
+	// widget (data + space + style)
 	widget.begin(data2);
 	widgetBorder.begin(widget);
 
