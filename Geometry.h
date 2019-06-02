@@ -34,6 +34,8 @@ struct Boundaries
 class Point
 {
 public:
+	Point(void);
+	Point(float x, float y);
 	float x;
 	float y;
 	float value;

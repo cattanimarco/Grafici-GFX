@@ -2,6 +2,7 @@
 #include "../visitors/VisitorDrawScatter.h"
 #include "../visitors/VisitorDrawBar.h"
 #include "../visitors/VisitorDrawLine.h"
+#include "../visitors/VisitorDrawAxis.h"
 #include "../data/DataFloat.h"
 #include "../data/DecoratorDataSpline.h"
 #include "../widgets/DecoratorWidgetBorder.h"
@@ -20,27 +21,30 @@ int main()
 	VisitorDrawScatter visitorScatter;
 	VisitorDrawBar visitorBar;
 	VisitorDrawLine visitorLine;
+	VisitorDrawAxis visitorAxis;
 	Widget widget;
 	DecoratorWidgetBorder widgetBorder;
 
 	// driver
-	Adafruit_GFX *gfx = new File_GFX(320, 240, "prova.bmp");
+	Adafruit_GFX *gfx = new File_GFX(640, 480, "prova.bmp");
 	driver.begin(gfx);
 
 	// data
 	data.begin(dataArrayY, 11);
-	data2.begin(&data, 40);
+	data2.begin(&data, 100);
 
 	// plotter
 	visitorScatter.begin(driver);
 	visitorBar.begin(driver);
 	visitorLine.begin(driver);
+	visitorAxis.begin(driver);
 
 	// widget (data + space + style)
 	widget.begin(data2);
 	widgetBorder.begin(widget);
 
 	// plot action
+	widgetBorder.accept(&visitorAxis, driver.fullScreen);
 	widgetBorder.accept(&visitorBar, driver.fullScreen);
 	widgetBorder.accept(&visitorLine, driver.fullScreen);
 
