@@ -1,6 +1,7 @@
 #include "File_GFX.h"
 #include "../visitors/VisitorDrawScatter.h"
 #include "../visitors/VisitorDrawBar.h"
+#include "../visitors/VisitorDrawHistogram.h"
 #include "../visitors/VisitorDrawLine.h"
 #include "../visitors/VisitorDrawAxis.h"
 #include "../data/DataFloat.h"
@@ -9,7 +10,8 @@
 
 #include <iostream>
 
-float dataArrayY[11] = {0, 2, 1, 15, 3, 6, 5, 8, 7, 10, 9};
+//float dataArrayY[11] = {0, 2, 1, 15, 3, 6, 5, 8, 7, 10, 9};
+float dataArrayY[11] = {0, 2, 2, 2, 2, 6, 5, 10, 10, 10, 9};
 
 int main()
 {
@@ -20,6 +22,7 @@ int main()
 	DecoratorDataSpline data2;
 	VisitorDrawScatter visitorScatter;
 	VisitorDrawBar visitorBar;
+	VisitorDrawHistogram visitorHistogram;
 	VisitorDrawLine visitorLine;
 	VisitorDrawAxis visitorAxis;
 	Widget widget;
@@ -38,6 +41,7 @@ int main()
 	visitorBar.begin(driver);
 	visitorLine.begin(driver);
 	visitorAxis.begin(driver);
+	visitorHistogram.begin(driver,10);
 
 	// widget (data + space + style)
 	widget.begin(data2);
@@ -47,6 +51,7 @@ int main()
 	widgetBorder.accept(&visitorAxis, driver.fullScreen);
 	widgetBorder.accept(&visitorBar, driver.fullScreen);
 	widgetBorder.accept(&visitorLine, driver.fullScreen);
+	 widgetBorder.accept(&visitorHistogram, driver.fullScreen);
 
 	//flush to file
 	((File_GFX *)gfx)->flush();
