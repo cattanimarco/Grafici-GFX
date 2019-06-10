@@ -7,7 +7,7 @@
 #include "../data/DataFloat.h"
 #include "../data/DecoratorDataSpline.h"
 #include "../widgets/DecoratorWidgetBorder.h"
-
+//todo make an h file to include all basic essentials
 #include <iostream>
 
 //float dataArrayY[11] = {0, 2, 1, 15, 3, 6, 5, 8, 7, 10, 9};
@@ -36,21 +36,23 @@ int main()
 	data.begin(dataArrayY, 11);
 	data2.begin(&data, 100);
 
+//todo create a factory that get gfx + array (+plot style) and instantiate all objects
+
 	// plotter
 	visitorScatter.begin(driver);
 	visitorBar.begin(driver);
 	visitorLine.begin(driver);
 	visitorAxis.begin(driver);
-	visitorHistogram.begin(driver,10);
+	visitorHistogram.begin(driver,15);
 
 	// widget (data + space + style)
 	widget.begin(data2);
 	widgetBorder.begin(widget);
 
 	// plot action
-	widgetBorder.accept(&visitorAxis, driver.fullScreen);
-	widgetBorder.accept(&visitorBar, driver.fullScreen);
-	widgetBorder.accept(&visitorLine, driver.fullScreen);
+	//widgetBorder.accept(&visitorAxis, driver.fullScreen);
+	//widgetBorder.accept(&visitorBar, driver.fullScreen);
+	//widgetBorder.accept(&visitorLine, driver.fullScreen);
 	 widgetBorder.accept(&visitorHistogram, driver.fullScreen);
 
 	//flush to file

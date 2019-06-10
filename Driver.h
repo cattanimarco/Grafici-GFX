@@ -8,7 +8,6 @@
 class Driver
 {
 public:
-
 	void begin(Adafruit_GFX *tft);
 
 	void drawPixel(Pixel c);
@@ -16,6 +15,7 @@ public:
 	void drawCircle(Pixel c, int r);
 	void drawTriangle(Pixel a, Pixel b, Pixel c);
 	void drawRectangle(Pixel bl, int w, int h);
+	void drawRectangle(Pixel bl, Pixel tr);
 	void drawRoundRectangle(Pixel bl, int w, int h, int r);
 
 	void fillRectangle(Pixel bl, int w, int h);
@@ -31,9 +31,8 @@ public:
 	Boundaries fullScreen;
 
 private:
-	Adafruit_GFX * _tft;
+	Adafruit_GFX *_tft;
 	int colorTo16b(Color color);
-
 };
 
 #endif //ARDU_DATAVIS_DRIVER_H

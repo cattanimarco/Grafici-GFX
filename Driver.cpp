@@ -42,9 +42,15 @@ void Driver::drawTriangle(Pixel a, Pixel b, Pixel c)
 void Driver::drawRectangle(Pixel bl, int w, int h)
 // bl: bottom left vertex, w: width, h: height
 {
-	_tft->drawRect(bl.x, _tft->height() - bl.y,
+	_tft->drawRect(bl.x, _tft->height() - (bl.y + h),
 				  w, h,
 				  colorTo16b(bl.color));
+}
+
+void Driver::drawRectangle(Pixel bl, Pixel tr)
+// bl: bottom left vertex, w: width, h: height
+{
+	drawRectangle(bl, tr.x - bl.x, tr.y - bl.y);
 }
 
 void Driver::drawRoundRectangle(Pixel bl, int w, int h, int r)
