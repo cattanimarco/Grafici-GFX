@@ -13,22 +13,24 @@ void VisitorDrawHistogram::visit(Data *data, Style *style, Boundaries boundaries
 
 	memset(counters, 0, sizeof(counters));
 
+
+
 	for (PointIterator it = data->begin(); it != data->end(); ++it)
 	{
 		Point p = *it;
 		int target = round(p.y * (_buckets - 1));
 		counters[target] += 1.0 / maxCounter;
 
-		Point a((float)target / _buckets + (0.2 / _buckets), counters[target]);
-		Point b((float)(target + 1) / _buckets - (0.2 / _buckets), counters[target]);
+		// Point a((float)target / _buckets + (0.2 / _buckets), counters[target]);
+		// Point b((float)(target + 1) / _buckets - (0.2 / _buckets), counters[target]);
 
-		_driver->drawLine(a.projectPoint(boundaries), b.projectPoint(boundaries));
+		// _driver->drawLine(a.projectPoint(boundaries), b.projectPoint(boundaries));
 	}
 
 	for (int i = 0; i < _buckets; i++)
 	{
-		Point bl((float)i / _buckets + (0.1 / _buckets), 0);
-		Point tr((float)(i+1) / _buckets - (0.1 / _buckets), counters[i]+ 1.0 / maxCounter);
-		_driver->drawRectangle(bl.projectPoint(boundaries), tr.projectPoint(boundaries));
+		Point a((float)i / _buckets + (0.5 / _buckets), 0);
+		Point b((float)i / _buckets + (0.5 / _buckets), counters[i]);
+		_driver->drawLine(a.projectPoint(boundaries), b.projectPoint(boundaries));
 	}
 }

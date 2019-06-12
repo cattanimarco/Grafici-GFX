@@ -43,7 +43,7 @@ int main()
 	visitorBar.begin(driver);
 	visitorLine.begin(driver);
 	visitorAxis.begin(driver);
-	visitorHistogram.begin(driver,15);
+	visitorHistogram.begin(driver,20);
 
 	// widget (data + space + style)
 	widget.begin(data2);
