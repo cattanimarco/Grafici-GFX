@@ -1,12 +1,13 @@
 #include "File_GFX.h"
 #include "../visitors/VisitorDrawScatter.h"
 #include "../visitors/VisitorDrawBar.h"
-#include "../visitors/VisitorDrawHistogram.h"
 #include "../visitors/VisitorDrawLine.h"
 #include "../visitors/VisitorDrawAxis.h"
 #include "../data/DataFloat.h"
 #include "../data/DecoratorDataSpline.h"
+#include "../data/DecoratorDataHistogram.h"
 #include "../widgets/DecoratorWidgetBorder.h"
+
 //todo make an h file to include all basic essentials
 #include <iostream>
 
@@ -19,10 +20,10 @@ int main()
 
 	Driver driver;
 	DataFloat data;
-	DecoratorDataSpline data2;
+	DecoratorDataSpline dataSpline;
+	DecoratorDataHistogram dataHist;
 	VisitorDrawScatter visitorScatter;
 	VisitorDrawBar visitorBar;
-	VisitorDrawHistogram visitorHistogram;
 	VisitorDrawLine visitorLine;
 	VisitorDrawAxis visitorAxis;
 	Widget widget;
@@ -34,7 +35,8 @@ int main()
 
 	// data
 	data.begin(dataArrayY, 11);
-	data2.begin(&data, 100);
+	dataSpline.begin(&data, 100);
+	dataHist.begin(&dataSpline, 20);
 
 //todo create a factory that get gfx + array (+plot style) and instantiate all objects
 
@@ -43,17 +45,16 @@ int main()
 	visitorBar.begin(driver);
 	visitorLine.begin(driver);
 	visitorAxis.begin(driver);
-	visitorHistogram.begin(driver,20);
 
 	// widget (data + space + style)
-	widget.begin(data2);
+	widget.begin(dataSpline);
+	//widget.begin(dataHist);
 	widgetBorder.begin(widget);
 
 	// plot action
 	//widgetBorder.accept(&visitorAxis, driver.fullScreen);
-	//widgetBorder.accept(&visitorBar, driver.fullScreen);
-	//widgetBorder.accept(&visitorLine, driver.fullScreen);
-	 widgetBorder.accept(&visitorHistogram, driver.fullScreen);
+	widgetBorder.accept(&visitorBar, driver.fullScreen);
+	widgetBorder.accept(&visitorLine, driver.fullScreen);
 
 	//flush to file
 	((File_GFX *)gfx)->flush();

@@ -39,7 +39,7 @@ Point DecoratorDataSpline::getPoint(int index)
 
 	if (index < _numElem)
 	{
-		p.x = (1.0 * index) / _numElem;
+		p.x = (1.0 * index) / (_numElem-1);
 
 		// check that we are in the correct bin
 		while ((p.x > _data->getPoint(bin + 1).x))
