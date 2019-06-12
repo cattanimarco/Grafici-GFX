@@ -7,7 +7,7 @@ class VisitorDrawBar : public VisitorDraw
 {
 public:
 
-	void visit(Data *data, Style *style,Boundaries boundaries);
+	void visit(Data *data, ColorScheme *colors,Boundaries boundaries);
 };
 
 

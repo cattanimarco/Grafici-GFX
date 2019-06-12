@@ -2,7 +2,8 @@
 #define ARDU_DATAVIS_GEOMETRY_H
 
 #include <math.h>
-#include "Style.h"
+
+#include "Colors.h"
 
 struct Pixel
 {
@@ -10,6 +11,11 @@ public:
 	Pixel(void);
 	Pixel(float x, float y);
 	Pixel(float x, float y, Color color);
+
+	Pixel &setColor(Color color);
+	Pixel &setColor(float value, Gradient gradient);
+
+	Pixel &darkerColor(float percentage);
 
 	Pixel &operator+=(const Pixel &b);
 	Pixel &operator-=(const Pixel &b);

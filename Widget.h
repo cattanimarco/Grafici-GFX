@@ -3,20 +3,20 @@
 
 #include "Data.h"
 #include "VisitorDraw.h"
-#include "Style.h"
+#include "Colors.h"
 
 class Widget
 {
 public:
 	void begin(Data &data);
-	void begin(Data &data, Style &style);
+	void begin(Data &data, ColorScheme &colors);
 
 	// visitor patttern
 	void accept(VisitorDraw *visitor, Boundaries boundaries);
 
 protected:
 	Data *_data;
-	Style *_style;
+	ColorScheme *_colors;
 };
 
 #endif //ARDU_DATAVIS_WIDGET_H

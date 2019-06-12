@@ -2,7 +2,6 @@
 #define ARDU_DATAVIS_DATA_FLOAT_H
 
 #include "../Data.h"
-#include <iostream>
 
 class DataFloat : public Data
 {

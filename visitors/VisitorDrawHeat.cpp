@@ -1,6 +1,6 @@
 #include "VisitorDrawHeat.h"
 
-void VisitorDrawHeat::visit(Data *data, Style *style,Boundaries boundaries)
+void VisitorDrawHeat::visit(Data *data, ColorScheme *colors,Boundaries boundaries)
 {
 
 	// for (PointIterator it = data->begin(); it != data->end(); ++it)

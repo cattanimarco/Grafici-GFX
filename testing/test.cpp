@@ -7,6 +7,7 @@
 #include "../data/DecoratorDataSpline.h"
 #include "../data/DecoratorDataHistogram.h"
 #include "../widgets/DecoratorWidgetBorder.h"
+#include "../Colors.h"
 
 //todo make an h file to include all basic essentials
 #include <iostream>
@@ -28,6 +29,7 @@ int main()
 	VisitorDrawAxis visitorAxis;
 	Widget widget;
 	DecoratorWidgetBorder widgetBorder;
+	ColorScheme colors;
 
 	// driver
 	Adafruit_GFX *gfx = new File_GFX(640, 480, "prova.bmp");
@@ -47,12 +49,12 @@ int main()
 	visitorAxis.begin(driver);
 
 	// widget (data + space + style)
-	widget.begin(dataSpline);
+	widget.begin(dataSpline,colors);
 	//widget.begin(dataHist);
 	widgetBorder.begin(widget);
 
 	// plot action
-	//widgetBorder.accept(&visitorAxis, driver.fullScreen);
+	widgetBorder.accept(&visitorAxis, driver.fullScreen);
 	widgetBorder.accept(&visitorBar, driver.fullScreen);
 	widgetBorder.accept(&visitorLine, driver.fullScreen);
 

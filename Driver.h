@@ -1,7 +1,7 @@
 #ifndef ARDU_DATAVIS_DRIVER_H
 #define ARDU_DATAVIS_DRIVER_H
 
-#include "Style.h"
+#include "Colors.h"
 #include "Geometry.h"
 #include "Adafruit_GFX.h"
 

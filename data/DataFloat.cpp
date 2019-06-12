@@ -1,5 +1,4 @@
 #include "DataFloat.h"
-#include <iostream>
 
 #ifndef min
 #define min(a, b) (((a) < (b)) ? (a) : (b))
