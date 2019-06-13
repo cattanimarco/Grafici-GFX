@@ -1,10 +1,10 @@
 #include "VisitorDrawScatter.h"
 
-void VisitorDrawScatter::visit(Data *data, ColorScheme *colors,Boundaries boundaries)
+void VisitorDrawScatter::visit(Data *data, Boundaries *boundaries)
 {
 	for (PointIterator it = data->begin(); it != data->end(); ++it)
 	{
-		_driver->drawPixel((*it).projectPoint(boundaries).setColor(markerColor));
+		_driver->drawPixel(boundaries->project(*it).setColor(markerColor));
 	}
 }
 

@@ -12,17 +12,6 @@ Point::Point(void) : x(0), y(0), value(1.0) {}
 
 Point::Point(float x, float y) : x(x), y(y), value(1.0) {}
 
-Pixel Point::projectPoint(Boundaries boundaries)
-{
-	Pixel p;
-
-	p.x = (boundaries.tr.x - boundaries.bl.x) * x + boundaries.bl.x;
-	p.y = (boundaries.tr.y - boundaries.bl.y) * y + boundaries.bl.y;
-	p.color = (Color){255, 255, 255};
-
-	return p;
-};
-
 Pixel::Pixel(void) : x(0), y(0), color((Color){255, 255, 255}) {}
 
 Pixel::Pixel(float x, float y, Color color) : x(x), y(y), color(color) {}
@@ -52,9 +41,9 @@ Pixel &Pixel::setColor(float value, Gradient gradient)
 	else
 	{
 		value = value * (gradient.size - 1); // Will multiply value by 3.
-		idx1 = floor(value);				// Our desired color will be after this index.
-		idx2 = idx1 + 1;					// ... and before this index (inclusive).
-		fractBetween = value - float(idx1); // Distance between the two indexes (0-1).
+		idx1 = floor(value);				 // Our desired color will be after this index.
+		idx2 = idx1 + 1;					 // ... and before this index (inclusive).
+		fractBetween = value - float(idx1);  // Distance between the two indexes (0-1).
 	}
 
 	color.red = gradient.colors[idx2].red * fractBetween + gradient.colors[idx1].red * (1 - fractBetween);
@@ -86,4 +75,63 @@ Pixel &Pixel::operator-=(const Pixel &b)
 	y -= b.y;
 	//a.color += b.color;
 	return *this;
+}
+
+Pixel SquareBoundaries::project(Point point)
+{
+	Pixel p;
+
+	p.x = (tr.x - bl.x) * point.x + bl.x;
+	p.y = (tr.y - bl.y) * point.y + bl.y;
+	p.color = (Color){255, 255, 255};
+
+	return p;
+};
+
+Boundaries *SquareBoundaries::addBorder(int top, int bottom, int left, int right)
+{
+	Boundaries *result = new SquareBoundaries();
+	result->bl.x = bl.x + left;
+	result->bl.y = bl.y + bottom;
+	result->tr.x = tr.x - right;
+	result->tr.y = tr.y - top;
+
+	return result;
+}
+
+Pixel RoundBoundaries::project(Point point)
+{
+	Pixel p;
+
+	p.x = (tr.x - bl.x) * point.x + bl.x;
+	p.y = (tr.y - bl.y) * point.y + bl.y;
+	p.color = (Color){255, 255, 255};
+
+	return p;
+};
+
+Boundaries *RoundBoundaries::addBorder(int top, int bottom, int left, int right)
+{
+	SquareBoundaries temp;
+	temp.bl.x = bl.x + left;
+	temp.bl.y = bl.y + bottom;
+	temp.tr.x = tr.x - right;
+	temp.tr.y = tr.y - top;
+
+	Boundaries *result = new RoundBoundaries(temp);
+	return result;
+}
+
+RoundBoundaries::RoundBoundaries(Boundaries &boundaries)
+{
+	bl = boundaries.bl;
+	tr = boundaries.tr;
+
+	center.x = (bl.x + tr.x) / 2.0;
+	center.y = (bl.y + tr.y) / 2.0;
+
+	outerRadius = min(tr.x - bl.x, tr.y - bl.y) / 2.0;
+	innerRadius = 0.0;
+	beginAngle = 0.0;
+	endAngle = 2 * M_PI;
 }

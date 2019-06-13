@@ -28,7 +28,7 @@ public:
 	int width(void);
 	int height(void);
 
-	Boundaries fullScreen;
+	Boundaries *fullScreen;
 
 private:
 	Adafruit_GFX *_tft;

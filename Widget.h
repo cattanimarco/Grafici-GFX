@@ -9,14 +9,12 @@ class Widget
 {
 public:
 	void begin(Data &data);
-	void begin(Data &data, ColorScheme &colors);
 
 	// visitor patttern
-	void accept(VisitorDraw *visitor, Boundaries boundaries);
+	void accept(VisitorDraw *visitor, Boundaries *boundaries);
 
 protected:
 	Data *_data;
-	ColorScheme *_colors;
 };
 
 #endif //ARDU_DATAVIS_WIDGET_H

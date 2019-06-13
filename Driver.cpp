@@ -4,10 +4,11 @@
 void Driver::begin(Adafruit_GFX *tft)
 {
 	_tft = tft;
-	fullScreen.bl.x = 0;
-	fullScreen.bl.y = 0;
-	fullScreen.tr.x = width() - 1;
-	fullScreen.tr.y = height() - 1;
+	fullScreen = new SquareBoundaries();
+	fullScreen->bl.x = 0;
+	fullScreen->bl.y = 0;
+	fullScreen->tr.x = width() - 1;
+	fullScreen->tr.y = height() - 1;
 }
 
 void Driver::drawPixel(Pixel c)

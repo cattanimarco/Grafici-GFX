@@ -25,18 +25,6 @@ public:
 	Color color;
 };
 
-struct Line
-{
-	Pixel begin;
-	Pixel end;
-};
-
-struct Boundaries
-{
-	Pixel bl;
-	Pixel tr;
-};
-
 class Point
 {
 public:
@@ -45,30 +33,64 @@ public:
 	float x;
 	float y;
 	float value;
-	Pixel projectPoint(Boundaries boundaries);
 	//	Pixel projectPoint(Boundaries boundaries,style);
 };
 
-// add class for poligon: list of point
-// to draw 6 point polygon: draw 123 134 145 156
-
-//rename quadrilateral
-struct Rectangle
+struct Line
 {
-	Pixel topLeft;  // rename first
-	Pixel topRight; // rename second (second needs to be linked to first and third)
-	Pixel bottomLeft;
-	Pixel bottomRight;
+	Pixel begin;
+	Pixel end;
 };
 
-struct Circle
+class Boundaries
 {
+public:
+	Pixel bl;
+	Pixel tr;
+	virtual Pixel project(Point point) = 0;
+	virtual Boundaries* addBorder(int top, int bottom, int left, int right) = 0;
+
+};
+
+class SquareBoundaries : public Boundaries
+{
+public:
+	Pixel project(Point point);
+	Boundaries* addBorder(int top, int bottom, int left, int right);
+
+};
+
+class RoundBoundaries : public Boundaries
+{
+public:
+	RoundBoundaries(Boundaries &boundaries);
+
+	Pixel project(Point point);
+	Boundaries* addBorder(int top, int bottom, int left, int right);
+
+
 	Pixel center;
 	float innerRadius;
 	float outerRadius;
 	float beginAngle;
 	float endAngle;
 };
+
+
+
+// add class for poligon: list of point
+// to draw 6 point polygon: draw 123 134 145 156
+
+//rename quadrilateral
+// struct Rectangle
+// {
+// 	Pixel topLeft;  // rename first
+// 	Pixel topRight; // rename second (second needs to be linked to first and third)
+// 	Pixel bottomLeft;
+// 	Pixel bottomRight;
+// };
+
+
 
 // float distance(Point a, Point b)
 // {

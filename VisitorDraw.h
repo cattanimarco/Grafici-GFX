@@ -9,7 +9,7 @@ class VisitorDraw
 {
 public:
 	void begin(Driver &driver);
-	virtual void visit(Data *data, ColorScheme *colors, Boundaries boundaries) = 0;
+	virtual void visit(Data *data, Boundaries *boundaries) = 0;
 
 protected:
 	Driver *_driver;

@@ -1,14 +1,14 @@
 #include "VisitorDrawAxis.h"
 
-void VisitorDrawAxis::visit(Data *data, ColorScheme *colors, Boundaries boundaries)
+void VisitorDrawAxis::visit(Data *data, Boundaries *boundaries)
 {
 	//vertical lines
 	for (int i = 0; i <= 10; i++)
 	{
 		Point a(i / 10.0, 0.0);
 		Point b(i / 10.0, 1.0);
-		_driver->drawLine(a.projectPoint(boundaries).setColor(lineColor).darkerColor(0.8),
-						  b.projectPoint(boundaries).setColor(lineColor).darkerColor(0.8));
+		_driver->drawLine(boundaries->project(a).setColor(lineColor).darkerColor(0.8),
+						  boundaries->project(b).setColor(lineColor).darkerColor(0.8));
 	}
 
 	//horizzontal lines
@@ -16,7 +16,7 @@ void VisitorDrawAxis::visit(Data *data, ColorScheme *colors, Boundaries boundari
 	{
 		Point a(0.0, i / 10.0);
 		Point b(1.0, i / 10.0);
-		_driver->drawLine(a.projectPoint(boundaries).setColor(lineColor).darkerColor(0.8),
-						  b.projectPoint(boundaries).setColor(lineColor).darkerColor(0.8));
+		_driver->drawLine(boundaries->project(a).setColor(lineColor).darkerColor(0.8),
+						  boundaries->project(b).setColor(lineColor).darkerColor(0.8));
 	}
 }
