@@ -90,6 +90,7 @@ Pixel SquareBoundaries::project(Point point)
 
 Boundaries *SquareBoundaries::addBorder(int top, int bottom, int left, int right)
 {
+	//TODO careful with memory leak!
 	Boundaries *result = new SquareBoundaries();
 	result->bl.x = bl.x + left;
 	result->bl.y = bl.y + bottom;
@@ -103,8 +104,9 @@ Pixel RoundBoundaries::project(Point point)
 {
 	Pixel p;
 
-	p.x = (tr.x - bl.x) * point.x + bl.x;
-	p.y = (tr.y - bl.y) * point.y + bl.y;
+	float radius = innerRadius + (outerRadius - innerRadius) * point.y;
+	p.x = center.x + radius * cos(beginAngle + (endAngle - beginAngle) * point.x);
+	p.y = center.y + radius * sin(beginAngle + (endAngle - beginAngle) * point.x);
 	p.color = (Color){255, 255, 255};
 
 	return p;
@@ -118,11 +120,13 @@ Boundaries *RoundBoundaries::addBorder(int top, int bottom, int left, int right)
 	temp.tr.x = tr.x - right;
 	temp.tr.y = tr.y - top;
 
-	Boundaries *result = new RoundBoundaries(temp);
+	//TODO careful with memory leak!
+	RoundBoundaries *result = new RoundBoundaries();
+	result->begin(temp);
 	return result;
 }
 
-RoundBoundaries::RoundBoundaries(Boundaries &boundaries)
+void RoundBoundaries::begin(Boundaries &boundaries)
 {
 	bl = boundaries.bl;
 	tr = boundaries.tr;

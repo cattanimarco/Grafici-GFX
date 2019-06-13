@@ -28,6 +28,9 @@ int main()
 	VisitorDrawLine visitorLine;
 	VisitorDrawAxis visitorAxis;
 	Widget widget;
+	RoundBoundaries circle;
+
+
 
 	// driver
 	Adafruit_GFX *gfx = new File_GFX(640, 480, "prova.bmp");
@@ -38,22 +41,28 @@ int main()
 	dataSpline.begin(&data, 100);
 	dataHist.begin(&dataSpline, 20);
 
-//todo create a factory that get gfx + array (+plot style) and instantiate all objects
+	//todo create a factory that get gfx + array (+plot style) and instantiate all objects
 
 	// plotter
-	visitorScatter.begin(driver);
 	visitorBar.begin(driver);
 	visitorLine.begin(driver);
 	visitorAxis.begin(driver);
+	visitorScatter.begin(driver);
 
 	widget.begin(dataSpline);
 	//widget.begin(dataHist);
-	
+
+	circle.begin(*driver.fullScreen);
 
 	// plot action
-	widget.accept(&visitorAxis, driver.fullScreen->addBorder(50,10,10,10));
-	widget.accept(&visitorBar, driver.fullScreen->addBorder(50,10,10,10));
-	widget.accept(&visitorLine, driver.fullScreen->addBorder(50,10,10,10));
+	//widget.accept(&visitorAxis, driver.fullScreen->addBorder(50, 10, 10, 10));
+	//widget.accept(&visitorBar, driver.fullScreen->addBorder(50, 10, 10, 10));
+	//widget.accept(&visitorLine, driver.fullScreen->addBorder(50, 10, 10, 10));
+	//widget.accept(&visitorScatter, driver.fullScreen->addBorder(50, 10, 10, 10));
+
+	widget.accept(&visitorAxis, &circle);
+	widget.accept(&visitorLine, &circle);
+	widget.accept(&visitorBar, &circle);
 
 	//flush to file
 	((File_GFX *)gfx)->flush();

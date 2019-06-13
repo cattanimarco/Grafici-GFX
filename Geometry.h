@@ -63,7 +63,7 @@ public:
 class RoundBoundaries : public Boundaries
 {
 public:
-	RoundBoundaries(Boundaries &boundaries);
+	void begin(Boundaries &boundaries);
 
 	Pixel project(Point point);
 	Boundaries* addBorder(int top, int bottom, int left, int right);
