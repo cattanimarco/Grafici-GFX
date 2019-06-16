@@ -105,8 +105,9 @@ Pixel RoundBoundaries::project(Point point)
 	Pixel p;
 
 	float radius = innerRadius + (outerRadius - innerRadius) * point.y;
-	p.x = center.x + radius * cos(beginAngle + (endAngle - beginAngle) * point.x);
-	p.y = center.y + radius * sin(beginAngle + (endAngle - beginAngle) * point.x);
+	float angle = (beginAngle + (endAngle - beginAngle) * point.x); 
+	p.x = center.x + radius * cos(angle);
+	p.y = center.y + radius * sin(angle);
 	p.color = (Color){255, 255, 255};
 
 	return p;
@@ -119,6 +120,8 @@ Boundaries *RoundBoundaries::addBorder(int top, int bottom, int left, int right)
 	temp.bl.y = bl.y + bottom;
 	temp.tr.x = tr.x - right;
 	temp.tr.y = tr.y - top;
+	
+	// TODO register original size and borders
 
 	//TODO careful with memory leak!
 	RoundBoundaries *result = new RoundBoundaries();
@@ -133,9 +136,10 @@ void RoundBoundaries::begin(Boundaries &boundaries)
 
 	center.x = (bl.x + tr.x) / 2.0;
 	center.y = (bl.y + tr.y) / 2.0;
-
+//TODO compute properly outer radius -> depends on start-end angle o 
 	outerRadius = min(tr.x - bl.x, tr.y - bl.y) / 2.0;
 	innerRadius = 0.0;
-	beginAngle = 0.0;
-	endAngle = 2 * M_PI;
+	// setup to simulate clock (start at 12, clockwise)
+	beginAngle = M_PI/2;
+	endAngle = -3.0/2 *M_PI;
 }

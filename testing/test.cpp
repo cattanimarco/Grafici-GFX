@@ -53,6 +53,9 @@ int main()
 	//widget.begin(dataHist);
 
 	circle.begin(*driver.fullScreen);
+	circle.beginAngle = M_PI;
+	circle.endAngle = 0; // this way is clockwise
+	circle.innerRadius = circle.outerRadius/2;
 
 	// plot action
 	//widget.accept(&visitorAxis, driver.fullScreen->addBorder(50, 10, 10, 10));
