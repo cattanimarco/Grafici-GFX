@@ -1,5 +1,9 @@
 #include "DataFloat.h"
 
+#ifndef NULL
+#define NULL (0)
+#endif
+
 #ifndef min
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
@@ -12,6 +16,7 @@ void DataFloat::begin(float *yData, int len)
 {
 	_xData = NULL;
 	_yData = yData;
+	_zData = NULL;
 	_numElem = len;
 	refresh();
 };
@@ -20,9 +25,20 @@ void DataFloat::begin(float *xData, float *yData, int len)
 {
 	_xData = xData;
 	_yData = yData;
+	_zData = NULL;
 	_numElem = len;
 	refresh();
 };
+
+void DataFloat::begin(float *xData, float *yData,float *zData, int len)
+{
+	_xData = xData;
+	_yData = yData;
+	_zData = zData;
+	_numElem = len;
+	refresh();
+};
+
 
 Point DataFloat::getPoint(int index)
 {
@@ -39,6 +55,15 @@ Point DataFloat::getPoint(int index)
 		else
 		{
 			p.x = (1.0 * index) / (_numElem - 1);
+		}
+
+		if (_zData != NULL)
+		{
+			p.value = (_zData[index] - _zMin) / (_zMax - _zMin);
+		}
+		else
+		{
+			p.value = 1.0;
 		}
 	}
 	return p;
@@ -70,6 +95,16 @@ void DataFloat::refresh(void)
 			{
 				_xMin = min(_xMin, _xData[i]);
 				_xMax = max(_xMax, _xData[i]);
+			}
+		}
+
+		if (_zData != NULL)
+		{
+			_zMin = _zMax = _zData[0];
+			for (int i = 1; i < _numElem; ++i)
+			{
+				_zMin = min(_zMin, _zData[i]);
+				_zMax = max(_zMax, _zData[i]);
 			}
 		}
 	}
