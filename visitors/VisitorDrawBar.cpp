@@ -1,4 +1,5 @@
 #include "VisitorDrawBar.h"
+#include "../colorMaps/EthColorMap.h"
 
 void VisitorDrawBar::visit(Data *data, Boundaries *boundaries)
 {
@@ -9,7 +10,7 @@ void VisitorDrawBar::visit(Data *data, Boundaries *boundaries)
 
 		basePoint.y = 0;
 
-		_driver->drawLine(boundaries->project(basePoint).setColor(lineColor),
-						  boundaries->project(topPoint).setColor(lineColor));
+		_driver->drawLine(boundaries->project(basePoint).setColor(ethGradient.getColor(topPoint.y)),
+						  boundaries->project(topPoint).setColor(ethGradient.getColor(topPoint.y)));
 	}
 }

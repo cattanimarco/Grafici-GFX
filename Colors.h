@@ -10,10 +10,13 @@ struct Color
 	unsigned char blue;
 };
 
-struct Gradient
+class Gradient
 {
+	public:
+	Gradient(int size, Color * colors);
 	Color *colors;
 	int size;
+	Color getColor(float value);
 };
 
 const Color lineColor = {255, 255, 255};		 //white
