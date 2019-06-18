@@ -10,7 +10,7 @@ void VisitorDrawBar::visit(Data *data, Boundaries *boundaries)
 
 		basePoint.y = 0;
 
-		_driver->drawLine(boundaries->project(basePoint).setColor(ethGradient.getColor(topPoint.y)),
-						  boundaries->project(topPoint).setColor(ethGradient.getColor(topPoint.y)));
+		_driver->drawLine(boundaries->project(basePoint).setColor(topPoint.y,ethGradient),
+						  boundaries->project(topPoint).setColor(topPoint.y,ethGradient));
 	}
 }
