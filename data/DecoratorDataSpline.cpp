@@ -55,6 +55,9 @@ Point DecoratorDataSpline::getPoint(int index)
 
 		// normalize data to a 0.0 .. 1.0 value
 		p.y = (p.y - _yMin) / (_yMax - _yMin);
+
+		//TODO this value needs to be interpolated between bin and bin+1
+		p.value = _data->getPoint(bin).value; 
 	}
 
 	return p;

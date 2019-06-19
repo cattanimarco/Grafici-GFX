@@ -12,33 +12,37 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-void DataFloat::begin(float *yData, int len)
+
+
+void DataFloat::begin(float *yData, float zValue, int len)
 {
 	_xData = NULL;
 	_yData = yData;
 	_zData = NULL;
+	_zValue = zValue;
 	_numElem = len;
 	refresh();
 };
 
-void DataFloat::begin(float *xData, float *yData, int len)
+void DataFloat::begin(float *xData, float *yData, float zValue, int len)
 {
 	_xData = xData;
 	_yData = yData;
 	_zData = NULL;
+	_zValue = zValue;
 	_numElem = len;
 	refresh();
 };
 
-void DataFloat::begin(float *xData, float *yData,float *zData, int len)
+void DataFloat::begin(float *xData, float *yData, float *zData, int len)
 {
 	_xData = xData;
 	_yData = yData;
 	_zData = zData;
+	_zValue = 0;
 	_numElem = len;
 	refresh();
 };
-
 
 Point DataFloat::getPoint(int index)
 {
@@ -57,13 +61,21 @@ Point DataFloat::getPoint(int index)
 			p.x = (1.0 * index) / (_numElem - 1);
 		}
 
+//rewrite ho zdata is defined
 		if (_zData != NULL)
 		{
 			p.value = (_zData[index] - _zMin) / (_zMax - _zMin);
 		}
 		else
 		{
-			p.value = 1.0;
+			if (_zValue < 0) 
+				p.value = p.x;
+			else if (_zValue > 1)
+				p.value = p.y;
+			else
+			{
+				p.value = _zValue;
+			}
 		}
 	}
 	return p;

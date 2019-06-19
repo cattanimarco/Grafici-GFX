@@ -3,7 +3,7 @@
 #ifndef ARDU_DATAVIS_ETH_H
 #define ARDU_DATAVIS_ETH_H
 
-Color ethColors[11]	= {
+Color colorsEth[11]	= {
 	{0 , 0, 0},
 	{10, 0, 0},
 	{75, 0, 0},
@@ -17,6 +17,14 @@ Color ethColors[11]	= {
 	{255, 255, 255},
 };
 
-Gradient ethGradient(11, ethColors);
+ColorScheme colorSchemeEth =
+{
+	.colors = colorsEth,
+	.size = 11,
+	.lineColor = &colorsEth[10], 
+	.markerColor= &colorsEth[5],   
+	.fillColor = &colorsEth[9], 
+	.bkgColor = &colorsEth[0],		  
+};
 
 #endif //ARDU_DATAVIS_ETH_H

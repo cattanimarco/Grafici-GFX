@@ -3,6 +3,7 @@
 
 #include <math.h>
 
+
 struct Color
 {
 	unsigned char red;
@@ -10,18 +11,17 @@ struct Color
 	unsigned char blue;
 };
 
-class Gradient
+class ColorScheme
 {
-	public:
-	Gradient(int size, Color * colors);
+public:
+
 	Color *colors;
 	int size;
-	Color getColor(float value);
+	Color *lineColor; //white
+	Color *markerColor;   //red
+	Color *fillColor; //gray
+	Color *bkgColor;		   //black
 };
 
-const Color lineColor = {255, 255, 255};		 //white
-const Color markerColor = {255, 0, 0}; //red
-const Color fillColor = {127, 127, 127}; //gray
-const Color bkgColor = {0, 0, 0};	//black
 
 #endif //ARDU_DATAVIS_COLOR_H

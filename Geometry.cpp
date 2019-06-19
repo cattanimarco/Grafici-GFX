@@ -18,13 +18,13 @@ Pixel::Pixel(float x, float y, Color color) : x(x), y(y), color(color) {}
 
 Pixel::Pixel(float x, float y) : x(x), y(y), color((Color){255, 255, 255}) {}
 
-Pixel &Pixel::setColor(Color color)
+Pixel &Pixel::setColor(Color *color)
 {
-	this->color = color;
+	this->color = *color;
 	return *this;
 }
 
-Pixel &Pixel::setColor(float value, Gradient gradient)
+Pixel &Pixel::setColor(float value, Color* colors, int size)
 {
 	int idx1;				// |-- Our desired color will be between these two indexes in "color".
 	int idx2;				// |
@@ -36,28 +36,28 @@ Pixel &Pixel::setColor(float value, Gradient gradient)
 	} // accounts for an input <=0
 	else if (value >= 1)
 	{
-		idx1 = idx2 = gradient.size - 1;
+		idx1 = idx2 = size - 1;
 	} // accounts for an input >=0
 	else
 	{
-		value = value * (gradient.size - 1); // Will multiply value by 3.
+		value = value * (size - 1); // Will multiply value by 3.
 		idx1 = floor(value);				 // Our desired color will be after this index.
 		idx2 = idx1 + 1;					 // ... and before this index (inclusive).
 		fractBetween = value - float(idx1);  // Distance between the two indexes (0-1).
 	}
 
-	color.red = gradient.colors[idx2].red * fractBetween + gradient.colors[idx1].red * (1 - fractBetween);
-	color.green = gradient.colors[idx2].green * fractBetween + gradient.colors[idx1].green * (1 - fractBetween);
-	color.blue = gradient.colors[idx2].blue * fractBetween + gradient.colors[idx1].blue * (1 - fractBetween);
+	color.red = colors[idx2].red * fractBetween + colors[idx1].red * (1 - fractBetween);
+	color.green = colors[idx2].green * fractBetween + colors[idx1].green * (1 - fractBetween);
+	color.blue = colors[idx2].blue * fractBetween + colors[idx1].blue * (1 - fractBetween);
 
 	return *this;
 }
 
-Pixel &Pixel::darkerColor(float percentage)
+Pixel &Pixel::fadeColor(float percentage, Color * otherColor)
 {
-	color.red = color.red * (1 - percentage) + bkgColor.red * percentage;
-	color.green = color.green * (1 - percentage) + bkgColor.green * percentage;
-	color.blue = color.blue * (1 - percentage) + bkgColor.blue * percentage;
+	color.red = color.red * (1 - percentage) + otherColor->red * percentage;
+	color.green = color.green * (1 - percentage) + otherColor->green * percentage;
+	color.blue = color.blue * (1 - percentage) + otherColor->blue * percentage;
 	return *this;
 }
 

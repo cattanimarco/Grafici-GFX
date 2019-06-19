@@ -7,8 +7,8 @@ void VisitorDrawAxis::visit(Data *data, Boundaries *boundaries)
 	{
 		Point a(i / 10.0, 0.0);
 		Point b(i / 10.0, 1.0);
-		_driver->drawLine(boundaries->project(a).setColor(lineColor).darkerColor(0.8),
-						  boundaries->project(b).setColor(lineColor).darkerColor(0.8));
+		_driver->drawLine(boundaries->project(a).setColor(_colorScheme->lineColor).fadeColor(0.8,_colorScheme->bkgColor),
+						  boundaries->project(b).setColor(_colorScheme->lineColor).fadeColor(0.8,_colorScheme->bkgColor));
 	}
 
 	//horizzontal lines
@@ -16,7 +16,7 @@ void VisitorDrawAxis::visit(Data *data, Boundaries *boundaries)
 	{
 		Point a(0.0, i / 10.0);
 		Point b(1.0, i / 10.0);
-		_driver->drawLine(boundaries->project(a).setColor(lineColor).darkerColor(0.8),
-						  boundaries->project(b).setColor(lineColor).darkerColor(0.8));
+		_driver->drawLine(boundaries->project(a).setColor(_colorScheme->lineColor).fadeColor(0.8,_colorScheme->bkgColor),
+						  boundaries->project(b).setColor(_colorScheme->lineColor).fadeColor(0.8,_colorScheme->bkgColor));
 	}
 }

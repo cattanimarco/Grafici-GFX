@@ -12,10 +12,9 @@ public:
 	Pixel(float x, float y);
 	Pixel(float x, float y, Color color);
 
-	Pixel &setColor(Color color);
-	Pixel &setColor(float value, Gradient gradient);
-
-	Pixel &darkerColor(float percentage);
+	Pixel &setColor(Color *color);
+	Pixel &setColor(float value, Color * colors, int size);
+	Pixel &fadeColor(float percentage, Color * otherColor);
 
 	Pixel &operator+=(const Pixel &b);
 	Pixel &operator-=(const Pixel &b);
