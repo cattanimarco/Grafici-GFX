@@ -9,9 +9,12 @@
 class DataFloat : public Data
 {
 public:
+
 	void begin(float *yData, float zValue, int len);
-	void begin(float *xData, float *yData, float zValue, int len);
+	void begin(float *yData, float *zData, int len);
+	void begin(float *xData, float *yData, float zData, int len);
 	void begin(float *xData, float *yData, float *zData, int len);
+	
 	Point getPoint(int index);
 	void refresh();
 	int size(void);
