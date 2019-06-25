@@ -40,7 +40,7 @@ int main()
 	driver.begin(gfx);
 
 	// data
-	data.begin(dataArrayY, 0.5, 11);
+	data.begin(dataArrayY, dataArrayY, 11);
 	dataSpline.begin(&data, 100);
 	dataHist.begin(&dataSpline, 20);
 

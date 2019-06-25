@@ -16,14 +16,22 @@ private:
 	Data *_data;
 	float _xMin;
 	float _yMin;
+	float _valueMin;
+	
 	float _xMax;
 	float _yMax;
+	float _valueMax;
+	
 	int _numElem;
 
-	//spline support array
-	float *_b;
-	float *_c;
-	float *_d;
+	//spline support arrays
+	float *_bY;
+	float *_cY;
+	float *_dY;
+
+	float *_bValue;
+	float *_cValue;
+	float *_dValue;
 };
 
 #endif //ARDU_DATAVIS_DATA_DECORATOR_SPLINE_H
