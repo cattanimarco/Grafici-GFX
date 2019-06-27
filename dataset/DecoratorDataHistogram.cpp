@@ -12,9 +12,9 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-void DecoratorDataHistogram::begin(Data *data, int buckets)
+void DecoratorDataHistogram::begin(Dataset *dataset, int buckets)
 {
-	_data = data;
+	_dataset = dataset;
 	_numElem = buckets;
 	_counters = (int *)malloc(sizeof(int) * buckets);
 
@@ -47,7 +47,7 @@ void DecoratorDataHistogram::refresh(void)
 {
 	_yMax = 0;
 
-	for (PointIterator it = _data->begin(); it != _data->end(); ++it)
+	for (PointIterator it = _dataset->beginIt(); it != _dataset->endIt(); ++it)
 	{
 		Point p = *it;
 		int target = round(p.y * (_numElem - 1));

@@ -1,7 +1,7 @@
 CCSRC = $(wildcard *.cpp) \
 	$(wildcard ../*.cpp) \
 	$(wildcard ../widgets/*.cpp) \
-	$(wildcard ../data/*.cpp) \
+	$(wildcard ../dataset/*.cpp) \
 	$(wildcard ../visitors/*.cpp) \
 
 OBJ = $(CCSRC:.cpp=.o)

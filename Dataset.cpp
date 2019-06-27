@@ -1,12 +1,12 @@
-#include "Data.h"
+#include "Dataset.h"
 
-PointIterator Data::begin()
+PointIterator Dataset::beginIt()
 {
 	PointIterator it(this, 0);
 	return it;
 }
 
-PointIterator Data::end()
+PointIterator Dataset::endIt()
 {
 	PointIterator it(this, size());
 	return it;
@@ -14,7 +14,7 @@ PointIterator Data::end()
 
 Point PointIterator::operator*()
 {
-	return _data->getPoint(_dataIndex);
+	return _dataset->getPoint(_dataIndex);
 }
 
 PointIterator &PointIterator::operator++()
@@ -32,5 +32,5 @@ PointIterator PointIterator::operator++(int postfix)
 
 bool PointIterator::operator!=(PointIterator const &other)
 {
-	return (((this->_data) != (other._data)) || ((this->_dataIndex) != (other._dataIndex)));
+	return (((this->_dataset) != (other._dataset)) || ((this->_dataIndex) != (other._dataIndex)));
 }

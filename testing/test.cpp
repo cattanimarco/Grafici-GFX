@@ -5,9 +5,9 @@
 #include "../visitors/VisitorDrawLine.h"
 #include "../visitors/VisitorDrawAxis.h"
 
-#include "../data/DataFloat.h"
-#include "../data/DecoratorDataSpline.h"
-#include "../data/DecoratorDataHistogram.h"
+#include "../dataset/DataFloat.h"
+#include "../dataset/DecoratorDataSpline.h"
+#include "../dataset/DecoratorDataHistogram.h"
 
 #include "../colorSchemes/ColorSchemeEth.h"
 
@@ -17,15 +17,15 @@
 //todo make an h file to include all basic essentials
 #include <iostream>
 
-//float dataArrayY[11] = {0, 2, 1, 15, 3, 6, 5, 8, 7, 10, 9};
+float dataArrayValue[11] = {0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2};
 float dataArrayY[11] = {0, 2, 2, 2, 2, 6, 5, 10, 10, 10, 9};
 
 int main()
 {
-	//TODO create factory that takes in input just driver, data (, style)
+	//TODO create factory that takes in input just driver, dataset (, style)
 
 	Driver driver;
-	DataFloat data;
+	DataFloat dataset;
 	DecoratorDataSpline dataSpline;
 	DecoratorDataHistogram dataHist;
 	VisitorDrawScatter visitorScatter;
@@ -39,9 +39,9 @@ int main()
 	Adafruit_GFX *gfx = new File_GFX(640, 480, "prova.bmp");
 	driver.begin(gfx);
 
-	// data
-	data.begin(dataArrayY, dataArrayY, 11);
-	dataSpline.begin(&data, 100);
+	// dataset
+	dataset.begin(dataArrayY, dataArrayValue, 11);
+	dataSpline.begin(&dataset, 100);
 	dataHist.begin(&dataSpline, 20);
 
 	//todo create a factory that get gfx + array (+plot style) and instantiate all objects

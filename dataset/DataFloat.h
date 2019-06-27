@@ -1,12 +1,12 @@
 #ifndef ARDU_DATAVIS_DATA_FLOAT_H
 #define ARDU_DATAVIS_DATA_FLOAT_H
 
-#include "../Data.h"
+#include "../Dataset.h"
 
 #define ZVALUE_FROM_X (-2.0)
 #define ZVALUE_FROM_Y (2.0)
 
-class DataFloat : public Data
+class DataFloat : public Dataset
 {
 public:
 

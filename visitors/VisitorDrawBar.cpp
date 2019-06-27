@@ -1,8 +1,8 @@
 #include "VisitorDrawBar.h"
 
-void VisitorDrawBar::visit(Data *data, Boundaries *boundaries)
+void VisitorDrawBar::visit(Dataset *dataset, Boundaries *boundaries)
 {
-	for (PointIterator it = data->begin(); it != data->end(); ++it)
+	for (PointIterator it = dataset->beginIt(); it != dataset->endIt(); ++it)
 	{
 		Point basePoint = *it;
 		Point topPoint = basePoint;

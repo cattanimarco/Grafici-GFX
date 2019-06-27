@@ -3,13 +3,13 @@
 
 #include "Geometry.h"
 #include "Driver.h"
-#include "Data.h"
+#include "Dataset.h"
 
 class VisitorDraw
 {
 public:
 	void begin(Driver &driver, ColorScheme &colorScheme);
-	virtual void visit(Data *data, Boundaries *boundaries) = 0;
+	virtual void visit(Dataset *dataset, Boundaries *boundaries) = 0;
 
 protected:
 	Driver *_driver;

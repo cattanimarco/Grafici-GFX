@@ -57,7 +57,7 @@ Point DataFloat::getPoint(int index)
 	Point p;
 	if (index < _numElem)
 	{
-		// normalize data to a 0.0 .. 1.0 value
+		// normalize dataset to a 0.0 .. 1.0 value
 		p.y = (_yData[index] - _yMin) / (_yMax - _yMin);
 
 		if (_xData != NULL)

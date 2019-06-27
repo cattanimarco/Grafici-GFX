@@ -6,7 +6,7 @@
 class VisitorDrawLine : public VisitorDraw
 {
 public:
-	void visit(Data *data, Boundaries *boundaries);
+	void visit(Dataset *dataset, Boundaries *boundaries);
 };
 
 

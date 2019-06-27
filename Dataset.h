@@ -5,21 +5,21 @@
 
 class PointIterator;
 
-class Data
+class Dataset
 {
 public:
 	virtual Point getPoint(int index) = 0;
 	virtual int size(void) = 0;
 	virtual void refresh() = 0;
-	PointIterator begin();
-	PointIterator end();
+	 PointIterator beginIt();
+	 PointIterator endIt();
 };
 
 class PointIterator
 {
 
 public:
-	PointIterator(Data *data, int dataIndex) : _data(data), _dataIndex(dataIndex){};
+	PointIterator(Dataset *dataset, int dataIndex) : _dataset(dataset), _dataIndex(dataIndex){};
 
 	Point operator*();
 	PointIterator &operator++();
@@ -27,7 +27,7 @@ public:
 	bool operator!=(PointIterator const &other);
 
 private:
-	Data *_data;
+	Dataset *_dataset;
 	int _dataIndex;
 };
 

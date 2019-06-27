@@ -1,6 +1,6 @@
 #include "VisitorDrawAxis.h"
 
-void VisitorDrawAxis::visit(Data *data, Boundaries *boundaries)
+void VisitorDrawAxis::visit(Dataset *dataset, Boundaries *boundaries)
 {
 	//vertical lines
 	for (int i = 0; i <= 10; i++)

@@ -1,12 +1,12 @@
 #include "Widget.h"
 
-void Widget::begin(Data &data)
+void Widget::begin(Dataset &dataset)
 {
-	_data = &data;
+	_dataset = &dataset;
 }
 
 void Widget::accept(VisitorDraw *visitorDraw, Boundaries *boundaries)
 {
 	// use input parameter boundaries
-	visitorDraw->visit(_data, boundaries);
+	visitorDraw->visit(_dataset, boundaries);
 }
