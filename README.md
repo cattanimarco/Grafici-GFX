@@ -6,7 +6,7 @@ Ths modular and flexible library allows you to easily plot dataset on any arduin
 ## Usage
 
 ## Documentation
-The Grafici GFX library is composed of the following libraries 
+The Grafici GFX library is composed of the following classes and structures 
 
 ### MODEL
 
@@ -16,13 +16,13 @@ The Grafici GFX library is composed of the following libraries
 This class is intended as an interface to uniform the dataset provided as source of the plotting library. Thus, datasets can only be plotted via a class implementing the Dataset class.
   
 Class implementing the Dataset interface must provide the follwing methods:
-* Point getPoint(int index): return the dataset point at a given index
-* int size(void): return the size of the dataset
-* void refresh(): needs to be called every time dataset points change
+* `Point getPoint(int index)` returns the dataset point at a given index
+* `int size(void)` returns the size of the dataset
+* `void refresh()` refresh the dataset whenever the data source changes
 
 These methos are already implememnted 
-* PointIterator beginIt() return an iterator pointing at the first element of the dataset
-* PointIterator endIt() return an iterator pointing at the end of the dataset (invalid dataset point)
+* `PointIterator beginIt()` returns an iterator pointing at the first element of the dataset
+* `PointIterator endIt()` returns an iterator pointing at the end of the dataset (invalid dataset point)
 
 
 #### PointIterator
