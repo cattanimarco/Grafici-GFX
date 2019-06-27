@@ -1,13 +1,18 @@
 # Grafici GFX
 Grafici GFX is a dataset plotting library for Adafruit GFX graphic libraries.
 
-Ths modular and flexible library allows you to easily plot dataset on all arduino displays that support the Adafruit GFX library such as e-ink, lcd, oled and led strip.
+Ths modular and flexible library allows you to easily plot dataset on any arduino display that supports the Adafruit GFX library.
 
-##MODEL
+## Usage
 
-### Point
+## Documentation
+The Grafici GFX library is composed of the following libraries 
 
-### Dataset
+### MODEL
+
+#### Point
+
+#### Dataset
 This class is intended as an interface to uniform the dataset provided as source of the plotting library. Thus, datasets can only be plotted via a class implementing the Dataset class.
   
 Class implementing the Dataset interface must provide the follwing methods:
@@ -20,12 +25,12 @@ These methos are already implememnted
 * PointIterator endIt() return an iterator pointing at the end of the dataset (invalid dataset point)
 
 
-### PointIterator
+#### PointIterator
 This class is a stripped-down implementation of C++ iterators intended to run on Arduino.
 Use the PointIterator constructor to create an iterator for a class implementing the Dataset interface.
 The operators supported by a PointIterator instance are *, ++, !=, =
 
-## VIEW
+### VIEW
 Colors
 
 Driver
