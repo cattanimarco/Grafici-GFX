@@ -8,7 +8,7 @@ Ths modular and flexible library allows you to easily plot dataset on any arduin
 ## Documentation
 The Grafici GFX library is composed of the following classes and structures 
 
-### MODEL
+### DATA
 
 #### Point
 
@@ -31,7 +31,23 @@ Use the PointIterator constructor to create an iterator for a class implementing
 The operators supported by a PointIterator instance are *, ++, !=, =
 
 ### VIEW
-Colors
+
+### Color
+This structure represent a color in the classic RGB format. 
+
+* `unsigned char red` red component of the color. Range from 0 to 255.
+* `unsigned char green` green component of the color. Range from 0 to 255.
+* `unsigned char blue` blue component of the color. Range from 0 to 255.
+
+### ColorScheme
+This structure describe a color theme that will be used by the Grafici GFX library. Different color schemes are available in the colorScheme directory of the library.
+
+* `Color *colors` ordered Color sequence, i.e. gradient, used to rappresent differnt Point values. For example, if a Point has value 0, it will be drawn using the first Color of this list. If a Point has value 1, it will be drawn using the last Color of this list.
+* `int size` size of the Color sequence
+* `Color *lineColor` Color used to draw lines 
+* `Color *markerColor` Color used to draw markers
+* `Color *fillColor` Color used to fill shapes
+* `Color *bkgColor` Color used as background
 
 Driver
 
