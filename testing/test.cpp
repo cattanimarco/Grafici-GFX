@@ -5,13 +5,13 @@
 #include "../visitors/VisitorDrawLine.h"
 #include "../visitors/VisitorDrawAxis.h"
 
-#include "../dataset/DataSetFloat.h"
-#include "../dataset/DecoratorDataSetSpline.h"
-#include "../dataset/DecoratorDataSetHistogram.h"
+#include "../dataSet/DataSetFloat.h"
+#include "../dataSet/DecoratorDataSetSpline.h"
+#include "../dataSet/DecoratorDataSetHistogram.h"
 
 #include "../colorSchemes/ColorSchemeEth.h"
 
-#include "../Colors.h"
+#include "../Display.h"
 #include "../Widget.h"
 
 //todo make an h file to include all basic essentials

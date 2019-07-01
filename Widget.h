@@ -3,7 +3,7 @@
 
 #include "Data.h"
 #include "VisitorDraw.h"
-#include "Colors.h"
+#include "Display.h"
 
 class Widget
 {

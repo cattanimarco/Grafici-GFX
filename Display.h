@@ -4,8 +4,26 @@
 #include <math.h>
 
 #include "Data.h"
-#include "Colors.h"
 #include "Adafruit_GFX.h"
+
+struct Color
+{
+	unsigned char red;
+	unsigned char green;
+	unsigned char blue;
+};
+
+class ColorScheme
+{
+public:
+
+	Color *colors;
+	int size;
+	Color *lineColor; //white
+	Color *markerColor;   //red
+	Color *fillColor; //gray
+	Color *bkgColor;		   //black
+};
 
 struct Pixel
 {

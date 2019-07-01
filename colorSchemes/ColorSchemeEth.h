@@ -1,4 +1,4 @@
-#include "../Colors.h"
+#include "../Display.h"
 
 #ifndef ARDU_DATAVIS_ETH_H
 #define ARDU_DATAVIS_ETH_H
