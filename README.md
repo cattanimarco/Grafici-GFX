@@ -5,23 +5,23 @@ Ths modular and flexible library allows you to easily plot dataset on any arduin
 
 ## Usage
 
-###line plot
-
-###bar plot
-
-###scatter plot
-
-###spline plot
-
-###histogram plot
-
-###multiple plots overlaid
-
-###multiplot on different areas
-
-###circular plot
-
-###mirror plot
+### line plot
+ 
+### bar plot
+ 
+### scatter plot
+ 
+### spline plot
+ 
+### histogram plot
+ 
+### multiple plots overlaid
+ 
+### multiplot on different areas
+ 
+### circular plot
+ 
+### mirror plot
 
 
 ## Documentation
