@@ -1,15 +1,15 @@
 #include "VisitorDrawBar.h"
 
-void VisitorDrawBar::visit(Dataset *dataset, Boundaries *boundaries)
+void VisitorDrawBar::visit(DataSet *dataset, Boundaries *boundaries)
 {
-	for (PointIterator it = dataset->beginIt(); it != dataset->endIt(); ++it)
+	for (DataPointIterator it = dataset->beginIt(); it != dataset->endIt(); ++it)
 	{
-		Point basePoint = *it;
-		Point topPoint = basePoint;
+		DataPoint baseDataPoint = *it;
+		DataPoint topDataPoint = baseDataPoint;
 
-		basePoint.y = 0;
+		baseDataPoint.y = 0;
 
-		_driver->drawLine(boundaries->project(basePoint).setColor(topPoint.value,_colorScheme->colors,_colorScheme->size),
-						  boundaries->project(topPoint).setColor(topPoint.value,_colorScheme->colors,_colorScheme->size));
+		_driver->drawLine(boundaries->project(baseDataPoint).setColor(topDataPoint.value,_colorScheme->colors,_colorScheme->size),
+						  boundaries->project(topDataPoint).setColor(topDataPoint.value,_colorScheme->colors,_colorScheme->size));
 	}
 }

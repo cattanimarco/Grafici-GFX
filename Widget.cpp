@@ -1,6 +1,6 @@
 #include "Widget.h"
 
-void Widget::begin(Dataset &dataset)
+void Widget::begin(DataSet &dataset)
 {
 	_dataset = &dataset;
 }

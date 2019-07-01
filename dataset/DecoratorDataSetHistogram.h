@@ -1,19 +1,19 @@
 #ifndef ARDU_DATAVIS_DATA_DECORATOR_HISTOGRAM_H
 #define ARDU_DATAVIS_DATA_DECORATOR_HISTOGRAM_H
 
-#include "../Dataset.h"
+#include "../Data.h"
 
-class DecoratorDataHistogram : public Dataset
+class DecoratorDataSetHistogram : public DataSet
 {
 public:
-	void begin(Dataset *dataset, int buckets);
+	void begin(DataSet *dataset, int buckets);
 	void end(void);
-	Point getPoint(int index);
+	DataPoint getDataPoint(int index);
 	void refresh();
 	int size(void);
 
 private:
-	Dataset *_dataset;
+	DataSet *_dataset;
 	int _yMax;
 	int _numElem;
 	int *_counters;

@@ -19,12 +19,12 @@ Color colorsEth[11]	= {
 
 ColorScheme colorSchemeEth =
 {
-	.colors = colorsEth,
-	.size = 11,
-	.lineColor = &colorsEth[10], 
-	.markerColor= &colorsEth[5],   
-	.fillColor = &colorsEth[9], 
-	.bkgColor = &colorsEth[0],		  
+	colorsEth, //.colors = 
+	11, //.size = 
+	&colorsEth[10], //.lineColor = 
+	&colorsEth[5], //.markerColor= 
+	&colorsEth[9], //.fillColor = 
+	&colorsEth[0], //.bkgColor = 	  
 };
 
 #endif //ARDU_DATAVIS_ETH_H

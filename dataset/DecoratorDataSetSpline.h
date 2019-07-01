@@ -1,19 +1,19 @@
 #ifndef ARDU_DATAVIS_DATA_DECORATOR_SPLINE_H
 #define ARDU_DATAVIS_DATA_DECORATOR_SPLINE_H
 
-#include "../Dataset.h"
+#include "../Data.h"
 
-class DecoratorDataSpline : public Dataset
+class DecoratorDataSetSpline : public DataSet
 {
 public:
-	void begin(Dataset *dataset, int interpolationSteps);
+	void begin(DataSet *dataset, int interpolationSteps);
 	void end(void);
-	Point getPoint(int index);
+	DataPoint getDataPoint(int index);
 	void refresh();
 	int size(void);
 
 private:
-	Dataset *_dataset;
+	DataSet *_dataset;
 	float _xMin;
 	float _yMin;
 	float _valueMin;

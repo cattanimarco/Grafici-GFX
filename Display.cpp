@@ -1,4 +1,4 @@
-#include "Geometry.h"
+#include "Display.h"
 
 #ifndef min
 #define min(a, b) (((a) < (b)) ? (a) : (b))
@@ -8,15 +8,11 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-Point::Point(void) : x(0), y(0), value(1.0) {}
-
-Point::Point(float x, float y) : x(x), y(y), value(1.0) {}
-
 Pixel::Pixel(void) : x(0), y(0), color((Color){255, 255, 255}) {}
 
-Pixel::Pixel(float x, float y, Color color) : x(x), y(y), color(color) {}
+Pixel::Pixel(unsigned int x, unsigned int y, Color color) : x(x), y(y), color(color) {}
 
-Pixel::Pixel(float x, float y) : x(x), y(y), color((Color){255, 255, 255}) {}
+Pixel::Pixel(unsigned int x, unsigned int y) : x(x), y(y), color((Color){255, 255, 255}) {}
 
 Pixel &Pixel::setColor(Color *color)
 {
@@ -77,7 +73,7 @@ Pixel &Pixel::operator-=(const Pixel &b)
 	return *this;
 }
 
-Pixel SquareBoundaries::project(Point point)
+Pixel SquareBoundaries::project(DataPoint point)
 {
 	Pixel p;
 
@@ -100,7 +96,7 @@ Boundaries *SquareBoundaries::addBorder(int top, int bottom, int left, int right
 	return result;
 }
 
-Pixel RoundBoundaries::project(Point point)
+Pixel RoundBoundaries::project(DataPoint point)
 {
 	Pixel p;
 
@@ -143,3 +139,120 @@ void RoundBoundaries::begin(Boundaries &boundaries)
 	beginAngle = M_PI/2;
 	endAngle = -3.0/2 *M_PI;
 }
+
+
+void Driver::begin(Adafruit_GFX *tft)
+{
+	_tft = tft;
+	fullScreen = new SquareBoundaries();
+	fullScreen->bl.x = 0;
+	fullScreen->bl.y = 0;
+	fullScreen->tr.x = width() - 1;
+	fullScreen->tr.y = height() - 1;
+}
+
+void Driver::drawPixel(Pixel c)
+{
+	_tft->drawPixel(c.x, _tft->height() - c.y,
+				   colorTo16b(c.color));
+}
+
+void Driver::drawLine(Pixel a, Pixel b)
+{
+	//for now, color is decided by first pixel
+	_tft->drawLine(a.x, _tft->height() - a.y,
+				  b.x, _tft->height() - b.y,
+				  colorTo16b(a.color));
+}
+
+void Driver::drawCircle(Pixel c, int r)
+{
+	_tft->drawCircle(c.x, _tft->height() - c.y,
+					r,
+					colorTo16b(c.color));
+}
+
+void Driver::drawTriangle(Pixel a, Pixel b, Pixel c)
+{
+	_tft->drawTriangle(a.x, _tft->height() - a.y,
+					  b.x, _tft->height() - b.y,
+					  c.x, _tft->height() - c.y,
+					  colorTo16b(a.color));
+}
+
+void Driver::drawRectangle(Pixel bl, int w, int h)
+// bl: bottom left vertex, w: width, h: height
+{
+	_tft->drawRect(bl.x, _tft->height() - (bl.y + h),
+				  w, h,
+				  colorTo16b(bl.color));
+}
+
+void Driver::drawRectangle(Pixel bl, Pixel tr)
+// bl: bottom left vertex, w: width, h: height
+{
+	drawRectangle(bl, tr.x - bl.x, tr.y - bl.y);
+}
+
+void Driver::drawRoundRectangle(Pixel bl, int w, int h, int r)
+// bl: bottom left vertex, w: width, h: height, r: radius
+{
+	_tft->drawRoundRect(bl.x, _tft->height() - bl.y,
+					   w, h, r,
+					   colorTo16b(bl.color));
+}
+
+void Driver::fillRectangle(Pixel bl, int w, int h)
+{
+	_tft->fillRect(bl.x, _tft->height() - bl.y,
+				  w, h,
+				  colorTo16b(bl.color));
+}
+
+void Driver::fillCircle(Pixel c, int r)
+{
+	_tft->fillCircle(c.x, _tft->height() - c.y,
+					r,
+					colorTo16b(c.color));
+}
+
+void Driver::fillTriangle(Pixel a, Pixel b, Pixel c)
+{
+	_tft->fillTriangle(a.x, _tft->height() - a.y,
+					  b.x, _tft->height() - b.y,
+					  c.x, _tft->height() - c.y,
+					  colorTo16b(a.color));
+}
+
+void Driver::fillRoundRectangle(Pixel bl, int w, int h, int r)
+{
+	_tft->fillRoundRect(bl.x, _tft->height() - bl.y,
+					   w, h, r,
+					   colorTo16b(bl.color));
+}
+
+void Driver::fillScreen(Color c)
+{
+	_tft->fillScreen(colorTo16b(c));
+}
+
+int Driver::width(void)
+{
+	return _tft->width();
+}
+
+int Driver::height(void)
+{
+	return _tft->height();
+}
+
+int Driver::colorTo16b(Color color)
+{
+	int c = 0;
+	int r = (color.red / 255.0) * 31;
+	int g = (color.green / 255.0) * 63;
+	int b = (color.blue / 255.0) * 31;
+	c = (r << 11) | (g << 5) | (b);
+	return (c);
+}
+

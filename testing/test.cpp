@@ -5,9 +5,9 @@
 #include "../visitors/VisitorDrawLine.h"
 #include "../visitors/VisitorDrawAxis.h"
 
-#include "../dataset/DataFloat.h"
-#include "../dataset/DecoratorDataSpline.h"
-#include "../dataset/DecoratorDataHistogram.h"
+#include "../dataset/DataSetFloat.h"
+#include "../dataset/DecoratorDataSetSpline.h"
+#include "../dataset/DecoratorDataSetHistogram.h"
 
 #include "../colorSchemes/ColorSchemeEth.h"
 
@@ -25,9 +25,9 @@ int main()
 	//TODO create factory that takes in input just driver, dataset (, style)
 
 	Driver driver;
-	DataFloat dataset;
-	DecoratorDataSpline dataSpline;
-	DecoratorDataHistogram dataHist;
+	DataSetFloat dataset;
+	DecoratorDataSetSpline dataSpline;
+	DecoratorDataSetHistogram dataHist;
 	VisitorDrawScatter visitorScatter;
 	VisitorDrawBar visitorBar;
 	VisitorDrawLine visitorLine;

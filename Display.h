@@ -3,14 +3,16 @@
 
 #include <math.h>
 
+#include "Data.h"
 #include "Colors.h"
+#include "Adafruit_GFX.h"
 
 struct Pixel
 {
 public:
 	Pixel(void);
-	Pixel(float x, float y);
-	Pixel(float x, float y, Color color);
+	Pixel(unsigned int x, unsigned int y);
+	Pixel(unsigned int x, unsigned int y, Color color);
 
 	Pixel &setColor(Color *color);
 	Pixel &setColor(float value, Color * colors, int size);
@@ -19,20 +21,9 @@ public:
 	Pixel &operator+=(const Pixel &b);
 	Pixel &operator-=(const Pixel &b);
 
-	float x;
-	float y;
+	unsigned int x;
+	unsigned int y;
 	Color color;
-};
-
-class Point
-{
-public:
-	Point(void);
-	Point(float x, float y);
-	float x;
-	float y;
-	float value;
-	//	Pixel projectPoint(Boundaries boundaries,style);
 };
 
 struct Line
@@ -46,7 +37,7 @@ class Boundaries
 public:
 	Pixel bl;
 	Pixel tr;
-	virtual Pixel project(Point point) = 0;
+	virtual Pixel project(DataPoint point) = 0;
 	virtual Boundaries* addBorder(int top, int bottom, int left, int right) = 0;
 
 };
@@ -54,7 +45,7 @@ public:
 class SquareBoundaries : public Boundaries
 {
 public:
-	Pixel project(Point point);
+	Pixel project(DataPoint point);
 	Boundaries* addBorder(int top, int bottom, int left, int right);
 
 };
@@ -64,7 +55,7 @@ class RoundBoundaries : public Boundaries
 public:
 	void begin(Boundaries &boundaries);
 
-	Pixel project(Point point);
+	Pixel project(DataPoint point);
 	Boundaries* addBorder(int top, int bottom, int left, int right);
 
 
@@ -76,31 +67,35 @@ public:
 };
 
 
+class Driver
+{
+public:
+	void begin(Adafruit_GFX *tft);
 
-// add class for poligon: list of point
-// to draw 6 point polygon: draw 123 134 145 156
+	void drawPixel(Pixel c);
+	void drawLine(Pixel a, Pixel b);
+	void drawCircle(Pixel c, int r);
+	void drawTriangle(Pixel a, Pixel b, Pixel c);
+	void drawRectangle(Pixel bl, int w, int h);
+	void drawRectangle(Pixel bl, Pixel tr);
+	void drawRoundRectangle(Pixel bl, int w, int h, int r);
 
-//rename quadrilateral
-// struct Rectangle
-// {
-// 	Pixel topLeft;  // rename first
-// 	Pixel topRight; // rename second (second needs to be linked to first and third)
-// 	Pixel bottomLeft;
-// 	Pixel bottomRight;
-// };
+	void fillRectangle(Pixel bl, int w, int h);
+	void fillCircle(Pixel c, int r);
+	void fillTriangle(Pixel a, Pixel b, Pixel c);
+	void fillRoundRectangle(Pixel bl, int w, int h, int r);
 
+	void fillScreen(Color c);
 
+	int width(void);
+	int height(void);
 
-// float distance(Point a, Point b)
-// {
-// 	return sqrt(pow(a.x-b.x,2)+pow(a.y-b.y,2));
-// }
+	Boundaries *fullScreen;
 
-// void swapPoint(Point &a, Point &b)
-// {
-// 	Point t = a;
-// 	a = b;
-// 	b = t;
-// };
+private:
+	Adafruit_GFX *_tft;
+	int colorTo16b(Color color);
+};
+
 
 #endif //ARDU_DATAVIS_GEOMETRY_H
