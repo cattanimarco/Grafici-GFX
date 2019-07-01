@@ -10,28 +10,51 @@ The Grafici GFX library is composed of the following classes and structures
 
 ### DATA
 
-#### Point
+#### DataPoint
+This class represents a 3D datapoint with values normalized between 0 and 1. Being GRAFICI-GFX a 2D plotting library, the third dimension is called value and is mostly used to change how a DataPoint is drawn (the color, shape and/or size of the plotted DataPoints should depend on their value field)
 
-#### Dataset
-This class is intended as an interface to uniform the dataset provided as source of the plotting library. Thus, datasets can only be plotted via a class implementing the Dataset class.
+Parameters
+* `float x` second dimension coordinate of the DataPoint, e.g. time
+* `float y` first dimension coordinate of the DataPoint, e.g. sensor reading
+* `float value` third dimension coordinate of the DataPoint, e.g. severity
   
-Class implementing the Dataset interface must provide the follwing methods:
-* `Point getPoint(int index)` returns the dataset point at a given index
+#### DataSet
+This interface is intended as a proxy between data sources and the plotting functions. This is achieved by implementing a class that converts the specific data source into more generic DataPoints via the DataSet interface.
+  
+Interface methods
+* `Point getPoint(int index)` returns the DataPoin at a given index in the DataSet
 * `int size(void)` returns the size of the dataset
 * `void refresh()` refresh the dataset whenever the data source changes
 
-These methos are already implememnted 
-* `PointIterator beginIt()` returns an iterator pointing at the first element of the dataset
-* `PointIterator endIt()` returns an iterator pointing at the end of the dataset (invalid dataset point)
+Implememnted methods 
+* `PointIterator beginIt()` returns a PointIterator pointing at the first element of the dataset
+* `PointIterator endIt()` returns an PointIterator pointing at the end of the dataset (the first invalid DataPoint after the last element of the DataSet)
 
 
 #### PointIterator
 This class is a stripped-down implementation of C++ iterators intended to run on Arduino.
-Use the PointIterator constructor to create an iterator for a class implementing the Dataset interface.
+Use the PointIterator constructor to create an iterator for a class implementing the DataSet interface.
 The operators supported by a PointIterator instance are *, ++, !=, =
 
-### VIEW
+### VIZ
 
+#### Pixel
+	Pixel(void);
+	Pixel(float x, float y);
+	Pixel(float x, float y, Color color);
+
+	Pixel &setColor(Color color);
+	Pixel &setColor(float value, Gradient gradient);
+
+	Pixel &darkerColor(float percentage);
+
+	Pixel &operator+=(const Pixel &b);
+	Pixel &operator-=(const Pixel &b);
+
+	float x;
+	float y;
+	Color color;
+  
 ### Color
 This structure represent a color in the classic RGB format. 
 
