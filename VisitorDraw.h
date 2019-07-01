@@ -8,11 +8,11 @@
 class VisitorDraw
 {
 public:
-	void begin(Driver &driver, ColorScheme &colorScheme);
+	void begin(DisplayDriver &displayDriver, ColorScheme &colorScheme);
 	virtual void visit(DataSet *dataset, Boundaries *boundaries) = 0;
 
 protected:
-	Driver *_driver;
+	DisplayDriver *_driver;
 	ColorScheme *_colorScheme;
 };
 

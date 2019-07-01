@@ -1,5 +1,5 @@
-#ifndef ARDU_DATAVIS_GEOMETRY_H
-#define ARDU_DATAVIS_GEOMETRY_H
+#ifndef GRAFICI_DISPLAY_H
+#define GRAFICI_DISPLAY_H
 
 #include <math.h>
 
@@ -85,7 +85,7 @@ public:
 };
 
 
-class Driver
+class DisplayDriver
 {
 public:
 	void begin(Adafruit_GFX *tft);
@@ -116,4 +116,4 @@ private:
 };
 
 
-#endif //ARDU_DATAVIS_GEOMETRY_H
+#endif //GRAFICI_DISPLAY_H

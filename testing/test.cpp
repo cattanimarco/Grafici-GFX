@@ -5,11 +5,11 @@
 #include "../visitors/VisitorDrawLine.h"
 #include "../visitors/VisitorDrawAxis.h"
 
-#include "../dataSet/DataSetFloat.h"
-#include "../dataSet/DecoratorDataSetSpline.h"
-#include "../dataSet/DecoratorDataSetHistogram.h"
+#include "../dataset/DataSetFloat.h"
+#include "../dataset/DecoratorDataSetSpline.h"
+#include "../dataset/DecoratorDataSetHistogram.h"
 
-#include "../colorSchemes/ColorSchemeEth.h"
+#include "../colorschemes/ColorSchemeHeat.h"
 
 #include "../Display.h"
 #include "../Widget.h"
@@ -22,9 +22,9 @@ float dataArrayY[11] = {0, 2, 2, 2, 2, 6, 5, 10, 10, 10, 9};
 
 int main()
 {
-	//TODO create factory that takes in input just driver, dataset (, style)
+	//TODO create factory that takes in input just displayDriver, dataset (, style)
 
-	Driver driver;
+	DisplayDriver displayDriver;
 	DataSetFloat dataset;
 	DecoratorDataSetSpline dataSpline;
 	DecoratorDataSetHistogram dataHist;
@@ -35,9 +35,9 @@ int main()
 	Widget widget;
 	RoundBoundaries circle;
 
-	// driver
+	// displayDriver
 	Adafruit_GFX *gfx = new File_GFX(640, 480, "prova.bmp");
-	driver.begin(gfx);
+	displayDriver.begin(gfx);
 
 	// dataset
 	dataset.begin(dataArrayY, dataArrayValue, 11);
@@ -47,24 +47,24 @@ int main()
 	//todo create a factory that get gfx + array (+plot style) and instantiate all objects
 
 	// plotter
-	visitorBar.begin(driver, colorSchemeEth);
-	visitorLine.begin(driver, colorSchemeEth);
-	visitorAxis.begin(driver, colorSchemeEth);
-	visitorScatter.begin(driver, colorSchemeEth);
+	visitorBar.begin(displayDriver, colorSchemeHeat);
+	visitorLine.begin(displayDriver, colorSchemeHeat);
+	visitorAxis.begin(displayDriver, colorSchemeHeat);
+	visitorScatter.begin(displayDriver, colorSchemeHeat);
 
 	widget.begin(dataSpline);
 	//widget.begin(dataHist);
 
-	circle.begin(*driver.fullScreen);
+	circle.begin(*displayDriver.fullScreen);
 	circle.beginAngle = M_PI;
 	circle.endAngle = 0; // this way is clockwise
 	circle.innerRadius = circle.outerRadius / 2;
 
 	// plot action
-	//widget.accept(&visitorAxis, driver.fullScreen->addBorder(50, 10, 10, 10));
-	//widget.accept(&visitorBar, driver.fullScreen->addBorder(50, 10, 10, 10));
-	//widget.accept(&visitorLine, driver.fullScreen->addBorder(50, 10, 10, 10));
-	//widget.accept(&visitorScatter, driver.fullScreen->addBorder(50, 10, 10, 10));
+	//widget.accept(&visitorAxis, displayDriver.fullScreen->addBorder(50, 10, 10, 10));
+	//widget.accept(&visitorBar, displayDriver.fullScreen->addBorder(50, 10, 10, 10));
+	//widget.accept(&visitorLine, displayDriver.fullScreen->addBorder(50, 10, 10, 10));
+	//widget.accept(&visitorScatter, displayDriver.fullScreen->addBorder(50, 10, 10, 10));
 
 	widget.accept(&visitorAxis, &circle);
 	widget.accept(&visitorLine, &circle);

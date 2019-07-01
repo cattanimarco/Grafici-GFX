@@ -1,9 +1,9 @@
 #include <iostream>
 #include "VisitorDraw.h"
 
-void VisitorDraw::begin(Driver &driver, ColorScheme &colorScheme)
+void VisitorDraw::begin(DisplayDriver &displayDriver, ColorScheme &colorScheme)
 {
-	_driver = &driver;
+	_driver = &displayDriver;
 	_colorScheme = &colorScheme;
 }
 

@@ -141,7 +141,7 @@ void RoundBoundaries::begin(Boundaries &boundaries)
 }
 
 
-void Driver::begin(Adafruit_GFX *tft)
+void DisplayDriver::begin(Adafruit_GFX *tft)
 {
 	_tft = tft;
 	fullScreen = new SquareBoundaries();
@@ -151,13 +151,13 @@ void Driver::begin(Adafruit_GFX *tft)
 	fullScreen->tr.y = height() - 1;
 }
 
-void Driver::drawPixel(Pixel c)
+void DisplayDriver::drawPixel(Pixel c)
 {
 	_tft->drawPixel(c.x, _tft->height() - c.y,
 				   colorTo16b(c.color));
 }
 
-void Driver::drawLine(Pixel a, Pixel b)
+void DisplayDriver::drawLine(Pixel a, Pixel b)
 {
 	//for now, color is decided by first pixel
 	_tft->drawLine(a.x, _tft->height() - a.y,
@@ -165,14 +165,14 @@ void Driver::drawLine(Pixel a, Pixel b)
 				  colorTo16b(a.color));
 }
 
-void Driver::drawCircle(Pixel c, int r)
+void DisplayDriver::drawCircle(Pixel c, int r)
 {
 	_tft->drawCircle(c.x, _tft->height() - c.y,
 					r,
 					colorTo16b(c.color));
 }
 
-void Driver::drawTriangle(Pixel a, Pixel b, Pixel c)
+void DisplayDriver::drawTriangle(Pixel a, Pixel b, Pixel c)
 {
 	_tft->drawTriangle(a.x, _tft->height() - a.y,
 					  b.x, _tft->height() - b.y,
@@ -180,7 +180,7 @@ void Driver::drawTriangle(Pixel a, Pixel b, Pixel c)
 					  colorTo16b(a.color));
 }
 
-void Driver::drawRectangle(Pixel bl, int w, int h)
+void DisplayDriver::drawRectangle(Pixel bl, int w, int h)
 // bl: bottom left vertex, w: width, h: height
 {
 	_tft->drawRect(bl.x, _tft->height() - (bl.y + h),
@@ -188,13 +188,13 @@ void Driver::drawRectangle(Pixel bl, int w, int h)
 				  colorTo16b(bl.color));
 }
 
-void Driver::drawRectangle(Pixel bl, Pixel tr)
+void DisplayDriver::drawRectangle(Pixel bl, Pixel tr)
 // bl: bottom left vertex, w: width, h: height
 {
 	drawRectangle(bl, tr.x - bl.x, tr.y - bl.y);
 }
 
-void Driver::drawRoundRectangle(Pixel bl, int w, int h, int r)
+void DisplayDriver::drawRoundRectangle(Pixel bl, int w, int h, int r)
 // bl: bottom left vertex, w: width, h: height, r: radius
 {
 	_tft->drawRoundRect(bl.x, _tft->height() - bl.y,
@@ -202,21 +202,21 @@ void Driver::drawRoundRectangle(Pixel bl, int w, int h, int r)
 					   colorTo16b(bl.color));
 }
 
-void Driver::fillRectangle(Pixel bl, int w, int h)
+void DisplayDriver::fillRectangle(Pixel bl, int w, int h)
 {
 	_tft->fillRect(bl.x, _tft->height() - bl.y,
 				  w, h,
 				  colorTo16b(bl.color));
 }
 
-void Driver::fillCircle(Pixel c, int r)
+void DisplayDriver::fillCircle(Pixel c, int r)
 {
 	_tft->fillCircle(c.x, _tft->height() - c.y,
 					r,
 					colorTo16b(c.color));
 }
 
-void Driver::fillTriangle(Pixel a, Pixel b, Pixel c)
+void DisplayDriver::fillTriangle(Pixel a, Pixel b, Pixel c)
 {
 	_tft->fillTriangle(a.x, _tft->height() - a.y,
 					  b.x, _tft->height() - b.y,
@@ -224,29 +224,29 @@ void Driver::fillTriangle(Pixel a, Pixel b, Pixel c)
 					  colorTo16b(a.color));
 }
 
-void Driver::fillRoundRectangle(Pixel bl, int w, int h, int r)
+void DisplayDriver::fillRoundRectangle(Pixel bl, int w, int h, int r)
 {
 	_tft->fillRoundRect(bl.x, _tft->height() - bl.y,
 					   w, h, r,
 					   colorTo16b(bl.color));
 }
 
-void Driver::fillScreen(Color c)
+void DisplayDriver::fillScreen(Color c)
 {
 	_tft->fillScreen(colorTo16b(c));
 }
 
-int Driver::width(void)
+int DisplayDriver::width(void)
 {
 	return _tft->width();
 }
 
-int Driver::height(void)
+int DisplayDriver::height(void)
 {
 	return _tft->height();
 }
 
-int Driver::colorTo16b(Color color)
+int DisplayDriver::colorTo16b(Color color)
 {
 	int c = 0;
 	int r = (color.red / 255.0) * 31;

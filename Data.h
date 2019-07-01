@@ -1,5 +1,5 @@
-#ifndef ARDU_DATAVIS_DATA_H
-#define ARDU_DATAVIS_DATA_H
+#ifndef GRAFICI_DATA_H
+#define GRAFICI_DATA_H
 
 
 class DataPointIterator;
@@ -40,4 +40,4 @@ private:
 	int _dataIndex;
 };
 
-#endif //ARDU_DATAVIS_DATA_H
+#endif //GRAFICI_DATA_H
