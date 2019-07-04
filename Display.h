@@ -81,16 +81,31 @@ class Boundaries
 {
 public:
 
-	virtual void begin(DisplayDriver &driver);
-	// transformation functions	
-	virtual void applyBorder(int top, int bottom, int left, int right);
-	virtual void reset(void);
-	// virtual void horizzontalFraction(int sections, int index);
-	// virtual void horizzontalMirror(void);
-	// virtual void verticalFraction(int sections, int index);
-	// virtual void verticalFlip(void);
+	//transformation function
+	virtual void applyBorder(int top, int bottom, int left, int right) =0;
+	virtual void reset(void) =0;
+	virtual void horizzontalFraction(int sections, int index) =0;
+	virtual void verticalFraction(int sections, int index) =0;
+	virtual void horizzontalFlip(void) =0;
+	virtual void verticalFlip(void) =0;
+
 	// projection function(s)
 	virtual Pixel project(DataPoint point);
+};
+
+class RectangularBoundaries
+{
+public:
+
+	void begin(DisplayDriver &driver);
+	void applyBorder(int top, int bottom, int left, int right);
+	void reset(void);
+	void horizzontalFraction(int sections, int index);
+	void horizzontalFraction(int sections, int index);
+	void verticalFraction(int sections, int index);
+	void horizzontalFlip(void);
+	void verticalFlip(void);
+	Pixel project(DataPoint point);
 	
 protected:
 	Pixel bottomLeft;
@@ -101,11 +116,16 @@ protected:
 class RoundBoundaries : public Boundaries
 {
 public:
-
+	void begin(RectangularBoundaries &enclosingBoundaries);
+	void applyBorder(int top, int bottom, int left, int right);
+	void reset(void);
+	void horizzontalFraction(int sections, int index);
+	void horizzontalFraction(int sections, int index);
+	void verticalFraction(int sections, int index);
+	void horizzontalFlip(void);
+	void verticalFlip(void);
 	Pixel project(DataPoint point);
-	void begin(DisplayDriver &driver);//link to normal boundaries and make this class a decorator? 
-	// TODO how to differentiate functions against outer boundaries and functions againg circle boundaries?
-
+	
 private:
 	Pixel center;
 	float innerRadius;

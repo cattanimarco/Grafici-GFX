@@ -20,7 +20,7 @@ Pixel &Pixel::setColor(Color *color)
 	return *this;
 }
 
-Pixel &Pixel::setColor(float value, Color* colors, int size)
+Pixel &Pixel::setColor(float value, Color *colors, int size)
 {
 	int idx1;				// |-- Our desired color will be between these two indexes in "color".
 	int idx2;				// |
@@ -36,10 +36,10 @@ Pixel &Pixel::setColor(float value, Color* colors, int size)
 	} // accounts for an input >=0
 	else
 	{
-		value = value * (size - 1); // Will multiply value by 3.
-		idx1 = floor(value);				 // Our desired color will be after this index.
-		idx2 = idx1 + 1;					 // ... and before this index (inclusive).
-		fractBetween = value - float(idx1);  // Distance between the two indexes (0-1).
+		value = value * (size - 1);			// Will multiply value by 3.
+		idx1 = floor(value);				// Our desired color will be after this index.
+		idx2 = idx1 + 1;					// ... and before this index (inclusive).
+		fractBetween = value - float(idx1); // Distance between the two indexes (0-1).
 	}
 
 	color.red = colors[idx2].red * fractBetween + colors[idx1].red * (1 - fractBetween);
@@ -49,7 +49,7 @@ Pixel &Pixel::setColor(float value, Color* colors, int size)
 	return *this;
 }
 
-Pixel &Pixel::fadeColor(float percentage, Color * otherColor)
+Pixel &Pixel::fadeColor(float percentage, Color *otherColor)
 {
 	color.red = color.red * (1 - percentage) + otherColor->red * percentage;
 	color.green = color.green * (1 - percentage) + otherColor->green * percentage;
@@ -73,9 +73,6 @@ Pixel &Pixel::operator-=(const Pixel &b)
 	return *this;
 }
 
-
-
-
 void DisplayDriver::begin(Adafruit_GFX *tft)
 {
 	_tft = tft;
@@ -84,38 +81,38 @@ void DisplayDriver::begin(Adafruit_GFX *tft)
 void DisplayDriver::drawPixel(Pixel c)
 {
 	_tft->drawPixel(c.x, _tft->height() - c.y,
-				   colorTo16b(c.color));
+					colorTo16b(c.color));
 }
 
 void DisplayDriver::drawLine(Pixel a, Pixel b)
 {
 	//for now, color is decided by first pixel
 	_tft->drawLine(a.x, _tft->height() - a.y,
-				  b.x, _tft->height() - b.y,
-				  colorTo16b(a.color));
+				   b.x, _tft->height() - b.y,
+				   colorTo16b(a.color));
 }
 
 void DisplayDriver::drawCircle(Pixel c, int r)
 {
 	_tft->drawCircle(c.x, _tft->height() - c.y,
-					r,
-					colorTo16b(c.color));
+					 r,
+					 colorTo16b(c.color));
 }
 
 void DisplayDriver::drawTriangle(Pixel a, Pixel b, Pixel c)
 {
 	_tft->drawTriangle(a.x, _tft->height() - a.y,
-					  b.x, _tft->height() - b.y,
-					  c.x, _tft->height() - c.y,
-					  colorTo16b(a.color));
+					   b.x, _tft->height() - b.y,
+					   c.x, _tft->height() - c.y,
+					   colorTo16b(a.color));
 }
 
 void DisplayDriver::drawRectangle(Pixel bl, int w, int h)
 // bl: bottom left vertex, w: width, h: height
 {
 	_tft->drawRect(bl.x, _tft->height() - (bl.y + h),
-				  w, h,
-				  colorTo16b(bl.color));
+				   w, h,
+				   colorTo16b(bl.color));
 }
 
 void DisplayDriver::drawRectangle(Pixel bl, Pixel tr)
@@ -128,37 +125,37 @@ void DisplayDriver::drawRoundRectangle(Pixel bl, int w, int h, int r)
 // bl: bottom left vertex, w: width, h: height, r: radius
 {
 	_tft->drawRoundRect(bl.x, _tft->height() - bl.y,
-					   w, h, r,
-					   colorTo16b(bl.color));
+						w, h, r,
+						colorTo16b(bl.color));
 }
 
 void DisplayDriver::fillRectangle(Pixel bl, int w, int h)
 {
 	_tft->fillRect(bl.x, _tft->height() - bl.y,
-				  w, h,
-				  colorTo16b(bl.color));
+				   w, h,
+				   colorTo16b(bl.color));
 }
 
 void DisplayDriver::fillCircle(Pixel c, int r)
 {
 	_tft->fillCircle(c.x, _tft->height() - c.y,
-					r,
-					colorTo16b(c.color));
+					 r,
+					 colorTo16b(c.color));
 }
 
 void DisplayDriver::fillTriangle(Pixel a, Pixel b, Pixel c)
 {
 	_tft->fillTriangle(a.x, _tft->height() - a.y,
-					  b.x, _tft->height() - b.y,
-					  c.x, _tft->height() - c.y,
-					  colorTo16b(a.color));
+					   b.x, _tft->height() - b.y,
+					   c.x, _tft->height() - c.y,
+					   colorTo16b(a.color));
 }
 
 void DisplayDriver::fillRoundRectangle(Pixel bl, int w, int h, int r)
 {
 	_tft->fillRoundRect(bl.x, _tft->height() - bl.y,
-					   w, h, r,
-					   colorTo16b(bl.color));
+						w, h, r,
+						colorTo16b(bl.color));
 }
 
 void DisplayDriver::fillScreen(Color c)
@@ -186,19 +183,13 @@ int DisplayDriver::colorTo16b(Color color)
 	return (c);
 }
 
-
-
-void Boundaries::begin(DisplayDriver &driver)
+void RectangularBoundaries::begin(DisplayDriver &driver)
 {
 	_driver = &driver;
-
-	bottomLeft.x = 0;
-	bottomLeft.y = 0;
-	topRight.x = _driver->width() - 1;
-	topRight.y = _driver->height() - 1;
+	reset();
 }
 
-void Boundaries::applyBorder(int top, int bottom, int left, int right)
+void RectangularBoundaries::applyBorder(int top, int bottom, int left, int right)
 {
 	bottomLeft.x += left;
 	bottomLeft.y += bottom;
@@ -206,7 +197,7 @@ void Boundaries::applyBorder(int top, int bottom, int left, int right)
 	topRight.y -= top;
 }
 
-void Boundaries::reset(void)
+void RectangularBoundaries::reset(void)
 {
 	bottomLeft.x = 0;
 	bottomLeft.y = 0;
@@ -214,8 +205,12 @@ void Boundaries::reset(void)
 	topRight.y = _driver->height() - 1;
 }
 
+void RectangularBoundaries::horizzontalFraction(int sections, int index) {}
+void RectangularBoundaries::verticalFraction(int sections, int index) {}
+void RectangularBoundaries::horizzontalFlip(void) {}
+void RectangularBoundaries::verticalFlip(void) {}
 
-Pixel Boundaries::project(DataPoint point)
+Pixel RectangularBoundaries::project(DataPoint point)
 {
 	Pixel p;
 
@@ -226,12 +221,8 @@ Pixel Boundaries::project(DataPoint point)
 	return p;
 };
 
-
-void RoundBoundaries::begin(DisplayDriver &driver)
+void RoundBoundaries::begin(RectangularBoundaries &enclosingBoundaries) 
 {
-	// call parent begin (for rectangular boundaries)
-	Boundaries::begin(driver);
-
 	//compute circle parameter depending on square boundaries
 	center.x = (bottomLeft.x + topRight.x) / 2.0;
 	center.y = (bottomLeft.y + topRight.y) / 2.0;
@@ -240,20 +231,27 @@ void RoundBoundaries::begin(DisplayDriver &driver)
 
 	// setup to simulate clock (start at 12, clockwise)
 	innerRadius = 0.0;
-	beginAngle = M_PI/2;
-	endAngle = -3.0/2 *M_PI;
+	beginAngle = M_PI / 2;
+	endAngle = -3.0 / 2 * M_PI;
 }
+
+void RoundBoundaries::applyBorder(int top, int bottom, int left, int right) {}
+void RoundBoundaries::reset(void) {}
+void RoundBoundaries::horizzontalFraction(int sections, int index) {}
+void RoundBoundaries::verticalFraction(int sections, int index) {}
+void RoundBoundaries::horizzontalFlip(void) {}
+void RoundBoundaries::verticalFlip(void) {}
+
 
 Pixel RoundBoundaries::project(DataPoint point)
 {
 	Pixel p;
 
 	float radius = innerRadius + (outerRadius - innerRadius) * point.y;
-	float angle = (beginAngle + (endAngle - beginAngle) * point.x); 
+	float angle = (beginAngle + (endAngle - beginAngle) * point.x);
 	p.x = center.x + radius * cos(angle);
 	p.y = center.y + radius * sin(angle);
 	p.color = (Color){255, 255, 255};
 
 	return p;
 };
-
