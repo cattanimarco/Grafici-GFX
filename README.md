@@ -103,7 +103,7 @@ Parameters
 
 Interface methods
 * `Pixel project(DataPoint point)`
-* `Boundaries* addBorder(int top, int bottom, int left, int right)`
+* `void applyBorder(int top, int bottom, int left, int right)`
 
 Parameters
 * `Pixel bl`
@@ -113,14 +113,14 @@ Parameters
 
 Implemented methods
 * `Pixel project(DataPoint point)`
-* `Boundaries* addBorder(int top, int bottom, int left, int* right)`
+* `void applyBorder(int top, int bottom, int left, int* right)`
 
 #### RoundBoundaries :: Boundaries
 
 Implemented methods
 * `void begin(Boundaries &boundaries)`
 * `Pixel project(DataPoint point)`
-* `Boundaries* addBorder(int top, int bottom, int left, int* right)`
+* `void applyBorder(int top, int bottom, int left, int* right)`
 
 Parameters
 * `Pixel center`

@@ -55,16 +55,16 @@ int main()
 	widget.begin(dataSpline);
 	//widget.begin(dataHist);
 
-	circle.begin(*displayDriver.fullScreen);
-	circle.beginAngle = M_PI;
-	circle.endAngle = 0; // this way is clockwise
-	circle.innerRadius = circle.outerRadius / 2;
+	circle.begin(displayDriver);
+	// circle.beginAngle = M_PI;
+	// circle.endAngle = 0; // this way is clockwise
+	// circle.innerRadius = circle.outerRadius / 2;
 
 	// plot action
-	//widget.accept(&visitorAxis, displayDriver.fullScreen->addBorder(50, 10, 10, 10));
-	//widget.accept(&visitorBar, displayDriver.fullScreen->addBorder(50, 10, 10, 10));
-	//widget.accept(&visitorLine, displayDriver.fullScreen->addBorder(50, 10, 10, 10));
-	//widget.accept(&visitorScatter, displayDriver.fullScreen->addBorder(50, 10, 10, 10));
+	//widget.accept(&visitorAxis, displayDriver.fullScreen->applyBorder(50, 10, 10, 10));
+	//widget.accept(&visitorBar, displayDriver.fullScreen->applyBorder(50, 10, 10, 10));
+	//widget.accept(&visitorLine, displayDriver.fullScreen->applyBorder(50, 10, 10, 10));
+	//widget.accept(&visitorScatter, displayDriver.fullScreen->applyBorder(50, 10, 10, 10));
 
 	widget.accept(&visitorAxis, &circle);
 	widget.accept(&visitorLine, &circle);

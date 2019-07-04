@@ -73,82 +73,12 @@ Pixel &Pixel::operator-=(const Pixel &b)
 	return *this;
 }
 
-Pixel SquareBoundaries::project(DataPoint point)
-{
-	Pixel p;
 
-	p.x = (tr.x - bl.x) * point.x + bl.x;
-	p.y = (tr.y - bl.y) * point.y + bl.y;
-	p.color = (Color){255, 255, 255};
-
-	return p;
-};
-
-Boundaries *SquareBoundaries::addBorder(int top, int bottom, int left, int right)
-{
-	//TODO careful with memory leak!
-	Boundaries *result = new SquareBoundaries();
-	result->bl.x = bl.x + left;
-	result->bl.y = bl.y + bottom;
-	result->tr.x = tr.x - right;
-	result->tr.y = tr.y - top;
-
-	return result;
-}
-
-Pixel RoundBoundaries::project(DataPoint point)
-{
-	Pixel p;
-
-	float radius = innerRadius + (outerRadius - innerRadius) * point.y;
-	float angle = (beginAngle + (endAngle - beginAngle) * point.x); 
-	p.x = center.x + radius * cos(angle);
-	p.y = center.y + radius * sin(angle);
-	p.color = (Color){255, 255, 255};
-
-	return p;
-};
-
-Boundaries *RoundBoundaries::addBorder(int top, int bottom, int left, int right)
-{
-	SquareBoundaries temp;
-	temp.bl.x = bl.x + left;
-	temp.bl.y = bl.y + bottom;
-	temp.tr.x = tr.x - right;
-	temp.tr.y = tr.y - top;
-	
-	// TODO register original size and borders
-
-	//TODO careful with memory leak!
-	RoundBoundaries *result = new RoundBoundaries();
-	result->begin(temp);
-	return result;
-}
-
-void RoundBoundaries::begin(Boundaries &boundaries)
-{
-	bl = boundaries.bl;
-	tr = boundaries.tr;
-
-	center.x = (bl.x + tr.x) / 2.0;
-	center.y = (bl.y + tr.y) / 2.0;
-//TODO compute properly outer radius -> depends on start-end angle o 
-	outerRadius = min(tr.x - bl.x, tr.y - bl.y) / 2.0;
-	innerRadius = 0.0;
-	// setup to simulate clock (start at 12, clockwise)
-	beginAngle = M_PI/2;
-	endAngle = -3.0/2 *M_PI;
-}
 
 
 void DisplayDriver::begin(Adafruit_GFX *tft)
 {
 	_tft = tft;
-	fullScreen = new SquareBoundaries();
-	fullScreen->bl.x = 0;
-	fullScreen->bl.y = 0;
-	fullScreen->tr.x = width() - 1;
-	fullScreen->tr.y = height() - 1;
 }
 
 void DisplayDriver::drawPixel(Pixel c)
@@ -255,4 +185,75 @@ int DisplayDriver::colorTo16b(Color color)
 	c = (r << 11) | (g << 5) | (b);
 	return (c);
 }
+
+
+
+void Boundaries::begin(DisplayDriver &driver)
+{
+	_driver = &driver;
+
+	bottomLeft.x = 0;
+	bottomLeft.y = 0;
+	topRight.x = _driver->width() - 1;
+	topRight.y = _driver->height() - 1;
+}
+
+void Boundaries::applyBorder(int top, int bottom, int left, int right)
+{
+	bottomLeft.x += left;
+	bottomLeft.y += bottom;
+	topRight.x -= right;
+	topRight.y -= top;
+}
+
+void Boundaries::reset(void)
+{
+	bottomLeft.x = 0;
+	bottomLeft.y = 0;
+	topRight.x = _driver->width() - 1;
+	topRight.y = _driver->height() - 1;
+}
+
+
+Pixel Boundaries::project(DataPoint point)
+{
+	Pixel p;
+
+	p.x = (topRight.x - bottomLeft.x) * point.x + bottomLeft.x;
+	p.y = (topRight.y - bottomLeft.y) * point.y + bottomLeft.y;
+	p.color = (Color){255, 255, 255};
+
+	return p;
+};
+
+
+void RoundBoundaries::begin(DisplayDriver &driver)
+{
+	// call parent begin (for rectangular boundaries)
+	Boundaries::begin(driver);
+
+	//compute circle parameter depending on square boundaries
+	center.x = (bottomLeft.x + topRight.x) / 2.0;
+	center.y = (bottomLeft.y + topRight.y) / 2.0;
+	//TODO compute properly outer radius -> depends on start-end angle
+	outerRadius = min(topRight.x - bottomLeft.x, topRight.y - bottomLeft.y) / 2.0;
+
+	// setup to simulate clock (start at 12, clockwise)
+	innerRadius = 0.0;
+	beginAngle = M_PI/2;
+	endAngle = -3.0/2 *M_PI;
+}
+
+Pixel RoundBoundaries::project(DataPoint point)
+{
+	Pixel p;
+
+	float radius = innerRadius + (outerRadius - innerRadius) * point.y;
+	float angle = (beginAngle + (endAngle - beginAngle) * point.x); 
+	p.x = center.x + radius * cos(angle);
+	p.y = center.y + radius * sin(angle);
+	p.color = (Color){255, 255, 255};
+
+	return p;
+};
 
