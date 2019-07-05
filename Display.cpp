@@ -229,9 +229,9 @@ void RectangularBoundaries::verticalFraction(int sections, int index)
 	topRight.y = bottomLeft.y + height;
 }
 
-void RectangularBoundaries::horizzontalFlip(void) 
+void RectangularBoundaries::horizzontalFlip(void)
 {
-		SWAP(bottomLeft.x, topRight.x, float);
+	SWAP(bottomLeft.x, topRight.x, float);
 }
 
 void RectangularBoundaries::verticalFlip(void)
@@ -262,9 +262,9 @@ Pixel RectangularBoundaries::getCenter(void)
 Pixel RectangularBoundaries::project(DataPoint point)
 {
 	Pixel p;
- 
- 	p.x = point.x * topRight.x + (1.0-point.x) * bottomLeft.x;
-	p.y = point.y * topRight.y + (1.0-point.y) * bottomLeft.y;
+
+	p.x = point.x * topRight.x + (1.0 - point.x) * bottomLeft.x;
+	p.y = point.y * topRight.y + (1.0 - point.y) * bottomLeft.y;
 	p.color = (Color){255, 255, 255};
 
 	return p;
@@ -273,16 +273,23 @@ Pixel RectangularBoundaries::project(DataPoint point)
 void RoundBoundaries::begin(DisplayDriver &driver)
 {
 	enclosingBoundaries.begin(driver);
-	update();
+	reset();
+}
 
-	// setup to simulate clock (start at 12, clockwise)
+void RoundBoundaries::applyBorder(int top, int bottom, int left, int right) 
+{
+
+}
+
+void RoundBoundaries::reset(void)
+{
 	innerRadius = 0.0;
+	outerRadius = min(enclosingBoundaries.getWidth(), enclosingBoundaries.getHeight()) / 2.0;
+	// setup to simulate clock (start at 12, clockwise)
 	beginAngle = M_PI / 2;
 	endAngle = -3.0 / 2 * M_PI;
 }
 
-void RoundBoundaries::applyBorder(int top, int bottom, int left, int right) {}
-void RoundBoundaries::reset(void) {}
 void RoundBoundaries::horizzontalFraction(int sections, int index) {}
 void RoundBoundaries::verticalFraction(int sections, int index) {}
 void RoundBoundaries::horizzontalFlip(void) {}
@@ -295,12 +302,10 @@ Pixel RoundBoundaries::project(DataPoint point)
 {
 	Pixel p;
 
-	update();
-
 	float radius = innerRadius + (outerRadius - innerRadius) * point.y;
 	float angle = (beginAngle + (endAngle - beginAngle) * point.x);
-	p.x = center.x + radius * cos(angle);
-	p.y = center.y + radius * sin(angle);
+	p.x = enclosingBoundaries.getCenter().x + radius * cos(angle);
+	p.y = enclosingBoundaries.getCenter().y + radius * sin(angle);
 	p.color = (Color){255, 255, 255};
 
 	return p;
@@ -309,6 +314,4 @@ Pixel RoundBoundaries::project(DataPoint point)
 void RoundBoundaries::update(void)
 {
 	//compute circle parameter depending on enclosing boundaries
-	center = enclosingBoundaries.getCenter();
-	outerRadius = min(enclosingBoundaries.getWidth(), enclosingBoundaries.getHeight()) / 2.0;
 }
