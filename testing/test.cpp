@@ -33,7 +33,10 @@ int main()
 	VisitorDrawLine visitorLine;
 	VisitorDrawAxis visitorAxis;
 	Widget widget;
-	RoundBoundaries circle;
+	RectangularBoundaries first;
+	RectangularBoundaries second;
+	RectangularBoundaries forth;
+	RoundBoundaries third;
 
 	// displayDriver
 	Adafruit_GFX *gfx = new File_GFX(640, 480, "prova.bmp");
@@ -55,7 +58,25 @@ int main()
 	widget.begin(dataSpline);
 	//widget.begin(dataHist);
 
-	circle.begin(displayDriver);
+	first.begin(displayDriver);
+	second.begin(displayDriver);
+	third.begin(displayDriver);
+	forth.begin(displayDriver);
+
+	first.verticalFraction(2,1);
+	first.horizzontalFraction(2,0);
+	first.horizzontalFlip();
+
+	second.verticalFraction(2,1);
+	second.horizzontalFraction(2,1);
+
+	third.enclosingBoundaries.verticalFraction(2,0);
+	third.enclosingBoundaries.horizzontalFraction(2,0);
+
+	forth.verticalFraction(2,0);
+	forth.horizzontalFraction(2,1);
+	forth.verticalFlip();
+	
 	// circle.beginAngle = M_PI;
 	// circle.endAngle = 0; // this way is clockwise
 	// circle.innerRadius = circle.outerRadius / 2;
@@ -66,9 +87,21 @@ int main()
 	//widget.accept(&visitorLine, displayDriver.fullScreen->applyBorder(50, 10, 10, 10));
 	//widget.accept(&visitorScatter, displayDriver.fullScreen->applyBorder(50, 10, 10, 10));
 
-	widget.accept(&visitorAxis, &circle);
-	widget.accept(&visitorLine, &circle);
-	widget.accept(&visitorBar, &circle);
+	widget.accept(&visitorAxis, &first);
+	widget.accept(&visitorLine, &first);
+	widget.accept(&visitorBar, &first);
+
+	widget.accept(&visitorAxis, &second);
+	widget.accept(&visitorLine, &second);
+	widget.accept(&visitorBar, &second);
+
+	widget.accept(&visitorAxis, &third);
+	widget.accept(&visitorLine, &third);
+	widget.accept(&visitorBar, &third);
+
+	widget.accept(&visitorAxis, &forth);
+	widget.accept(&visitorLine, &forth);
+	widget.accept(&visitorBar, &forth);
 
 	//flush to file
 	((File_GFX *)gfx)->flush();

@@ -81,32 +81,41 @@ class Boundaries
 {
 public:
 
+	virtual void begin(DisplayDriver &driver) = 0;
+
+	// getter functions
+	virtual float getWidth(void) = 0;
+	virtual float getHeight(void) = 0;
+	virtual Pixel getCenter(void) = 0;
+
 	//transformation function
-	virtual void applyBorder(int top, int bottom, int left, int right) =0;
-	virtual void reset(void) =0;
-	virtual void horizzontalFraction(int sections, int index) =0;
-	virtual void verticalFraction(int sections, int index) =0;
-	virtual void horizzontalFlip(void) =0;
-	virtual void verticalFlip(void) =0;
+	virtual void applyBorder(int top, int bottom, int left, int right) = 0;
+	virtual void reset(void) = 0;
+	virtual void horizzontalFraction(int sections, int index) = 0;
+	virtual void verticalFraction(int sections, int index) = 0;
+	virtual void horizzontalFlip(void) = 0;
+	virtual void verticalFlip(void) = 0;
 
 	// projection function(s)
-	virtual Pixel project(DataPoint point);
+	virtual Pixel project(DataPoint point) = 0;
 };
 
-class RectangularBoundaries
+class RectangularBoundaries : public Boundaries
 {
 public:
-
 	void begin(DisplayDriver &driver);
 	void applyBorder(int top, int bottom, int left, int right);
 	void reset(void);
 	void horizzontalFraction(int sections, int index);
-	void horizzontalFraction(int sections, int index);
 	void verticalFraction(int sections, int index);
 	void horizzontalFlip(void);
 	void verticalFlip(void);
+	float getWidth(void);
+	float getHeight(void);
+	Pixel getCenter(void);
+
 	Pixel project(DataPoint point);
-	
+
 protected:
 	Pixel bottomLeft;
 	Pixel topRight;
@@ -116,17 +125,23 @@ protected:
 class RoundBoundaries : public Boundaries
 {
 public:
-	void begin(RectangularBoundaries &enclosingBoundaries);
+	void begin(DisplayDriver &driver);
 	void applyBorder(int top, int bottom, int left, int right);
 	void reset(void);
-	void horizzontalFraction(int sections, int index);
 	void horizzontalFraction(int sections, int index);
 	void verticalFraction(int sections, int index);
 	void horizzontalFlip(void);
 	void verticalFlip(void);
+	float getWidth(void);
+	float getHeight(void);
+	Pixel getCenter(void);
 	Pixel project(DataPoint point);
-	
+
+	RectangularBoundaries enclosingBoundaries;
+
 private:
+	void update(void);
+
 	Pixel center;
 	float innerRadius;
 	float outerRadius;
