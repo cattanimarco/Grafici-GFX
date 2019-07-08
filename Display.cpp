@@ -199,6 +199,7 @@ void Boundaries::begin(DisplayDriver &driver)
 
 void Boundaries::applyBorder(int top, int bottom, int left, int right)
 {
+	//TODO make it robust to flip
 	bottomLeft.x += left;
 	bottomLeft.y += bottom;
 	topRight.x -= right;
@@ -276,9 +277,9 @@ void RoundBoundaries::begin(DisplayDriver &driver)
 }
 
 //TODO update circle every time a slice is done
-void RoundBoundaries::applyBorder(int top, int bottom, int left, int right) 
+void RoundBoundaries::applyBorder(int top, int bottom, int left, int right)
 {
-	Boundaries::applyBorder( top,  bottom,  left,  right);
+	Boundaries::applyBorder(top, bottom, left, right);
 	update();
 }
 
@@ -288,8 +289,8 @@ void RoundBoundaries::reset(void)
 	innerRadius = 0.0;
 	outerRadius = min(getWidth(), getHeight()) / 2.0;
 	// setup to simulate clock (start at 12, clockwise)
-	beginAngle = M_PI / 2;
-	endAngle = -3.0 / 2 * M_PI;
+	beginAngle = 0;
+	endAngle = 2 * M_PI;
 }
 
 //TODO update circle every time a slice is done
@@ -297,6 +298,21 @@ void RoundBoundaries::subBoundaries(int rows, int columns, int index)
 {
 	Boundaries::subBoundaries(rows, columns, index);
 	update();
+}
+
+void RoundBoundaries::subBoundariesRadial(int rows, int columns, int index)
+{
+	float width = endAngle - beginAngle;
+	float height = outerRadius - innerRadius;
+
+	width /= columns;
+	height /= rows;
+
+	beginAngle += (index % columns) * width;
+	endAngle = beginAngle + width;
+
+	innerRadius += (index / rows) * height;
+	outerRadius = innerRadius + height;
 }
 
 void RoundBoundaries::horizzontalFlip(void)
@@ -311,12 +327,22 @@ void RoundBoundaries::verticalFlip(void)
 	update();
 }
 
+void RoundBoundaries::horizzontalFlipRadial(void)
+{
+	SWAP(beginAngle, endAngle, float);
+}
+
+void RoundBoundaries::verticalFlipRadial(void)
+{
+	SWAP(innerRadius, outerRadius, float);
+}
+
 Pixel RoundBoundaries::project(DataPoint point)
 {
 	Pixel p;
 
-	float radius = innerRadius + (outerRadius - innerRadius) * point.y;
-	float angle = (beginAngle + (endAngle - beginAngle) * point.x);
+	float radius = innerRadius * (1.0 - point.y) + outerRadius * point.y;
+	float angle = beginAngle * (1.0 - point.x) + endAngle * point.x;
 	p.x = getCenter().x + radius * cos(angle);
 	p.y = getCenter().y + radius * sin(angle);
 	p.color = (Color){255, 255, 255};

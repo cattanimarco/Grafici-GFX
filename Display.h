@@ -111,11 +111,13 @@ public:
 	void applyBorder(int top, int bottom, int left, int right);
 	void reset(void);
 	void subBoundaries(int rows, int columns, int index);
-	//void subBoundariesRadial(int rows, int columns, int index);
+	void subBoundariesRadial(int rows, int columns, int index);
 	void horizzontalFlip(void);
 	void verticalFlip(void);
-	//void horizzontalFlipRadial(void);
-	//void verticalFlipRadial(void);
+	void horizzontalFlipRadial(void);
+	void verticalFlipRadial(void);
+	//void rotateRadial(float value);
+
 	Pixel project(DataPoint point);
 
 private:
