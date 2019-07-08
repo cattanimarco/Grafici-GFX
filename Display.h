@@ -80,41 +80,22 @@ private:
 class Boundaries
 {
 public:
-
-	virtual void begin(DisplayDriver &driver) = 0;
-
-	// getter functions
-	virtual float getWidth(void) = 0;
-	virtual float getHeight(void) = 0;
-	virtual Pixel getCenter(void) = 0;
+	void begin(DisplayDriver &driver);
 
 	//transformation function
-	virtual void applyBorder(int top, int bottom, int left, int right) = 0;
-	virtual void reset(void) = 0;
-	virtual void horizzontalFraction(int sections, int index) = 0;
-	virtual void verticalFraction(int sections, int index) = 0;
-	virtual void horizzontalFlip(void) = 0;
-	virtual void verticalFlip(void) = 0;
+	virtual void applyBorder(int top, int bottom, int left, int right);
+	virtual void reset(void);
+	virtual void subBoundaries(int rows, int columns, int index);
+	virtual void horizzontalFlip(void);
+	virtual void verticalFlip(void);
 
-	// projection function(s)
-	virtual Pixel project(DataPoint point) = 0;
-};
-
-class RectangularBoundaries : public Boundaries
-{
-public:
-	void begin(DisplayDriver &driver);
-	void applyBorder(int top, int bottom, int left, int right);
-	void reset(void);
-	void horizzontalFraction(int sections, int index);
-	void verticalFraction(int sections, int index);
-	void horizzontalFlip(void);
-	void verticalFlip(void);
+	// getter functions
 	float getWidth(void);
 	float getHeight(void);
 	Pixel getCenter(void);
 
-	Pixel project(DataPoint point);
+	// projection function(s)
+	virtual Pixel project(DataPoint point);
 
 protected:
 	Pixel bottomLeft;
@@ -126,18 +107,16 @@ class RoundBoundaries : public Boundaries
 {
 public:
 	void begin(DisplayDriver &driver);
+
 	void applyBorder(int top, int bottom, int left, int right);
 	void reset(void);
-	void horizzontalFraction(int sections, int index);
-	void verticalFraction(int sections, int index);
+	void subBoundaries(int rows, int columns, int index);
+	//void subBoundariesRadial(int rows, int columns, int index);
 	void horizzontalFlip(void);
 	void verticalFlip(void);
-	float getWidth(void);
-	float getHeight(void);
-	Pixel getCenter(void);
+	//void horizzontalFlipRadial(void);
+	//void verticalFlipRadial(void);
 	Pixel project(DataPoint point);
-
-	RectangularBoundaries enclosingBoundaries;
 
 private:
 	void update(void);

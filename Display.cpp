@@ -191,13 +191,13 @@ int DisplayDriver::colorTo16b(Color color)
 	return (c);
 }
 
-void RectangularBoundaries::begin(DisplayDriver &driver)
+void Boundaries::begin(DisplayDriver &driver)
 {
 	_driver = &driver;
 	reset();
 }
 
-void RectangularBoundaries::applyBorder(int top, int bottom, int left, int right)
+void Boundaries::applyBorder(int top, int bottom, int left, int right)
 {
 	bottomLeft.x += left;
 	bottomLeft.y += bottom;
@@ -205,7 +205,7 @@ void RectangularBoundaries::applyBorder(int top, int bottom, int left, int right
 	topRight.y -= top;
 }
 
-void RectangularBoundaries::reset(void)
+void Boundaries::reset(void)
 {
 	bottomLeft.x = 0;
 	bottomLeft.y = 0;
@@ -213,43 +213,42 @@ void RectangularBoundaries::reset(void)
 	topRight.y = _driver->height() - 1;
 }
 
-void RectangularBoundaries::horizzontalFraction(int sections, int index)
+void Boundaries::subBoundaries(int rows, int columns, int index)
 {
 	float width = getWidth();
-	width /= sections;
-	bottomLeft.x += index * width;
-	topRight.x = bottomLeft.x + width;
-}
-
-void RectangularBoundaries::verticalFraction(int sections, int index)
-{
 	float height = getHeight();
-	height /= sections;
-	bottomLeft.y += index * height;
+
+	width /= columns;
+	height /= rows;
+
+	bottomLeft.x += (index % columns) * width;
+	bottomLeft.y += (index / rows) * height;
+
+	topRight.x = bottomLeft.x + width;
 	topRight.y = bottomLeft.y + height;
 }
 
-void RectangularBoundaries::horizzontalFlip(void)
+void Boundaries::horizzontalFlip(void)
 {
 	SWAP(bottomLeft.x, topRight.x, float);
 }
 
-void RectangularBoundaries::verticalFlip(void)
+void Boundaries::verticalFlip(void)
 {
 	SWAP(bottomLeft.y, topRight.y, float);
 }
 
-float RectangularBoundaries::getWidth(void)
+float Boundaries::getWidth(void)
 {
 	return (topRight.x - bottomLeft.x);
 }
 
-float RectangularBoundaries::getHeight(void)
+float Boundaries::getHeight(void)
 {
 	return (topRight.y - bottomLeft.y);
 }
 
-Pixel RectangularBoundaries::getCenter(void)
+Pixel Boundaries::getCenter(void)
 {
 	Pixel center;
 	center.x = (bottomLeft.x + topRight.x) / 2.0;
@@ -259,7 +258,7 @@ Pixel RectangularBoundaries::getCenter(void)
 	return center;
 }
 
-Pixel RectangularBoundaries::project(DataPoint point)
+Pixel Boundaries::project(DataPoint point)
 {
 	Pixel p;
 
@@ -272,31 +271,45 @@ Pixel RectangularBoundaries::project(DataPoint point)
 
 void RoundBoundaries::begin(DisplayDriver &driver)
 {
-	enclosingBoundaries.begin(driver);
+	Boundaries::begin(driver);
 	reset();
 }
 
+//TODO update circle every time a slice is done
 void RoundBoundaries::applyBorder(int top, int bottom, int left, int right) 
 {
-
+	Boundaries::applyBorder( top,  bottom,  left,  right);
+	update();
 }
 
 void RoundBoundaries::reset(void)
 {
+	Boundaries::reset();
 	innerRadius = 0.0;
-	outerRadius = min(enclosingBoundaries.getWidth(), enclosingBoundaries.getHeight()) / 2.0;
+	outerRadius = min(getWidth(), getHeight()) / 2.0;
 	// setup to simulate clock (start at 12, clockwise)
 	beginAngle = M_PI / 2;
 	endAngle = -3.0 / 2 * M_PI;
 }
 
-void RoundBoundaries::horizzontalFraction(int sections, int index) {}
-void RoundBoundaries::verticalFraction(int sections, int index) {}
-void RoundBoundaries::horizzontalFlip(void) {}
-void RoundBoundaries::verticalFlip(void) {}
-float RoundBoundaries::getWidth(void) {}
-float RoundBoundaries::getHeight(void) {}
-Pixel RoundBoundaries::getCenter(void) {}
+//TODO update circle every time a slice is done
+void RoundBoundaries::subBoundaries(int rows, int columns, int index)
+{
+	Boundaries::subBoundaries(rows, columns, index);
+	update();
+}
+
+void RoundBoundaries::horizzontalFlip(void)
+{
+	Boundaries::horizzontalFlip();
+	update();
+}
+
+void RoundBoundaries::verticalFlip(void)
+{
+	Boundaries::verticalFlip();
+	update();
+}
 
 Pixel RoundBoundaries::project(DataPoint point)
 {
@@ -304,8 +317,8 @@ Pixel RoundBoundaries::project(DataPoint point)
 
 	float radius = innerRadius + (outerRadius - innerRadius) * point.y;
 	float angle = (beginAngle + (endAngle - beginAngle) * point.x);
-	p.x = enclosingBoundaries.getCenter().x + radius * cos(angle);
-	p.y = enclosingBoundaries.getCenter().y + radius * sin(angle);
+	p.x = getCenter().x + radius * cos(angle);
+	p.y = getCenter().y + radius * sin(angle);
 	p.color = (Color){255, 255, 255};
 
 	return p;
@@ -314,4 +327,5 @@ Pixel RoundBoundaries::project(DataPoint point)
 void RoundBoundaries::update(void)
 {
 	//compute circle parameter depending on enclosing boundaries
+	outerRadius = min(getWidth(), getHeight()) / 2.0;
 }

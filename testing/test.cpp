@@ -33,10 +33,10 @@ int main()
 	VisitorDrawLine visitorLine;
 	VisitorDrawAxis visitorAxis;
 	Widget widget;
-	RectangularBoundaries first;
-	RectangularBoundaries second;
-	RectangularBoundaries forth;
-	RoundBoundaries third;
+	Boundaries topRight;
+	Boundaries topLeft;
+	RoundBoundaries bottomRight;
+	Boundaries bottomLeft;
 
 	// displayDriver
 	Adafruit_GFX *gfx = new File_GFX(640, 480, "prova.bmp");
@@ -58,40 +58,40 @@ int main()
 	widget.begin(dataSpline);
 	//widget.begin(dataHist);
 
-	first.begin(displayDriver);
-	second.begin(displayDriver);
-	third.begin(displayDriver);
-	forth.begin(displayDriver);
+	topRight.begin(displayDriver);
+	topLeft.begin(displayDriver);
+	bottomRight.begin(displayDriver);
+	bottomLeft.begin(displayDriver);
 
-	first.verticalFraction(2,1);
-	first.horizzontalFraction(2,0);
-	first.horizzontalFlip();
+	topLeft.subBoundaries(2, 2, 2);
+	topLeft.applyBorder(10, 10, 10, 10);
 
-	second.verticalFraction(2,1);
-	second.horizzontalFraction(2,1);
+	bottomLeft.subBoundaries(2, 2, 0);
+	bottomLeft.applyBorder(10, 10, 10, 10);
+	bottomLeft.verticalFlip();
 
-	third.enclosingBoundaries.verticalFraction(2,0);
-	third.enclosingBoundaries.horizzontalFraction(2,0);
+	topRight.subBoundaries(2, 2, 3);
+	topRight.applyBorder(10, 10, 10, 10);
+	topRight.horizzontalFlip();
 
-	forth.verticalFraction(2,0);
-	forth.horizzontalFraction(2,1);
-	forth.verticalFlip();
+	bottomRight.subBoundaries(2, 2, 1);
+	bottomRight.applyBorder(10, 10, 10, 10);
 
-	widget.accept(&visitorAxis, &first);
-	widget.accept(&visitorLine, &first);
-	widget.accept(&visitorBar, &first);
+	widget.accept(&visitorAxis, &topRight);
+	widget.accept(&visitorLine, &topRight);
+	widget.accept(&visitorBar, &topRight);
 
-	widget.accept(&visitorAxis, &second);
-	widget.accept(&visitorLine, &second);
-	widget.accept(&visitorBar, &second);
+	widget.accept(&visitorAxis, &topLeft);
+	widget.accept(&visitorLine, &topLeft);
+	widget.accept(&visitorBar, &topLeft);
 
-	widget.accept(&visitorAxis, &third);
-	widget.accept(&visitorLine, &third);
-	widget.accept(&visitorBar, &third);
+	widget.accept(&visitorAxis, &bottomRight);
+	widget.accept(&visitorLine, &bottomRight);
+	widget.accept(&visitorBar, &bottomRight);
 
-	widget.accept(&visitorAxis, &forth);
-	widget.accept(&visitorLine, &forth);
-	widget.accept(&visitorBar, &forth);
+	widget.accept(&visitorAxis, &bottomLeft);
+	widget.accept(&visitorLine, &bottomLeft);
+	widget.accept(&visitorBar, &bottomLeft);
 
 	//flush to file
 	((File_GFX *)gfx)->flush();
