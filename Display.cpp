@@ -1,5 +1,8 @@
 #include "Display.h"
 
+// #include <iostream>
+// using namespace std;
+
 #define SWAP(x, y, T) \
 	do                \
 	{                 \
@@ -223,7 +226,7 @@ void Boundaries::subBoundaries(int rows, int columns, int index)
 	height /= rows;
 
 	bottomLeft.x += (index % columns) * width;
-	bottomLeft.y += (index / rows) * height;
+	bottomLeft.y += (index / columns) * height;
 
 	topRight.x = bottomLeft.x + width;
 	topRight.y = bottomLeft.y + height;
@@ -311,8 +314,10 @@ void RoundBoundaries::subBoundariesRadial(int rows, int columns, int index)
 	beginAngle += (index % columns) * width;
 	endAngle = beginAngle + width;
 
-	innerRadius += (index / rows) * height;
+	innerRadius += (index / columns) * height;
 	outerRadius = innerRadius + height;
+
+	//cout << index << " " << innerRadius << " " << outerRadius << endl;
 }
 
 void RoundBoundaries::horizzontalFlip(void)

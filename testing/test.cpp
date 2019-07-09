@@ -75,10 +75,9 @@ int main()
 	topRight.horizzontalFlip();
 
 	bottomRight.subBoundaries(2, 2, 1);
-	//bottomRight.applyBorder(10, 10, 10, 10);
-	bottomRight.subBoundariesRadial(2,1,3);
-		//bottomRight.verticalFlipRadial();
-
+	bottomRight.applyBorder(10, 10, 10, 10);
+	bottomRight.subBoundariesRadial(2,1,1);
+	bottomRight.horizzontalFlipRadial();
 
 	widget.accept(&visitorAxis, &topRight);
 	widget.accept(&visitorLine, &topRight);
