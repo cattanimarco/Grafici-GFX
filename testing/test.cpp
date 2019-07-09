@@ -67,16 +67,16 @@ int main()
 	topLeft.applyBorder(10, 10, 10, 10);
 
 	bottomLeft.subBoundaries(2, 2, 0);
-	bottomLeft.applyBorder(10, 10, 10, 10);
 	bottomLeft.verticalFlip();
+	bottomLeft.applyBorder(10, 10, 10, 10);
 
 	topRight.subBoundaries(2, 2, 3);
-	topRight.applyBorder(10, 10, 10, 10);
 	topRight.horizzontalFlip();
+	topRight.applyBorder(10, 10, 10, 10);
 
 	bottomRight.subBoundaries(2, 2, 1);
 	bottomRight.applyBorder(10, 10, 10, 10);
-	bottomRight.subBoundariesRadial(2,1,1);
+	bottomRight.subBoundariesRadial(2, 6, 7);
 	bottomRight.horizzontalFlipRadial();
 
 	widget.accept(&visitorAxis, &topRight);

@@ -28,8 +28,8 @@ struct Pixel
 {
 public:
 	Pixel(void);
-	Pixel(unsigned int x, unsigned int y);
-	Pixel(unsigned int x, unsigned int y, Color color);
+	Pixel( int x,  int y);
+	Pixel( int x,  int y, Color color);
 
 	Pixel &setColor(Color *color);
 	Pixel &setColor(float value, Color *colors, int size);
@@ -38,8 +38,8 @@ public:
 	Pixel &operator+=(const Pixel &b);
 	Pixel &operator-=(const Pixel &b);
 
-	unsigned int x;
-	unsigned int y;
+	int x;
+	int y;
 	Color color;
 };
 
@@ -90,9 +90,11 @@ public:
 	virtual void verticalFlip(void);
 
 	// getter functions
-	float getWidth(void);
-	float getHeight(void);
+	float width(void);
+	float height(void);
 	Pixel getCenter(void);
+
+void print(); 
 
 	// projection function(s)
 	virtual Pixel project(DataPoint point);

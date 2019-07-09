@@ -1,7 +1,7 @@
 #include "Display.h"
 
-// #include <iostream>
-// using namespace std;
+#include <iostream>
+using namespace std;
 
 #define SWAP(x, y, T) \
 	do                \
@@ -21,9 +21,9 @@
 
 Pixel::Pixel(void) : x(0), y(0), color((Color){255, 255, 255}) {}
 
-Pixel::Pixel(unsigned int x, unsigned int y, Color color) : x(x), y(y), color(color) {}
+Pixel::Pixel( int x,  int y, Color color) : x(x), y(y), color(color) {}
 
-Pixel::Pixel(unsigned int x, unsigned int y) : x(x), y(y), color((Color){255, 255, 255}) {}
+Pixel::Pixel( int x,  int y) : x(x), y(y), color((Color){255, 255, 255}) {}
 
 Pixel &Pixel::setColor(Color *color)
 {
@@ -200,13 +200,37 @@ void Boundaries::begin(DisplayDriver &driver)
 	reset();
 }
 
+void Boundaries::print()
+{
+	cout << bottomLeft.x << "," << bottomLeft.y << " " << topRight.x << "," << topRight.y << endl;
+
+}
+
 void Boundaries::applyBorder(int top, int bottom, int left, int right)
 {
-	//TODO make it robust to flip
-	bottomLeft.x += left;
-	bottomLeft.y += bottom;
-	topRight.x -= right;
-	topRight.y -= top;
+	// account for horizzontalFlip
+	if (width() > 0)
+	{
+		bottomLeft.x += left;
+		topRight.x -= right;
+	}
+	else
+	{
+		bottomLeft.x -= left;
+		topRight.x += right;
+	}
+
+	// account for verticalFlip
+	if (height() > 0)
+	{
+		bottomLeft.y += bottom;
+		topRight.y -= top;
+	}
+	else
+	{
+		bottomLeft.y -= bottom;
+		topRight.y += top;
+	}
 }
 
 void Boundaries::reset(void)
@@ -219,17 +243,17 @@ void Boundaries::reset(void)
 
 void Boundaries::subBoundaries(int rows, int columns, int index)
 {
-	float width = getWidth();
-	float height = getHeight();
+	float _width = width();
+	float _height = height();
 
-	width /= columns;
-	height /= rows;
+	_width /= columns;
+	_height /= rows;
 
-	bottomLeft.x += (index % columns) * width;
-	bottomLeft.y += (index / columns) * height;
+	bottomLeft.x += (index % columns) * _width;
+	bottomLeft.y += (index / columns) * _height;
 
-	topRight.x = bottomLeft.x + width;
-	topRight.y = bottomLeft.y + height;
+	topRight.x = bottomLeft.x + _width;
+	topRight.y = bottomLeft.y + _height;
 }
 
 void Boundaries::horizzontalFlip(void)
@@ -242,12 +266,12 @@ void Boundaries::verticalFlip(void)
 	SWAP(bottomLeft.y, topRight.y, float);
 }
 
-float Boundaries::getWidth(void)
+float Boundaries::width(void)
 {
 	return (topRight.x - bottomLeft.x);
 }
 
-float Boundaries::getHeight(void)
+float Boundaries::height(void)
 {
 	return (topRight.y - bottomLeft.y);
 }
@@ -290,7 +314,7 @@ void RoundBoundaries::reset(void)
 {
 	Boundaries::reset();
 	innerRadius = 0.0;
-	outerRadius = min(getWidth(), getHeight()) / 2.0;
+	outerRadius = min(width(), height()) / 2.0;
 	// setup to simulate clock (start at 12, clockwise)
 	beginAngle = 0;
 	endAngle = 2 * M_PI;
@@ -305,17 +329,17 @@ void RoundBoundaries::subBoundaries(int rows, int columns, int index)
 
 void RoundBoundaries::subBoundariesRadial(int rows, int columns, int index)
 {
-	float width = endAngle - beginAngle;
-	float height = outerRadius - innerRadius;
+	float _width = endAngle - beginAngle;
+	float _height = outerRadius - innerRadius;
 
-	width /= columns;
-	height /= rows;
+	_width /= columns;
+	_height /= rows;
 
-	beginAngle += (index % columns) * width;
-	endAngle = beginAngle + width;
+	beginAngle += (index % columns) * _width;
+	endAngle = beginAngle + _width;
 
-	innerRadius += (index / columns) * height;
-	outerRadius = innerRadius + height;
+	innerRadius += (index / columns) * _height;
+	outerRadius = innerRadius + _height;
 
 	//cout << index << " " << innerRadius << " " << outerRadius << endl;
 }
@@ -358,5 +382,5 @@ Pixel RoundBoundaries::project(DataPoint point)
 void RoundBoundaries::update(void)
 {
 	//compute circle parameter depending on enclosing boundaries
-	outerRadius = min(getWidth(), getHeight()) / 2.0;
+	outerRadius = min(width(), height()) / 2.0;
 }
