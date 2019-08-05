@@ -1,7 +1,6 @@
 CCSRC = $(wildcard *.cpp) \
 	$(wildcard ../*.cpp) \
 	$(wildcard ../dataSet/*.cpp) \
-	$(wildcard ../visitors/*.cpp) \
 
 OBJ = $(CCSRC:.cpp=.o)
 

@@ -32,10 +32,10 @@ ColorScheme::ColorScheme(Color *colors, int size, Color lineColor, Color markerC
 {
 	_colors = colors;
 	_size = size;
-	lineColor = lineColor;
-	markerColor = markerColor;
-	fillColor = fillColor;
-	bkgColor = bkgColor;
+	line = lineColor;
+	marker = markerColor;
+	fill = fillColor;
+	bkg = bkgColor;
 }
 
 Color ColorScheme::getColor(float value)

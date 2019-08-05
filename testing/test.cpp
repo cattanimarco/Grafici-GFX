@@ -3,15 +3,16 @@
 #include "../Grafici.h"
 
 // #include "../visitors/VisitorDrawScatter.h"
-#include "../visitors/VisitorDrawBar.h"
-// #include "../visitors/VisitorDrawLine.h"
-#include "../visitors/VisitorDrawAxis.h"
+#include "../drawVisitors/barPlot.h"
+#include "../drawVisitors/linePlot.h"
+#include "../drawVisitors/axisPlot.h"
 
 #include "../dataset/DataSetFloat.h"
 #include "../dataset/DecoratorDataSetSpline.h"
 #include "../dataset/DecoratorDataSetHistogram.h"
 
-#include "../colorschemes/ColorSchemeHeat.h"
+#include "../colorSchemes/heat.h"
+#include "../colorSchemes/parula.h"
 
 #include "../Display.h"
 //#include "../Widget.h"
@@ -37,14 +38,14 @@ int main()
 	//VisitorDrawLine visitorLine;
 	//VisitorDrawAxis visitorAxis;
 	//Widget widget;
-	//Boundaries topRight;
-	 Boundaries topLeft ;
+	Boundaries topRight;
+	Boundaries topLeft;
 	// RoundBoundaries bottomRight;
 	// Boundaries bottomLeft;
 
 	// displayDriver
 	Adafruit_GFX *gfx = new File_GFX(640, 480, "prova.bmp");
-	
+
 	grafici.begin(*gfx);
 
 	// dataset
@@ -53,13 +54,19 @@ int main()
 	dataHist.begin(&dataSpline, 20);
 
 	topLeft = grafici.baseBoundaries();
-	 topLeft.subBoundaries(2, 2, 2);
-	 topLeft.applyBorder(10, 10, 10, 10);
+	topLeft.subBoundaries(2, 2, 2);
+	topLeft.applyBorder(10, 10, 10, 10);
 
-	grafici.plot(barPlot, &dataSpline,&colorSchemeHeat, &topLeft);
-	grafici.plot(axisPlot, &dataSpline,&colorSchemeHeat, &topLeft);
+	topRight = grafici.baseBoundaries();
+	topRight.subBoundaries(2, 2, 3);
+	topRight.applyBorder(10, 10, 10, 10);
+	topRight.horizzontalFlip();
 
-	//todo create a factory that get gfx + array (+plot style) and instantiate all objects
+	grafici.plot(axisPlot, &dataSpline, &csHeat, &topLeft);
+	grafici.plot(barPlot, &dataSpline, &csHeat, &topLeft);
+
+	grafici.plot(barPlot, &dataSpline, &csParula, &topRight);
+	grafici.plot(linePlot, &dataSpline, &csParula, &topRight);
 
 	// plotter
 	// visitorBar.begin(displayDriver, colorSchemeHeat);
@@ -73,8 +80,6 @@ int main()
 	// topRight.begin(displayDriver);
 	// bottomRight.begin(displayDriver);
 	// bottomLeft.begin(displayDriver);
-
-
 
 	// bottomLeft.subBoundaries(2, 2, 0);
 	// bottomLeft.verticalFlip();
