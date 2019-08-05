@@ -1,14 +1,21 @@
-#ifndef ARDU_DATAVIS_VISITOR_DRAW_BAR_H
-#define ARDU_DATAVIS_VISITOR_DRAW_BAR_H
+#ifndef GRAFICI_GFX_VISITOR_DRAW_BAR_H
+#define GRAFICI_GFX_VISITOR_DRAW_BAR_H
 
-#include "../VisitorDraw.h"
+#include "../Data.h"
+#include "../Display.h"
 
-class VisitorDrawBar : public VisitorDraw
+void barPlot(DisplayDriver *displayDriver, DataSet *dataset, Boundaries *boundaries, ColorScheme *colorScheme)
 {
-public:
+	for (DataPointIterator it = dataset->beginIt(); it != dataset->endIt(); ++it)
+	{
+		DataPoint baseDataPoint = *it;
+		DataPoint topDataPoint = baseDataPoint;
 
-	void visit(DataSet *dataset, Boundaries *boundaries);
-};
+		baseDataPoint.y = 0;
 
+		displayDriver->drawLine(boundaries->project(baseDataPoint).setColor(colorScheme->getColor(topDataPoint.value)),
+								boundaries->project(topDataPoint).setColor(colorScheme->getColor(topDataPoint.value)));
+	}
+}
 
-#endif //ARDU_DATAVIS_VISITOR_DRAW_BAR_H
+#endif //GRAFICI_GFX_VISITOR_DRAW_BAR_H

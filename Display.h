@@ -6,8 +6,11 @@
 #include "Data.h"
 #include "Adafruit_GFX.h"
 
-struct Color
+class Color
 {
+public:
+	//Color &fadeColor(float percentage, Color *otherColor);
+
 	unsigned char red;
 	unsigned char green;
 	unsigned char blue;
@@ -16,24 +19,28 @@ struct Color
 class ColorScheme
 {
 public:
-	Color *colors;
-	int size;
-	Color *lineColor;   //white
-	Color *markerColor; //red
-	Color *fillColor;   //gray
-	Color *bkgColor;	//black
+	ColorScheme(Color *	colors, int size, Color lineColor, Color markerColor, Color fillColor, Color bkgColor);
+
+	Color line;   
+	Color marker; 
+	Color fill;   
+	Color bkg;	
+
+	Color getColor(float value);
+
+private:
+	Color *_colors;
+	int    _size;
 };
 
 struct Pixel
 {
 public:
 	Pixel(void);
-	Pixel( int x,  int y);
-	Pixel( int x,  int y, Color color);
+	Pixel(int x, int y);
+	Pixel(int x, int y, Color color);
 
-	Pixel &setColor(Color *color);
-	Pixel &setColor(float value, Color *colors, int size);
-	Pixel &fadeColor(float percentage, Color *otherColor);
+	Pixel &setColor(Color color);
 
 	Pixel &operator+=(const Pixel &b);
 	Pixel &operator-=(const Pixel &b);
@@ -94,10 +101,11 @@ public:
 	float height(void);
 	Pixel getCenter(void);
 
-void print(); 
+	void print();
 
 	// projection function(s)
 	virtual Pixel project(DataPoint point);
+	virtual Pixel project(DataPoint point, Color color);
 
 protected:
 	Pixel bottomLeft;
@@ -121,6 +129,7 @@ public:
 	//void rotateRadial(float value);
 
 	Pixel project(DataPoint point);
+	Pixel project(DataPoint point, Color color);
 
 private:
 	void update(void);

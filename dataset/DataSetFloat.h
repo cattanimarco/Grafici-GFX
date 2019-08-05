@@ -1,5 +1,5 @@
-#ifndef ARDU_DATAVIS_DATA_FLOAT_H
-#define ARDU_DATAVIS_DATA_FLOAT_H
+#ifndef GRAFICI_GFX_DATA_FLOAT_H
+#define GRAFICI_GFX_DATA_FLOAT_H
 
 #include "../Data.h"
 
@@ -36,4 +36,4 @@ private:
 	int _numElem;
 };
 
-#endif //ARDU_DATAVIS_DATA_FLOAT_H
+#endif //GRAFICI_GFX_DATA_FLOAT_H

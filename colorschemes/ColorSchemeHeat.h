@@ -1,9 +1,9 @@
 #include "../Display.h"
 
-#ifndef ARDU_DATAVIS_ETH_H
-#define ARDU_DATAVIS_ETH_H
+#ifndef GRAFICI_GFX_ETH_H
+#define GRAFICI_GFX_ETH_H
 
-Color colorsHeat[11]	= {
+Color colorsHeat[11] = {
 	{0 , 0, 0},
 	{10, 0, 0},
 	{75, 0, 0},
@@ -17,14 +17,13 @@ Color colorsHeat[11]	= {
 	{255, 255, 255},
 };
 
-ColorScheme colorSchemeHeat =
-{
-	colorsHeat, //.colors = 
+ColorScheme colorSchemeHeat(
+	&colorsHeat[0], //.colors = 
 	11, //.size = 
-	&colorsHeat[10], //.lineColor = 
-	&colorsHeat[5], //.markerColor= 
-	&colorsHeat[9], //.fillColor = 
-	&colorsHeat[0], //.bkgColor = 	  
-};
+	colorsHeat[10], //.lineColor = 
+	colorsHeat[5], //.markerColor= 
+	colorsHeat[9], //.fillColor = 
+	colorsHeat[0] //.bkgColor = 	  
+);
 
-#endif //ARDU_DATAVIS_ETH_H
+#endif //GRAFICI_GFX_ETH_H

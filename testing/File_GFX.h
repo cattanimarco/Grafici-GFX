@@ -1,5 +1,5 @@
-#ifndef ARDU_DATAVIS_DRIVER_FILE_H
-#define ARDU_DATAVIS_DRIVER_FILE_H
+#ifndef GRAFICI_GFX_DRIVER_FILE_H
+#define GRAFICI_GFX_DRIVER_FILE_H
 
 #include "../Adafruit_GFX.h"
 #include "../lib/ezdib.h"
@@ -17,4 +17,4 @@ private:
 	char *filename;
 };
 
-#endif //ARDU_DATAVIS_DRIVER_FILE_H
+#endif //GRAFICI_GFX_DRIVER_FILE_H

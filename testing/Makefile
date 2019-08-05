@@ -1,6 +1,5 @@
 CCSRC = $(wildcard *.cpp) \
 	$(wildcard ../*.cpp) \
-	$(wildcard ../widgets/*.cpp) \
 	$(wildcard ../dataSet/*.cpp) \
 	$(wildcard ../visitors/*.cpp) \
 

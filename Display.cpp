@@ -19,23 +19,31 @@ using namespace std;
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-Pixel::Pixel(void) : x(0), y(0), color((Color){255, 255, 255}) {}
+// Color &Color::fadeColor(float percentage, Color *otherColor)
+// {
+// 	red = red * (1 - percentage) + otherColor->red * percentage;
+// 	green = green * (1 - percentage) + otherColor->green * percentage;
+// 	blue = blue * (1 - percentage) + otherColor->blue * percentage;
+// 	return *this;
+// }
 
-Pixel::Pixel( int x,  int y, Color color) : x(x), y(y), color(color) {}
 
-Pixel::Pixel( int x,  int y) : x(x), y(y), color((Color){255, 255, 255}) {}
-
-Pixel &Pixel::setColor(Color *color)
+ColorScheme::ColorScheme(Color *colors, int size, Color lineColor, Color markerColor, Color fillColor, Color bkgColor)
 {
-	this->color = *color;
-	return *this;
+	_colors = colors;
+	_size = size;
+	lineColor = lineColor;
+	markerColor = markerColor;
+	fillColor = fillColor;
+	bkgColor = bkgColor;
 }
 
-Pixel &Pixel::setColor(float value, Color *colors, int size)
+Color ColorScheme::getColor(float value)
 {
 	int idx1;				// |-- Our desired color will be between these two indexes in "color".
 	int idx2;				// |
 	float fractBetween = 0; // Fraction between "idx1" and "idx2" where our value is.
+	Color color;
 
 	if (value <= 0)
 	{
@@ -43,28 +51,32 @@ Pixel &Pixel::setColor(float value, Color *colors, int size)
 	} // accounts for an input <=0
 	else if (value >= 1)
 	{
-		idx1 = idx2 = size - 1;
+		idx1 = idx2 = _size - 1;
 	} // accounts for an input >=0
 	else
 	{
-		value = value * (size - 1);			// Will multiply value by 3.
+		value = value * (_size - 1);			// Will multiply value by 3.
 		idx1 = floor(value);				// Our desired color will be after this index.
 		idx2 = idx1 + 1;					// ... and before this index (inclusive).
 		fractBetween = value - float(idx1); // Distance between the two indexes (0-1).
 	}
 
-	color.red = colors[idx2].red * fractBetween + colors[idx1].red * (1 - fractBetween);
-	color.green = colors[idx2].green * fractBetween + colors[idx1].green * (1 - fractBetween);
-	color.blue = colors[idx2].blue * fractBetween + colors[idx1].blue * (1 - fractBetween);
+	color.red =   _colors[idx2].red * fractBetween +   _colors[idx1].red * (1 - fractBetween);
+	color.green = _colors[idx2].green * fractBetween + _colors[idx1].green * (1 - fractBetween);
+	color.blue =  _colors[idx2].blue * fractBetween +  _colors[idx1].blue * (1 - fractBetween);
 
-	return *this;
+	return color;
 }
 
-Pixel &Pixel::fadeColor(float percentage, Color *otherColor)
+Pixel::Pixel(void) : x(0), y(0), color((Color){255, 255, 255}) {}
+
+Pixel::Pixel(int x, int y, Color color) : x(x), y(y), color(color) {}
+
+Pixel::Pixel(int x, int y) : x(x), y(y), color((Color){255, 255, 255}) {}
+
+Pixel &Pixel::setColor(Color color)
 {
-	color.red = color.red * (1 - percentage) + otherColor->red * percentage;
-	color.green = color.green * (1 - percentage) + otherColor->green * percentage;
-	color.blue = color.blue * (1 - percentage) + otherColor->blue * percentage;
+	this->color = color;
 	return *this;
 }
 
@@ -203,7 +215,6 @@ void Boundaries::begin(DisplayDriver &driver)
 void Boundaries::print()
 {
 	cout << bottomLeft.x << "," << bottomLeft.y << " " << topRight.x << "," << topRight.y << endl;
-
 }
 
 void Boundaries::applyBorder(int top, int bottom, int left, int right)
@@ -288,11 +299,16 @@ Pixel Boundaries::getCenter(void)
 
 Pixel Boundaries::project(DataPoint point)
 {
+	return project(point, (Color){255, 255, 255});
+};
+
+Pixel Boundaries::project(DataPoint point, Color color)
+{
 	Pixel p;
 
 	p.x = point.x * topRight.x + (1.0 - point.x) * bottomLeft.x;
 	p.y = point.y * topRight.y + (1.0 - point.y) * bottomLeft.y;
-	p.color = (Color){255, 255, 255};
+	p.color = color;
 
 	return p;
 };
@@ -368,13 +384,19 @@ void RoundBoundaries::verticalFlipRadial(void)
 
 Pixel RoundBoundaries::project(DataPoint point)
 {
+	//TODO do we need to override this function?
+	return project(point, (Color){255, 255, 255});
+};
+
+Pixel RoundBoundaries::project(DataPoint point, Color color)
+{
 	Pixel p;
 
 	float radius = innerRadius * (1.0 - point.y) + outerRadius * point.y;
 	float angle = beginAngle * (1.0 - point.x) + endAngle * point.x;
 	p.x = getCenter().x + radius * cos(angle);
 	p.y = getCenter().y + radius * sin(angle);
-	p.color = (Color){255, 255, 255};
+	p.color = color;
 
 	return p;
 };
