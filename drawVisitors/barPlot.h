@@ -4,17 +4,17 @@
 #include "../Data.h"
 #include "../Display.h"
 
-void barPlot(DisplayDriver *displayDriver, DataSet *dataset, Boundaries *boundaries, ColorScheme *colorScheme)
+void barPlot(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *boundaries, ColorScheme *colorScheme)
 {
-	for (DataPointIterator it = dataset->beginIt(); it != dataset->endIt(); ++it)
+	for (DatapointIterator it = dataset->beginIt(); it != dataset->endIt(); ++it)
 	{
-		DataPoint baseDataPoint = *it;
-		DataPoint topDataPoint = baseDataPoint;
+		Datapoint baseDatapoint = *it;
+		Datapoint topDatapoint = baseDatapoint;
 
-		baseDataPoint.y = 0;
+		baseDatapoint.y = 0;
 
-		displayDriver->drawLine(boundaries->project(baseDataPoint).setColor(colorScheme->getColor(topDataPoint.value)),
-								boundaries->project(topDataPoint).setColor(colorScheme->getColor(topDataPoint.value)));
+		displayDriver->drawLine(boundaries->project(baseDatapoint).setColor(colorScheme->getColor(topDatapoint.value)),
+								boundaries->project(topDatapoint).setColor(colorScheme->getColor(topDatapoint.value)));
 	}
 }
 

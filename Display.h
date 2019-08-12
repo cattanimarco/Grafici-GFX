@@ -1,8 +1,7 @@
 #ifndef GRAFICI_DISPLAY_H
 #define GRAFICI_DISPLAY_H
 
-#include <math.h>
-
+#include "Arduino.h"
 #include "Data.h"
 #include "Adafruit_GFX.h"
 
@@ -104,8 +103,8 @@ public:
 	void print();
 
 	// projection function(s)
-	virtual Pixel project(DataPoint point);
-	virtual Pixel project(DataPoint point, Color color);
+	virtual Pixel project(Datapoint point);
+	virtual Pixel project(Datapoint point, Color color);
 
 protected:
 	Pixel bottomLeft;
@@ -128,8 +127,8 @@ public:
 	void verticalFlipRadial(void);
 	//void rotateRadial(float value);
 
-	Pixel project(DataPoint point);
-	Pixel project(DataPoint point, Color color);
+	Pixel project(Datapoint point);
+	Pixel project(Datapoint point, Color color);
 
 private:
 	void update(void);

@@ -7,9 +7,9 @@
 #include "../drawVisitors/linePlot.h"
 #include "../drawVisitors/axisPlot.h"
 
-#include "../dataset/DataSetFloat.h"
-#include "../dataset/DecoratorDataSetSpline.h"
-#include "../dataset/DecoratorDataSetHistogram.h"
+#include "../DatasetFloat.h"
+#include "../DatasetSpline.h"
+#include "../DatasetHistogram.h"
 
 #include "../colorSchemes/heat.h"
 #include "../colorSchemes/parula.h"
@@ -30,9 +30,9 @@ int main()
 	//DisplayDriver displayDriver;
 	Grafici grafici;
 
-	DataSetFloat dataset;
-	DecoratorDataSetSpline dataSpline;
-	DecoratorDataSetHistogram dataHist;
+	DatasetFloat dataset;
+	DatasetSpline dataSpline;
+	DatasetHistogram dataHist;
 	//VisitorDrawScatter visitorScatter;
 	//VisitorDrawBar visitorBar;
 	//VisitorDrawLine visitorLine;

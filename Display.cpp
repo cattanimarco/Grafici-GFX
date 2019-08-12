@@ -1,8 +1,5 @@
 #include "Display.h"
 
-#include <iostream>
-using namespace std;
-
 #define SWAP(x, y, T) \
 	do                \
 	{                 \
@@ -214,7 +211,7 @@ void Boundaries::begin(DisplayDriver &driver)
 
 void Boundaries::print()
 {
-	cout << bottomLeft.x << "," << bottomLeft.y << " " << topRight.x << "," << topRight.y << endl;
+	//cout << bottomLeft.x << "," << bottomLeft.y << " " << topRight.x << "," << topRight.y << endl;
 }
 
 void Boundaries::applyBorder(int top, int bottom, int left, int right)
@@ -297,12 +294,12 @@ Pixel Boundaries::getCenter(void)
 	return center;
 }
 
-Pixel Boundaries::project(DataPoint point)
+Pixel Boundaries::project(Datapoint point)
 {
 	return project(point, (Color){255, 255, 255});
 };
 
-Pixel Boundaries::project(DataPoint point, Color color)
+Pixel Boundaries::project(Datapoint point, Color color)
 {
 	Pixel p;
 
@@ -382,13 +379,13 @@ void RoundBoundaries::verticalFlipRadial(void)
 	SWAP(innerRadius, outerRadius, float);
 }
 
-Pixel RoundBoundaries::project(DataPoint point)
+Pixel RoundBoundaries::project(Datapoint point)
 {
 	//TODO do we need to override this function?
 	return project(point, (Color){255, 255, 255});
 };
 
-Pixel RoundBoundaries::project(DataPoint point, Color color)
+Pixel RoundBoundaries::project(Datapoint point, Color color)
 {
 	Pixel p;
 

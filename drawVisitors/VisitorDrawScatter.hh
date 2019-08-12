@@ -6,7 +6,7 @@
 class VisitorDrawScatter : public VisitorDraw
 {
 public:
-	void visit(DataSet *dataset, Boundaries *boundaries);
+	void visit(Dataset *dataset, Boundaries *boundaries);
 };
 
 

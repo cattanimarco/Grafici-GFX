@@ -1,19 +1,19 @@
 #ifndef GRAFICI_GFX_DATA_DECORATOR_HISTOGRAM_H
 #define GRAFICI_GFX_DATA_DECORATOR_HISTOGRAM_H
 
-#include "../Data.h"
+#include "Data.h"
 
-class DecoratorDataSetHistogram : public DataSet
+class DatasetHistogram : public Dataset
 {
 public:
-	void begin(DataSet *dataset, int buckets);
+	void begin(Dataset *dataset, int buckets);
 	void end(void);
-	DataPoint getDataPoint(int index);
+	Datapoint getDatapoint(int index);
 	void refresh();
 	int size(void);
 
 private:
-	DataSet *_dataset;
+	Dataset *_dataset;
 	int _yMax;
 	int _numElem;
 	int *_counters;

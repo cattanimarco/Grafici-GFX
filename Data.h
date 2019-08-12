@@ -1,42 +1,43 @@
 #ifndef GRAFICI_DATA_H
 #define GRAFICI_DATA_H
 
+#include "Arduino.h"
 
-class DataPointIterator;
+class DatapointIterator;
 
-class DataPoint
+class Datapoint
 {
 public:
-	DataPoint(void);
-	DataPoint(float x, float y);
+	Datapoint(void);
+	Datapoint(float x, float y);
 	float x;
 	float y;
 	float value;
 };
 
-class DataSet
+class Dataset
 {
 public:
-	virtual DataPoint getDataPoint(int index) = 0;
+	virtual Datapoint getDatapoint(int index) = 0;
 	virtual int size(void) = 0;
 	virtual void refresh() = 0;
-	 DataPointIterator beginIt();
-	 DataPointIterator endIt();
+	 DatapointIterator beginIt();
+	 DatapointIterator endIt();
 };
 
-class DataPointIterator
+class DatapointIterator
 {
 
 public:
-	DataPointIterator(DataSet *dataset, int dataIndex) : _dataset(dataset), _dataIndex(dataIndex){};
+	DatapointIterator(Dataset *dataset, int dataIndex) : _dataset(dataset), _dataIndex(dataIndex){};
 
-	DataPoint operator*();
-	DataPointIterator &operator++();
-	DataPointIterator operator++(int postfix);
-	bool operator!=(DataPointIterator const &other);
+	Datapoint operator*();
+	DatapointIterator &operator++();
+	DatapointIterator operator++(int postfix);
+	bool operator!=(DatapointIterator const &other);
 
 private:
-	DataSet *_dataset;
+	Dataset *_dataset;
 	int _dataIndex;
 };
 

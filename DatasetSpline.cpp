@@ -1,8 +1,5 @@
 
-#include "DecoratorDataSetSpline.h"
-#include <iostream>
-#include <stdlib.h>
-#include <string.h>
+#include "DatasetSpline.h"
 
 #ifndef min
 #define min(a, b) (((a) < (b)) ? (a) : (b))
@@ -13,7 +10,7 @@
 #endif
 
 
-void DecoratorDataSetSpline::begin(DataSet *dataset, int interpolationSteps)
+void DatasetSpline::begin(Dataset *dataset, int interpolationSteps)
 {
 	_dataset = dataset;
 	_numElem = interpolationSteps;
@@ -28,7 +25,7 @@ void DecoratorDataSetSpline::begin(DataSet *dataset, int interpolationSteps)
 	refresh();
 }
 
-void DecoratorDataSetSpline::end(void)
+void DatasetSpline::end(void)
 {
 	free(_bY);
 	free(_cY);
@@ -38,35 +35,35 @@ void DecoratorDataSetSpline::end(void)
 	free(_dValue);
 }
 
-DataPoint DecoratorDataSetSpline::getDataPoint(int index)
+Datapoint DatasetSpline::getDatapoint(int index)
 {
 	int bin = 0;
-	DataPoint p;
+	Datapoint p;
 
 	if (index < _numElem)
 	{
 		p.x = (1.0 * index) / (_numElem - 1);
 
 		// check that we are in the correct bin
-		while ((p.x > _dataset->getDataPoint(bin + 1).x))
+		while ((p.x > _dataset->getDatapoint(bin + 1).x))
 		{
 			bin++;
 		}
 
 		// compute interpolated y
-		p.y = _dataset->getDataPoint(bin).y +
-			  _bY[bin] * (p.x - _dataset->getDataPoint(bin).x) +
-			  _cY[bin] * (p.x - _dataset->getDataPoint(bin).x) * (p.x - _dataset->getDataPoint(bin).x) +
-			  _dY[bin] * (p.x - _dataset->getDataPoint(bin).x) * (p.x - _dataset->getDataPoint(bin).x) * (p.x - _dataset->getDataPoint(bin).x);
+		p.y = _dataset->getDatapoint(bin).y +
+			  _bY[bin] * (p.x - _dataset->getDatapoint(bin).x) +
+			  _cY[bin] * (p.x - _dataset->getDatapoint(bin).x) * (p.x - _dataset->getDatapoint(bin).x) +
+			  _dY[bin] * (p.x - _dataset->getDatapoint(bin).x) * (p.x - _dataset->getDatapoint(bin).x) * (p.x - _dataset->getDatapoint(bin).x);
 
 		// normalize dataset to a 0.0 .. 1.0 value
 		p.y = (p.y - _yMin) / (_yMax - _yMin);
 
 		// compute interpolated value
-		p.value = _dataset->getDataPoint(bin).value +
-			  _bValue[bin] * (p.x - _dataset->getDataPoint(bin).x) +
-			  _cValue[bin] * (p.x - _dataset->getDataPoint(bin).x) * (p.x - _dataset->getDataPoint(bin).x) +
-			  _dValue[bin] * (p.x - _dataset->getDataPoint(bin).x) * (p.x - _dataset->getDataPoint(bin).x) * (p.x - _dataset->getDataPoint(bin).x);
+		p.value = _dataset->getDatapoint(bin).value +
+			  _bValue[bin] * (p.x - _dataset->getDatapoint(bin).x) +
+			  _cValue[bin] * (p.x - _dataset->getDatapoint(bin).x) * (p.x - _dataset->getDatapoint(bin).x) +
+			  _dValue[bin] * (p.x - _dataset->getDatapoint(bin).x) * (p.x - _dataset->getDatapoint(bin).x) * (p.x - _dataset->getDatapoint(bin).x);
 
 		// normalize dataset to a 0.0 .. 1.0 value
 		p.value = (p.value - _valueMin) / (_valueMax - _valueMin);
@@ -75,12 +72,12 @@ DataPoint DecoratorDataSetSpline::getDataPoint(int index)
 	return p;
 }
 
-int DecoratorDataSetSpline::size(void)
+int DatasetSpline::size(void)
 {
 	return _numElem;
 }
 
-void DecoratorDataSetSpline::refresh(void)
+void DatasetSpline::refresh(void)
 {
 	_dataset->refresh();
 	
@@ -103,13 +100,13 @@ void DecoratorDataSetSpline::refresh(void)
 
 		for (int i = 0; i <= n - 1; ++i)
 		{
-			h[i] = _dataset->getDataPoint(i + 1).x - _dataset->getDataPoint(i).x;
+			h[i] = _dataset->getDatapoint(i + 1).x - _dataset->getDatapoint(i).x;
 		}
 
 		// Interpolate Y axe
 		for (int i = 1; i <= n - 1; ++i)
 		{
-			A[i] = 3 * (_dataset->getDataPoint(i + 1).y - _dataset->getDataPoint(i).y) / h[i] - 3 * (_dataset->getDataPoint(i).y - _dataset->getDataPoint(i - 1).y) / h[i - 1];
+			A[i] = 3 * (_dataset->getDatapoint(i + 1).y - _dataset->getDatapoint(i).y) / h[i] - 3 * (_dataset->getDatapoint(i).y - _dataset->getDatapoint(i - 1).y) / h[i - 1];
 		}
 
 		l[0] = 1;
@@ -118,7 +115,7 @@ void DecoratorDataSetSpline::refresh(void)
 
 		for (int i = 1; i <= n - 1; ++i)
 		{
-			l[i] = 2 * (_dataset->getDataPoint(i + 1).x - _dataset->getDataPoint(i - 1).x) - h[i - 1] * u[i - 1];
+			l[i] = 2 * (_dataset->getDatapoint(i + 1).x - _dataset->getDatapoint(i - 1).x) - h[i - 1] * u[i - 1];
 			u[i] = h[i] / l[i];
 			z[i] = (A[i] - h[i - 1] * z[i - 1]) / l[i];
 		}
@@ -130,7 +127,7 @@ void DecoratorDataSetSpline::refresh(void)
 		for (int j = n - 1; j >= 0; --j)
 		{
 			_cY[j] = z[j] - u[j] * _cY[j + 1];
-			_bY[j] = (_dataset->getDataPoint(j + 1).y - _dataset->getDataPoint(j).y) / h[j] - h[j] * (_cY[j + 1] + 2 * _cY[j]) / 3;
+			_bY[j] = (_dataset->getDatapoint(j + 1).y - _dataset->getDatapoint(j).y) / h[j] - h[j] * (_cY[j + 1] + 2 * _cY[j]) / 3;
 			_dY[j] = (_cY[j + 1] - _cY[j]) / (3 * h[j]);
 		}
 
@@ -139,16 +136,16 @@ void DecoratorDataSetSpline::refresh(void)
 		for (float px = 0; px < 1; px += (1.0 / _numElem))
 		{
 			/* check that we are in the correct bin */
-			while ((px > _dataset->getDataPoint(bin + 1).x))
+			while ((px > _dataset->getDatapoint(bin + 1).x))
 			{
 				bin++;
 			}
 			
 			/* compute interpolated y value */
-			yInter = _dataset->getDataPoint(bin).y +
-					 _bY[bin] * (px - _dataset->getDataPoint(bin).x) +
-					 _cY[bin] * (px - _dataset->getDataPoint(bin).x) * (px - _dataset->getDataPoint(bin).x) +
-					 _dY[bin] * (px - _dataset->getDataPoint(bin).x) * (px - _dataset->getDataPoint(bin).x) * (px - _dataset->getDataPoint(bin).x);
+			yInter = _dataset->getDatapoint(bin).y +
+					 _bY[bin] * (px - _dataset->getDatapoint(bin).x) +
+					 _cY[bin] * (px - _dataset->getDatapoint(bin).x) * (px - _dataset->getDatapoint(bin).x) +
+					 _dY[bin] * (px - _dataset->getDatapoint(bin).x) * (px - _dataset->getDatapoint(bin).x) * (px - _dataset->getDatapoint(bin).x);
 
 			/* Updated dataset min/max */
 			if (yInter < _yMin)
@@ -160,7 +157,7 @@ void DecoratorDataSetSpline::refresh(void)
 		// Interpolate value
 		for (int i = 1; i <= n - 1; ++i)
 		{
-			A[i] = 3 * (_dataset->getDataPoint(i + 1).value - _dataset->getDataPoint(i).value) / h[i] - 3 * (_dataset->getDataPoint(i).value - _dataset->getDataPoint(i - 1).value) / h[i - 1];
+			A[i] = 3 * (_dataset->getDatapoint(i + 1).value - _dataset->getDatapoint(i).value) / h[i] - 3 * (_dataset->getDatapoint(i).value - _dataset->getDatapoint(i - 1).value) / h[i - 1];
 		}
 
 		l[0] = 1;
@@ -169,7 +166,7 @@ void DecoratorDataSetSpline::refresh(void)
 
 		for (int i = 1; i <= n - 1; ++i)
 		{
-			l[i] = 2 * (_dataset->getDataPoint(i + 1).x - _dataset->getDataPoint(i - 1).x) - h[i - 1] * u[i - 1];
+			l[i] = 2 * (_dataset->getDatapoint(i + 1).x - _dataset->getDatapoint(i - 1).x) - h[i - 1] * u[i - 1];
 			u[i] = h[i] / l[i];
 			z[i] = (A[i] - h[i - 1] * z[i - 1]) / l[i];
 		}
@@ -181,7 +178,7 @@ void DecoratorDataSetSpline::refresh(void)
 		for (int j = n - 1; j >= 0; --j)
 		{
 			_cValue[j] = z[j] - u[j] * _cValue[j + 1];
-			_bValue[j] = (_dataset->getDataPoint(j + 1).value - _dataset->getDataPoint(j).value) / h[j] - h[j] * (_cValue[j + 1] + 2 * _cValue[j]) / 3;
+			_bValue[j] = (_dataset->getDatapoint(j + 1).value - _dataset->getDatapoint(j).value) / h[j] - h[j] * (_cValue[j + 1] + 2 * _cValue[j]) / 3;
 			_dValue[j] = (_cValue[j + 1] - _cValue[j]) / (3 * h[j]);
 		}
 
@@ -190,16 +187,16 @@ void DecoratorDataSetSpline::refresh(void)
 		for (float px = 0; px < 1; px += (1.0 / _numElem))
 		{
 			/* check that we are in the correct bin */
-			while ((px > _dataset->getDataPoint(bin + 1).x))
+			while ((px > _dataset->getDatapoint(bin + 1).x))
 			{
 				bin++;
 			}
 			
 			/* compute interpolated y value */
-			valueInter = _dataset->getDataPoint(bin).value +
-					 _bValue[bin] * (px - _dataset->getDataPoint(bin).x) +
-					 _cValue[bin] * (px - _dataset->getDataPoint(bin).x) * (px - _dataset->getDataPoint(bin).x) +
-					 _dValue[bin] * (px - _dataset->getDataPoint(bin).x) * (px - _dataset->getDataPoint(bin).x) * (px - _dataset->getDataPoint(bin).x);
+			valueInter = _dataset->getDatapoint(bin).value +
+					 _bValue[bin] * (px - _dataset->getDatapoint(bin).x) +
+					 _cValue[bin] * (px - _dataset->getDatapoint(bin).x) * (px - _dataset->getDatapoint(bin).x) +
+					 _dValue[bin] * (px - _dataset->getDatapoint(bin).x) * (px - _dataset->getDatapoint(bin).x) * (px - _dataset->getDatapoint(bin).x);
 
 			/* Updated dataset min/max */
 			if (valueInter < _valueMin)

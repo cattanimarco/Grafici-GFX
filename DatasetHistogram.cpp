@@ -1,9 +1,5 @@
 
-#include "DecoratorDataSetHistogram.h"
-#include <iostream>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#include "DatasetHistogram.h"
 
 #ifndef min
 #define min(a, b) (((a) < (b)) ? (a) : (b))
@@ -13,7 +9,7 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-void DecoratorDataSetHistogram::begin(DataSet *dataset, int buckets)
+void DatasetHistogram::begin(Dataset *dataset, int buckets)
 {
 	_dataset = dataset;
 	_numElem = buckets;
@@ -22,14 +18,14 @@ void DecoratorDataSetHistogram::begin(DataSet *dataset, int buckets)
 	refresh();
 }
 
-void DecoratorDataSetHistogram::end(void)
+void DatasetHistogram::end(void)
 {
 	free(_counters);
 }
 
-DataPoint DecoratorDataSetHistogram::getDataPoint(int index)
+Datapoint DatasetHistogram::getDatapoint(int index)
 {
-	DataPoint p;
+	Datapoint p;
 	if (index < _numElem)
 	{
 		p.x = (1.0 * index) / (_numElem - 1);
@@ -39,18 +35,18 @@ DataPoint DecoratorDataSetHistogram::getDataPoint(int index)
 	return p;
 }
 
-int DecoratorDataSetHistogram::size(void)
+int DatasetHistogram::size(void)
 {
 	return _numElem;
 }
 
-void DecoratorDataSetHistogram::refresh(void)
+void DatasetHistogram::refresh(void)
 {
 	_yMax = 0;
 
-	for (DataPointIterator it = _dataset->beginIt(); it != _dataset->endIt(); ++it)
+	for (DatapointIterator it = _dataset->beginIt(); it != _dataset->endIt(); ++it)
 	{
-		DataPoint p = *it;
+		Datapoint p = *it;
 		int target = round(p.y * (_numElem - 1));
 		_counters[target]++;
 		_yMax = max(_counters[target], _yMax);

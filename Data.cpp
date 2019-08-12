@@ -1,40 +1,40 @@
 #include "Data.h"
 
-DataPoint::DataPoint(void) : x(0), y(0), value(1.0) {}
+Datapoint::Datapoint(void) : x(0), y(0), value(1.0) {}
 
-DataPoint::DataPoint(float x, float y) : x(x), y(y), value(1.0) {}
+Datapoint::Datapoint(float x, float y) : x(x), y(y), value(1.0) {}
 
-DataPointIterator DataSet::beginIt()
+DatapointIterator Dataset::beginIt()
 {
-	DataPointIterator it(this, 0);
+	DatapointIterator it(this, 0);
 	return it;
 }
 
-DataPointIterator DataSet::endIt()
+DatapointIterator Dataset::endIt()
 {
-	DataPointIterator it(this, size());
+	DatapointIterator it(this, size());
 	return it;
 }
 
-DataPoint DataPointIterator::operator*()
+Datapoint DatapointIterator::operator*()
 {
-	return _dataset->getDataPoint(_dataIndex);
+	return _dataset->getDatapoint(_dataIndex);
 }
 
-DataPointIterator &DataPointIterator::operator++()
+DatapointIterator &DatapointIterator::operator++()
 {
 	++_dataIndex;
 	return *this;
 }
 
-DataPointIterator DataPointIterator::operator++(int postfix)
+DatapointIterator DatapointIterator::operator++(int postfix)
 {
-	DataPointIterator result = *this;
+	DatapointIterator result = *this;
 	++_dataIndex;
 	return result;
 }
 
-bool DataPointIterator::operator!=(DataPointIterator const &other)
+bool DatapointIterator::operator!=(DatapointIterator const &other)
 {
 	return (((this->_dataset) != (other._dataset)) || ((this->_dataIndex) != (other._dataIndex)));
 }

@@ -29,34 +29,34 @@ The Grafici GFX library is composed of the following classes and structures
 
 ### Data.h
 
-#### DataPoint
-This class represents a 3D datapoint with values normalized between 0 and 1. Being GRAFICI-GFX a 2D plotting library, the third dimension is called value and is mostly used to change how a DataPoint is drawn (the color, shape and/or size of the plotted DataPoints should depend on their value field)
+#### Datapoint
+This class represents a 3D datapoint with values normalized between 0 and 1. Being GRAFICI-GFX a 2D plotting library, the third dimension is called value and is mostly used to change how a Datapoint is drawn (the color, shape and/or size of the plotted Datapoints should depend on their value field)
 
 Implemented methods
-* `DataPoint(void)` initialize a datapoint with x = y = 0.0 and value = 1.0
-* `DataPoint(float x, float y)` inizialize a DataPoint with given x and y and value = 1.0
+* `Datapoint(void)` initialize a datapoint with x = y = 0.0 and value = 1.0
+* `Datapoint(float x, float y)` inizialize a Datapoint with given x and y and value = 1.0
 
 Parameters
-* `float x` second dimension coordinate of the DataPoint, e.g. time. It ranges from 0.0 to 1.0
-* `float y` first dimension coordinate of the DataPoint, e.g. sensor reading. it ranges from 0.0 to 1.0
-* `float value` third dimension coordinate of the DataPoint, e.g. severity. It ranges from 0.0 to 1.0
+* `float x` second dimension coordinate of the Datapoint, e.g. time. It ranges from 0.0 to 1.0
+* `float y` first dimension coordinate of the Datapoint, e.g. sensor reading. it ranges from 0.0 to 1.0
+* `float value` third dimension coordinate of the Datapoint, e.g. severity. It ranges from 0.0 to 1.0
 
-#### DataSet
-This interface is intended as a proxy between data sources and the plotting functions. This is achieved by implementing a class that converts the specific data source into more generic DataPoints via the DataSet interface.
+#### Dataset
+This interface is intended as a proxy between data sources and the plotting functions. This is achieved by implementing a class that converts the specific data source into more generic Datapoints via the Dataset interface.
   
 Interface methods
-* `DataPoint getDataPoint(int index)` returns the DataPointPoin at a given index in the DataSet
+* `Datapoint getDatapoint(int index)` returns the DatapointPoin at a given index in the Dataset
 * `int size(void)` returns the size of the dataset
 * `void refresh()` refresh the dataset whenever the data source changes
 
 Implememnted methods 
-* `DataPointIterator beginIt()` returns a DataPointIterator pointing at the first element of the dataset
-* `DataPointIterator endIt()` returns an DataPointIterator pointing at the end of the dataset (the first invalid DataPoint after the last element of the DataSet)
+* `DatapointIterator beginIt()` returns a DatapointIterator pointing at the first element of the dataset
+* `DatapointIterator endIt()` returns an DatapointIterator pointing at the end of the dataset (the first invalid Datapoint after the last element of the Dataset)
 
-#### DataPointIterator
+#### DatapointIterator
 This class is a stripped-down implementation of C++ iterators intended to run on Arduino.
-Use the DataPointIterator constructor to create an iterator for a class implementing the DataSet interface.
-The operators supported by a DataPointIterator instance are `*`, `++`, `!=`, `=`
+Use the DatapointIterator constructor to create an iterator for a class implementing the Dataset interface.
+The operators supported by a DatapointIterator instance are `*`, `++`, `!=`, `=`
 
 ### Display.h
 
@@ -72,7 +72,7 @@ Parameters
 This class describes a color scheme that will be used by the Grafici GFX library.
 
 Parameters
-* `Color *colors` ordered Color sequence, i.e. gradient, used to rappresent differnt DataPoint values. For example, if a DataPoint has value 0, it will be drawn using the first Color of this list. If a DataPoint has value 1, it will be drawn using the last Color of this list.
+* `Color *colors` ordered Color sequence, i.e. gradient, used to rappresent differnt Datapoint values. For example, if a Datapoint has value 0, it will be drawn using the first Color of this list. If a Datapoint has value 1, it will be drawn using the last Color of this list.
 * `int size` size of the Color sequence
 * `Color *lineColor` Color used to draw lines 
 * `Color *markerColor` Color used to draw markers
@@ -84,14 +84,14 @@ Implementations (in the colorschemes directory of the library)
 
 #### Pixel
 This class represent a pixel on the 2D screen. Note that changing values to a Pixel color does not result in a change on the display. In order to be drawn, the Pixel class must be passed to a function of the DisplayDriver class.
-The operators supported by a DataPointIterator instance are `+=` and `-=`.
+The operators supported by a DatapointIterator instance are `+=` and `-=`.
 
 Implemented methods 
 * `Pixel(void)`
 * `Pixel(float x, float y)`
 * `Pixel(float x, float y, Color color)`
 * `Pixel &setColor(Color color)` set the color of the pixel to a specific value. It returns a reference to the color itself
-* `Pixel &setColor(float value, Color * colors, int size)` set the color of the pixel given a value between 0.0 and 1.0, e.g. the value of a DataPoint and an array of Color with specific size, e.g. the colors and size parameters of a ColorScheme object.  It returns a reference to the color itself
+* `Pixel &setColor(float value, Color * colors, int size)` set the color of the pixel given a value between 0.0 and 1.0, e.g. the value of a Datapoint and an array of Color with specific size, e.g. the colors and size parameters of a ColorScheme object.  It returns a reference to the color itself
 * `Pixel &fadeColor(float percentage, Color * otherColor)`
 
 Parameters
@@ -102,7 +102,7 @@ Parameters
 #### Boundaries
 
 Interface methods
-* `Pixel project(DataPoint point)`
+* `Pixel project(Datapoint point)`
 * `void applyBorder(int top, int bottom, int left, int right)`
 
 Parameters
@@ -112,14 +112,14 @@ Parameters
 #### SquareBoundaries :: Boundaries
 
 Implemented methods
-* `Pixel project(DataPoint point)`
+* `Pixel project(Datapoint point)`
 * `void applyBorder(int top, int bottom, int left, int* right)`
 
 #### RoundBoundaries :: Boundaries
 
 Implemented methods
 * `void begin(Boundaries &boundaries)`
-* `Pixel project(DataPoint point)`
+* `Pixel project(Datapoint point)`
 * `void applyBorder(int top, int bottom, int left, int* right)`
 
 Parameters

@@ -1,11 +1,11 @@
 #include "VisitorDrawHeat.h"
 
-void VisitorDrawHeat::visit(DataSet *dataset, Boundaries *boundaries)
+void VisitorDrawHeat::visit(Dataset *dataset, Boundaries *boundaries)
 {
 
-	// for (DataPointIterator it = dataset->begin(); it != dataset->end(); ++it)
+	// for (DatapointIterator it = dataset->begin(); it != dataset->end(); ++it)
 	// {
-	// 	driver->drawPixel((*it).projectDataPoint(boundaries));
+	// 	driver->drawPixel((*it).projectDatapoint(boundaries));
 	// }
 
 	// for (int px = 0; px < (this->width / HEATMAP_PIXEL_SIZE); px++)

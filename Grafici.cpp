@@ -16,7 +16,7 @@ Boundaries Grafici::baseBoundaries(void)
 	
 }
 
-void Grafici::plot(PlotFunction plotFunction, DataSet *dataset,  ColorScheme *colorScheme, Boundaries *boundaries)
+void Grafici::plot(PlotFunction plotFunction, Dataset *dataset,  ColorScheme *colorScheme, Boundaries *boundaries)
 {
 	Boundaries _boundaries;
 

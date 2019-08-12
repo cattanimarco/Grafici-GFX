@@ -1,19 +1,19 @@
 #ifndef GRAFICI_GFX_DATA_DECORATOR_SPLINE_H
 #define GRAFICI_GFX_DATA_DECORATOR_SPLINE_H
 
-#include "../Data.h"
+#include "Data.h"
 
-class DecoratorDataSetSpline : public DataSet
+class DatasetSpline : public Dataset
 {
 public:
-	void begin(DataSet *dataset, int interpolationSteps);
+	void begin(Dataset *dataset, int interpolationSteps);
 	void end(void);
-	DataPoint getDataPoint(int index);
+	Datapoint getDatapoint(int index);
 	void refresh();
 	int size(void);
 
 private:
-	DataSet *_dataset;
+	Dataset *_dataset;
 	float _xMin;
 	float _yMin;
 	float _valueMin;
