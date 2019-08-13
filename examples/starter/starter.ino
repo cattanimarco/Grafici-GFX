@@ -19,7 +19,7 @@ float dataArrayY[11] = {0, 2, 2, 2, 2, 6, 5, 10, 10, 10, 9};
 Grafici grafici;
 
 DatasetFloat dataset;
-	DatasetSpline dataSpline;
+DatasetSpline dataSpline;
 
 void setup(void)
 {
@@ -31,7 +31,7 @@ void setup(void)
 	dataset.begin(dataArrayY, dataArrayValue, 11);
 	dataSpline.begin(&dataset, 40);
 
-grafici.clear(&csHeat);
+	grafici.clear(&csHeat);
 	grafici.plot(barPlot, &dataSpline, &csHeat);
 	grafici.plot(linePlot, &dataSpline, &csHeat);
 }
