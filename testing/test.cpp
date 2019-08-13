@@ -7,9 +7,9 @@
 #include "../drawVisitors/linePlot.h"
 #include "../drawVisitors/axisPlot.h"
 
-#include "../DatasetFloat.h"
-#include "../DatasetSpline.h"
-#include "../DatasetHistogram.h"
+#include "../dataset/Float.h"
+#include "../dataset/Spline.h"
+#include "../dataset/Histogram.h"
 
 #include "../colorSchemes/heat.h"
 #include "../colorSchemes/parula.h"
@@ -61,6 +61,9 @@ int main()
 	topRight.subBoundaries(2, 2, 3);
 	topRight.applyBorder(10, 10, 10, 10);
 	topRight.horizzontalFlip();
+
+	grafici.clear(&csHeat);
+	grafici.clear(&csParula, &topRight);
 
 	grafici.plot(axisPlot, &dataSpline, &csHeat, &topLeft);
 	grafici.plot(barPlot, &dataSpline, &csHeat, &topLeft);

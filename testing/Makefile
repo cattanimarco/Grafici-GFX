@@ -25,6 +25,20 @@ test: $(OBJ) ezdib.o
 run: lib test
 	@./test
 
+arduino: lib test
+	rm -f -r arduino
+	mkdir arduino
+	cp ../Data.cpp arduino/
+	cp ../Data.h arduino/
+	cp ../Display.cpp arduino/
+	cp ../Display.h arduino/
+	cp ../Grafici.cpp arduino/
+	cp ../Grafici.h arduino/
+	cp -r ../colorSchemes arduino/
+	cp -r ../drawVisitors arduino/
+	cp -r ../dataset arduino/
+	cp -r ../examples arduino/
+
 .PHONY: clean
 
 clean:$

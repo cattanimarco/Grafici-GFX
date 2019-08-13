@@ -6,7 +6,6 @@
 #include "drawVisitors/barPlot.h"
 #include "drawVisitors/linePlot.h"
 #include "dataset/Float.h"
-#include "dataset/Spline.h"
 #include "colorSchemes/heat.h"
 
 #include "Display.h"
@@ -19,7 +18,6 @@ float dataArrayY[11] = {0, 2, 2, 2, 2, 6, 5, 10, 10, 10, 9};
 Grafici grafici;
 
 DatasetFloat dataset;
-	DatasetSpline dataSpline;
 
 void setup(void)
 {
@@ -29,11 +27,10 @@ void setup(void)
 
 	// dataset
 	dataset.begin(dataArrayY, dataArrayValue, 11);
-	dataSpline.begin(&dataset, 40);
 
 grafici.clear(&csHeat);
-	grafici.plot(barPlot, &dataSpline, &csHeat);
-	grafici.plot(linePlot, &dataSpline, &csHeat);
+	grafici.plot(barPlot, &dataset, &csHeat);
+	grafici.plot(linePlot, &dataset, &csHeat);
 }
 
 void loop(void)
