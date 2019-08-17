@@ -20,20 +20,32 @@ Grafici grafici;
 
 DatasetFloat dataset;
 DatasetSpline dataSpline;
+Boundaries left,right;
 
 void setup(void)
 {
 	gfx.begin(0x7575);
+	gfx.setRotation(1);
 
 	grafici.begin(gfx);
 
-	// dataset
 	dataset.begin(dataArrayY, dataArrayValue, 11);
 	dataSpline.begin(&dataset, 40);
 
-	grafici.clear(&csHeat);
-	grafici.plot(barPlot, &dataSpline, &csHeat);
-	grafici.plot(linePlot, &dataSpline, &csHeat);
+	left = grafici.baseBoundaries();
+	left.subBoundaries(1, 2, 0);
+
+	right = grafici.baseBoundaries();
+	right.subBoundaries(1, 2, 1);
+
+	grafici.clear(csHeat);
+
+	grafici.plot(barPlot, dataset, csHeat, left);
+	grafici.plot(linePlot, dataset, csHeat, left);
+
+	grafici.plot(barPlot, dataSpline, csHeat, right);
+	grafici.plot(linePlot, dataSpline, csHeat, right);
+
 }
 
 void loop(void)

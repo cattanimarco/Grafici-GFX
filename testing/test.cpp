@@ -38,15 +38,47 @@ int main()
 	//VisitorDrawLine visitorLine;
 	//VisitorDrawAxis visitorAxis;
 	//Widget widget;
-	Boundaries topRight;
-	Boundaries topLeft;
+
 	// RoundBoundaries bottomRight;
 	// Boundaries bottomLeft;
 
 	// displayDriver
+
+#define INTERPOLATE_SPLINE 1
+
+#if INTERPOLATE_SPLINE
+
+	Adafruit_GFX *gfx = new File_GFX(640, 480, "interpolate_spline.bmp");
+
+	grafici.begin(*gfx);
+
+	Boundaries left;
+	Boundaries right;
+
+	dataset.begin(dataArrayY, dataArrayValue, 11);
+	dataSpline.begin(&dataset, 40);
+
+	left = grafici.baseBoundaries();
+	left.subBoundaries(1, 2, 0);
+
+	right = grafici.baseBoundaries();
+	right.subBoundaries(1, 2, 1);
+
+	grafici.clear(csHeat);
+
+	grafici.plot(barPlot, dataset, csHeat, left);
+	grafici.plot(linePlot, dataset, csHeat, left);
+
+	grafici.plot(barPlot, dataSpline, csHeat, right);
+	grafici.plot(linePlot, dataSpline, csHeat, right);
+
+#else
 	Adafruit_GFX *gfx = new File_GFX(640, 480, "prova.bmp");
 
 	grafici.begin(*gfx);
+
+	Boundaries topRight;
+	Boundaries topLeft;
 
 	// dataset
 	dataset.begin(dataArrayY, dataArrayValue, 11);
@@ -62,56 +94,15 @@ int main()
 	topRight.applyBorder(10, 10, 10, 10);
 	topRight.horizzontalFlip();
 
-	grafici.clear(&csHeat);
-	grafici.clear(&csParula, &topRight);
+	grafici.clear(csHeat);
+	grafici.clear(csParula, topRight);
 
-	grafici.plot(axisPlot, &dataSpline, &csHeat, &topLeft);
-	grafici.plot(barPlot, &dataSpline, &csHeat, &topLeft);
+	grafici.plot(axisPlot, dataSpline, csHeat, topLeft);
+	grafici.plot(barPlot, dataSpline, csHeat, topLeft);
 
-	grafici.plot(barPlot, &dataSpline, &csParula, &topRight);
-	grafici.plot(linePlot, &dataSpline, &csParula, &topRight);
-
-	// plotter
-	// visitorBar.begin(displayDriver, colorSchemeHeat);
-	// visitorLine.begin(displayDriver, colorSchemeHeat);
-	// visitorAxis.begin(displayDriver, colorSchemeHeat);
-	// visitorScatter.begin(displayDriver, colorSchemeHeat);
-
-	//widget.begin(dataSpline);
-	//widget.begin(dataHist);
-
-	// topRight.begin(displayDriver);
-	// bottomRight.begin(displayDriver);
-	// bottomLeft.begin(displayDriver);
-
-	// bottomLeft.subBoundaries(2, 2, 0);
-	// bottomLeft.verticalFlip();
-	// bottomLeft.applyBorder(10, 10, 10, 10);
-
-	// topRight.subBoundaries(2, 2, 3);
-	// topRight.horizzontalFlip();
-	// topRight.applyBorder(10, 10, 10, 10);
-
-	// bottomRight.subBoundaries(2, 2, 1);
-	// bottomRight.applyBorder(10, 10, 10, 10);
-	// bottomRight.subBoundariesRadial(2, 6, 7);
-	// bottomRight.horizzontalFlipRadial();
-
-	// widget.accept(&visitorAxis, &topRight);
-	// widget.accept(&visitorLine, &topRight);
-	// widget.accept(&visitorBar, &topRight);
-
-	// widget.accept(&visitorAxis, &topLeft);
-	// widget.accept(&visitorLine, &topLeft);
-	// widget.accept(&visitorBar, &topLeft);
-
-	// widget.accept(&visitorAxis, &bottomRight);
-	// widget.accept(&visitorLine, &bottomRight);
-	// widget.accept(&visitorBar, &bottomRight);
-
-	// widget.accept(&visitorAxis, &bottomLeft);
-	// widget.accept(&visitorLine, &bottomLeft);
-	// widget.accept(&visitorBar, &bottomLeft);
+	grafici.plot(barPlot, dataSpline, csParula, topRight);
+	grafici.plot(linePlot, dataSpline, csParula, topRight);
+#endif
 
 	//flush to file
 	((File_GFX *)gfx)->flush();

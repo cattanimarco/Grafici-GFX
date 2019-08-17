@@ -13,9 +13,11 @@ public:
 
 	// visitor pattern
 	// TODO add default value for boundaries
-	void plot(PlotFunction plotFunction, Dataset *dataset, ColorScheme *colorScheme, Boundaries *boundaries = NULL);
+	void plot(PlotFunction plotFunction, Dataset &dataset, ColorScheme &colorScheme);
+	void plot(PlotFunction plotFunction, Dataset &dataset, ColorScheme &colorScheme, Boundaries &boundaries);
 
-	void clear(ColorScheme *colorScheme, Boundaries *boundaries = NULL);
+	void clear(ColorScheme &colorScheme);
+	void clear(ColorScheme &colorScheme, Boundaries &boundaries);
 
 Boundaries baseBoundaries(void);
 

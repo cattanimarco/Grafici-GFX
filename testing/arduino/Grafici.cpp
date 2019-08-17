@@ -14,32 +14,31 @@ Boundaries Grafici::baseBoundaries(void)
 	return boundaries;
 }
 
-void Grafici::plot(PlotFunction plotFunction, Dataset *dataset, ColorScheme *colorScheme, Boundaries *boundaries)
+void Grafici::plot(PlotFunction plotFunction, Dataset &dataset, ColorScheme &colorScheme)
 {
-	Boundaries _boundaries;
-
-	if (boundaries == NULL)
-	{
-		_boundaries.begin(_displayDriver);
-		boundaries = &_boundaries;
-	}
-
-	plotFunction(&_displayDriver, dataset, boundaries, colorScheme);
+	Boundaries boundaries;
+	boundaries.begin(_displayDriver);
+	plot( plotFunction,  dataset,  colorScheme,  boundaries);
 }
 
-void Grafici::clear(ColorScheme *colorScheme, Boundaries *boundaries)
+void Grafici::plot(PlotFunction plotFunction, Dataset &dataset, ColorScheme &colorScheme, Boundaries &boundaries)
 {
-	Boundaries _boundaries;
+	plotFunction(&_displayDriver, &dataset, &boundaries, &colorScheme);
+}
 
-	if (boundaries == NULL)
-	{
-		_boundaries.begin(_displayDriver);
-		boundaries = &_boundaries;
-	}
+void Grafici::clear(ColorScheme &colorScheme)
+{
+	Boundaries boundaries;
+	boundaries.begin(_displayDriver);
+	
+	clear(colorScheme, boundaries);
+}
 
+void Grafici::clear(ColorScheme &colorScheme, Boundaries &boundaries)
+{
 	Datapoint a(0.0, 0.0);
 	Datapoint b(1.0, 1.0);
 
-	_displayDriver.fillRectangle(boundaries->project(a).setColor(colorScheme->bkg),
-								 boundaries->project(b).setColor(colorScheme->bkg));
+	_displayDriver.fillRectangle(boundaries.project(a).setColor(colorScheme.bkg),
+								 boundaries.project(b).setColor(colorScheme.bkg));
 }

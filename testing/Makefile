@@ -1,3 +1,4 @@
+ARDUINO_DIR = arduino
 CCSRC = $(wildcard *.cpp) \
 	$(wildcard ../*.cpp) \
 	$(wildcard ../dataSet/*.cpp) \
@@ -26,18 +27,18 @@ run: lib test
 	@./test
 
 arduino: lib test
-	rm -f -r arduino
-	mkdir arduino
-	cp ../Data.cpp arduino/
-	cp ../Data.h arduino/
-	cp ../Display.cpp arduino/
-	cp ../Display.h arduino/
-	cp ../Grafici.cpp arduino/
-	cp ../Grafici.h arduino/
-	cp -r ../colorSchemes arduino/
-	cp -r ../drawVisitors arduino/
-	cp -r ../dataset arduino/
-	cp -r ../examples arduino/
+	rm -f -r $(ARDUINO_DIR)
+	mkdir $(ARDUINO_DIR)
+	cp ../Data.cpp $(ARDUINO_DIR)
+	cp ../Data.h $(ARDUINO_DIR)
+	cp ../Display.cpp $(ARDUINO_DIR)
+	cp ../Display.h $(ARDUINO_DIR)
+	cp ../Grafici.cpp $(ARDUINO_DIR)
+	cp ../Grafici.h $(ARDUINO_DIR)
+	cp -r ../colorSchemes $(ARDUINO_DIR)
+	cp -r ../drawVisitors $(ARDUINO_DIR)
+	cp -r ../dataset $(ARDUINO_DIR)
+	cp -r ../examples $(ARDUINO_DIR)
 
 .PHONY: clean
 
