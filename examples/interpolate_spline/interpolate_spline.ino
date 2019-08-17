@@ -20,7 +20,7 @@ Grafici grafici;
 
 DatasetFloat dataset;
 DatasetSpline dataSpline;
-Boundaries left,right;
+Boundaries left, right;
 
 void setup(void)
 {
@@ -34,9 +34,11 @@ void setup(void)
 
 	left = grafici.baseBoundaries();
 	left.subBoundaries(1, 2, 0);
+	left.applyBorder(10, 10, 10, 5);
 
 	right = grafici.baseBoundaries();
 	right.subBoundaries(1, 2, 1);
+	right.applyBorder(10, 10, 5, 10);
 
 	grafici.clear(csHeat);
 
@@ -45,7 +47,6 @@ void setup(void)
 
 	grafici.plot(barPlot, dataSpline, csHeat, right);
 	grafici.plot(linePlot, dataSpline, csHeat, right);
-
 }
 
 void loop(void)

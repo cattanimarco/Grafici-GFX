@@ -60,9 +60,11 @@ int main()
 
 	left = grafici.baseBoundaries();
 	left.subBoundaries(1, 2, 0);
+	left.applyBorder(10, 10, 10, 5);
 
 	right = grafici.baseBoundaries();
 	right.subBoundaries(1, 2, 1);
+	right.applyBorder(10, 10, 5, 10);
 
 	grafici.clear(csHeat);
 
