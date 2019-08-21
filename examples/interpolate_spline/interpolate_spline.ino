@@ -3,11 +3,11 @@
 
 #include "Grafici.h"
 
-#include "drawVisitors/barPlot.h"
-#include "drawVisitors/linePlot.h"
-#include "dataset/Float.h"
-#include "dataset/Spline.h"
-#include "colorSchemes/heat.h"
+#include "plotters/barPlot.h"
+#include "plotters/linePlot.h"
+#include "datasets/DatasetFloat.h"
+#include "decorators/DatasetSpline.h"
+#include "color_schemes/heat.h"
 
 #include "Display.h"
 

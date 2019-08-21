@@ -35,8 +35,8 @@ arduino: lib test
 	cp ../Display.h $(ARDUINO_DIR)
 	cp ../Grafici.cpp $(ARDUINO_DIR)
 	cp ../Grafici.h $(ARDUINO_DIR)
-	cp -r ../colorSchemes $(ARDUINO_DIR)
-	cp -r ../drawVisitors $(ARDUINO_DIR)
+	cp -r ../color_schemes $(ARDUINO_DIR)
+	cp -r ../plotters $(ARDUINO_DIR)
 	cp -r ../dataset $(ARDUINO_DIR)
 	cp -r ../examples $(ARDUINO_DIR)
 
