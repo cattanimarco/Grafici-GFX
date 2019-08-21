@@ -283,8 +283,8 @@ void Boundaries::reset(void)
 {
 	bottomLeft.x = 0;
 	bottomLeft.y = 0;
-	topRight.x = _driver->width();
-	topRight.y = _driver->height();
+	topRight.x = _driver->width() - 1;
+	topRight.y = _driver->height() - 1;
 }
 
 void Boundaries::subBoundaries(int rows, int columns, int index)

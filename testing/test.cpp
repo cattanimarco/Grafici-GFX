@@ -77,13 +77,10 @@ int main()
 	grafici.clear(csHeat);
 
 	grafici.plot(barPlot, dataset, csHeat, left);
-	//grafici.plot(linePlot, dataset, csHeat, left);
 
 	grafici.plot(barPlot, dataInterpolator, csHeat, mid);
-	//grafici.plot(linePlot, dataInterpolator, csHeat, mid);
 
 	grafici.plot(barPlot, dataSpline, csHeat, right);
-	//grafici.plot(linePlot, dataSpline, csHeat, right);
 
 #else
 	Adafruit_GFX *gfx = new File_GFX(640, 480, "prova.bmp");

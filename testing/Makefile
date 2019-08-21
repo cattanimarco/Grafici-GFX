@@ -1,4 +1,4 @@
-ARDUINO_DIR = arduino
+ARDUINO_DIR = ~/Documents/Arduino/libraries/Grafici
 CCSRC = $(wildcard *.cpp) \
 	$(wildcard ../*.cpp) \
 	$(wildcard ../dataSet/*.cpp) \
@@ -37,7 +37,8 @@ arduino: lib test
 	cp ../Grafici.h $(ARDUINO_DIR)
 	cp -r ../color_schemes $(ARDUINO_DIR)
 	cp -r ../plotters $(ARDUINO_DIR)
-	cp -r ../dataset $(ARDUINO_DIR)
+	cp -r ../decorators $(ARDUINO_DIR)
+	cp -r ../datasets $(ARDUINO_DIR)
 	cp -r ../examples $(ARDUINO_DIR)
 
 .PHONY: clean
