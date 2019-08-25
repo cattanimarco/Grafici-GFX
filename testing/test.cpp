@@ -14,6 +14,7 @@
 
 #include "../color_schemes/heat.h"
 #include "../color_schemes/parula.h"
+#include "../color_schemes/sunset.h"
 
 #include "../Display.h"
 //#include "../Widget.h"
@@ -21,8 +22,7 @@
 //todo make an h file to include all basic essentials
 //#include <iostream>
 
-float dataArrayValue[11] = {0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2};
-float dataArrayY[11] = {0, 2, 2, 2, 2, 6, 5, 10, 10, 10, 9};
+
 
 int main()
 {
@@ -46,9 +46,11 @@ int main()
 
 	// displayDriver
 
-#define INTERPOLATE 1
 
-#if INTERPOLATE
+{
+	/* == INTERPOLATION == */
+	float dataArrayValue[11] = {0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2};
+float dataArrayY[11] = {0, 2, 2, 2, 2, 6, 5, 10, 10, 10, 9};
 
 	Adafruit_GFX *gfx = new File_GFX(1024, 480, "interpolation.bmp");
 
@@ -81,41 +83,56 @@ int main()
 	grafici.plot(barPlot, dataInterpolator, csHeat, mid);
 
 	grafici.plot(barPlot, dataSpline, csHeat, right);
+		//flush to file
+	((File_GFX *)gfx)->flush();
 
-#else
-	Adafruit_GFX *gfx = new File_GFX(640, 480, "prova.bmp");
+
+}
+
+{
+	/* == COLOR SCHEMES == */
+	float dataArrayY[11] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+	Adafruit_GFX *gfx = new File_GFX(1024, 480, "color_schemes.bmp");
 
 	grafici.begin(*gfx);
 
-	Boundaries topRight;
-	Boundaries topLeft;
+	Boundaries one;
+	Boundaries two;	
+	Boundaries three;
+	Boundaries four;	
+	Boundaries five;
+	Boundaries six;	
 
-	// dataset
-	dataset.begin(dataArrayY, dataArrayValue, 11);
+	// dataset - we provide the same array for Y and values so that the color encodes the bar height
+	dataset.begin(dataArrayY, dataArrayY, 11);
 	dataSpline.begin(&dataset, 100);
-	dataHist.begin(&dataSpline, 20);
-
-	topLeft = grafici.baseBoundaries();
-	topLeft.subBoundaries(2, 2, 2);
-	topLeft.applyBorder(10, 10, 10, 10);
-
-	topRight = grafici.baseBoundaries();
-	topRight.subBoundaries(2, 2, 3);
-	topRight.applyBorder(10, 10, 10, 10);
-	topRight.horizzontalFlip();
 
 	grafici.clear(csHeat);
-	grafici.clear(csParula, topRight);
 
-	grafici.plot(axisPlot, dataSpline, csHeat, topLeft);
-	grafici.plot(barPlot, dataSpline, csHeat, topLeft);
+	one = grafici.baseBoundaries();
+	one.subBoundaries(2, 3, 0);
+	one.applyBorder(10, 10, 10, 10);
+	//grafici.clear(csParula, one);
+	grafici.plot(barPlot, dataSpline, csParula, one);
 
-	grafici.plot(barPlot, dataSpline, csParula, topRight);
-	grafici.plot(linePlot, dataSpline, csParula, topRight);
-#endif
+	two = grafici.baseBoundaries();
+	two.subBoundaries(2, 3, 1);
+	two.applyBorder(10, 10, 10, 10);
+	//grafici.clear(csHeat, two);
+	grafici.plot(barPlot, dataSpline, csHeat, two);
 
-	//flush to file
+	three = grafici.baseBoundaries();
+	three.subBoundaries(2, 3, 2);
+	three.applyBorder(10, 10, 10, 10);
+	//grafici.clear(csSunset, three);
+	grafici.plot(barPlot, dataSpline, csSunset, three);
+
+		//flush to file
 	((File_GFX *)gfx)->flush();
+
+}
+
 
 	return 0;
 }
