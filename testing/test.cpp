@@ -15,6 +15,7 @@
 #include "../color_schemes/heat.h"
 #include "../color_schemes/parula.h"
 #include "../color_schemes/sunset.h"
+#include "../color_schemes/cmyk.h"
 
 #include "../Display.h"
 //#include "../Widget.h"
@@ -113,20 +114,26 @@ float dataArrayY[11] = {0, 2, 2, 2, 2, 6, 5, 10, 10, 10, 9};
 	one = grafici.baseBoundaries();
 	one.subBoundaries(2, 3, 0);
 	one.applyBorder(10, 10, 10, 10);
-	//grafici.clear(csParula, one);
+	grafici.clear(csParula, one);
 	grafici.plot(barPlot, dataSpline, csParula, one);
 
 	two = grafici.baseBoundaries();
 	two.subBoundaries(2, 3, 1);
 	two.applyBorder(10, 10, 10, 10);
-	//grafici.clear(csHeat, two);
+	grafici.clear(csHeat, two);
 	grafici.plot(barPlot, dataSpline, csHeat, two);
 
 	three = grafici.baseBoundaries();
 	three.subBoundaries(2, 3, 2);
 	three.applyBorder(10, 10, 10, 10);
-	//grafici.clear(csSunset, three);
+	grafici.clear(csSunset, three);
 	grafici.plot(barPlot, dataSpline, csSunset, three);
+
+	four = grafici.baseBoundaries();
+	four.subBoundaries(2, 3, 3);
+	four.applyBorder(10, 10, 10, 10);
+	grafici.clear(csCmyk, four);
+	grafici.plot(barPlot, dataSpline, csCmyk, four);
 
 		//flush to file
 	((File_GFX *)gfx)->flush();
