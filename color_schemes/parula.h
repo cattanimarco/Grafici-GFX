@@ -23,7 +23,7 @@ ColorScheme csParula(
 	cParula[10], //.lineColor = 
 	cParula[5], //.markerColor= 
 	cParula[9], //.fillColor = 
-	cParula[0] //.bkgColor = 	  
+	(Color){0, 0, 0} //.bkgColor = 	  
 );
 
 #endif //GRAFICI_GFX_PARULA_H
