@@ -5,31 +5,42 @@
 #include "Data.h"
 #include "Adafruit_GFX.h"
 
+typedef void (*PlotFunction)(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *boundaries, ColorTheme *theme);
+
 class Color
 {
-public:
-	//Color &fadeColor(float percentage, Color *otherColor);
-
 	unsigned char red;
 	unsigned char green;
 	unsigned char blue;
 };
 
-class ColorScheme
+class ColorPalette
 {
-public:
-	ColorScheme(Color *	colors, int size, Color lineColor, Color markerColor, Color fillColor, Color bkgColor);
+	Color *colors;
+	int size;
+	Color line;
+	Color marker;
+	Color bkg;
+};
 
-	Color line;   
-	Color marker; 
-	Color fill;   
-	Color bkg;	
+class ColorTheme
+{
+	ColorPalette *palette;
+	int markerSize;
 
+	enum class ColorSource
+	{
+		predefined,
+		computeFromValue,
+		computeFromX,
+		computeFromY,
+	} colorSource;
+
+	Color getLineColor(Datapoint *dataPoint);
+	Color getMarkerColor(Datapoint *dataPoint);
+	Color getBkgColor();
 	Color getColor(float value);
 
-private:
-	Color *_colors;
-	int    _size;
 };
 
 struct Pixel

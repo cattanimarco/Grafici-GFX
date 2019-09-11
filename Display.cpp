@@ -16,26 +16,86 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-// Color &Color::fadeColor(float percentage, Color *otherColor)
-// {
-// 	red = red * (1 - percentage) + otherColor->red * percentage;
-// 	green = green * (1 - percentage) + otherColor->green * percentage;
-// 	blue = blue * (1 - percentage) + otherColor->blue * percentage;
-// 	return *this;
-// }
-
-
-ColorScheme::ColorScheme(Color *colors, int size, Color lineColor, Color markerColor, Color fillColor, Color bkgColor)
+Color ColorTheme::getLineColor(Datapoint *dataPoint)
 {
-	_colors = colors;
-	_size = size;
-	line = lineColor;
-	marker = markerColor;
-	fill = fillColor;
-	bkg = bkgColor;
-}
+switch (colorSource)
+	{
+	case ColorSource::computeFromX:
+	{
+		return getColor(dataPoint->x);
+	}
+	break;
+	case ColorSource::computeFromY:
+	{
+		return getColor(dataPoint->y);
+	}
+	break;
+	case ColorSource::computeFromValue:
+	{
+		return getColor(dataPoint->value);
+	}
+	break;
 
-Color ColorScheme::getColor(float value)
+	case ColorSource::predefined:
+	default:
+	{
+		return (palette->line);
+	}
+	break;
+	}
+};
+
+Color ColorTheme::getMarkerColor(Datapoint *dataPoint)
+{
+	switch (colorSource)
+	{
+	case ColorSource::computeFromX:
+	{
+		return getColor(dataPoint->x);
+	}
+	break;
+	case ColorSource::computeFromY:
+	{
+		return getColor(dataPoint->y);
+	}
+	break;
+	case ColorSource::computeFromValue:
+	{
+		return getColor(dataPoint->value);
+	}
+	break;
+
+	case ColorSource::predefined:
+	default:
+	{
+		return (palette->marker);
+	}
+	break;
+	}
+};
+
+Color ColorTheme::getBkgColor()
+{
+	switch (colorSource)
+	{
+	case ColorSource::computeFromX:
+	case ColorSource::computeFromY:
+	case ColorSource::computeFromValue:
+	{
+		return getColor(0.0);
+	}
+	break;
+
+	case ColorSource::predefined:
+	default:
+	{
+		return (palette->bkg);
+	}
+	break;
+	}
+};
+
+Color ColorTheme::getColor(float value)
 {
 	int idx1;				// |-- Our desired color will be between these two indexes in "color".
 	int idx2;				// |
@@ -48,19 +108,19 @@ Color ColorScheme::getColor(float value)
 	} // accounts for an input <=0
 	else if (value >= 1)
 	{
-		idx1 = idx2 = _size - 1;
+		idx1 = idx2 = colorScheme->size - 1;
 	} // accounts for an input >=0
 	else
 	{
-		value = value * (_size - 1);			// Will multiply value by 3.
-		idx1 = floor(value);				// Our desired color will be after this index.
-		idx2 = idx1 + 1;					// ... and before this index (inclusive).
-		fractBetween = value - float(idx1); // Distance between the two indexes (0-1).
+		value = value * (colorScheme->size - 1);
+		idx1 = floor(value);
+		idx2 = idx1 + 1;
+		fractBetween = value - float(idx1);
 	}
 
-	color.red =   _colors[idx2].red * fractBetween +   _colors[idx1].red * (1 - fractBetween);
-	color.green = _colors[idx2].green * fractBetween + _colors[idx1].green * (1 - fractBetween);
-	color.blue =  _colors[idx2].blue * fractBetween +  _colors[idx1].blue * (1 - fractBetween);
+	color.red = colorScheme->colors[idx2].red * fractBetween + colorScheme->colors[idx1].red * (1 - fractBetween);
+	color.green = colorScheme->colors[idx2].green * fractBetween + colorScheme->colors[idx1].green * (1 - fractBetween);
+	color.blue = colorScheme->colors[idx2].blue * fractBetween + colorScheme->colors[idx1].blue * (1 - fractBetween);
 
 	return color;
 }
@@ -145,18 +205,18 @@ void DisplayDriver::drawRoundRectangle(Pixel bl, int w, int h, int r)
 // bl: bottom left vertex, w: width, h: height, r: radius
 {
 
-//account for mirrored boundaries
-if (w<0)
-{
-	bl.x+=w;
-	w = -w;
-}
+	//account for mirrored boundaries
+	if (w < 0)
+	{
+		bl.x += w;
+		w = -w;
+	}
 
-if (h<0)
-{
-	bl.y+=h;
-	h = -h;
-}
+	if (h < 0)
+	{
+		bl.y += h;
+		h = -h;
+	}
 
 	_tft->drawRoundRect(bl.x, _tft->height() - (bl.y + h),
 						w, h, r,
@@ -167,21 +227,20 @@ void DisplayDriver::fillRectangle(Pixel bl, int w, int h)
 {
 	//std::cout << bl.x << " " << bl.y << " " << w << " " << h << std::endl;
 
-//account for mirrored boundaries
-if (w<0)
-{
-	bl.x+=w;
-	w = -w;
-}
+	//account for mirrored boundaries
+	if (w < 0)
+	{
+		bl.x += w;
+		w = -w;
+	}
 
-if (h<0)
-{
-	bl.y+=h;
-	h = -h;
-}
+	if (h < 0)
+	{
+		bl.y += h;
+		h = -h;
+	}
 
 	//std::cout << bl.x << " " << bl.y << " " << w << " " << h << std::endl;
-
 
 	_tft->fillRect(bl.x, _tft->height() - (bl.y + h),
 				   w, h,

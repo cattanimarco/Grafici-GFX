@@ -15,10 +15,10 @@ public:
 	unsigned char blue;
 };
 
-class ColorScheme
+class ColorPalette
 {
 public:
-	ColorScheme(Color *	colors, int size, Color lineColor, Color markerColor, Color fillColor, Color bkgColor);
+	ColorPalette(Color *	colors, int size, Color lineColor, Color markerColor, Color fillColor, Color bkgColor);
 
 	Color line;   
 	Color marker; 

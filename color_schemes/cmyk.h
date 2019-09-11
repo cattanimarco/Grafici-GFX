@@ -10,7 +10,7 @@ Color cCmyk[4] = {
 	{116, 251, 253},
 };
 
-ColorScheme csCmyk(
+ColorPalette csCmyk(
 	&cCmyk[0], //.colors =
 	4,			 //.size =
 	cCmyk[3],  //.lineColor =

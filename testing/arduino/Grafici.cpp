@@ -14,19 +14,19 @@ Boundaries Grafici::baseBoundaries(void)
 	return boundaries;
 }
 
-void Grafici::plot(PlotFunction plotFunction, Dataset &dataset, ColorScheme &colorScheme)
+void Grafici::plot(PlotFunction plotFunction, Dataset &dataset, ColorPalette &colorScheme)
 {
 	Boundaries boundaries;
 	boundaries.begin(_displayDriver);
 	plot( plotFunction,  dataset,  colorScheme,  boundaries);
 }
 
-void Grafici::plot(PlotFunction plotFunction, Dataset &dataset, ColorScheme &colorScheme, Boundaries &boundaries)
+void Grafici::plot(PlotFunction plotFunction, Dataset &dataset, ColorPalette &colorScheme, Boundaries &boundaries)
 {
 	plotFunction(&_displayDriver, &dataset, &boundaries, &colorScheme);
 }
 
-void Grafici::clear(ColorScheme &colorScheme)
+void Grafici::clear(ColorPalette &colorScheme)
 {
 	Boundaries boundaries;
 	boundaries.begin(_displayDriver);
@@ -34,7 +34,7 @@ void Grafici::clear(ColorScheme &colorScheme)
 	clear(colorScheme, boundaries);
 }
 
-void Grafici::clear(ColorScheme &colorScheme, Boundaries &boundaries)
+void Grafici::clear(ColorPalette &colorScheme, Boundaries &boundaries)
 {
 	Datapoint a(0.0, 0.0);
 	Datapoint b(1.0, 1.0);

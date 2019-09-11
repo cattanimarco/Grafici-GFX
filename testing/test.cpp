@@ -3,11 +3,11 @@
 #include "../Grafici.h"
 
 // #include "../visitors/VisitorDrawScatter.h"
+#include "../plotters/spaghettiPlot.h"
 #include "../plotters/barPlot.h"
-#include "../plotters/barPlotFill.h"
-
 #include "../plotters/linePlot.h"
 #include "../plotters/axisPlot.h"
+#include "../plotters/scatterPlot.h"
 
 #include "../datasets/DatasetFloat.h"
 #include "../decorators/DatasetInterpolator.h"
@@ -15,7 +15,7 @@
 #include "../decorators/DatasetHistogram.h"
 
 #include "../color_schemes/heat.h"
-#include "../color_schemes/parula.h"
+#include "../color_schemes/neon.h"
 #include "../color_schemes/thermo.h"
 #include "../color_schemes/cmyk.h"
 #include "../color_schemes/bright.h"
@@ -83,9 +83,13 @@ int main()
 		grafici.plot(linePlot, dataInterpolator, csBright, mid);
 		grafici.plot(linePlot, dataSpline, csBright, right);
 		
-		grafici.plot(barPlot, dataset, csBright, left);
-		grafici.plot(barPlot, dataInterpolator, csBright, mid);
-		grafici.plot(barPlot, dataSpline, csBright, right);
+		grafici.plot(scatterPlot, dataset, csBright, left);
+		grafici.plot(scatterPlot, dataInterpolator, csBright, mid);
+		grafici.plot(scatterPlot, dataSpline, csBright, right);
+
+		grafici.plot(spaghettiPlot, dataset, csBright, left);
+		grafici.plot(spaghettiPlot, dataInterpolator, csBright, mid);
+		grafici.plot(spaghettiPlot, dataSpline, csBright, right);
 		//flush to file
 		((File_GFX *)gfx)->flush();
 	}
@@ -111,39 +115,39 @@ int main()
 
 		one = grafici.baseBoundaries();
 		one.subBoundaries(2, 3, 0);
-		grafici.clear(csParula, one);
+		grafici.clear(csNeon, one);
 		one.applyBorder(10, 10, 10, 10);
-		grafici.plot(barPlotFill, dataSpline, csParula, one);
+		grafici.plot(barPlot, dataSpline, csNeon, one);
 
 		two = grafici.baseBoundaries();
 		two.subBoundaries(2, 3, 1);
 		grafici.clear(csBright, two);
 		two.applyBorder(10, 10, 10, 10);
-		grafici.plot(barPlotFill, dataSpline, csBright, two);
+		grafici.plot(barPlot, dataSpline, csBright, two);
 
 		three = grafici.baseBoundaries();
 		three.subBoundaries(2, 3, 2);
 		grafici.clear(csThermo, three);
 		three.applyBorder(10, 10, 10, 10);
-		grafici.plot(barPlotFill, dataSpline, csThermo, three);
+		grafici.plot(barPlot, dataSpline, csThermo, three);
 
 		four = grafici.baseBoundaries();
 		four.subBoundaries(2, 3, 3);
 		grafici.clear(csCmyk, four);
 		four.applyBorder(10, 10, 10, 10);
-		grafici.plot(barPlotFill, dataSpline, csCmyk, four);
+		grafici.plot(barPlot, dataSpline, csCmyk, four);
 
 		five = grafici.baseBoundaries();
 		five.subBoundaries(2, 3, 4);
 		grafici.clear(csHeat, five);
 		five.applyBorder(10, 10, 10, 10);
-		grafici.plot(barPlotFill, dataSpline, csHeat, five);
+		grafici.plot(barPlot, dataSpline, csHeat, five);
 
 		six = grafici.baseBoundaries();
 		six.subBoundaries(2, 3, 5);
 		grafici.clear(csBw, six);
 		six.applyBorder(10, 10, 10, 10);
-		grafici.plot(barPlotFill, dataSpline, csBw, six);
+		grafici.plot(barPlot, dataSpline, csBw, six);
 
 		//flush to file
 		((File_GFX *)gfx)->flush();

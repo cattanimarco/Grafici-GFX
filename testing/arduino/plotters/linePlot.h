@@ -4,7 +4,7 @@
 #include "../Data.h"
 #include "../Display.h"
 
-void linePlot(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *boundaries, ColorScheme *colorScheme)
+void linePlot(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *boundaries, ColorPalette *colorScheme)
 {
 
 		DatapointIterator it = dataset->beginIt();

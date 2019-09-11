@@ -4,7 +4,7 @@
 #include "Data.h"
 #include "Display.h"
 
-typedef void (*PlotFunction)(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *boundaries, ColorScheme *colorScheme);
+typedef void (*PlotFunction)(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *boundaries, ColorPalette *colorScheme);
 
 class Grafici
 {
@@ -13,11 +13,11 @@ public:
 
 	// visitor pattern
 	// TODO add default value for boundaries
-	void plot(PlotFunction plotFunction, Dataset &dataset, ColorScheme &colorScheme);
-	void plot(PlotFunction plotFunction, Dataset &dataset, ColorScheme &colorScheme, Boundaries &boundaries);
+	void plot(PlotFunction plotFunction, Dataset &dataset, ColorPalette &colorScheme);
+	void plot(PlotFunction plotFunction, Dataset &dataset, ColorPalette &colorScheme, Boundaries &boundaries);
 
-	void clear(ColorScheme &colorScheme);
-	void clear(ColorScheme &colorScheme, Boundaries &boundaries);
+	void clear(ColorPalette &colorScheme);
+	void clear(ColorPalette &colorScheme, Boundaries &boundaries);
 
 Boundaries baseBoundaries(void);
 

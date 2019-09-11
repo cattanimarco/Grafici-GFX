@@ -4,7 +4,7 @@
 #include "../Data.h"
 #include "../Display.h"
 
-void barPlot(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *boundaries, ColorScheme *colorScheme)
+void spaghettiPlot(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *boundaries, ColorPalette *colorScheme)
 {
 	for (DatapointIterator it = dataset->beginIt(); it != dataset->endIt(); ++it)
 	{

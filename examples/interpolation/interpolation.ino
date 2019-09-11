@@ -3,7 +3,7 @@
 
 #include "Grafici.h"
 
-#include "plotters/barPlot.h"
+#include "plotters/spaghettiPlot.h"
 #include "plotters/linePlot.h"
 #include "datasets/DatasetFloat.h"
 #include "decorators/DatasetInterpolator.h"
@@ -49,11 +49,11 @@ void setup(void)
 
 	grafici.clear(csHeat);
 
-	grafici.plot(barPlot, dataset, csHeat, left);
+	grafici.plot(spaghettiPlot, dataset, csHeat, left);
 
-	grafici.plot(barPlot, dataInterpolator, csHeat, mid);
+	grafici.plot(spaghettiPlot, dataInterpolator, csHeat, mid);
 
-	grafici.plot(barPlot, dataSpline, csHeat, right);
+	grafici.plot(spaghettiPlot, dataSpline, csHeat, right);
 }
 
 void loop(void)

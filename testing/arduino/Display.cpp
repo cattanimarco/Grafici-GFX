@@ -25,7 +25,7 @@
 // }
 
 
-ColorScheme::ColorScheme(Color *colors, int size, Color lineColor, Color markerColor, Color fillColor, Color bkgColor)
+ColorPalette::ColorPalette(Color *colors, int size, Color lineColor, Color markerColor, Color fillColor, Color bkgColor)
 {
 	_colors = colors;
 	_size = size;
@@ -35,7 +35,7 @@ ColorScheme::ColorScheme(Color *colors, int size, Color lineColor, Color markerC
 	bkg = bkgColor;
 }
 
-Color ColorScheme::getColor(float value)
+Color ColorPalette::getColor(float value)
 {
 	int idx1;				// |-- Our desired color will be between these two indexes in "color".
 	int idx2;				// |

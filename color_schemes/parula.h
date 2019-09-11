@@ -17,7 +17,7 @@ Color cParula[11] = {
 		{245, 233, 36},
 };
 
-ColorScheme csParula(
+ColorPalette csParula(
 	&cParula[0], //.colors = 
 	11, //.size = 
 	cParula[10], //.lineColor = 

@@ -1,10 +1,10 @@
-#ifndef GRAFICI_GFX_VISITOR_DRAW_AXIS_H
-#define GRAFICI_GFX_VISITOR_DRAW_AXIS_H
+#ifndef GRAFICI_GFX_PLOT_AXIS_H
+#define GRAFICI_GFX_PLOT_AXIS_H
 
 #include "../Data.h"
 #include "../Display.h"
 
-void axisPlot(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *boundaries, ColorScheme *colorScheme)
+void axisPlot(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *boundaries, ColorTheme *theme)
 {
 	//vertical lines
 	for (int itX = 0; itX <= 10; itX++)
@@ -28,4 +28,4 @@ void axisPlot(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *bounda
 	}
 }
 
-#endif //GRAFICI_GFX_VISITOR_DRAW_AXIS_H
+#endif //GRAFICI_GFX_PLOT_AXIS_H

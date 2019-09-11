@@ -17,7 +17,7 @@ Color cHeat[11] = {
 	{255, 255, 255},
 };
 
-ColorScheme csHeat(
+ColorPalette csHeat(
 	&cHeat[0], //.colors = 
 	11, //.size = 
 	cHeat[10], //.lineColor = 

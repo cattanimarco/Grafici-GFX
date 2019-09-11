@@ -4,7 +4,7 @@
 #include "../Data.h"
 #include "../Display.h"
 
-void axisPlot(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *boundaries, ColorScheme *colorScheme)
+void axisPlot(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *boundaries, ColorPalette *colorScheme)
 {
 	//vertical lines
 	for (int itX = 0; itX <= 10; itX++)

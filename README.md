@@ -68,7 +68,7 @@ Parameters
 * `unsigned char green` green component of the color. It ranges from 0 to 255
 * `unsigned char blue` blue component of the color. It ranges from 0 to 255
 
-#### ColorScheme
+#### ColorPalette
 This class describes a color scheme that will be used by the Grafici GFX library.
 
 Parameters
@@ -91,7 +91,7 @@ Implemented methods
 * `Pixel(float x, float y)`
 * `Pixel(float x, float y, Color color)`
 * `Pixel &setColor(Color color)` set the color of the pixel to a specific value. It returns a reference to the color itself
-* `Pixel &setColor(float value, Color * colors, int size)` set the color of the pixel given a value between 0.0 and 1.0, e.g. the value of a Datapoint and an array of Color with specific size, e.g. the colors and size parameters of a ColorScheme object.  It returns a reference to the color itself
+* `Pixel &setColor(float value, Color * colors, int size)` set the color of the pixel given a value between 0.0 and 1.0, e.g. the value of a Datapoint and an array of Color with specific size, e.g. the colors and size parameters of a ColorPalette object.  It returns a reference to the color itself
 * `Pixel &fadeColor(float percentage, Color * otherColor)`
 
 Parameters

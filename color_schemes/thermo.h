@@ -9,7 +9,7 @@ Color cThermo[3] = {
 	{255, 0, 0},
 };
 
-ColorScheme csThermo(
+ColorPalette csThermo(
 	&cThermo[0], //.colors =
 	3,			 //.size =
 	cThermo[2],  //.lineColor =

@@ -8,7 +8,7 @@ Color cBw[2] = {
 	{128+64, 128+64, 128+64},
 };
 
-ColorScheme csBw(
+ColorPalette csBw(
 	&cBw[0], //.colors =
 	2,			 //.size =
 	(Color){64, 64, 64},  //.lineColor =

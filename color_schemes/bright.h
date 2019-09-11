@@ -12,7 +12,7 @@ Color cBright[6] = {
 	{240, 137, 53},
 };
 
-ColorScheme csBright(
+ColorPalette csBright(
 	&cBright[0], //.colors =
 	6,			 //.size =
 	cBright[3],  //.lineColor =
