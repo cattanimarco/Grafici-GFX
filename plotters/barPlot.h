@@ -16,8 +16,8 @@ void barPlot(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *boundar
 		baseDatapoint.x  += (0.05/(dataset->size()+1));
 		topDatapoint.x  = baseDatapoint.x + (0.90/(dataset->size()+1));
 
-		displayDriver->fillRectangle(boundaries->project(baseDatapoint).setColor(colorScheme->getColor(topDatapoint.value)),
-									 boundaries->project(topDatapoint).setColor(colorScheme->getColor(topDatapoint.value)));
+		displayDriver->fillRectangle(boundaries->project(baseDatapoint).setColor(theme->getLineColor(topDatapoint)),
+									 boundaries->project(topDatapoint).setColor(theme->getLineColor(topDatapoint)));
 	}
 }
 
