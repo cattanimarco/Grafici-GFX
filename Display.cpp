@@ -357,13 +357,13 @@ void RoundDisplayBoundaries::reset(void)
 }
 
 //TODO update circle every time a slice is done
-void RoundBoundaries::subBoundaries(int rows, int columns, int index)
+void RoundDisplayBoundaries::subBoundaries(int rows, int columns, int index)
 {
-	Boundaries::subBoundaries(rows, columns, index);
+	DisplayBoundaries::subBoundaries(rows, columns, index);
 	update();
 }
 
-void RoundBoundaries::subBoundariesRadial(int rows, int columns, int index)
+void RoundDisplayBoundaries::subBoundariesRadial(int rows, int columns, int index)
 {
 	float _width = endAngle - beginAngle;
 	float _height = outerRadius - innerRadius;
@@ -380,47 +380,41 @@ void RoundBoundaries::subBoundariesRadial(int rows, int columns, int index)
 	//cout << index << " " << innerRadius << " " << outerRadius << endl;
 }
 
-void RoundBoundaries::horizzontalFlip(void)
+void RoundDisplayBoundaries::horizzontalFlip(void)
 {
-	Boundaries::horizzontalFlip();
+	DisplayBoundaries::horizzontalFlip();
 	update();
 }
 
-void RoundBoundaries::verticalFlip(void)
+void RoundDisplayBoundaries::verticalFlip(void)
 {
-	Boundaries::verticalFlip();
+	DisplayBoundaries::verticalFlip();
 	update();
 }
 
-void RoundBoundaries::horizzontalFlipRadial(void)
+void RoundDisplayBoundaries::horizzontalFlipRadial(void)
 {
 	SWAP(beginAngle, endAngle, float);
 }
 
-void RoundBoundaries::verticalFlipRadial(void)
+void RoundDisplayBoundaries::verticalFlipRadial(void)
 {
 	SWAP(innerRadius, outerRadius, float);
 }
 
-Pixel RoundBoundaries::project(Datapoint point)
-{
-	//TODO do we need to override this function?
-	return project(point, (Color){255, 255, 255});
-};
-
-Pixel RoundBoundaries::project(Datapoint point, Color color)
+Pixel RoundDisplayBoundaries::project(DataPoint dataPoint,DisplayDriver &displayDriver)
 {
 	Pixel p;
 
 	float radius = innerRadius * (1.0 - point.y) + outerRadius * point.y;
 	float angle = beginAngle * (1.0 - point.x) + endAngle * point.x;
-	p.x = getCenter().x + radius * cos(angle);
-	p.y = getCenter().y + radius * sin(angle);
+	p.x = displayDriver.width() * (getCenter().x + radius * cos(angle));
+	p.y = displayDriver.height() * (getCenter().y + radius * sin(angle));
 
 	return p;
 };
 
-void RoundBoundaries::update(void)
+void RoundDisplayBoundaries::update(void)
 {
 	//compute circle parameter depending on enclosing boundaries
 	outerRadius = min(width(), height()) / 2.0;

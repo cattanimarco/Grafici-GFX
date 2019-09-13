@@ -34,6 +34,7 @@ private:
 class ColorTheme
 {
 public:
+
 	enum class ColorSource
 	{
 		predefined,
@@ -41,7 +42,9 @@ public:
 		computeFromX,
 		computeFromY,
 	};
+
 	ColorTheme(ColorPalette *colorPalette, ColorSource colorSource) : colorPalette(colorPalette), colorSource(colorSource){};
+
 	Color project(DataPoint *dataPoint);
 
 private:
@@ -132,7 +135,7 @@ public:
 	void verticalFlipRadial(void);
 	//void rotateRadial(float value);
 
-	Pixel project(DisplayDriver &displayDriver, DataPoint point);
+	Pixel project(DataPoint dataPoint,DisplayDriver &displayDriver);
 
 private:
 	void update(void);
