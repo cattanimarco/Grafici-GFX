@@ -1,19 +1,12 @@
 #include "../Display.h"
 
-#ifndef GRAFICI_GFX_Bw_H
-#define GRAFICI_GFX_Bw_H
+#ifndef GRAFICI_GFX_BW_H
+#define GRAFICI_GFX_BW_H
 
 Color cBw[2] = {
 	{0, 0, 0},
-	{128+64, 128+64, 128+64},
+	{255, 255, 255},
 };
 
-ColorPalette csBw(
-	&cBw[0], //.colors =
-	2,			 //.size =
-	(Color){64, 64, 64},  //.lineColor =
-	(Color){128, 128, 128},  //.markerColor=
-	cBw[0],  //.fillColor =
-	(Color){255, 255, 255}   //.bkgColor =
-);
-#endif //GRAFICI_GFX_Bw_H
+ColorPalette csBw(&cBw[0], 2);
+#endif //GRAFICI_GFX_BW_H

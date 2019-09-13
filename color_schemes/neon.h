@@ -18,13 +18,6 @@ Color cNeon[12] = {
 	(29, 29, 29),
 };
 
-ColorPalette csNeon(
-	&cNeon[0],	 //.colors =
-	12,				 //.size =
-	cNeon[10],	 //.lineColor =
-	cNeon[5],		 //.markerColor=
-	cNeon[9],		 //.fillColor =
-	(Color){0, 0, 0} //.bkgColor =
-);
+ColorPalette csNeon(&cNeon[0], 12);
 
 #endif //GRAFICI_GFX_NEON_H

@@ -5,7 +5,6 @@
 #include "Data.h"
 #include "Adafruit_GFX.h"
 
-typedef void (*PlotFunction)(DisplayDriver *displayDriver, DataSource *dataSource, DisplayBoundaries *displayBoundaries, ColorTheme *colorTheme);
 
 class Color
 {
@@ -136,7 +135,7 @@ public:
 	void verticalFlipRadial(void);
 	//void rotateRadial(float value);
 
-	Pixel project(DataPoint dataPoint,DisplayDriver &displayDriver);
+	Pixel project(DataPoint &dataPoint,DisplayDriver &displayDriver);
 
 private:
 	void update(void);

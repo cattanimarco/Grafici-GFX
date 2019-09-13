@@ -16,7 +16,7 @@ public:
 	float z; // third dimension only visualized via color/size/etc..
 };
 
-class Dataset
+class DataSet
 {
 public:
 	virtual DataPoint getDataPoint(int index) = 0;
@@ -30,7 +30,7 @@ class DataPointIterator
 {
 
 public:
-	DataPointIterator(Dataset *dataset, int dataIndex) : _dataset(dataset), _dataIndex(dataIndex){};
+	DataPointIterator(DataSet *dataSet, int dataIndex) : dataSet(dataSet), dataIndex(dataIndex){};
 
 	DataPoint operator*();
 	DataPointIterator &operator++();
@@ -38,8 +38,8 @@ public:
 	bool operator!=(DataPointIterator const &other);
 
 private:
-	Dataset *_dataset;
-	int _dataIndex;
+	DataSet *dataSet;
+	int dataIndex;
 };
 
 #endif //GRAFICI_DATA_H

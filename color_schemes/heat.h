@@ -3,7 +3,7 @@
 #ifndef GRAFICI_GFX_HEAT_H
 #define GRAFICI_GFX_HEAT_H
 
-Color cHeat[10] = {
+Color cHeat[11] = {
 	{0, 0, 0},
 	{10, 0, 0},
 	{75, 0, 0},
@@ -14,15 +14,9 @@ Color cHeat[10] = {
 	{255, 160, 0},
 	{255, 255, 0},
 	{252, 255, 29},
+	{255, 255, 255},
 };
 
-ColorPalette csHeat(
-	&cHeat[0], //.colors = 
-	10, //.size = 
-	cHeat[0], //.lineColor = 
-	cHeat[3], //.markerColor= 
-	cHeat[6], //.fillColor = 
-	(Color){255, 255, 255} //.bkgColor = 	  
-);
+ColorPalette csHeat(&cHeat[0], 11);
 
 #endif //GRAFICI_GFX_HEAT_H

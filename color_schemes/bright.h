@@ -1,7 +1,7 @@
 #include "../Display.h"
 
-#ifndef GRAFICI_GFX_Bright_H
-#define GRAFICI_GFX_Bright_H
+#ifndef GRAFICI_GFX_BRIGHT_H
+#define GRAFICI_GFX_BRIGHT_H
 
 Color cBright[6] = {
 	{212, 53, 59},
@@ -12,13 +12,6 @@ Color cBright[6] = {
 	{240, 137, 53},
 };
 
-ColorPalette csBright(
-	&cBright[0], //.colors =
-	6,			 //.size =
-	cBright[3],  //.lineColor =
-	cBright[2],  //.markerColor=
-	cBright[1],  //.fillColor =
-	(Color){0, 0, 0}    //.bkgColor =
-);
+ColorPalette csBright(&cBright[0], 6);
 
-#endif //GRAFICI_GFX_Bright_H
+#endif //GRAFICI_GFX_BRIGHT_H

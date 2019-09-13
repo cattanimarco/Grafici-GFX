@@ -4,19 +4,21 @@
 #include "Data.h"
 #include "Display.h"
 
+typedef void (*PlotFunction)(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *displayBoundaries, ColorTheme *colorTheme);
+
 class Grafici
 {
 public:
 	void begin(Adafruit_GFX &tft, ColorPalette &colorScheme);
 
 	/* use default boundaries and theme */
-	void plot(PlotFunction plotFunction, Dataset &dataset);
+	void plot(PlotFunction plotFunction, DataSet &dataSet);
 	/* use default theme */
-	void plot(PlotFunction plotFunction, Dataset &dataset, DisplayBoundaries &customBoundaries);
+	void plot(PlotFunction plotFunction, DataSet &dataSet, DisplayBoundaries &customBoundaries);
 	/* use default boundaries */
-	void plot(PlotFunction plotFunction, Dataset &dataset, ColorTheme &customTheme);
+	void plot(PlotFunction plotFunction, DataSet &dataSet, ColorTheme &customTheme);
 	/* no default parameters */
-	void plot(PlotFunction plotFunction, Dataset &dataset, DisplayBoundaries &customBoundaries, ColorTheme &customTheme);
+	void plot(PlotFunction plotFunction, DataSet &dataSet, DisplayBoundaries &customBoundaries, ColorTheme &customTheme);
 
 	/* use default boundaries and theme */
 	void clear();

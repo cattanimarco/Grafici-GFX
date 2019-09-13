@@ -14,33 +14,33 @@ void Grafici::begin(Adafruit_GFX &tft, ColorPalette &colorScheme)
 }
 
 /* use default boundaries and theme */
-void Grafici::plot(PlotFunction plotFunction, Dataset &dataset)
+void Grafici::plot(PlotFunction plotFunction, DataSet &dataSet)
 {
 	DisplayBoundaries boundaries;
 	boundaries.begin();
 
-	plot(plotFunction, dataset, boundaries, colorTheme);
+	plot(plotFunction, dataSet, boundaries, colorTheme);
 }
 
 /* use default theme */
-void Grafici::plot(PlotFunction plotFunction, Dataset &dataset, DisplayBoundaries &customBoundaries)
+void Grafici::plot(PlotFunction plotFunction, DataSet &dataSet, DisplayBoundaries &customBoundaries)
 {
-	plot(plotFunction, dataset, customBoundaries, colorTheme);
+	plot(plotFunction, dataSet, customBoundaries, colorTheme);
 }
 
 /* use default boundaries */
-void Grafici::plot(PlotFunction plotFunction, Dataset &dataset, ColorTheme &customTheme)
+void Grafici::plot(PlotFunction plotFunction, DataSet &dataSet, ColorTheme &customTheme)
 {
 	DisplayBoundaries boundaries;
 	boundaries.begin();
 
-	plot(plotFunction, dataset, boundaries, customTheme);
+	plot(plotFunction, dataSet, boundaries, customTheme);
 }
 
 /* no default parameters */
-void Grafici::plot(PlotFunction plotFunction, Dataset &dataset, DisplayBoundaries &customBoundaries, ColorTheme &customTheme)
+void Grafici::plot(PlotFunction plotFunction, DataSet &dataSet, DisplayBoundaries &customBoundaries, ColorTheme &customTheme)
 {
-	plotFunction(&displayDriver, &dataset, &customBoundaries, &customTheme);
+	plotFunction(&displayDriver, &dataSet, &customBoundaries, &customTheme);
 }
 
 /* use default boundaries and theme */
@@ -73,5 +73,5 @@ void Grafici::clear(DisplayBoundaries &boundaries, ColorTheme &customTheme)
 	DataPoint bl(0.0, 0.0);
 	DataPoint tr(1.0, 1.0);
 
-	displayDriver.fillRectangle(boundaries.project(bl,displayDriver),boundaries.project(tr,displayDriver), customTheme.getColor(0.0));
+	displayDriver.fillRectangle(boundaries.project(bl, displayDriver), boundaries.project(tr, displayDriver), customTheme.getColor(0.0));
 }

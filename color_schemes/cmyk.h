@@ -10,12 +10,6 @@ Color cCmyk[4] = {
 	{116, 251, 253},
 };
 
-ColorPalette csCmyk(
-	&cCmyk[0], //.colors =
-	4,			 //.size =
-	cCmyk[3],  //.lineColor =
-	cCmyk[2],  //.markerColor=
-	cCmyk[1],  //.fillColor =
-	(Color){255, 255, 255}   //.bkgColor =
-);
+ColorPalette csCmyk(&cCmyk[0], 4);
+
 #endif //GRAFICI_GFX_CMYK_H
