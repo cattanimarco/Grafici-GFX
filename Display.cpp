@@ -18,27 +18,27 @@
 
 
 
-Color ColorPalette::getColor(float value)
+Color ColorPalette::getColor(float val)
 {
 	int idx1;				// |-- Our desired color will be between these two indexes in "color".
 	int idx2;				// |
 	float fractBetween = 0; // Fraction between "idx1" and "idx2" where our value is.
 	Color color;
 
-	if (value <= 0)
+	if (val <= 0)
 	{
 		idx1 = idx2 = 0;
 	} // accounts for an input <=0
-	else if (value >= 1)
+	else if (val >= 1)
 	{
 		idx1 = idx2 = size - 1;
 	} // accounts for an input >=0
 	else
 	{
-		value = value * (size - 1);
-		idx1 = floor(value);
+		val = val * (size - 1);
+		idx1 = floor(val);
 		idx2 = idx1 + 1;
-		fractBetween = value - float(idx1);
+		fractBetween = val - float(idx1);
 	}
 
 	color.red = colors[idx2].red * fractBetween + colors[idx1].red * (1 - fractBetween);
@@ -48,23 +48,23 @@ Color ColorPalette::getColor(float value)
 	return color;
 }
 
-Color ColorTheme::project(DataPoint *dataPoint)
+Color ColorTheme::project(DataPoint &dataPoint)
 {
 switch (colorSource)
 	{
 	case ColorSource::computeFromX:
 	{
-		return colorPalette->getColor(dataPoint->x);
+		return colorPalette->getColor(dataPoint.x);
 	}
 	break;
 	case ColorSource::computeFromY:
 	{
-		return colorPalette->getColor(dataPoint->y);
+		return colorPalette->getColor(dataPoint.y);
 	}
 	break;
-	case ColorSource::computeFromValue:
+	case ColorSource::computeFromZ:
 	{
-		return colorPalette->getColor(dataPoint->value);
+		return colorPalette->getColor(dataPoint.z);
 	}
 	break;
 
@@ -76,6 +76,11 @@ switch (colorSource)
 	break;
 	}
 };
+
+Color ColorTheme::getColor(float val)
+{
+	return(colorPalette->getColor(val));
+}
 
 Pixel::Pixel() : x(0), y(0) {}
 
@@ -325,7 +330,7 @@ DataPoint DisplayBoundaries::getCenter(void)
 	return center;
 }
 
-Pixel DisplayBoundaries::project(DataPoint dataPoint,DisplayDriver &displayDriver)
+Pixel DisplayBoundaries::project(DataPoint &dataPoint,DisplayDriver &displayDriver)
 {
 	Pixel p;
 	p.x = displayDriver.width() * (dataPoint.x * topRight.x + (1.0 - dataPoint.x) * bottomLeft.x);
@@ -402,12 +407,12 @@ void RoundDisplayBoundaries::verticalFlipRadial(void)
 	SWAP(innerRadius, outerRadius, float);
 }
 
-Pixel RoundDisplayBoundaries::project(DataPoint dataPoint,DisplayDriver &displayDriver)
+Pixel RoundDisplayBoundaries::project(DataPoint &dataPoint,DisplayDriver &displayDriver)
 {
 	Pixel p;
 
-	float radius = innerRadius * (1.0 - point.y) + outerRadius * point.y;
-	float angle = beginAngle * (1.0 - point.x) + endAngle * point.x;
+	float radius = innerRadius * (1.0 - dataPoint.y) + outerRadius * dataPoint.y;
+	float angle = beginAngle * (1.0 - dataPoint.x) + endAngle * dataPoint.x;
 	p.x = displayDriver.width() * (getCenter().x + radius * cos(angle));
 	p.y = displayDriver.height() * (getCenter().y + radius * sin(angle));
 

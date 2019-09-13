@@ -5,7 +5,7 @@
 #include "Data.h"
 #include "Adafruit_GFX.h"
 
-typedef void (*PlotFunction)(DisplayDriver *DisplayDriver, DataSource *dataset, Display::Boundaries *DisplayBoundaries, Colors::Theme *ColorTheme);
+typedef void (*PlotFunction)(DisplayDriver *displayDriver, DataSource *dataSource, DisplayBoundaries *displayBoundaries, ColorTheme *colorTheme);
 
 class Color
 {
@@ -24,7 +24,7 @@ class ColorPalette
 {
 public:
 	ColorPalette(Color *colors, int size) : colors(colors), size(size){};
-	Color getColor(float value);
+	Color getColor(float val);
 
 private:
 	Color *colors;
@@ -38,14 +38,15 @@ public:
 	enum class ColorSource
 	{
 		predefined,
-		computeFromValue,
 		computeFromX,
 		computeFromY,
+		computeFromZ,
 	};
 
 	ColorTheme(ColorPalette *colorPalette, ColorSource colorSource) : colorPalette(colorPalette), colorSource(colorSource){};
 
-	Color project(DataPoint *dataPoint);
+	Color project(DataPoint &dataPoint);
+	Color getColor(float val);
 
 private:
 	ColorPalette *colorPalette;
@@ -113,7 +114,7 @@ public:
 	DataPoint getCenter(void);
 
 	// projection function(s)
-	virtual Pixel project(DataPoint dataPoint,DisplayDriver &displayDriver);
+	virtual Pixel project(DataPoint &dataPoint,DisplayDriver &displayDriver);
 
 protected:
 	DataPoint bottomLeft;

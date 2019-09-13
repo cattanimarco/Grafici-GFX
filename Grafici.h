@@ -12,27 +12,28 @@ public:
 	/* use default boundaries and theme */
 	void plot(PlotFunction plotFunction, Dataset &dataset);
 	/* use default theme */
-	void plot(PlotFunction plotFunction, Dataset &dataset, Boundaries &customBoundaries);
+	void plot(PlotFunction plotFunction, Dataset &dataset, DisplayBoundaries &customBoundaries);
 	/* use default boundaries */
-	void plot(PlotFunction plotFunction, Dataset &dataset, ColorTheme &customSettings);
+	void plot(PlotFunction plotFunction, Dataset &dataset, ColorTheme &customTheme);
 	/* no default parameters */
-	void plot(PlotFunction plotFunction, Dataset &dataset, Boundaries &customBoundaries, ColorTheme &customSettings);
+	void plot(PlotFunction plotFunction, Dataset &dataset, DisplayBoundaries &customBoundaries, ColorTheme &customTheme);
 
 	/* use default boundaries and theme */
 	void clear();
 	/* use default theme */
-	void clear(Boundaries &boundaries);
+	void clear(DisplayBoundaries &boundaries);
 	/* use default boundaries */
-	void clear(ColorTheme &customSettings);
+	void clear(ColorTheme &customTheme);
 	/* no default parameters */
-	void clear(Boundaries &boundaries, ColorTheme &customSettings);
+	void clear(DisplayBoundaries &boundaries, ColorTheme &customTheme);
 
-	// TODO select type of boundaries via theme
-	Boundaries baseBoundaries(void);
+	// TODO declare lamda function to project space and color to a pixel
+	// TODO make functor to pass to plot function?
+	//Pixel project(DataPoint dataPoint);
 
 private:
-	ColorTheme _theme;
-	DisplayDriver _displayDriver;
+	ColorTheme colorTheme;
+	DisplayDriver displayDriver;
 };
 
 #endif //GRAFICI_GFX_API_H

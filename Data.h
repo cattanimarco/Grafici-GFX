@@ -3,38 +3,39 @@
 
 #include "Arduino.h"
 
-class DatapointIterator;
+class DataPointIterator;
 
-class Datapoint
+class DataPoint
 {
 public:
-	Datapoint(void);
-	Datapoint(float x, float y);
+	DataPoint(void);
+	DataPoint(float x, float y);
+	DataPoint(float x, float y, float z);
 	float x;
 	float y;
-	float value;
+	float z; // third dimension only visualized via color/size/etc..
 };
 
 class Dataset
 {
 public:
-	virtual Datapoint getDatapoint(int index) = 0;
+	virtual DataPoint getDataPoint(int index) = 0;
 	virtual int size(void) = 0;
 	virtual void refresh() = 0;
-	 DatapointIterator beginIt();
-	 DatapointIterator endIt();
+	 DataPointIterator beginIt();
+	 DataPointIterator endIt();
 };
 
-class DatapointIterator
+class DataPointIterator
 {
 
 public:
-	DatapointIterator(Dataset *dataset, int dataIndex) : _dataset(dataset), _dataIndex(dataIndex){};
+	DataPointIterator(Dataset *dataset, int dataIndex) : _dataset(dataset), _dataIndex(dataIndex){};
 
-	Datapoint operator*();
-	DatapointIterator &operator++();
-	DatapointIterator operator++(int postfix);
-	bool operator!=(DatapointIterator const &other);
+	DataPoint operator*();
+	DataPointIterator &operator++();
+	DataPointIterator operator++(int postfix);
+	bool operator!=(DataPointIterator const &other);
 
 private:
 	Dataset *_dataset;

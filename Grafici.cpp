@@ -10,93 +10,68 @@
 
 void Grafici::begin(Adafruit_GFX &tft, ColorPalette &colorScheme)
 {
-	_displayDriver.begin(&tft);
-	_theme.colorScheme = &colorScheme;
-	_theme.drawColor = ColorTheme::COLOR_THEME;
-	_theme.markerSize = min(_displayDriver.height, _displayDriver.width) * 0.05;
-}
-
-Boundaries Grafici::baseBoundaries(void)
-{
-	Boundaries boundaries;
-
-	boundaries.begin(_displayDriver);
-
-	return boundaries;
+	displayDriver.begin(&tft);
 }
 
 /* use default boundaries and theme */
 void Grafici::plot(PlotFunction plotFunction, Dataset &dataset)
 {
-	Boundaries boundaries;
-	boundaries.begin(_displayDriver);
+	DisplayBoundaries boundaries;
+	boundaries.begin();
 
-	plot(plotFunction, dataset, boundaries, _theme);
+	plot(plotFunction, dataset, boundaries, colorTheme);
 }
 
 /* use default theme */
-void Grafici::plot(PlotFunction plotFunction, Dataset &dataset, Boundaries &customBoundaries)
+void Grafici::plot(PlotFunction plotFunction, Dataset &dataset, DisplayBoundaries &customBoundaries)
 {
-	plot(plotFunction, dataset, customBoundaries, _theme);
+	plot(plotFunction, dataset, customBoundaries, colorTheme);
 }
 
 /* use default boundaries */
-void Grafici::plot(PlotFunction plotFunction, Dataset &dataset, ColorTheme &customSettings)
+void Grafici::plot(PlotFunction plotFunction, Dataset &dataset, ColorTheme &customTheme)
 {
-	Boundaries boundaries;
-	boundaries.begin(_displayDriver);
+	DisplayBoundaries boundaries;
+	boundaries.begin();
 
-	plot(plotFunction, dataset, boundaries, customSettings);
+	plot(plotFunction, dataset, boundaries, customTheme);
 }
 
 /* no default parameters */
-void Grafici::plot(PlotFunction plotFunction, Dataset &dataset, Boundaries &customBoundaries, ColorTheme &customSettings)
+void Grafici::plot(PlotFunction plotFunction, Dataset &dataset, DisplayBoundaries &customBoundaries, ColorTheme &customTheme)
 {
-	plotFunction(&_displayDriver, &dataset, &customBoundaries, &customSettings);
+	plotFunction(&displayDriver, &dataset, &customBoundaries, &customTheme);
 }
 
 /* use default boundaries and theme */
 void Grafici::clear()
 {
-	Boundaries boundaries;
-	boundaries.begin(_displayDriver);
+	DisplayBoundaries boundaries;
+	boundaries.begin();
 
-	clear(boundaries, _theme);
+	clear(boundaries, colorTheme);
 }
 
 /* use default theme */
-void Grafici::clear(Boundaries &boundaries)
+void Grafici::clear(DisplayBoundaries &boundaries)
 {
-	clear(boundaries, _theme);
+	clear(boundaries, colorTheme);
 }
 
 /* use default boundaries */
-void Grafici::clear(ColorTheme &customSettings)
+void Grafici::clear(ColorTheme &customTheme)
 {
-	Boundaries boundaries;
-	boundaries.begin(_displayDriver);
+	DisplayBoundaries boundaries;
+	boundaries.begin();
 
-	clear(boundaries, customSettings);
+	clear(boundaries, customTheme);
 }
 
 /* no default parameters */
-void Grafici::clear(Boundaries &boundaries, ColorTheme &customSettings)
+void Grafici::clear(DisplayBoundaries &boundaries, ColorTheme &customTheme)
 {
-	Datapoint a(0.0, 0.0);
-	Datapoint b(1.0, 1.0);
+	DataPoint bl(0.0, 0.0);
+	DataPoint tr(1.0, 1.0);
 
-	_displayDriver.fillRectangle(boundaries.project(a).setColor(customSettings.colorScheme->getBkgColor()),
-								 boundaries.project(b).setColor(customSettings.colorScheme->getBkgColor()));
-}
-
-void Grafici::clear()
-{
-	Boundaries boundaries;
-	boundaries.begin(_displayDriver);
-
-	clear(boundaries);
-}
-
-void Grafici::clear(Boundaries &boundaries)
-{
+	displayDriver.fillRectangle(boundaries.project(bl,displayDriver),boundaries.project(tr,displayDriver), customTheme.getColor(0.0));
 }
