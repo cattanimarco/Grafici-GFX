@@ -1,5 +1,5 @@
-#ifndef GRAFICI_DECORATOR_DatasetInterpolator_H
-#define GRAFICI_DECORATOR_DatasetInterpolator_H
+#ifndef GRAFICI_GFX_DATA_DECORATOR_INTERPOLATOR_H
+#define GRAFICI_GFX_DATA_DECORATOR_INTERPOLATOR_H
 
 #include "../Data.h"
 
@@ -11,72 +11,64 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-class DatasetInterpolator : public Dataset
+class DataSetInterpolator : public DataSet
 {
 public:
-	void begin(Dataset *dataset, int interpolationSteps);
+	void begin(DataSet *dataSet, int interpolationSteps);
 	void end(void);
 	Datapoint getDatapoint(int index);
 	void refresh();
 	int size(void);
 
 private:
-	Dataset *_dataset;
-	int _numElem;
+	DataSet *dataSet;
+	int numElem;
 };
 
-void DatasetInterpolator::begin(Dataset *dataset, int interpolationSteps)
+void DataSetInterpolator::begin(DataSet *dataSet, int interpolationSteps)
 {
-	_dataset = dataset;
-	_numElem = interpolationSteps;
+	this->dataSet = dataSet;
+	numElem = interpolationSteps;
 }
 
-void DatasetInterpolator::end(void)
+void DataSetInterpolator::end(void)
 {
 }
 
-Datapoint DatasetInterpolator::getDatapoint(int index)
+Datapoint DataSetInterpolator::getDatapoint(int index)
 {
 	int bin = 0;
 	Datapoint p;
 
-	if (index < _numElem)
+	if (index < numElem)
 	{
-		p.x = (1.0 * index) / (_numElem - 1);
-
-		//std::cout << p.x << " - ";
-
+		p.x = (1.0 * index) / (numElem - 1);
 		// check that we are in the correct bin
-		while (p.x > _dataset->getDatapoint(bin + 1).x)
+		while (p.x > dataSet->getDatapoint(bin + 1).x)
 		{
 			bin++;
-			if (bin == _dataset->size())
+			if (bin == dataSet->size())
 			{
 				bin--;
 				break;
 			}
 		}
-
-		//std::cout << _dataset->getDatapoint(bin).x << " " << p.x << " " << _dataset->getDatapoint(bin + 1).x << std::endl;
-
-		float fractBetween = (p.x - _dataset->getDatapoint(bin).x) / (_dataset->getDatapoint(bin + 1).x - _dataset->getDatapoint(bin).x);
-		p.y = _dataset->getDatapoint(bin + 1).y * fractBetween + _dataset->getDatapoint(bin).y * (1.0 - fractBetween);
-		p.value = _dataset->getDatapoint(bin + 1).value * fractBetween + _dataset->getDatapoint(bin).value * (1.0 - fractBetween);
-
-		//std::cout << p.x << " " << p.y << " " << p.value << std::endl;
+		float fractBetween = (p.x - dataSet->getDatapoint(bin).x) / (dataSet->getDatapoint(bin + 1).x - dataSet->getDatapoint(bin).x);
+		p.y = dataSet->getDatapoint(bin + 1).y * fractBetween + dataSet->getDatapoint(bin).y * (1.0 - fractBetween);
+		p.value = dataSet->getDatapoint(bin + 1).value * fractBetween + dataSet->getDatapoint(bin).value * (1.0 - fractBetween);
 	}
 
 	return p;
 }
 
-int DatasetInterpolator::size(void)
+int DataSetInterpolator::size(void)
 {
-	return _numElem;
+	return numElem;
 }
 
-void DatasetInterpolator::refresh(void)
+void DataSetInterpolator::refresh(void)
 {
-	_dataset->refresh();
+	dataSet->refresh();
 }
 
-#endif //GRAFICI_DECORATOR_DatasetInterpolator_H
+#endif //GRAFICI_GFX_DATA_DECORATOR_INTERPOLATOR_H

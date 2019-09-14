@@ -1,5 +1,5 @@
-#ifndef GRAFICI_GFX_DATA_DECORATOR_HISTOGRAM_H
-#define GRAFICI_GFX_DATA_DECORATOR_HISTOGRAM_H
+#ifndef GRAFICIGFXDATADECORATORHISTOGRAMH
+#define GRAFICIGFXDATADECORATORHISTOGRAMH
 
 #include "../Data.h"
 
@@ -11,65 +11,65 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-class DatasetHistogram : public Dataset
+class DataSetHistogram : public DataSet
 {
 public:
-	void begin(Dataset *dataset, int buckets);
+	void begin(DataSet *dataSet, int buckets);
 	void end(void);
 	Datapoint getDatapoint(int index);
 	void refresh();
 	int size(void);
 
 private:
-	Dataset *_dataset;
-	int _yMax;
-	int _numElem;
-	int *_counters;
+	DataSet *dataSet;
+	int yMax;
+	int numElem;
+	int *counters;
 };
 
 
-void DatasetHistogram::begin(Dataset *dataset, int buckets)
+void DataSetHistogram::begin(DataSet *dataSet, int buckets)
 {
-	_dataset = dataset;
-	_numElem = buckets;
-	_counters = (int *)malloc(sizeof(int) * buckets);
+	this->dataSet = dataSet;
+	numElem = buckets;
+	counters = (int *)malloc(sizeof(int) * buckets);
 
 	refresh();
 }
 
-void DatasetHistogram::end(void)
+void DataSetHistogram::end(void)
 {
-	free(_counters);
+	free(counters);
 }
 
-Datapoint DatasetHistogram::getDatapoint(int index)
+Datapoint DataSetHistogram::getDatapoint(int index)
 {
 	Datapoint p;
-	if (index < _numElem)
+	if (index < numElem)
 	{
-		p.x = (1.0 * index) / (_numElem - 1);
-		p.y = (1.0 * _counters[index]) / _yMax;
+		p.x = (1.0 * index) / (numElem - 1);
+		p.y = (1.0 * counters[index]) / yMax;
 	}
 
 	return p;
 }
 
-int DatasetHistogram::size(void)
+int DataSetHistogram::size(void)
 {
-	return _numElem;
+	return numElem;
 }
 
-void DatasetHistogram::refresh(void)
+void DataSetHistogram::refresh(void)
 {
-	_yMax = 0;
+	yMax = 0;
 
-	for (DatapointIterator it = _dataset->beginIt(); it != _dataset->endIt(); ++it)
+	for (DatapointIterator it = dataSet->beginIt(); it != dataSet->endIt(); ++it)
 	{
 		Datapoint p = *it;
-		int target = round(p.y * (_numElem - 1));
-		_counters[target]++;
-		_yMax = max(_counters[target], _yMax);
+		int target = round(p.y * (numElem - 1));
+		counters[target]++;
+		yMax = max(counters[target], yMax);
 	}
 }
 
-#endif //GRAFICI_GFX_DATA_DECORATOR_HISTOGRAM_H
+#endif //GRAFICIGFXDATADECORATORHISTOGRAMH

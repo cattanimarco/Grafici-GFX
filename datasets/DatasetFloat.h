@@ -3,9 +3,6 @@
 
 #include "../Data.h"
 
-// #define ZVALUEFROMX (-2.0)
-// #define ZVALUEFROMY (2.0)
-
 #ifndef NULL
 #define NULL (0)
 #endif

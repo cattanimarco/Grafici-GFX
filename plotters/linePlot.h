@@ -1,21 +1,18 @@
 #ifndef GRAFICI_GFX_PLOT_LINE_H
 #define GRAFICI_GFX_PLOT_LINE_H
 
-#include "../Data.h"
-#include "../Display.h"
+#include "../Grafici.h"
 
-void linePlot(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *boundaries, ColorTheme *theme)
+void linePlot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 {
 
-		DatapointIterator it = dataset->beginIt();
+	DatapointIterator it = dataSet->beginIt();
 
-	for (Datapoint previous = *(it++); it != dataset->endIt(); previous = *(it++))
+	for (Datapoint previous = *(it++); it != dataSet->endIt(); previous = *(it++))
 	{
 		Datapoint actual = *it;
-				displayDriver->drawLine(boundaries->project(previous).setColor(theme->colorScheme->getMarkerColor(&previous, theme)),
-								boundaries->project(actual).setColor(theme->colorScheme->getMarkerColor(&actual, theme)));
+		displayDriver->drawLine(boundaries->project(previous, displayDriver), boundaries->project(actual, displayDriver), theme->project(actual));
 	}
-
 }
 
 #endif //GRAFICI_GFX_PLOT_LINE_H

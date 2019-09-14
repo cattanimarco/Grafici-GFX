@@ -42,6 +42,8 @@ public:
 		computeFromZ,
 	};
 
+int markerSize = 5;
+
 	ColorTheme(ColorPalette *colorPalette, ColorSource colorSource) : colorPalette(colorPalette), colorSource(colorSource){};
 
 	Color project(DataPoint &dataPoint);
