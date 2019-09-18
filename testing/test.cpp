@@ -20,7 +20,6 @@
 #include "../colorSchemes/bright.h"
 #include "../colorSchemes/bw.h"
 
-
 //todo make an h file to include all basic essentials
 //#include <iostream>
 
@@ -41,7 +40,7 @@ int main()
 	//VisitorDrawAxis visitorAxis;
 	//Widget widget;
 
-ColorTheme myTheme(csBright, ColorSource::computeFromX);
+	ColorTheme myTheme(csBright, ColorSource::computeFromX);
 
 	// RoundBoundaries bottomRight;
 	// Boundaries bottomLeft;
@@ -81,7 +80,7 @@ ColorTheme myTheme(csBright, ColorSource::computeFromX);
 		grafici.plot(linePlot, dataset, left);
 		grafici.plot(linePlot, dataInterpolator, mid);
 		grafici.plot(linePlot, dataSpline, right);
-		
+
 		grafici.plot(scatterPlot, dataset, left);
 		grafici.plot(scatterPlot, dataInterpolator, mid);
 		grafici.plot(scatterPlot, dataSpline, right);
