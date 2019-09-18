@@ -12,8 +12,8 @@ void linePlot(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *bounda
 	for (Datapoint previous = *(it++); it != dataset->endIt(); previous = *(it++))
 	{
 		Datapoint actual = *it;
-				displayDriver->drawLine(boundaries->project(previous).setColor(colorScheme->getColor(previous.value)),
-								boundaries->project(actual).setColor(colorScheme->getColor(actual.value)));
+				displayDriver->drawLine(boundaries->project(previous).setColor(colorScheme->getColor(previous.z)),
+								boundaries->project(actual).setColor(colorScheme->getColor(actual.z)));
 	}
 
 }

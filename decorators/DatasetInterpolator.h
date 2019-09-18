@@ -16,7 +16,7 @@ class DataSetInterpolator : public DataSet
 public:
 	void begin(DataSet *dataSet, int interpolationSteps);
 	void end(void);
-	Datapoint getDatapoint(int index);
+	DataPoint getDataPoint(int index);
 	void refresh();
 	int size(void);
 
@@ -35,16 +35,16 @@ void DataSetInterpolator::end(void)
 {
 }
 
-Datapoint DataSetInterpolator::getDatapoint(int index)
+DataPoint DataSetInterpolator::getDataPoint(int index)
 {
 	int bin = 0;
-	Datapoint p;
+	DataPoint p;
 
 	if (index < numElem)
 	{
 		p.x = (1.0 * index) / (numElem - 1);
 		// check that we are in the correct bin
-		while (p.x > dataSet->getDatapoint(bin + 1).x)
+		while (p.x > dataSet->getDataPoint(bin + 1).x)
 		{
 			bin++;
 			if (bin == dataSet->size())
@@ -53,9 +53,9 @@ Datapoint DataSetInterpolator::getDatapoint(int index)
 				break;
 			}
 		}
-		float fractBetween = (p.x - dataSet->getDatapoint(bin).x) / (dataSet->getDatapoint(bin + 1).x - dataSet->getDatapoint(bin).x);
-		p.y = dataSet->getDatapoint(bin + 1).y * fractBetween + dataSet->getDatapoint(bin).y * (1.0 - fractBetween);
-		p.value = dataSet->getDatapoint(bin + 1).value * fractBetween + dataSet->getDatapoint(bin).value * (1.0 - fractBetween);
+		float fractBetween = (p.x - dataSet->getDataPoint(bin).x) / (dataSet->getDataPoint(bin + 1).x - dataSet->getDataPoint(bin).x);
+		p.y = dataSet->getDataPoint(bin + 1).y * fractBetween + dataSet->getDataPoint(bin).y * (1.0 - fractBetween);
+		p.z = dataSet->getDataPoint(bin + 1).z * fractBetween + dataSet->getDataPoint(bin).z * (1.0 - fractBetween);
 	}
 
 	return p;

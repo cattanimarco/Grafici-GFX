@@ -16,7 +16,7 @@ class DataSetHistogram : public DataSet
 public:
 	void begin(DataSet *dataSet, int buckets);
 	void end(void);
-	Datapoint getDatapoint(int index);
+	DataPoint getDataPoint(int index);
 	void refresh();
 	int size(void);
 
@@ -42,9 +42,9 @@ void DataSetHistogram::end(void)
 	free(counters);
 }
 
-Datapoint DataSetHistogram::getDatapoint(int index)
+DataPoint DataSetHistogram::getDataPoint(int index)
 {
-	Datapoint p;
+	DataPoint p;
 	if (index < numElem)
 	{
 		p.x = (1.0 * index) / (numElem - 1);
@@ -63,9 +63,9 @@ void DataSetHistogram::refresh(void)
 {
 	yMax = 0;
 
-	for (DatapointIterator it = dataSet->beginIt(); it != dataSet->endIt(); ++it)
+	for (DataPointIterator it = dataSet->beginIt(); it != dataSet->endIt(); ++it)
 	{
-		Datapoint p = *it;
+		DataPoint p = *it;
 		int target = round(p.y * (numElem - 1));
 		counters[target]++;
 		yMax = max(counters[target], yMax);

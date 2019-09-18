@@ -92,13 +92,13 @@ DataPoint DataSetSpline::getDataPoint(int index)
 		p.y = (p.y - yMin) / (yMax - yMin);
 
 		// compute interpolated value
-		p.value = dataSet->getDataPoint(bin).value +
+		p.z = dataSet->getDataPoint(bin).z +
 				  bValue[bin] * (p.x - dataSet->getDataPoint(bin).x) +
 				  cValue[bin] * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x) +
 				  dValue[bin] * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x);
 
 		// normalize dataSet to a 0.0 .. 1.0 value
-		p.value = (p.value - valueMin) / (valueMax - valueMin);
+		p.z = (p.z - valueMin) / (valueMax - valueMin);
 	}
 
 	return p;
@@ -189,7 +189,7 @@ void DataSetSpline::refresh(void)
 		// Interpolate value
 		for (int i = 1; i <= n - 1; ++i)
 		{
-			A[i] = 3 * (dataSet->getDataPoint(i + 1).value - dataSet->getDataPoint(i).value) / h[i] - 3 * (dataSet->getDataPoint(i).value - dataSet->getDataPoint(i - 1).value) / h[i - 1];
+			A[i] = 3 * (dataSet->getDataPoint(i + 1).z - dataSet->getDataPoint(i).z) / h[i] - 3 * (dataSet->getDataPoint(i).z - dataSet->getDataPoint(i - 1).z) / h[i - 1];
 		}
 
 		l[0] = 1;
@@ -210,7 +210,7 @@ void DataSetSpline::refresh(void)
 		for (int j = n - 1; j >= 0; --j)
 		{
 			cValue[j] = z[j] - u[j] * cValue[j + 1];
-			bValue[j] = (dataSet->getDataPoint(j + 1).value - dataSet->getDataPoint(j).value) / h[j] - h[j] * (cValue[j + 1] + 2 * cValue[j]) / 3;
+			bValue[j] = (dataSet->getDataPoint(j + 1).z - dataSet->getDataPoint(j).z) / h[j] - h[j] * (cValue[j + 1] + 2 * cValue[j]) / 3;
 			dValue[j] = (cValue[j + 1] - cValue[j]) / (3 * h[j]);
 		}
 
@@ -225,7 +225,7 @@ void DataSetSpline::refresh(void)
 			}
 
 			/* compute interpolated y value */
-			valueInter = dataSet->getDataPoint(bin).value +
+			valueInter = dataSet->getDataPoint(bin).z +
 						 bValue[bin] * (px - dataSet->getDataPoint(bin).x) +
 						 cValue[bin] * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x) +
 						 dValue[bin] * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x);

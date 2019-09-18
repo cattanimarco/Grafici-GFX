@@ -13,8 +13,8 @@ void spaghettiPlot(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *b
 
 		baseDatapoint.y = 0;
 
-		displayDriver->drawLine(boundaries->project(baseDatapoint).setColor(colorScheme->getColor(topDatapoint.value)),
-								boundaries->project(topDatapoint).setColor(colorScheme->getColor(topDatapoint.value)));
+		displayDriver->drawLine(boundaries->project(baseDatapoint).setColor(colorScheme->getColor(topDatapoint.z)),
+								boundaries->project(topDatapoint).setColor(colorScheme->getColor(topDatapoint.z)));
 	}
 }
 

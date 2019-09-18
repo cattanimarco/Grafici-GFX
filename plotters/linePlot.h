@@ -6,12 +6,14 @@
 void linePlot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 {
 
-	DatapointIterator it = dataSet->beginIt();
+	DataPointIterator it = dataSet->beginIt();
 
-	for (Datapoint previous = *(it++); it != dataSet->endIt(); previous = *(it++))
+	for (DataPoint previous = *(it++); it != dataSet->endIt(); previous = *(it++))
 	{
-		Datapoint actual = *it;
-		displayDriver->drawLine(boundaries->project(previous, displayDriver), boundaries->project(actual, displayDriver), theme->project(actual));
+		DataPoint actual = *it;
+		displayDriver->drawLine(boundaries->project(previous),
+								boundaries->project(actual),
+								theme->project(actual));
 	}
 }
 

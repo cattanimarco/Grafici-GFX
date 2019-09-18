@@ -1,23 +1,23 @@
 #ifndef GRAFICI_GFX_PLOT_BAR_H
 #define GRAFICI_GFX_PLOT_BAR_H
 
-#include "../Data.h"
-#include "../Display.h"
+#include "../Grafici.h"
 
-void barPlot(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *boundaries, ColorTheme *theme)
+void barPlot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 {
-	for (DatapointIterator it = dataset->beginIt(); it != dataset->endIt(); ++it)
+	for (DataPointIterator it = dataSet->beginIt(); it != dataSet->endIt(); ++it)
 	{
-		Datapoint baseDatapoint = *it;
-		Datapoint topDatapoint = baseDatapoint;
+		DataPoint baseDataPoint = *it;
+		DataPoint topDataPoint = baseDataPoint;
 
-		baseDatapoint.y = 0;
-		baseDatapoint.x = (baseDatapoint.x * dataset->size())/(dataset->size()+1);
-		baseDatapoint.x  += (0.05/(dataset->size()+1));
-		topDatapoint.x  = baseDatapoint.x + (0.90/(dataset->size()+1));
+		baseDataPoint.y = 0;
+		baseDataPoint.x = (baseDataPoint.x * dataSet->size())/(dataSet->size()+1);
+		baseDataPoint.x  += (0.05/(dataSet->size()+1));
+		topDataPoint.x  = baseDataPoint.x + (0.90/(dataSet->size()+1));
 
-		displayDriver->fillRectangle(boundaries->project(baseDatapoint).setColor(theme->getLineColor(topDatapoint)),
-									 boundaries->project(topDatapoint).setColor(theme->getLineColor(topDatapoint)));
+		displayDriver->fillRectangle(boundaries->project(baseDataPoint),
+									 boundaries->project(topDataPoint),
+									 theme->project(topDataPoint));
 	}
 }
 

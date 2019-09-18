@@ -109,11 +109,11 @@ Datapoint DatasetFloat::getDatapoint(int index)
 		//rewrite ho zdata is defined
 		if (_zDatapoint != NULL)
 		{
-			p.value = (_zDatapoint[index] - _zMin) / (_zMax - _zMin);
+			p.z = (_zDatapoint[index] - _zMin) / (_zMax - _zMin);
 		}
 		else
 		{
-			p.value = _zValue;
+			p.z = _zValue;
 		}
 	}
 	return p;

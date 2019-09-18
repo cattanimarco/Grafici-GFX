@@ -4,17 +4,18 @@
 #include "../Data.h"
 #include "../Display.h"
 
-void spaghettiPlot(DisplayDriver *displayDriver, Dataset *dataset, Boundaries *boundaries, ColorTheme *theme)
+void spaghettiPlot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 {
-	for (DatapointIterator it = dataset->beginIt(); it != dataset->endIt(); ++it)
+	for (DataPointIterator it = dataSet->beginIt(); it != dataSet->endIt(); ++it)
 	{
-		Datapoint baseDatapoint = *it;
-		Datapoint topDatapoint = baseDatapoint;
+		DataPoint baseDataPoint = *it;
+		DataPoint topDataPoint = baseDataPoint;
 
-		baseDatapoint.y = 0;
+		baseDataPoint.y = 0;
 
-		displayDriver->drawLine(boundaries->project(baseDatapoint).setColor(theme->colorScheme->getLineColor(&baseDatapoint, theme)),
-								boundaries->project(topDatapoint).setColor(theme->colorScheme->getLineColor(&topDatapoint, theme)));
+		displayDriver->drawLine(boundaries->project(baseDataPoint),
+								boundaries->project(topDataPoint),
+								theme->project(topDataPoint));
 	}
 }
 

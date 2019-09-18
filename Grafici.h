@@ -9,7 +9,7 @@ typedef void (*PlotFunction)(DisplayDriver *displayDriver, DataSet *dataSet, Dis
 class Grafici
 {
 public:
-	void begin(Adafruit_GFX &tft, ColorPalette &colorScheme);
+	void begin(Adafruit_GFX &tft, ColorTheme &colorTheme);
 
 	/* use default boundaries and theme */
 	void plot(PlotFunction plotFunction, DataSet &dataSet);
@@ -34,7 +34,7 @@ public:
 	//Pixel project(DataPoint dataPoint);
 
 private:
-	ColorTheme colorTheme;
+	ColorTheme *colorTheme;
 	DisplayDriver displayDriver;
 };
 

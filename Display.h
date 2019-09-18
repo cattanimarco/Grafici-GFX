@@ -5,7 +5,6 @@
 #include "Data.h"
 #include "Adafruit_GFX.h"
 
-
 class Color
 {
 public:
@@ -13,11 +12,6 @@ public:
 	unsigned char green;
 	unsigned char blue;
 };
-
-Color colorBlack = (Color){0, 0, 0};
-Color colorRed = (Color){255, 0, 0};
-Color colorGreen = (Color){0, 255, 0};
-Color colorBlue = (Color){0, 0, 255};
 
 class ColorPalette
 {
@@ -29,12 +23,8 @@ private:
 	Color *colors;
 	int size;
 };
-
-class ColorTheme
-{
-public:
-
-	enum class ColorSource
+	
+	enum ColorSource
 	{
 		predefined,
 		computeFromX,
@@ -42,9 +32,14 @@ public:
 		computeFromZ,
 	};
 
-int markerSize = 5;
+class ColorTheme
+{
+public:
 
-	ColorTheme(ColorPalette *colorPalette, ColorSource colorSource) : colorPalette(colorPalette), colorSource(colorSource){};
+
+	int markerSize = 5;
+
+	ColorTheme(ColorPalette &colorPalette, ColorSource colorSource) : colorPalette(&colorPalette), colorSource(colorSource){};
 
 	Color project(DataPoint &dataPoint);
 	Color getColor(float val);
@@ -58,13 +53,13 @@ struct Pixel
 {
 public:
 	Pixel(void);
-	Pixel(int x, int y);
+	Pixel(float x, float y);
 
 	Pixel &operator+=(const Pixel &b);
 	Pixel &operator-=(const Pixel &b);
 
-	int x;
-	int y;
+	float x;
+	float y;
 };
 
 class DisplayDriver
@@ -74,27 +69,27 @@ public:
 
 	void drawPixel(Pixel c, Color color);
 	void drawLine(Pixel a, Pixel b, Color color);
-	void drawCircle(Pixel c, int r, Color color);
+	void drawCircle(Pixel c, float area, Color color);
+	
 	void drawTriangle(Pixel a, Pixel b, Pixel c, Color color);
-	void drawRectangle(Pixel bl, int w, int h, Color color);
+	void drawRectangle(Pixel bl, float w, float h, Color color);
 	void drawRectangle(Pixel bl, Pixel tr, Color color);
-	void drawRoundRectangle(Pixel bl, int w, int h, int r, Color color);
+	void drawRoundRectangle(Pixel bl, float w, float h, float r, Color color);
 
-	void fillRectangle(Pixel bl, int w, int h, Color color);
+	void fillRectangle(Pixel bl, float w, float h, Color color);
 	void fillRectangle(Pixel bl, Pixel tr, Color color);
 
-	void fillCircle(Pixel c, int r, Color color);
+	void fillCircle(Pixel c, float r, Color color);
 	void fillTriangle(Pixel a, Pixel b, Pixel c, Color color);
-	void fillRoundRectangle(Pixel bl, int w, int h, int r, Color color);
+	void fillRoundRectangle(Pixel bl, float w, float h, float r, Color color);
 
 	void fillScreen(Color color);
 
-	int width(void);
-	int height(void);
-
 private:
-	Adafruit_GFX *_tft;
+	Adafruit_GFX *tft;
 	int colorTo16b(Color color);
+	//int displayWidth(void);
+	//int displayHeight(void);
 };
 
 class DisplayBoundaries
@@ -115,7 +110,7 @@ public:
 	DataPoint getCenter(void);
 
 	// projection function(s)
-	virtual Pixel project(DataPoint &dataPoint,DisplayDriver &displayDriver);
+	virtual Pixel project(DataPoint &dataPoint);
 
 protected:
 	DataPoint bottomLeft;
@@ -137,7 +132,7 @@ public:
 	void verticalFlipRadial(void);
 	//void rotateRadial(float value);
 
-	Pixel project(DataPoint &dataPoint,DisplayDriver &displayDriver);
+	Pixel project(DataPoint &dataPoint);
 
 private:
 	void update(void);

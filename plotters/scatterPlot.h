@@ -6,10 +6,12 @@
 void scatterPlot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 {
 
-	for (DatapointIterator it = dataSet->beginIt(); it != dataSet->endIt(); ++it)
+	for (DataPointIterator it = dataSet->beginIt(); it != dataSet->endIt(); ++it)
 	{
-		Datapoint dataPoint = *it;
-		displayDriver->drawCircle(boundaries->project(dataPoint), theme->markerSize, theme->project(dataPoint));
+		DataPoint dataPoint = *it;
+		displayDriver->drawCircle(boundaries->project(dataPoint),
+								  0.0001,
+								  theme->project(dataPoint));
 	}
 }
 

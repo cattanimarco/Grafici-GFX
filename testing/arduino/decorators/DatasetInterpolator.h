@@ -61,9 +61,9 @@ Datapoint DatasetInterpolator::getDatapoint(int index)
 
 		float fractBetween = (p.x - _dataset->getDatapoint(bin).x) / (_dataset->getDatapoint(bin + 1).x - _dataset->getDatapoint(bin).x);
 		p.y = _dataset->getDatapoint(bin + 1).y * fractBetween + _dataset->getDatapoint(bin).y * (1.0 - fractBetween);
-		p.value = _dataset->getDatapoint(bin + 1).value * fractBetween + _dataset->getDatapoint(bin).value * (1.0 - fractBetween);
+		p.z = _dataset->getDatapoint(bin + 1).z * fractBetween + _dataset->getDatapoint(bin).z * (1.0 - fractBetween);
 
-		//std::cout << p.x << " " << p.y << " " << p.value << std::endl;
+		//std::cout << p.x << " " << p.y << " " << p.z << std::endl;
 	}
 
 	return p;
