@@ -18,7 +18,7 @@ void Grafici::begin(Adafruit_GFX &tft, ColorTheme &colorTheme)
 void Grafici::plot(PlotFunction plotFunction, DataSet &dataSet)
 {
 	DisplayBoundaries boundaries;
-	boundaries.begin();
+	//boundaries.begin();
 
 	plot(plotFunction, dataSet, boundaries, *colorTheme);
 }
@@ -33,7 +33,7 @@ void Grafici::plot(PlotFunction plotFunction, DataSet &dataSet, DisplayBoundarie
 void Grafici::plot(PlotFunction plotFunction, DataSet &dataSet, ColorTheme &customTheme)
 {
 	DisplayBoundaries boundaries;
-	boundaries.begin();
+	//boundaries.begin();
 
 	plot(plotFunction, dataSet, boundaries, customTheme);
 }
@@ -48,7 +48,7 @@ void Grafici::plot(PlotFunction plotFunction, DataSet &dataSet, DisplayBoundarie
 void Grafici::clear()
 {
 	DisplayBoundaries boundaries;
-	boundaries.begin();
+	//boundaries.begin();
 
 	clear(boundaries, *colorTheme);
 }
@@ -63,7 +63,7 @@ void Grafici::clear(DisplayBoundaries &boundaries)
 void Grafici::clear(ColorTheme &customTheme)
 {
 	DisplayBoundaries boundaries;
-	boundaries.begin();
+	//boundaries.begin();
 
 	clear(boundaries, customTheme);
 }

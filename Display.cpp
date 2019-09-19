@@ -264,7 +264,7 @@ int DisplayDriver::colorTo16b(Color color)
 	return (c);
 }
 
-void DisplayBoundaries::begin()
+DisplayBoundaries::DisplayBoundaries()
 {
 	reset();
 }
@@ -355,9 +355,9 @@ Pixel DisplayBoundaries::project(DataPoint &dataPoint)
 	return p;
 };
 
-void RoundDisplayBoundaries::begin()
+RoundDisplayBoundaries::RoundDisplayBoundaries()
 {
-	DisplayBoundaries::begin();
+	DisplayBoundaries();
 	reset();
 }
 

@@ -92,7 +92,7 @@ private:
 class DisplayBoundaries
 {
 public:
-	virtual void begin();
+	DisplayBoundaries();
 
 	//transformation function
 	virtual void applyBorder(float top, float bottom, float left, float right);
@@ -117,7 +117,7 @@ protected:
 class RoundDisplayBoundaries : public DisplayBoundaries
 {
 public:
-	void begin();
+	RoundDisplayBoundaries();
 
 	void applyBorder(float top, float bottom, float left, float right);
 	void reset(void);

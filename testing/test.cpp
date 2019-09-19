@@ -13,6 +13,7 @@
 #include "../decorators/DataSetSpline.h"
 #include "../decorators/DataSetHistogram.h"
 
+#include "../colorSchemes/rainbow.h"
 #include "../colorSchemes/heat.h"
 #include "../colorSchemes/neon.h"
 #include "../colorSchemes/france.h"
@@ -25,34 +26,21 @@
 
 int main()
 {
-	//TODO create factory that takes in input just displayDriver, dataset (, style)
-
-	//DisplayDriver displayDriver;
 	Grafici grafici;
 
 	DataSetFloat dataset;
 	DataSetInterpolator dataInterpolator;
 	DataSetSpline dataSpline;
 	DataSetHistogram dataHist;
-	//VisitorDrawScatter visitorScatter;
-	//VisitorDrawBar visitorBar;
-	//VisitorDrawLine visitorLine;
-	//VisitorDrawAxis visitorAxis;
-	//Widget widget;
 
 	ColorTheme myTheme(csBright, ColorSource::computeFromX);
-
-	// RoundBoundaries bottomRight;
-	// Boundaries bottomLeft;
-
-	// displayDriver
 
 	{
 		/* == INTERPOLATION == */
 		//float dataArrayValue[11] = {0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2};
 		float dataArrayY[13] = {0, 5, 10, 10, 0, 0, -10, -10, 0, 0, 10, 0, 0};
 
-		Adafruit_GFX *gfx = new File_GFX(1024, 480, "interpolation.bmp");
+		Adafruit_GFX *gfx = new File_GFX(1024, 768, "interpolation.bmp");
 
 		grafici.begin(*gfx, myTheme);
 
@@ -64,15 +52,15 @@ int main()
 		dataInterpolator.begin(&dataset, 40);
 		dataSpline.begin(&dataset, 40);
 
-		left.begin();
+		//left.begin();
 		left.subBoundaries(1, 3, 0);
 		left.applyBorder(0.04, 0.04, 0.04, 0.02);
 
-		mid.begin();
+		//mid.begin();
 		mid.subBoundaries(1, 3, 1);
 		mid.applyBorder(0.04, 0.04, 0.02, 0.02);
 
-		right.begin();
+		//right.begin();
 		right.subBoundaries(1, 3, 2);
 		right.applyBorder(0.04, 0.04, 0.02, 0.04);
 
@@ -92,64 +80,34 @@ int main()
 		((File_GFX *)gfx)->flush();
 	}
 
-	// {
-	// 	/* == COLOR SCHEMES == */
-	// 	float dataArrayY[11] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+	{
+		/* == COLOR SCHEMES == */
+		float dataArrayY[11] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-	// 	Adafruit_GFX *gfx = new File_GFX(1024, 480, "color_schemes.bmp");
+		Adafruit_GFX *gfx = new File_GFX(1024, 768, "color_schemes.bmp");
 
-	// 	grafici.begin(*gfx);
+		grafici.begin(*gfx, myTheme);
 
-	// 	Boundaries one;
-	// 	Boundaries two;
-	// 	Boundaries three;
-	// 	Boundaries four;
-	// 	Boundaries five;
-	// 	Boundaries six;
+		// dataset - we provide the same array for Y and values so that the color encodes the bar height
+		dataset.begin(dataArrayY, dataArrayY, 11);
+		dataSpline.begin(&dataset, 20);
 
-	// 	// dataset - we provide the same array for Y and values so that the color encodes the bar height
-	// 	dataset.begin(dataArrayY, dataArrayY, 11);
-	// 	dataSpline.begin(&dataset, 20);
+		ColorPalette colorPalettes[6] = {csRainbow, csBright, csFrance, csCmyk, csHeat, csBw};
 
-	// 	one = grafici.baseBoundaries();
-	// 	one.subBoundaries(2, 3, 0);
-	// 	grafici.clear(csNeon, one);
-	// 	one.applyBorder(10, 10, 10, 10);
-	// 	grafici.plot(barPlot, dataSpline, csNeon, one);
+		for (int i = 0; i < 6; i++)
+		{
+			DisplayBoundaries boundaries;
+			ColorTheme theme(colorPalettes[i], ColorSource::computeFromX);
+			//boundaries.begin();
+			boundaries.subBoundaries(2, 3, i);
+			grafici.clear(boundaries, theme);
+			boundaries.applyBorder(0.02, 0.02, 0.02, 0.02);
+			grafici.plot(barPlot, dataSpline, boundaries, theme);
+		}
 
-	// 	two = grafici.baseBoundaries();
-	// 	two.subBoundaries(2, 3, 1);
-	// 	grafici.clear(csBright, two);
-	// 	two.applyBorder(10, 10, 10, 10);
-	// 	grafici.plot(barPlot, dataSpline, csBright, two);
-
-	// 	three = grafici.baseBoundaries();
-	// 	three.subBoundaries(2, 3, 2);
-	// 	grafici.clear(csThermo, three);
-	// 	three.applyBorder(10, 10, 10, 10);
-	// 	grafici.plot(barPlot, dataSpline, csThermo, three);
-
-	// 	four = grafici.baseBoundaries();
-	// 	four.subBoundaries(2, 3, 3);
-	// 	grafici.clear(csCmyk, four);
-	// 	four.applyBorder(10, 10, 10, 10);
-	// 	grafici.plot(barPlot, dataSpline, csCmyk, four);
-
-	// 	five = grafici.baseBoundaries();
-	// 	five.subBoundaries(2, 3, 4);
-	// 	grafici.clear(csHeat, five);
-	// 	five.applyBorder(10, 10, 10, 10);
-	// 	grafici.plot(barPlot, dataSpline, csHeat, five);
-
-	// 	six = grafici.baseBoundaries();
-	// 	six.subBoundaries(2, 3, 5);
-	// 	grafici.clear(csBw, six);
-	// 	six.applyBorder(10, 10, 10, 10);
-	// 	grafici.plot(barPlot, dataSpline, csBw, six);
-
-	// 	//flush to file
-	// 	((File_GFX *)gfx)->flush();
-	// }
+		//flush to file
+		((File_GFX *)gfx)->flush();
+	}
 
 	return 0;
 }
