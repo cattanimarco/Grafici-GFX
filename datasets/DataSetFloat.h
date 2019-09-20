@@ -52,7 +52,7 @@ void DataSetFloat::begin(float *yDataPoint, float zValue, int len)
 	this->zValue = zValue;
 	this->numElem = len;
 	refresh();
-};
+}
 
 void DataSetFloat::begin(float *yDataPoint, float *zDataPoint, int len)
 {
@@ -62,7 +62,7 @@ void DataSetFloat::begin(float *yDataPoint, float *zDataPoint, int len)
 	this->zValue = 0;
 	this->numElem = len;
 	refresh();
-};
+}
 
 void DataSetFloat::begin(float *xDataPoint, float *yDataPoint, float zValue, int len)
 {
@@ -72,7 +72,7 @@ void DataSetFloat::begin(float *xDataPoint, float *yDataPoint, float zValue, int
 	this->zValue = zValue;
 	this->numElem = len;
 	refresh();
-};
+}
 
 void DataSetFloat::begin(float *xDataPoint, float *yDataPoint, float *zDataPoint, int len)
 {
@@ -82,7 +82,7 @@ void DataSetFloat::begin(float *xDataPoint, float *yDataPoint, float *zDataPoint
 	this->zValue = 0;
 	this->numElem = len;
 	refresh();
-};
+}
 
 DataPoint DataSetFloat::getDataPoint(int index)
 {

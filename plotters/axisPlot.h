@@ -5,6 +5,9 @@
 
 void axisPlot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 {
+	// unused variable
+	(void)dataSet;
+
 	//vertical lines
 	for (int itX = 0; itX <= 10; itX++)
 	{
