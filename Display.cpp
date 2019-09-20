@@ -73,7 +73,7 @@ Color ColorTheme::project(DataPoint &dataPoint)
 	}
 	break;
 	}
-};
+}
 
 Color ColorTheme::getColor(float val)
 {
@@ -353,7 +353,7 @@ Pixel DisplayBoundaries::project(DataPoint &dataPoint)
 	p.x = (dataPoint.x * topRight.x + (1.0 - dataPoint.x) * bottomLeft.x);
 	p.y = (dataPoint.y * topRight.y + (1.0 - dataPoint.y) * bottomLeft.y);
 	return p;
-};
+}
 
 RoundDisplayBoundaries::RoundDisplayBoundaries()
 {
@@ -434,7 +434,7 @@ Pixel RoundDisplayBoundaries::project(DataPoint &dataPoint)
 	p.y = (getCenter().y + radius * sin(angle));
 
 	return p;
-};
+}
 
 void RoundDisplayBoundaries::update(void)
 {

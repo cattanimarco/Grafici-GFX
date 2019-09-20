@@ -31,6 +31,7 @@ DataPointIterator &DataPointIterator::operator++()
 
 DataPointIterator DataPointIterator::operator++(int postfix)
 {
+	(void)postfix;
 	DataPointIterator result = *this;
 	++dataIndex;
 	return result;
