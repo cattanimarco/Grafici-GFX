@@ -3,8 +3,7 @@
 
 #include "Data.h"
 #include "Display.h"
-
-typedef void (*PlotFunction)(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *displayBoundaries, ColorTheme *colorTheme);
+#include "PlotObject.h"
 
 class Grafici
 {
@@ -12,13 +11,13 @@ public:
 	void begin(Adafruit_GFX &tft, ColorTheme &colorTheme);
 
 	/* use default boundaries and theme */
-	void plot(PlotFunction plotFunction, DataSet &dataSet);
+	void plot(PlotObject &plotObject, DataSet &dataSet);
 	/* use default theme */
-	void plot(PlotFunction plotFunction, DataSet &dataSet, DisplayBoundaries &customBoundaries);
+	void plot(PlotObject &plotObject, DataSet &dataSet, DisplayBoundaries &customBoundaries);
 	/* use default boundaries */
-	void plot(PlotFunction plotFunction, DataSet &dataSet, ColorTheme &customTheme);
+	void plot(PlotObject &plotObject, DataSet &dataSet, ColorTheme &customTheme);
 	/* no default parameters */
-	void plot(PlotFunction plotFunction, DataSet &dataSet, DisplayBoundaries &customBoundaries, ColorTheme &customTheme);
+	void plot(PlotObject &plotObject, DataSet &dataSet, DisplayBoundaries &customBoundaries, ColorTheme &customTheme);
 
 	/* use default boundaries and theme */
 	void clear();

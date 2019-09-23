@@ -3,7 +3,10 @@
 
 #include "../Grafici.h"
 
-void linePlot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
+class LinePlot : public PlotObject
+{
+public:
+void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 {
 
 	DataPointIterator it = dataSet->beginIt();
@@ -16,5 +19,9 @@ void linePlot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries 
 								theme->project(actual));
 	}
 }
+}
+
+// Declare default plotter object
+LinePlot linePlot;
 
 #endif //GRAFICI_GFX_PLOT_LINE_H

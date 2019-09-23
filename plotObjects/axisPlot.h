@@ -3,7 +3,10 @@
 
 #include "../Grafici.h"
 
-void axisPlot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
+class AxisPlot : public PlotObject
+{
+public:
+void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 {
 	// unused variable
 	(void)dataSet;
@@ -31,5 +34,9 @@ void axisPlot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries 
 		}
 	}
 }
+}
+
+// Declare default plotter object
+AxisPlot axisPlot;
 
 #endif //GRAFICI_GFX_PLOT_AXIS_H

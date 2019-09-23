@@ -3,7 +3,10 @@
 
 #include "../Grafici.h"
 
-void scatterPlot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
+class ScatterPlot : public PlotObject
+{
+public:
+void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 {
 
 	for (DataPointIterator it = dataSet->beginIt(); it != dataSet->endIt(); ++it)
@@ -14,5 +17,9 @@ void scatterPlot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundari
 								  theme->project(dataPoint));
 	}
 }
+}
+
+// Declare default plotter object
+ScatterPlot scatterPlot;
 
 #endif //GRAFICI_GFX_PLOT_SCATTER_H
