@@ -6,6 +6,9 @@
 class AxisPlot : public PlotObject
 {
 public:
+
+AxisPlot(){};
+
 void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 {
 	// unused variable

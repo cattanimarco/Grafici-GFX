@@ -6,6 +6,9 @@
 class BarPlot : public PlotObject
 {
 public:
+
+BarPlot():barThickness(0.9){};
+
 void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 {
 	for (DataPointIterator it = dataSet->beginIt(); it != dataSet->endIt(); ++it)

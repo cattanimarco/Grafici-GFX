@@ -5,6 +5,8 @@
 
 class LinePlot : public PlotObject
 {
+	LinePlot(){};
+	
 public:
 void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 {

@@ -5,6 +5,8 @@
 
 class ScatterPlot : public PlotObject
 {
+	ScatterPlot(){};
+	
 public:
 void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 {
