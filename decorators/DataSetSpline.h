@@ -126,7 +126,7 @@ void DataSetSpline::refresh(void)
 	if (numElem >= dataSet->size())
 	{
 		int bin = 0;
-		int n = (dataSet->size() - 1);
+		const int n = (dataSet->size() - 1);
 		float yInter, valueInter;
 		float h[n], A[n], l[n + 1], u[n + 1], z[n + 1];
 
