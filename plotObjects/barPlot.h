@@ -3,11 +3,11 @@
 
 #include "../Grafici.h"
 
-class BarPlot : public PlotObject
+class BarPlot : public PlotObj
 {
 public:
 
-BarPlot():barThickness(0.9){};
+BarPlot(){ thickness=0.0; };
 
 void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 {
@@ -18,7 +18,7 @@ void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *bou
 
 		baseDataPoint.y = 0;
 
-if (0.0 == barThickness)
+if (0.0 == thickness)
 		{
 			displayDriver->drawLine(boundaries->project(baseDataPoint),
 								boundaries->project(topDataPoint),
@@ -26,8 +26,8 @@ if (0.0 == barThickness)
 }
 else 
 	{	baseDataPoint.x = (baseDataPoint.x * dataSet->size())/(dataSet->size()+1);
-		baseDataPoint.x  += (((1.0-barThickness)/2.0)/(dataSet->size()+1));
-		topDataPoint.x  = baseDataPoint.x + (barThickness/(dataSet->size()+1));
+		baseDataPoint.x  += (((1.0-thickness)/2.0)/(dataSet->size()+1));
+		topDataPoint.x  = baseDataPoint.x + (thickness/(dataSet->size()+1));
 
 		displayDriver->fillRectangle(boundaries->project(baseDataPoint),
 									 boundaries->project(topDataPoint),
@@ -35,12 +35,12 @@ else
 	
 	}
 	}
-}
+};
 
-float barThickness = 0.9;
-}
+float thickness;
+};
 
 // Declare default plotter object
-BarPlot barPlot;
+PlotObj* barPlot = new BarPlot();
 
 #endif //GRAFICI_GFX_PLOT_BAR_H

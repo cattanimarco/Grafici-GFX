@@ -3,11 +3,12 @@
 
 #include "../Grafici.h"
 
-class LinePlot : public PlotObject
+class LinePlot : public PlotObj
 {
-	LinePlot(){};
 	
 public:
+	LinePlot(){};
+
 void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 {
 
@@ -21,9 +22,9 @@ void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *bou
 								theme->project(actual));
 	}
 }
-}
+};
 
 // Declare default plotter object
-LinePlot linePlot;
+PlotObj* linePlot = new LinePlot();
 
 #endif //GRAFICI_GFX_PLOT_LINE_H

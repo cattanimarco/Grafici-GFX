@@ -141,4 +141,12 @@ private:
 	float endAngle;
 };
 
+class PlotObj
+{
+public:
+PlotObj();
+
+	virtual void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme);	
+};
+
 #endif //GRAFICI_DISPLAY_H

@@ -441,3 +441,13 @@ void RoundDisplayBoundaries::update(void)
 	//compute circle parameter depending on enclosing boundaries
 	outerRadius = min(width(), height()) / 2.0;
 }
+
+PlotObj::PlotObj()
+{
+
+}
+
+void PlotObj::plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
+{
+
+}	

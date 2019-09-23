@@ -3,43 +3,43 @@
 
 #include "../Grafici.h"
 
-class AxisPlot : public PlotObject
+class AxisPlot : public PlotObj
 {
 public:
 
-AxisPlot(){};
+	AxisPlot(){};
 
-void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
-{
-	// unused variable
-	(void)dataSet;
-
-	//vertical lines
-	for (int itX = 0; itX <= 10; itX++)
+	void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 	{
-		DataPoint a(itX / 10.0, 0.0);
-		DataPoint b(itX / 10.0, 1.0);
-		displayDriver->drawLine(boundaries->project(a),
-								boundaries->project(b),
-								theme->getColor(0.1));
+		// unused variable
+		(void)dataSet;
 
-		//horrizontal sub line
-		for (int itY = 0; itY <= 10; itY++)
+		//vertical lines
+		for (int itX = 0; itX <= 10; itX++)
 		{
-			if (itX < 10)
+			DataPoint a(itX / 10.0, 0.0);
+			DataPoint b(itX / 10.0, 1.0);
+			displayDriver->drawLine(boundaries->project(a),
+									boundaries->project(b),
+									theme->getColor(0.1));
+
+			//horrizontal sub line
+			for (int itY = 0; itY <= 10; itY++)
 			{
-				DataPoint a(itX / 10.0, itY / 10.0);
-				DataPoint b((itX + 1.0) / 10.0, itY / 10.0);
-				displayDriver->drawLine(boundaries->project(a),
-										boundaries->project(b),
-										theme->getColor(0.1));
+				if (itX < 10)
+				{
+					DataPoint a(itX / 10.0, itY / 10.0);
+					DataPoint b((itX + 1.0) / 10.0, itY / 10.0);
+					displayDriver->drawLine(boundaries->project(a),
+											boundaries->project(b),
+											theme->getColor(0.1));
+				}
 			}
 		}
-	}
-}
-}
+	};
+};
 
 // Declare default plotter object
-AxisPlot axisPlot;
+PlotObj* axisPlot = new AxisPlot();
 
 #endif //GRAFICI_GFX_PLOT_AXIS_H
