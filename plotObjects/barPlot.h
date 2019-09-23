@@ -41,6 +41,7 @@ float thickness;
 };
 
 // Declare default plotter object
-PlotObj* barPlot = new BarPlot();
+//PlotObj* barPlot = new BarPlot();
+BarPlot barPlot;
 
 #endif //GRAFICI_GFX_PLOT_BAR_H

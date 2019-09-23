@@ -40,6 +40,7 @@ public:
 };
 
 // Declare default plotter object
-PlotObj* axisPlot = new AxisPlot();
+//PlotObj* axisPlot = new AxisPlot();
+AxisPlot axisPlot;
 
 #endif //GRAFICI_GFX_PLOT_AXIS_H

@@ -23,6 +23,7 @@ void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *bou
 };
 
 // Declare default plotter object
-PlotObj* scatterPlot = new ScatterPlot();
+//PlotObj* scatterPlot = new ScatterPlot();
+ScatterPlot scatterPlot;
 
 #endif //GRAFICI_GFX_PLOT_SCATTER_H

@@ -25,6 +25,7 @@ void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *bou
 };
 
 // Declare default plotter object
-PlotObj* linePlot = new LinePlot();
+//PlotObj* linePlot = new LinePlot();
+LinePlot linePlot;
 
 #endif //GRAFICI_GFX_PLOT_LINE_H

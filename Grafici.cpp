@@ -15,7 +15,7 @@ void Grafici::begin(Adafruit_GFX &tft, ColorTheme &colorTheme)
 }
 
 /* use default boundaries and theme */
-void Grafici::plot(PlotObj *plotObj, DataSet &dataSet)
+void Grafici::plot(PlotObj &plotObj, DataSet &dataSet)
 {
 	DisplayBoundaries boundaries;
 	//boundaries.begin();
@@ -24,13 +24,13 @@ void Grafici::plot(PlotObj *plotObj, DataSet &dataSet)
 }
 
 /* use default theme */
-void Grafici::plot(PlotObj *plotObj, DataSet &dataSet, DisplayBoundaries &customBoundaries)
+void Grafici::plot(PlotObj &plotObj, DataSet &dataSet, DisplayBoundaries &customBoundaries)
 {
 	plot(plotObj, dataSet, customBoundaries, *colorTheme);
 }
 
 /* use default boundaries */
-void Grafici::plot(PlotObj *plotObj, DataSet &dataSet, ColorTheme &customTheme)
+void Grafici::plot(PlotObj &plotObj, DataSet &dataSet, ColorTheme &customTheme)
 {
 	DisplayBoundaries boundaries;
 	//boundaries.begin();
@@ -39,9 +39,9 @@ void Grafici::plot(PlotObj *plotObj, DataSet &dataSet, ColorTheme &customTheme)
 }
 
 /* no default parameters */
-void Grafici::plot(PlotObj *plotObj, DataSet &dataSet, DisplayBoundaries &customBoundaries, ColorTheme &customTheme)
+void Grafici::plot(PlotObj &plotObj, DataSet &dataSet, DisplayBoundaries &customBoundaries, ColorTheme &customTheme)
 {
-	plotObj->plot(&displayDriver, &dataSet, &customBoundaries, &customTheme);
+	(&plotObj)->plot(&displayDriver, &dataSet, &customBoundaries, &customTheme);
 }
 
 /* use default boundaries and theme */

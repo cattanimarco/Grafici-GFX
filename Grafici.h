@@ -10,13 +10,13 @@ public:
 	void begin(Adafruit_GFX &tft, ColorTheme &colorTheme);
 
 	/* use default boundaries and theme */
-	void plot(PlotObj *plotObj, DataSet &dataSet);
+	void plot(PlotObj &plotObj, DataSet &dataSet);
 	/* use default theme */
-	void plot(PlotObj *plotObj, DataSet &dataSet, DisplayBoundaries &customBoundaries);
+	void plot(PlotObj &plotObj, DataSet &dataSet, DisplayBoundaries &customBoundaries);
 	/* use default boundaries */
-	void plot(PlotObj *plotObj, DataSet &dataSet, ColorTheme &customTheme);
+	void plot(PlotObj &plotObj, DataSet &dataSet, ColorTheme &customTheme);
 	/* no default parameters */
-	void plot(PlotObj *plotObj, DataSet &dataSet, DisplayBoundaries &customBoundaries, ColorTheme &customTheme);
+	void plot(PlotObj &plotObj, DataSet &dataSet, DisplayBoundaries &customBoundaries, ColorTheme &customTheme);
 
 	/* use default boundaries and theme */
 	void clear();
