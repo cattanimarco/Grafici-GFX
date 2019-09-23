@@ -3,15 +3,8 @@
 #ifndef GRAFICI_GFX_RAINBOW_H
 #define GRAFICI_GFX_RAINBOW_H
 
-Color cRainbow[6] = {
-	{0, 0, 255},
-	{0, 255, 255},
-	{0, 255, 0},
-	{255, 255, 0},
-	{255, 0, 0},
-	{255, 0, 255},
-};
+extern Color cRainbow[];
 
-ColorPalette csRainbow(&cRainbow[0], 6);
+extern ColorPalette csRainbow;
 
 #endif //GRAFICI_GFX_RAINBOW_H

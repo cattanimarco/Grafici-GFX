@@ -3,13 +3,8 @@
 #ifndef GRAFICI_GFX_CMYK_H
 #define GRAFICI_GFX_CMYK_H
 
-Color cCmyk[4] = {
-	{0, 0, 0},
-	{255, 254, 85},
-	{234, 59, 245},
-	{116, 251, 253},
-};
+extern Color cCmyk[];
 
-ColorPalette csCmyk(&cCmyk[0], 4);
+extern ColorPalette csCmyk;
 
 #endif //GRAFICI_GFX_CMYK_H

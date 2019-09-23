@@ -3,29 +3,26 @@
 
 #include "Data.h"
 #include "Display.h"
+#include "colorSchemes/bw.h"
 
 class Grafici
 {
 public:
-	void begin(Adafruit_GFX &tft, ColorTheme &colorTheme);
+	void begin(Adafruit_GFX &tft);
 
 	/* use default boundaries and theme */
 	void plot(PlotObj &plotObj, DataSet &dataSet);
 	/* use default theme */
 	void plot(PlotObj &plotObj, DataSet &dataSet, DisplayBoundaries &customBoundaries);
-	/* use default boundaries */
-	void plot(PlotObj &plotObj, DataSet &dataSet, ColorTheme &customTheme);
-	/* no default parameters */
-	void plot(PlotObj &plotObj, DataSet &dataSet, DisplayBoundaries &customBoundaries, ColorTheme &customTheme);
 
 	/* use default boundaries and theme */
 	void clear();
 	/* use default theme */
 	void clear(DisplayBoundaries &boundaries);
-	/* use default boundaries */
-	void clear(ColorTheme &customTheme);
-	/* no default parameters */
-	void clear(DisplayBoundaries &boundaries, ColorTheme &customTheme);
+
+	void setColorPalette(ColorPalette &colorPalette) { colorTheme->colorPalette = &colorPalette;};
+
+	void setColorSource(const ColorSource &colorSource) {colorTheme->colorSource = colorSource;};
 
 	// TODO declare lamda function to project space and color to a pixel
 	// TODO make functor to pass to plot function?
@@ -35,5 +32,9 @@ private:
 	ColorTheme *colorTheme;
 	DisplayDriver displayDriver;
 };
+
+/* Instance of a Grafici object. Used instead of a singleton patter as it is simpler 
+to use this way for arduino users and there can be multiple instances of this object if it is relly needed */
+extern Grafici grafici;
 
 #endif //GRAFICI_GFX_API_H

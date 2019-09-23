@@ -41,7 +41,6 @@ public:
 	Color project(DataPoint &dataPoint);
 	Color getColor(float val);
 
-private:
 	ColorPalette *colorPalette;
 	ColorSource colorSource;
 };

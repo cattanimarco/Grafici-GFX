@@ -8,10 +8,12 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-void Grafici::begin(Adafruit_GFX &tft, ColorTheme &colorTheme)
+Grafici grafici;
+
+void Grafici::begin(Adafruit_GFX &tft)
 {
 	displayDriver.begin(&tft);
-	this->colorTheme = &colorTheme;
+	colorTheme =  new ColorTheme(csBw, ColorSource::computeFromX); 
 }
 
 /* use default boundaries and theme */
@@ -20,28 +22,13 @@ void Grafici::plot(PlotObj &plotObj, DataSet &dataSet)
 	DisplayBoundaries boundaries;
 	//boundaries.begin();
 
-	plot(plotObj, dataSet, boundaries, *colorTheme);
+	plot(plotObj, dataSet, boundaries);
 }
 
 /* use default theme */
 void Grafici::plot(PlotObj &plotObj, DataSet &dataSet, DisplayBoundaries &customBoundaries)
 {
-	plot(plotObj, dataSet, customBoundaries, *colorTheme);
-}
-
-/* use default boundaries */
-void Grafici::plot(PlotObj &plotObj, DataSet &dataSet, ColorTheme &customTheme)
-{
-	DisplayBoundaries boundaries;
-	//boundaries.begin();
-
-	plot(plotObj, dataSet, boundaries, customTheme);
-}
-
-/* no default parameters */
-void Grafici::plot(PlotObj &plotObj, DataSet &dataSet, DisplayBoundaries &customBoundaries, ColorTheme &customTheme)
-{
-	(&plotObj)->plot(&displayDriver, &dataSet, &customBoundaries, &customTheme);
+	(&plotObj)->plot(&displayDriver, &dataSet, &customBoundaries, colorTheme);
 }
 
 /* use default boundaries and theme */
@@ -50,31 +37,16 @@ void Grafici::clear()
 	DisplayBoundaries boundaries;
 	//boundaries.begin();
 
-	clear(boundaries, *colorTheme);
+	clear(boundaries);
 }
 
 /* use default theme */
 void Grafici::clear(DisplayBoundaries &boundaries)
-{
-	clear(boundaries, *colorTheme);
-}
-
-/* use default boundaries */
-void Grafici::clear(ColorTheme &customTheme)
-{
-	DisplayBoundaries boundaries;
-	//boundaries.begin();
-
-	clear(boundaries, customTheme);
-}
-
-/* no default parameters */
-void Grafici::clear(DisplayBoundaries &boundaries, ColorTheme &customTheme)
 {
 	DataPoint bl(0.0, 0.0);
 	DataPoint tr(1.0, 1.0);
 
 	displayDriver.fillRectangle(boundaries.project(bl),
 								boundaries.project(tr),
-								customTheme.getColor(0.0));
+								colorTheme->getColor(0.0));
 }
