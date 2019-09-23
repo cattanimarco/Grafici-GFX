@@ -5,25 +5,24 @@
 
 class ScatterPlot : public PlotObj
 {
-	
-public:
+
+  public:
 	ScatterPlot(){};
 
-void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
-{
-
-	for (DataPointIterator it = dataSet->beginIt(); it != dataSet->endIt(); ++it)
+	void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 	{
-		DataPoint dataPoint = *it;
-		displayDriver->drawCircle(boundaries->project(dataPoint),
-								  0.0001,
-								  theme->project(dataPoint));
+
+		for (DataPointIterator it = dataSet->beginIt(); it != dataSet->endIt(); ++it)
+		{
+			DataPoint dataPoint = *it;
+			displayDriver->drawCircle(boundaries->project(dataPoint),
+			                          0.0001,
+			                          theme->project(dataPoint));
+		}
 	}
-}
 };
 
 // Declare default plotter object
-//PlotObj* scatterPlot = new ScatterPlot();
 ScatterPlot scatterPlot;
 
 #endif //GRAFICI_GFX_PLOT_SCATTER_H
