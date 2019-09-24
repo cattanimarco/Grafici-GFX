@@ -5,28 +5,47 @@ This modular library allows you to easily manage and plot data on any arduino di
 ## Usage
 Most use cases of this library involve the following three steps:
 
-#### Initialize Adafruit GFX and Grafici GFX
 ```
 Adafruit_GFX gfx;
 DataSetFloat dataset;
 float dataArray[dataSize] = { 1, 0, 2, 0, 1};
 
-gfx.begin();
+// Initialize library
 grafici.begin(gfx);
-```
-#### Import the dataset
-```
-dataset.begin(dataArray, dataSize);
+
+// Prepare data
+dataset.begin(dataArray, 1, dataSize);
+
+// Plot
+grafici.clear();
+grafici.plot(linePlot, dataset);
 ```
 
-#### Plot data on the display
-```
-grafici.clear();
-grafici.plot(axisPlot, dataset);
-```
+![simplest plot](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/usage.bmp)
+
 ## Customization
+Now that we plotted our first dataset, let's make it look a bit nicer.
 
 ### Data
+```
+Adafruit_GFX gfx;
+DataSetFloat dataset;
+DataSetSpline dataSpline;
+float dataArray[dataSize] = { 1, 0, 2, 0, 1};
+
+// Initialize library
+grafici.begin(gfx);
+
+// Prepare data
+dataset.begin(dataArray, 1, dataSize);
+dataSpline.begin(&dataset, 100); // interpolate 5 datapoints into 100 datapoint using spline
+
+// Plot
+grafici.clear();
+grafici.plot(linePlot, dataSpline); // plot interpolated data instead of original source
+```
+
+![interpolated data](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/interpolation.bmp)
 
 ### Styles
 
