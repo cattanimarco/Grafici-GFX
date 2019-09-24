@@ -9,7 +9,7 @@ Most use cases of this library involve the following three steps:
 ```
 Adafruit_GFX gfx;
 DataSetFloat dataset;
-float dataArray[dataSize] = { 0, 1, 2, 3, 4};
+float dataArray[dataSize] = { 1, 0, 2, 0, 1};
 
 gfx.begin();
 grafici.begin(gfx);
