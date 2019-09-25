@@ -45,18 +45,18 @@ class DataSetSpline : public DataSet
 
 DataSetSpline::~DataSetSpline()
 {
-	if (bY != nullptr)
-		free(bY);
-	if (cY != nullptr)
-		free(cY);
-	if (dY != nullptr)
-		free(dY);
-	if (bValue != nullptr)
-		free(bValue);
-	if (cValue != nullptr)
-		free(cValue);
-	if (dValue != nullptr)
-		free(dValue);
+	// if (bY != nullptr)
+	// 	free(bY);
+	// if (cY != nullptr)
+	// 	free(cY);
+	// if (dY != nullptr)
+	// 	free(dY);
+	// if (bValue != nullptr)
+	// 	free(bValue);
+	// if (cValue != nullptr)
+	// 	free(cValue);
+	// if (dValue != nullptr)
+	// 	free(dValue);
 }
 
 void DataSetSpline::begin(DataSet *dataSet, int interpolationSteps)

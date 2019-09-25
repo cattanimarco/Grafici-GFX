@@ -6,7 +6,10 @@
 class AxisPlot : public PlotObj
 {
   public:
-	AxisPlot(){};
+	AxisPlot(){numAxisX =1; numAxisY = 1;};
+
+	int numAxisX;
+	int numAxisY;
 
 	void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 	{
@@ -14,24 +17,24 @@ class AxisPlot : public PlotObj
 		(void)dataSet;
 
 		//vertical lines
-		for (int itX = 0; itX <= 10; itX++)
+		for (int itX = 0; itX <= numAxisX; itX++)
 		{
-			DataPoint a(itX / 10.0, 0.0);
-			DataPoint b(itX / 10.0, 1.0);
+			DataPoint a(itX / (float)numAxisX, 0.0);
+			DataPoint b(itX / (float)numAxisX, 1.0);
 			displayDriver->drawLine(boundaries->project(a),
 			                        boundaries->project(b),
-			                        theme->getColor(0.1));
+			                        theme->colorSubtle);
 
 			//horrizontal sub line
-			for (int itY = 0; itY <= 10; itY++)
+			for (int itY = 0; itY <= numAxisY; itY++)
 			{
-				if (itX < 10)
+				if (itX < numAxisX)
 				{
-					DataPoint a(itX / 10.0, itY / 10.0);
-					DataPoint b((itX + 1.0) / 10.0, itY / 10.0);
+					DataPoint a(itX / (float)numAxisX, itY / (float)numAxisY);
+					DataPoint b((itX + 1.0) / (float)numAxisX, itY / (float)numAxisY);
 					displayDriver->drawLine(boundaries->project(a),
 					                        boundaries->project(b),
-					                        theme->getColor(0.1));
+					                        theme->colorSubtle);
 				}
 			}
 		}

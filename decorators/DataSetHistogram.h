@@ -30,8 +30,8 @@ class DataSetHistogram : public DataSet
 
 DataSetHistogram::~DataSetHistogram()
 {
-	if (counters != nullptr)
-		free(counters);
+	// if (counters != nullptr)
+	// 	free(counters);
 }
 
 void DataSetHistogram::begin(DataSet *dataSet, int buckets)

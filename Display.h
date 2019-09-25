@@ -13,6 +13,11 @@ public:
 	unsigned char blue;
 };
 
+extern Color colorBlack;
+extern Color colorDarkGray;
+extern Color colorLightGray;
+extern Color colorWhite;
+
 class ColorPalette
 {
 public:

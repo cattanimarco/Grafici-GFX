@@ -16,6 +16,11 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
+Color colorBlack = {0,0,0};
+Color colorDarkGray {50,50,50};
+Color colorLightGray {200,200,200};
+Color colorWhite {255,255,255};
+
 Color ColorPalette::getColor(float val)
 {
 	int idx1;				// |-- Our desired color will be between these two indexes in "color".

@@ -14,7 +14,9 @@ void Grafici::begin(Adafruit_GFX &tft)
 {
 	displayDriver.begin(&tft);
 	colorTheme =  new ColorTheme(csBw, ColorSource::computeFromZ);
-	 
+	colorTheme->colorBackgorund = colorBlack;
+	colorTheme->colorBold = colorLightGray;
+	colorTheme->colorSubtle = colorDarkGray;
 }
 
 /* use default boundaries and theme */
@@ -49,5 +51,5 @@ void Grafici::clear(DisplayBoundaries &boundaries)
 
 	displayDriver.fillRectangle(boundaries.project(bl),
 								boundaries.project(tr),
-								colorTheme->getColor(0.0));
+								colorTheme->colorBackgorund);
 }
