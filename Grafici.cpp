@@ -13,43 +13,34 @@ Grafici grafici;
 void Grafici::begin(Adafruit_GFX &tft)
 {
 	displayDriver.begin(&tft);
-	colorTheme =  new ColorTheme(csBw, ColorSource::computeFromZ);
-	colorTheme->colorBackgorund = colorBlack;
-	colorTheme->colorBold = colorLightGray;
-	colorTheme->colorSubtle = colorDarkGray;
+	backgroundColor =  colorBlack;
 }
 
 /* use default boundaries and theme */
 void Grafici::plot(PlotObj &plotObj, DataSet &dataSet)
 {
-	DisplayBoundaries boundaries;
-	//boundaries.begin();
-
 	plot(plotObj, dataSet, boundaries);
 }
 
 /* use default theme */
 void Grafici::plot(PlotObj &plotObj, DataSet &dataSet, DisplayBoundaries &customBoundaries)
 {
-	(&plotObj)->plot(&displayDriver, &dataSet, &customBoundaries, colorTheme);
+	(&plotObj)->plot(&displayDriver, &dataSet, &customBoundaries, &style);
 }
 
 /* use default boundaries and theme */
 void Grafici::clear()
 {
-	DisplayBoundaries boundaries;
-	//boundaries.begin();
-
 	clear(boundaries);
 }
 
 /* use default theme */
-void Grafici::clear(DisplayBoundaries &boundaries)
+void Grafici::clear(DisplayBoundaries &displayBoundaries)
 {
 	DataPoint bl(0.0, 0.0);
 	DataPoint tr(1.0, 1.0);
 
-	displayDriver.fillRectangle(boundaries.project(bl),
-								boundaries.project(tr),
-								colorTheme->colorBackgorund);
+	displayDriver.fillRectangle(displayBoundaries.project(bl),
+								displayBoundaries.project(tr),
+								backgroundColor);
 }

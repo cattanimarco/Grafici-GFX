@@ -3,7 +3,6 @@
 
 #include "Data.h"
 #include "Display.h"
-#include "colorSchemes/bw.h"
 
 class Grafici
 {
@@ -20,17 +19,22 @@ public:
 	/* use default theme */
 	void clear(DisplayBoundaries &boundaries);
 
-	void setColorPalette(ColorPalette &colorPalette) { colorTheme->colorPalette = &colorPalette;};
 
-	void setColorSource(const ColorSource &colorSource) {colorTheme->colorSource = colorSource;};
+	// void setColorPalette(ColorPalette &colorPalette) { colorTheme->colorPalette = &colorPalette;};
+	// void setColorSource(const ColorSource &colorSource) {colorTheme->colorSource = colorSource;};
+
 
 	// TODO declare lamda function to project space and color to a pixel
 	// TODO make functor to pass to plot function?
 	//Pixel project(DataPoint dataPoint);
+ 
+	DisplayBoundaries boundaries;
+	ColorTheme style;
+Color backgroundColor;
 
 private:
-	ColorTheme *colorTheme;
 	DisplayDriver displayDriver;
+
 };
 
 /* Instance of a Grafici object. Used instead of a singleton patter as it is simpler 

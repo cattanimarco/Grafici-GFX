@@ -6,10 +6,11 @@
 class AxisPlot : public PlotObj
 {
   public:
-	AxisPlot(){numAxisX =1; numAxisY = 1;};
+	AxisPlot(){numAxisX =1; numAxisY = 1;plotColor = colorDarkGray;};
 
 	int numAxisX;
 	int numAxisY;
+	Color plotColor;
 
 	void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 	{
@@ -23,7 +24,7 @@ class AxisPlot : public PlotObj
 			DataPoint b(itX / (float)numAxisX, 1.0);
 			displayDriver->drawLine(boundaries->project(a),
 			                        boundaries->project(b),
-			                        theme->colorSubtle);
+			                        plotColor);
 
 			//horrizontal sub line
 			for (int itY = 0; itY <= numAxisY; itY++)
@@ -34,7 +35,7 @@ class AxisPlot : public PlotObj
 					DataPoint b((itX + 1.0) / (float)numAxisX, itY / (float)numAxisY);
 					displayDriver->drawLine(boundaries->project(a),
 					                        boundaries->project(b),
-					                        theme->colorSubtle);
+					                        plotColor);
 				}
 			}
 		}

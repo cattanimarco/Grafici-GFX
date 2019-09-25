@@ -41,17 +41,13 @@ class ColorTheme
 {
 public:
 
-	ColorTheme(ColorPalette &colorPalette, ColorSource colorSource) : colorPalette(&colorPalette), colorSource(colorSource){};
+	ColorTheme();//{colorPalette = &csBw; colorSource = ColorSource::computeFromZ;};//ColorPalette &colorPalette, ColorSource colorSource) : colorPalette(&colorPalette), colorSource(colorSource){};
 
 	Color project(DataPoint &dataPoint);
 	Color getColor(float val);
 
 	ColorPalette *colorPalette;
 	ColorSource colorSource;
-
-	Color colorBackgorund;
-	Color colorSubtle;
-	Color colorBold;
 };
 
 struct Pixel

@@ -1,4 +1,5 @@
 #include "Display.h"
+#include "colorSchemes/bw.h"
 
 #define SWAP(x, y, T) \
 	do                \
@@ -49,6 +50,13 @@ Color ColorPalette::getColor(float val)
 	color.blue = colors[idx2].blue * fractBetween + colors[idx1].blue * (1 - fractBetween);
 
 	return color;
+}
+
+ColorTheme::ColorTheme()
+{
+	colorPalette = &csBw; 
+	colorSource = ColorSource::computeFromZ;
+	//ColorPalette &colorPalette, ColorSource colorSource) : colorPalette(&colorPalette), colorSource(colorSource){};
 }
 
 Color ColorTheme::project(DataPoint &dataPoint)
