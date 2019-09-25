@@ -13,14 +13,13 @@
 
 class DataSetInterpolator : public DataSet
 {
-public:
+  public:
 	void begin(DataSet *dataSet, int interpolationSteps);
-	void end(void);
 	DataPoint getDataPoint(int index);
 	void refresh();
 	int size(void);
 
-private:
+  private:
 	DataSet *dataSet;
 	int numElem;
 };
@@ -29,10 +28,6 @@ void DataSetInterpolator::begin(DataSet *dataSet, int interpolationSteps)
 {
 	this->dataSet = dataSet;
 	numElem = interpolationSteps;
-}
-
-void DataSetInterpolator::end(void)
-{
 }
 
 DataPoint DataSetInterpolator::getDataPoint(int index)

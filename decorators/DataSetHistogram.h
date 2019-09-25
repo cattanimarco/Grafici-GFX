@@ -13,20 +13,26 @@
 
 class DataSetHistogram : public DataSet
 {
-public:
+  public:
+	DataSetHistogram(){};
+	~DataSetHistogram();
 	void begin(DataSet *dataSet, int buckets);
-	void end(void);
 	DataPoint getDataPoint(int index);
 	void refresh();
 	int size(void);
 
-private:
+  private:
 	DataSet *dataSet;
 	int yMax;
 	int numElem;
 	int *counters;
 };
 
+DataSetHistogram::~DataSetHistogram()
+{
+	if (counters != nullptr)
+		free(counters);
+}
 
 void DataSetHistogram::begin(DataSet *dataSet, int buckets)
 {
@@ -35,11 +41,6 @@ void DataSetHistogram::begin(DataSet *dataSet, int buckets)
 	counters = (int *)malloc(sizeof(int) * buckets);
 
 	refresh();
-}
-
-void DataSetHistogram::end(void)
-{
-	free(counters);
 }
 
 DataPoint DataSetHistogram::getDataPoint(int index)

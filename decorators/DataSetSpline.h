@@ -13,14 +13,15 @@
 
 class DataSetSpline : public DataSet
 {
-public:
+  public:
+	DataSetSpline(){};
+	~DataSetSpline();
 	void begin(DataSet *dataSet, int interpolationSteps);
-	void end(void);
 	DataPoint getDataPoint(int index);
 	void refresh();
 	int size(void);
 
-private:
+  private:
 	DataSet *dataSet;
 	float xMin;
 	float yMin;
@@ -42,6 +43,22 @@ private:
 	float *dValue;
 };
 
+DataSetSpline::~DataSetSpline()
+{
+	if (bY != nullptr)
+		free(bY);
+	if (cY != nullptr)
+		free(cY);
+	if (dY != nullptr)
+		free(dY);
+	if (bValue != nullptr)
+		free(bValue);
+	if (cValue != nullptr)
+		free(cValue);
+	if (dValue != nullptr)
+		free(dValue);
+}
+
 void DataSetSpline::begin(DataSet *dataSet, int interpolationSteps)
 {
 	this->dataSet = dataSet;
@@ -55,16 +72,6 @@ void DataSetSpline::begin(DataSet *dataSet, int interpolationSteps)
 	//TODO make sure x axis is in increasing order
 
 	refresh();
-}
-
-void DataSetSpline::end(void)
-{
-	free(bY);
-	free(cY);
-	free(dY);
-	free(bValue);
-	free(cValue);
-	free(dValue);
 }
 
 DataPoint DataSetSpline::getDataPoint(int index)
@@ -84,18 +91,18 @@ DataPoint DataSetSpline::getDataPoint(int index)
 
 		// compute interpolated y
 		p.y = dataSet->getDataPoint(bin).y +
-			  bY[bin] * (p.x - dataSet->getDataPoint(bin).x) +
-			  cY[bin] * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x) +
-			  dY[bin] * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x);
+		      bY[bin] * (p.x - dataSet->getDataPoint(bin).x) +
+		      cY[bin] * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x) +
+		      dY[bin] * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x);
 
 		// normalize dataSet to a 0.0 .. 1.0 value
 		p.y = (p.y - yMin) / (yMax - yMin);
 
 		// compute interpolated value
 		p.z = dataSet->getDataPoint(bin).z +
-				  bValue[bin] * (p.x - dataSet->getDataPoint(bin).x) +
-				  cValue[bin] * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x) +
-				  dValue[bin] * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x);
+		      bValue[bin] * (p.x - dataSet->getDataPoint(bin).x) +
+		      cValue[bin] * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x) +
+		      dValue[bin] * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x);
 
 		// normalize dataSet to a 0.0 .. 1.0 value
 		p.z = (p.z - valueMin) / (valueMax - valueMin);
@@ -119,16 +126,17 @@ void DataSetSpline::refresh(void)
 	valueMax = 1;
 	valueMin = 0;
 
-	// memset(bY, sizeof(float) * dataSet->size(), 0);
-	// memset(cY, sizeof(float) * dataSet->size(), 0);
-	// memset(dY, sizeof(float) * dataSet->size(), 0);
-
 	if (numElem >= dataSet->size())
 	{
 		int bin = 0;
 		const int n = (dataSet->size() - 1);
 		float yInter, valueInter;
-		float h[n], A[n], l[n + 1], u[n + 1], z[n + 1];
+
+		float *h = (float *)malloc(sizeof(float) * n);
+		float *A = (float *)malloc(sizeof(float) * n);
+		float *l = (float *)malloc(sizeof(float) * n + 1);
+		float *u = (float *)malloc(sizeof(float) * n + 1);
+		float *z = (float *)malloc(sizeof(float) * n + 1);
 
 		for (int i = 0; i <= n - 1; ++i)
 		{
@@ -175,9 +183,9 @@ void DataSetSpline::refresh(void)
 
 			/* compute interpolated y value */
 			yInter = dataSet->getDataPoint(bin).y +
-					 bY[bin] * (px - dataSet->getDataPoint(bin).x) +
-					 cY[bin] * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x) +
-					 dY[bin] * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x);
+			         bY[bin] * (px - dataSet->getDataPoint(bin).x) +
+			         cY[bin] * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x) +
+			         dY[bin] * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x);
 
 			/* Updated dataSet min/max */
 			if (yInter < yMin)
@@ -226,9 +234,9 @@ void DataSetSpline::refresh(void)
 
 			/* compute interpolated y value */
 			valueInter = dataSet->getDataPoint(bin).z +
-						 bValue[bin] * (px - dataSet->getDataPoint(bin).x) +
-						 cValue[bin] * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x) +
-						 dValue[bin] * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x);
+			             bValue[bin] * (px - dataSet->getDataPoint(bin).x) +
+			             cValue[bin] * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x) +
+			             dValue[bin] * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x);
 
 			/* Updated dataSet min/max */
 			if (valueInter < valueMin)
@@ -236,6 +244,11 @@ void DataSetSpline::refresh(void)
 			if (valueInter > valueMax)
 				valueMax = valueInter;
 		}
+		free(h);
+		free(A);
+		free(l);
+		free(u);
+		free(z);
 	}
 }
 
