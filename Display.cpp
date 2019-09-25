@@ -84,20 +84,6 @@ Pixel::Pixel() : x(0), y(0) {}
 
 Pixel::Pixel(float x, float y) : x(x), y(y) {}
 
-Pixel &Pixel::operator+=(const Pixel &b)
-{
-	x += b.x;
-	y += b.y;
-	return *this;
-}
-
-Pixel &Pixel::operator-=(const Pixel &b)
-{
-	x -= b.x;
-	y -= b.y;
-	return *this;
-}
-
 void DisplayDriver::begin(Adafruit_GFX *tft)
 {
 	this->tft = tft;

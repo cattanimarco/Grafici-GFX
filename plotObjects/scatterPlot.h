@@ -7,7 +7,7 @@ class ScatterPlot : public PlotObj
 {
 
   public:
-	ScatterPlot(){};
+	ScatterPlot(){markerSize = 0.0001;};
 
 	void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 	{
@@ -16,10 +16,12 @@ class ScatterPlot : public PlotObj
 		{
 			DataPoint dataPoint = *it;
 			displayDriver->drawCircle(boundaries->project(dataPoint),
-			                          0.0001,
+			                          markerSize,
 			                          theme->project(dataPoint));
 		}
 	}
+
+	float markerSize;
 };
 
 // Declare default plotter object

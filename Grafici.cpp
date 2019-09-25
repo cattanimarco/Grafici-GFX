@@ -13,7 +13,8 @@ Grafici grafici;
 void Grafici::begin(Adafruit_GFX &tft)
 {
 	displayDriver.begin(&tft);
-	colorTheme =  new ColorTheme(csBw, ColorSource::computeFromX); 
+	colorTheme =  new ColorTheme(csBw, ColorSource::computeFromX);
+	 
 }
 
 /* use default boundaries and theme */

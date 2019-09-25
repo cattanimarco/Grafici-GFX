@@ -43,6 +43,10 @@ public:
 
 	ColorPalette *colorPalette;
 	ColorSource colorSource;
+
+	Color colorBackgorund;
+	Color colorSubtle;
+	Color colorBold;
 };
 
 struct Pixel
@@ -50,10 +54,6 @@ struct Pixel
 public:
 	Pixel(void);
 	Pixel(float x, float y);
-
-	Pixel &operator+=(const Pixel &b);
-	Pixel &operator-=(const Pixel &b);
-
 	float x;
 	float y;
 };
