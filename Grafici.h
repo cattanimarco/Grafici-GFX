@@ -6,7 +6,7 @@
 
 class Grafici
 {
-public:
+  public:
 	void begin(Adafruit_GFX &tft);
 
 	/* use default boundaries and theme */
@@ -19,22 +19,19 @@ public:
 	/* use default theme */
 	void clear(DisplayBoundaries &boundaries);
 
-
 	// void setColorPalette(ColorPalette &colorPalette) { colorTheme->colorPalette = &colorPalette;};
 	// void setColorSource(const ColorSource &colorSource) {colorTheme->colorSource = colorSource;};
-
 
 	// TODO declare lamda function to project space and color to a pixel
 	// TODO make functor to pass to plot function?
 	//Pixel project(DataPoint dataPoint);
- 
+
 	DisplayBoundaries boundaries;
 	ColorTheme style;
-Color backgroundColor;
+	Color backgroundColor;
 
-private:
+  private:
 	DisplayDriver displayDriver;
-
 };
 
 /* Instance of a Grafici object. Used instead of a singleton patter as it is simpler 
