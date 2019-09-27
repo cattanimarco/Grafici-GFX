@@ -8,7 +8,7 @@ Most use cases of this library involve the following three steps:
 ```
 Adafruit_GFX gfx;
 DataSetFloat dataset;
-float dataArray[dataSize] = { 1, 0, 2, 0, 1};
+float dataArray[dataSize] = { 1, 0, 2, 1, 2 };
 
 // Initialize library
 grafici.begin(gfx);
@@ -32,7 +32,7 @@ In order to make the plot smoother, it is possible to increase the number of dat
 Adafruit_GFX gfx;
 DataSetFloat dataset;
 DataSetSpline dataSpline;
-float dataArray[dataSize] = { 1, 0, 2, 0, 1};
+float dataArray[dataSize] = { 1, 0, 2, 1, 2 };
 
 // Initialize library
 grafici.begin(gfx);
@@ -56,7 +56,7 @@ Adafruit_GFX gfx;
 DataSetFloat dataset;
 DataSetSpline dataSpline;
 DataSetHistogram dataHist;
-float dataArray[dataSize] = { 1, 0, 2, 0, 1};
+float dataArray[dataSize] = { 1, 0, 2, 1, 2 };
 
 // Initialize library
 grafici.begin(gfx);
@@ -79,7 +79,7 @@ grafici.plot(barPlot, dataHist); // plot histogram using barplot
 Adafruit_GFX gfx;
 DataSetFloat dataset;
 DataSetSpline dataSpline;
-float dataArray[dataSize] = { 1, 0, 2, 0, 1};
+float dataArray[dataSize] = { 1, 0, 2, 1, 2 };
 
 // Initialize library
 grafici.begin(gfx);
@@ -108,7 +108,7 @@ grafici.plot(barPlot, dataSpline);
 Adafruit_GFX gfx;
 DataSetFloat dataset;
 DataSetSpline dataSpline;
-float dataArray[dataSize] = { 1, 0, 2, 0, 1};
+float dataArray[dataSize] = { 1, 0, 2, 1, 2 };
 
 // Initialize library
 grafici.begin(gfx);
