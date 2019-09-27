@@ -91,7 +91,8 @@ dataSpline.begin(&dataset, 100); // interpolate 5 datapoints into 100 datapoint 
 // Plot
 grafici.clear();
 
-// reset boundaries, i.e. set to full screen plotting, then divide screen in 1 row and 2 colums. Select the first column and add a blank border
+// Reset boundaries, i.e. set to full screen plotting, then divide screen in 1 row and 2 colums. 
+// Select the first column and add a blank border
 grafici.boundaries.reset().crop(1, 2, 0).addBorder(0.04, 0.04, 0.04, 0.02);
 grafici.plot(linePlot, dataSpline);
 
