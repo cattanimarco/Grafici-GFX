@@ -91,11 +91,12 @@ dataSpline.begin(&dataset, 100); // interpolate 5 datapoints into 100 datapoint 
 // Plot
 grafici.clear();
 
-// set boundaries to full screen, divide screen in 2 colums and select first one. Finnally apply an empty bordet
+// Reset boundaries, i.e. set to full screen plotting, then divide screen in 1 row and 2 colums. 
+// Select the first column and add a blank border
 grafici.boundaries.reset().crop(1, 2, 0).addBorder(0.04, 0.04, 0.04, 0.02);
 grafici.plot(linePlot, dataSpline);
 
-// set boundaries to full screen, divide screen in 2 colums and select second one. Finnally apply an empty bordet
+// same as before, but select the second column
 grafici.boundaries.reset().crop(1, 2, 1).addBorder(0.04, 0.04, 0.02, 0.04);
 grafici.plot(barPlot, dataSpline);
 ```
@@ -120,13 +121,13 @@ dataSpline.begin(&dataset, 100); // interpolate 5 datapoints into 100 datapoint 
 // Plot
 grafici.clear();
 grafici.boundaries.reset().addBorder(0.04, 0.04, 0.04, 0.04); 
-grafici.plot(linePlot, dataSpline); // keep the same boundaries and plot multiple times
+grafici.plot(linePlot, dataSpline); // using the same boundaries, plot multiple times
 grafici.plot(scatterPlot, dataSpline);
 ```
 
 ![interpolated data](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/multiplot.bmp)
 
-### Styles
+### Boundaries tranformations
 
 ### Colors 
 
