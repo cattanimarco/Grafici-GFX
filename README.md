@@ -127,14 +127,14 @@ grafici.plot(scatterPlot, dataSpline);
 
 ![interpolated data](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/multiplot.bmp)
 
-### Boundaries tranformations
+### Boundaries tranformation
 
 ### Colors 
 
-### Geometry
-
 ## Contribute
 
-### Object oriented patterns and concepts
+TODO Class diagram
+TODO Object oriented patterns and concepts
+TODO link to project to run library on computer
 
 
