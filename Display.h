@@ -96,9 +96,9 @@ class DisplayBoundaries
 	DisplayBoundaries();
 
 	//transformation function
-	virtual DisplayBoundaries &applyBorder(float top, float bottom, float left, float right);
+	virtual DisplayBoundaries &addBorder(float top, float bottom, float left, float right);
 	virtual DisplayBoundaries &reset(void);
-	virtual DisplayBoundaries &subBoundaries(int rows, int columns, int index);
+	virtual DisplayBoundaries &crop(int rows, int columns, int index);
 	virtual DisplayBoundaries &horizzontalFlip(void);
 	virtual DisplayBoundaries &verticalFlip(void);
 
@@ -120,10 +120,10 @@ class RoundDisplayBoundaries : public DisplayBoundaries
   public:
 	RoundDisplayBoundaries();
 
-	DisplayBoundaries &applyBorder(float top, float bottom, float left, float right);
+	DisplayBoundaries &addBorder(float top, float bottom, float left, float right);
 	DisplayBoundaries &reset(void);
-	DisplayBoundaries &subBoundaries(int rows, int columns, int index);
-	DisplayBoundaries &subBoundariesRadial(int rows, int columns, int index);
+	DisplayBoundaries &crop(int rows, int columns, int index);
+	DisplayBoundaries &cropRadial(int rows, int columns, int index);
 	DisplayBoundaries &horizzontalFlip(void);
 	DisplayBoundaries &verticalFlip(void);
 	DisplayBoundaries &horizzontalFlipRadial(void);

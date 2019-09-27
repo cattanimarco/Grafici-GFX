@@ -36,16 +36,16 @@ void setup(void)
 	dataSpline.begin(&dataset, 50);
 
 	left = grafici.baseBoundaries();
-	left.subBoundaries(1, 3, 0);
-	left.applyBorder(10, 10, 10, 5);
+	left.crop(1, 3, 0);
+	left.addBorder(10, 10, 10, 5);
 
 	mid = grafici.baseBoundaries();
-	mid.subBoundaries(1, 3, 1);
-	mid.applyBorder(10, 10, 5, 5);
+	mid.crop(1, 3, 1);
+	mid.addBorder(10, 10, 5, 5);
 
 	right = grafici.baseBoundaries();
-	right.subBoundaries(1, 3, 2);
-	right.applyBorder(10, 10, 5, 10);
+	right.crop(1, 3, 2);
+	right.addBorder(10, 10, 5, 10);
 
 	grafici.clear(csHeat);
 

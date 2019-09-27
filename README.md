@@ -23,7 +23,6 @@ grafici.plot(linePlot, dataset);
 
 ![simplest plot](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/usage.bmp)
 
-## Customization
 Now that we plotted our first dataset, let's make it look a bit nicer.
 
 ### Data Interpolation
@@ -73,6 +72,59 @@ grafici.plot(barPlot, dataHist); // plot histogram using barplot
 ```
 
 ![histogram analisis](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/histogram.bmp)
+
+### Subplot
+
+```
+Adafruit_GFX gfx;
+DataSetFloat dataset;
+DataSetSpline dataSpline;
+float dataArray[dataSize] = { 1, 0, 2, 0, 1};
+
+// Initialize library
+grafici.begin(gfx);
+
+// Prepare data
+dataset.begin(dataArray, 1, dataSize);
+dataSpline.begin(&dataset, 100); // interpolate 5 datapoints into 100 datapoint using spline
+
+// Plot
+grafici.clear();
+
+// set boundaries to full screen, divide screen in 2 colums and select first one. Finnally apply an empty bordet
+grafici.boundaries.reset().crop(1, 2, 0).addBorder(0.04, 0.04, 0.04, 0.02);
+grafici.plot(linePlot, dataSpline);
+
+// set boundaries to full screen, divide screen in 2 colums and select second one. Finnally apply an empty bordet
+grafici.boundaries.reset().crop(1, 2, 1).addBorder(0.04, 0.04, 0.02, 0.04);
+grafici.plot(barPlot, dataSpline);
+```
+
+![interpolated data](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/subplot.bmp)
+
+### Multiplot
+
+```
+Adafruit_GFX gfx;
+DataSetFloat dataset;
+DataSetSpline dataSpline;
+float dataArray[dataSize] = { 1, 0, 2, 0, 1};
+
+// Initialize library
+grafici.begin(gfx);
+
+// Prepare data
+dataset.begin(dataArray, 1, dataSize);
+dataSpline.begin(&dataset, 100); // interpolate 5 datapoints into 100 datapoint using spline
+
+// Plot
+grafici.clear();
+grafici.boundaries.reset().addBorder(0.04, 0.04, 0.04, 0.04); 
+grafici.plot(linePlot, dataSpline); // keep the same boundaries and plot multiple times
+grafici.plot(scatterPlot, dataSpline);
+```
+
+![interpolated data](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/multiplot.bmp)
 
 ### Styles
 

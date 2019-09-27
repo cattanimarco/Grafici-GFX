@@ -276,7 +276,7 @@ DisplayBoundaries::DisplayBoundaries()
 	reset();
 }
 
-DisplayBoundaries &DisplayBoundaries::applyBorder(float top, float bottom, float left, float right)
+DisplayBoundaries &DisplayBoundaries::addBorder(float top, float bottom, float left, float right)
 {
 	// account for horizzontalFlip
 	if (width() > 0.0)
@@ -313,7 +313,7 @@ DisplayBoundaries &DisplayBoundaries::reset(void)
 	return *this;
 }
 
-DisplayBoundaries &DisplayBoundaries::subBoundaries(int rows, int columns, int index)
+DisplayBoundaries &DisplayBoundaries::crop(int rows, int columns, int index)
 {
 	float _width = width();
 	float _height = height();
@@ -374,9 +374,9 @@ RoundDisplayBoundaries::RoundDisplayBoundaries()
 }
 
 //TODO update circle every time a slice is done
-DisplayBoundaries &RoundDisplayBoundaries::applyBorder(float top, float bottom, float left, float right)
+DisplayBoundaries &RoundDisplayBoundaries::addBorder(float top, float bottom, float left, float right)
 {
-	DisplayBoundaries::applyBorder(top, bottom, left, right);
+	DisplayBoundaries::addBorder(top, bottom, left, right);
 	update();
 	return *this;
 }
@@ -393,14 +393,14 @@ DisplayBoundaries &RoundDisplayBoundaries::reset(void)
 }
 
 //TODO update circle every time a slice is done
-DisplayBoundaries &RoundDisplayBoundaries::subBoundaries(int rows, int columns, int index)
+DisplayBoundaries &RoundDisplayBoundaries::crop(int rows, int columns, int index)
 {
-	DisplayBoundaries::subBoundaries(rows, columns, index);
+	DisplayBoundaries::crop(rows, columns, index);
 	update();
 	return *this;
 }
 
-DisplayBoundaries &RoundDisplayBoundaries::subBoundariesRadial(int rows, int columns, int index)
+DisplayBoundaries &RoundDisplayBoundaries::cropRadial(int rows, int columns, int index)
 {
 	float _width = endAngle - beginAngle;
 	float _height = outerRadius - innerRadius;
