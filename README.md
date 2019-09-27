@@ -127,7 +127,7 @@ grafici.plot(scatterPlot, dataSpline);
 
 ![interpolated data](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/multiplot.bmp)
 
-### Styles
+### Boundaries tranformations
 
 ### Colors 
 
