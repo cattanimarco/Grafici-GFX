@@ -1,13 +1,13 @@
 #ifndef GRAFICI_DISPLAY_H
 #define GRAFICI_DISPLAY_H
 
+#include "Adafruit_GFX.h"
 #include "Arduino.h"
 #include "Data.h"
-#include "Adafruit_GFX.h"
 
 class Color
 {
-public:
+  public:
 	unsigned char red;
 	unsigned char green;
 	unsigned char blue;
@@ -20,28 +20,29 @@ extern Color colorWhite;
 
 class ColorPalette
 {
-public:
-	ColorPalette(Color *colors, int size) : colors(colors), size(size){};
+  public:
+	ColorPalette(Color *colors, int size)
+	    : colors(colors)
+	    , size(size){};
 	Color getColor(float val);
 
-private:
+  private:
 	Color *colors;
 	int size;
 };
-	
-	enum ColorSource
-	{
-		predefined,
-		computeFromX,
-		computeFromY,
-		computeFromZ,
-	};
+
+enum ColorSource
+{
+	predefined,
+	computeFromX,
+	computeFromY,
+	computeFromZ,
+};
 
 class ColorTheme
 {
-public:
-
-	ColorTheme();//{colorPalette = &csBw; colorSource = ColorSource::computeFromZ;};//ColorPalette &colorPalette, ColorSource colorSource) : colorPalette(&colorPalette), colorSource(colorSource){};
+  public:
+	ColorTheme(); //{colorPalette = &csBw; colorSource = ColorSource::computeFromZ;};//ColorPalette &colorPalette, ColorSource colorSource) : colorPalette(&colorPalette), colorSource(colorSource){};
 
 	Color project(DataPoint &dataPoint);
 	Color getColor(float val);
@@ -52,7 +53,7 @@ public:
 
 struct Pixel
 {
-public:
+  public:
 	Pixel(void);
 	Pixel(float x, float y);
 	float x;
@@ -61,13 +62,13 @@ public:
 
 class DisplayDriver
 {
-public:
+  public:
 	void begin(Adafruit_GFX *tft);
 
 	void drawPixel(Pixel c, Color color);
 	void drawLine(Pixel a, Pixel b, Color color);
 	void drawCircle(Pixel c, float area, Color color);
-	
+
 	void drawTriangle(Pixel a, Pixel b, Pixel c, Color color);
 	void drawRectangle(Pixel bl, float w, float h, Color color);
 	void drawRectangle(Pixel bl, Pixel tr, Color color);
@@ -82,7 +83,7 @@ public:
 
 	void fillScreen(Color color);
 
-private:
+  private:
 	Adafruit_GFX *tft;
 	int colorTo16b(Color color);
 	//int displayWidth(void);
@@ -91,15 +92,15 @@ private:
 
 class DisplayBoundaries
 {
-public:
+  public:
 	DisplayBoundaries();
 
 	//transformation function
-	virtual void applyBorder(float top, float bottom, float left, float right);
-	virtual void reset(void);
-	virtual void subBoundaries(int rows, int columns, int index);
-	virtual void horizzontalFlip(void);
-	virtual void verticalFlip(void);
+	virtual DisplayBoundaries &applyBorder(float top, float bottom, float left, float right);
+	virtual DisplayBoundaries &reset(void);
+	virtual DisplayBoundaries &subBoundaries(int rows, int columns, int index);
+	virtual DisplayBoundaries &horizzontalFlip(void);
+	virtual DisplayBoundaries &verticalFlip(void);
 
 	// getter functions
 	float width(void);
@@ -109,29 +110,29 @@ public:
 	// projection function(s)
 	virtual Pixel project(DataPoint &dataPoint);
 
-protected:
+  protected:
 	DataPoint bottomLeft;
 	DataPoint topRight;
 };
 
 class RoundDisplayBoundaries : public DisplayBoundaries
 {
-public:
+  public:
 	RoundDisplayBoundaries();
 
-	void applyBorder(float top, float bottom, float left, float right);
-	void reset(void);
-	void subBoundaries(int rows, int columns, int index);
-	void subBoundariesRadial(int rows, int columns, int index);
-	void horizzontalFlip(void);
-	void verticalFlip(void);
-	void horizzontalFlipRadial(void);
-	void verticalFlipRadial(void);
+	DisplayBoundaries &applyBorder(float top, float bottom, float left, float right);
+	DisplayBoundaries &reset(void);
+	DisplayBoundaries &subBoundaries(int rows, int columns, int index);
+	DisplayBoundaries &subBoundariesRadial(int rows, int columns, int index);
+	DisplayBoundaries &horizzontalFlip(void);
+	DisplayBoundaries &verticalFlip(void);
+	DisplayBoundaries &horizzontalFlipRadial(void);
+	DisplayBoundaries &verticalFlipRadial(void);
 	//void rotateRadial(float value);
 
 	Pixel project(DataPoint &dataPoint);
 
-private:
+  private:
 	void update(void);
 
 	DataPoint center;
@@ -143,10 +144,10 @@ private:
 
 class PlotObj
 {
-public:
-PlotObj();
+  public:
+	PlotObj();
 
-	virtual void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme);	
+	virtual void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme);
 };
 
 #endif //GRAFICI_DISPLAY_H

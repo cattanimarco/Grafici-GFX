@@ -17,15 +17,15 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-Color colorBlack = {0,0,0};
-Color colorDarkGray {50,50,50};
-Color colorLightGray {200,200,200};
-Color colorWhite {255,255,255};
+Color colorBlack = { 0, 0, 0 };
+Color colorDarkGray{ 50, 50, 50 };
+Color colorLightGray{ 200, 200, 200 };
+Color colorWhite{ 255, 255, 255 };
 
 Color ColorPalette::getColor(float val)
 {
-	int idx1;				// |-- Our desired color will be between these two indexes in "color".
-	int idx2;				// |
+	int idx1;               // |-- Our desired color will be between these two indexes in "color".
+	int idx2;               // |
 	float fractBetween = 0; // Fraction between "idx1" and "idx2" where our value is.
 	Color color;
 
@@ -54,7 +54,7 @@ Color ColorPalette::getColor(float val)
 
 ColorTheme::ColorTheme()
 {
-	colorPalette = &csBw; 
+	colorPalette = &csBw;
 	colorSource = ColorSource::computeFromZ;
 	//ColorPalette &colorPalette, ColorSource colorSource) : colorPalette(&colorPalette), colorSource(colorSource){};
 }
@@ -93,9 +93,17 @@ Color ColorTheme::getColor(float val)
 	return (colorPalette->getColor(val));
 }
 
-Pixel::Pixel() : x(0), y(0) {}
+Pixel::Pixel()
+    : x(0)
+    , y(0)
+{
+}
 
-Pixel::Pixel(float x, float y) : x(x), y(y) {}
+Pixel::Pixel(float x, float y)
+    : x(x)
+    , y(y)
+{
+}
 
 void DisplayDriver::begin(Adafruit_GFX *tft)
 {
@@ -105,18 +113,18 @@ void DisplayDriver::begin(Adafruit_GFX *tft)
 void DisplayDriver::drawPixel(Pixel c, Color color)
 {
 	tft->drawPixel(c.x * tft->width(),
-				   (1.0 - c.y) * tft->height(),
-				   colorTo16b(color));
+	               (1.0 - c.y) * tft->height(),
+	               colorTo16b(color));
 }
 
 void DisplayDriver::drawLine(Pixel a, Pixel b, Color color)
 {
 	//for now, color is decided by first pixel
 	tft->drawLine(a.x * tft->width(),
-				  (1.0 - a.y) * tft->height(),
-				  b.x * tft->width(),
-				  (1.0 - b.y) * tft->height(),
-				  colorTo16b(color));
+	              (1.0 - a.y) * tft->height(),
+	              b.x * tft->width(),
+	              (1.0 - b.y) * tft->height(),
+	              colorTo16b(color));
 }
 
 void DisplayDriver::drawCircle(Pixel c, float area, Color color)
@@ -124,30 +132,30 @@ void DisplayDriver::drawCircle(Pixel c, float area, Color color)
 	area *= tft->width() * tft->height();
 	int radius = sqrt(area / M_PI);
 	tft->drawCircle(c.x * tft->width(),
-					(1.0 - c.y) * tft->height(),
-					radius,
-					colorTo16b(color));
+	                (1.0 - c.y) * tft->height(),
+	                radius,
+	                colorTo16b(color));
 }
 
 void DisplayDriver::drawTriangle(Pixel a, Pixel b, Pixel c, Color color)
 {
 	tft->drawTriangle(a.x * tft->width(),
-					  (1.0 - a.y) * tft->height(),
-					  b.x * tft->width(),
-					  (1.0 - b.y) * tft->height(),
-					  c.x * tft->width(),
-					  (1.0 - c.y) * tft->height(),
-					  colorTo16b(color));
+	                  (1.0 - a.y) * tft->height(),
+	                  b.x * tft->width(),
+	                  (1.0 - b.y) * tft->height(),
+	                  c.x * tft->width(),
+	                  (1.0 - c.y) * tft->height(),
+	                  colorTo16b(color));
 }
 
 void DisplayDriver::drawRectangle(Pixel bl, float w, float h, Color color)
 // bl: bottom left vertex, w: width, h: height
 {
 	tft->drawRect(bl.x * tft->width(),
-				  1.0 - (bl.y + h) * tft->height(),
-				  w * tft->width(),
-				  h * tft->height(),
-				  colorTo16b(color));
+	              1.0 - (bl.y + h) * tft->height(),
+	              w * tft->width(),
+	              h * tft->height(),
+	              colorTo16b(color));
 }
 
 void DisplayDriver::drawRectangle(Pixel bl, Pixel tr, Color color)
@@ -177,11 +185,11 @@ void DisplayDriver::drawRoundRectangle(Pixel bl, float w, float h, float area, C
 	int radius = sqrt(area / M_PI);
 
 	tft->drawRoundRect(tft->width() * bl.x,
-					   tft->height() * (1.0 - (bl.y + h)),
-					   tft->width() * w,
-					   tft->height() * h,
-					   radius,
-					   colorTo16b(color));
+	                   tft->height() * (1.0 - (bl.y + h)),
+	                   tft->width() * w,
+	                   tft->height() * h,
+	                   radius,
+	                   colorTo16b(color));
 }
 
 void DisplayDriver::fillRectangle(Pixel bl, float w, float h, Color color)
@@ -202,10 +210,10 @@ void DisplayDriver::fillRectangle(Pixel bl, float w, float h, Color color)
 	}
 
 	tft->fillRect(tft->width() * bl.x,
-				  tft->height() * (1.0 - (bl.y + h)),
-				  tft->width() * w,
-				  tft->height() * h,
-				  colorTo16b(color));
+	              tft->height() * (1.0 - (bl.y + h)),
+	              tft->width() * w,
+	              tft->height() * h,
+	              colorTo16b(color));
 }
 
 void DisplayDriver::fillRectangle(Pixel bl, Pixel tr, Color color)
@@ -219,20 +227,20 @@ void DisplayDriver::fillCircle(Pixel c, float area, Color color)
 	area *= tft->width() * tft->height();
 	int radius = sqrt(area / M_PI);
 	tft->fillCircle(c.x * tft->width(),
-					(1.0 - c.y) * tft->height(),
-					radius,
-					colorTo16b(color));
+	                (1.0 - c.y) * tft->height(),
+	                radius,
+	                colorTo16b(color));
 }
 
 void DisplayDriver::fillTriangle(Pixel a, Pixel b, Pixel c, Color color)
 {
 	tft->fillTriangle(tft->width() * a.x,
-					  tft->height() * (1.0 - a.y),
-					  tft->width() * b.x,
-					  tft->height() * (1.0 - b.y),
-					  tft->width() * c.x,
-					  tft->height() * (1.0 - c.y),
-					  colorTo16b(color));
+	                  tft->height() * (1.0 - a.y),
+	                  tft->width() * b.x,
+	                  tft->height() * (1.0 - b.y),
+	                  tft->width() * c.x,
+	                  tft->height() * (1.0 - c.y),
+	                  colorTo16b(color));
 }
 
 void DisplayDriver::fillRoundRectangle(Pixel bl, float w, float h, float area, Color color)
@@ -241,11 +249,11 @@ void DisplayDriver::fillRoundRectangle(Pixel bl, float w, float h, float area, C
 	int radius = sqrt(area / M_PI);
 
 	tft->fillRoundRect(tft->width() * bl.x,
-					   tft->height() * (1.0 - (bl.y + h)),
-					   tft->width() * w,
-					   tft->height() * h,
-					   radius,
-					   colorTo16b(color));
+	                   tft->height() * (1.0 - (bl.y + h)),
+	                   tft->width() * w,
+	                   tft->height() * h,
+	                   radius,
+	                   colorTo16b(color));
 }
 
 void DisplayDriver::fillScreen(Color color)
@@ -268,7 +276,7 @@ DisplayBoundaries::DisplayBoundaries()
 	reset();
 }
 
-void DisplayBoundaries::applyBorder(float top, float bottom, float left, float right)
+DisplayBoundaries &DisplayBoundaries::applyBorder(float top, float bottom, float left, float right)
 {
 	// account for horizzontalFlip
 	if (width() > 0.0)
@@ -293,17 +301,19 @@ void DisplayBoundaries::applyBorder(float top, float bottom, float left, float r
 		bottomLeft.y -= bottom;
 		topRight.y += top;
 	}
+	return *this;
 }
 
-void DisplayBoundaries::reset(void)
+DisplayBoundaries &DisplayBoundaries::reset(void)
 {
 	bottomLeft.x = 0.0;
 	bottomLeft.y = 0.0;
 	topRight.x = 1.0;
 	topRight.y = 1.0;
+	return *this;
 }
 
-void DisplayBoundaries::subBoundaries(int rows, int columns, int index)
+DisplayBoundaries &DisplayBoundaries::subBoundaries(int rows, int columns, int index)
 {
 	float _width = width();
 	float _height = height();
@@ -316,16 +326,19 @@ void DisplayBoundaries::subBoundaries(int rows, int columns, int index)
 
 	topRight.x = bottomLeft.x + _width;
 	topRight.y = bottomLeft.y + _height;
+	return *this;
 }
 
-void DisplayBoundaries::horizzontalFlip(void)
+DisplayBoundaries &DisplayBoundaries::horizzontalFlip(void)
 {
 	SWAP(bottomLeft.x, topRight.x, float);
+	return *this;
 }
 
-void DisplayBoundaries::verticalFlip(void)
+DisplayBoundaries &DisplayBoundaries::verticalFlip(void)
 {
 	SWAP(bottomLeft.y, topRight.y, float);
+	return *this;
 }
 
 float DisplayBoundaries::width(void)
@@ -361,13 +374,14 @@ RoundDisplayBoundaries::RoundDisplayBoundaries()
 }
 
 //TODO update circle every time a slice is done
-void RoundDisplayBoundaries::applyBorder(float top, float bottom, float left, float right)
+DisplayBoundaries &RoundDisplayBoundaries::applyBorder(float top, float bottom, float left, float right)
 {
 	DisplayBoundaries::applyBorder(top, bottom, left, right);
 	update();
+	return *this;
 }
 
-void RoundDisplayBoundaries::reset(void)
+DisplayBoundaries &RoundDisplayBoundaries::reset(void)
 {
 	DisplayBoundaries::reset();
 	innerRadius = 0.0;
@@ -375,16 +389,18 @@ void RoundDisplayBoundaries::reset(void)
 	// setup to simulate clock (start at 12, clockwise)
 	beginAngle = 0;
 	endAngle = 2 * M_PI;
+	return *this;
 }
 
 //TODO update circle every time a slice is done
-void RoundDisplayBoundaries::subBoundaries(int rows, int columns, int index)
+DisplayBoundaries &RoundDisplayBoundaries::subBoundaries(int rows, int columns, int index)
 {
 	DisplayBoundaries::subBoundaries(rows, columns, index);
 	update();
+	return *this;
 }
 
-void RoundDisplayBoundaries::subBoundariesRadial(int rows, int columns, int index)
+DisplayBoundaries &RoundDisplayBoundaries::subBoundariesRadial(int rows, int columns, int index)
 {
 	float _width = endAngle - beginAngle;
 	float _height = outerRadius - innerRadius;
@@ -399,28 +415,33 @@ void RoundDisplayBoundaries::subBoundariesRadial(int rows, int columns, int inde
 	outerRadius = innerRadius + _height;
 
 	//cout << index << " " << innerRadius << " " << outerRadius << endl;
+	return *this;
 }
 
-void RoundDisplayBoundaries::horizzontalFlip(void)
+DisplayBoundaries &RoundDisplayBoundaries::horizzontalFlip(void)
 {
 	DisplayBoundaries::horizzontalFlip();
 	update();
+	return *this;
 }
 
-void RoundDisplayBoundaries::verticalFlip(void)
+DisplayBoundaries &RoundDisplayBoundaries::verticalFlip(void)
 {
 	DisplayBoundaries::verticalFlip();
 	update();
+	return *this;
 }
 
-void RoundDisplayBoundaries::horizzontalFlipRadial(void)
+DisplayBoundaries &RoundDisplayBoundaries::horizzontalFlipRadial(void)
 {
 	SWAP(beginAngle, endAngle, float);
+	return *this;
 }
 
-void RoundDisplayBoundaries::verticalFlipRadial(void)
+DisplayBoundaries &RoundDisplayBoundaries::verticalFlipRadial(void)
 {
 	SWAP(innerRadius, outerRadius, float);
+	return *this;
 }
 
 Pixel RoundDisplayBoundaries::project(DataPoint &dataPoint)
@@ -443,10 +464,8 @@ void RoundDisplayBoundaries::update(void)
 
 PlotObj::PlotObj()
 {
-
 }
 
 void PlotObj::plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 {
-
-}	
+}
