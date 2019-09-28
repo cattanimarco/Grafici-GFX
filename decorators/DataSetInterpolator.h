@@ -3,14 +3,6 @@
 
 #include "../Data.h"
 
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef max
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-#endif
-
 class DataSetInterpolator : public DataSet
 {
   public:

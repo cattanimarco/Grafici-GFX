@@ -4,6 +4,7 @@
 #include "Adafruit_GFX.h"
 #include "Arduino.h"
 #include "Data.h"
+#include "Macros.h"
 
 class Color
 {
@@ -95,9 +96,11 @@ class DisplayBoundaries
   public:
 	DisplayBoundaries();
 
+	virtual DisplayBoundaries &reset(void);
+	virtual DisplayBoundaries &set(	DataPoint bottomLeft, DataPoint topRight);
+
 	//transformation function
 	virtual DisplayBoundaries &addBorder(float top, float bottom, float left, float right);
-	virtual DisplayBoundaries &reset(void);
 	virtual DisplayBoundaries &crop(int rows, int columns, int index);
 	virtual DisplayBoundaries &horizzontalFlip(void);
 	virtual DisplayBoundaries &verticalFlip(void);
@@ -120,8 +123,10 @@ class RoundDisplayBoundaries : public DisplayBoundaries
   public:
 	RoundDisplayBoundaries();
 
-	DisplayBoundaries &addBorder(float top, float bottom, float left, float right);
 	DisplayBoundaries &reset(void);
+	DisplayBoundaries &set(	DataPoint bottomLeft, DataPoint topRight);
+
+	DisplayBoundaries &addBorder(float top, float bottom, float left, float right);
 	DisplayBoundaries &crop(int rows, int columns, int index);
 	DisplayBoundaries &cropRadial(int rows, int columns, int index);
 	DisplayBoundaries &horizzontalFlip(void);

@@ -2,6 +2,7 @@
 #define GRAFICI_DATA_H
 
 #include "Arduino.h"
+#include "Macros.h"
 
 class DataPointIterator;
 

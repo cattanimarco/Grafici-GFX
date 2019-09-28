@@ -1,21 +1,6 @@
 #include "Display.h"
 #include "colorSchemes/bw.h"
 
-#define SWAP(x, y, T) \
-	do                \
-	{                 \
-		T SWAP = x;   \
-		x = y;        \
-		y = SWAP;     \
-	} while (0)
-
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef max
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-#endif
 
 Color colorBlack = { 0, 0, 0 };
 Color colorDarkGray{ 50, 50, 50 };
@@ -276,6 +261,22 @@ DisplayBoundaries::DisplayBoundaries()
 	reset();
 }
 
+DisplayBoundaries &DisplayBoundaries::reset()
+{
+	bottomLeft.x = 0.0;
+	bottomLeft.y = 0.0;
+	topRight.x = 1.0;
+	topRight.y = 1.0;
+	return *this;
+}
+
+DisplayBoundaries &DisplayBoundaries::set(DataPoint bottomLeft, DataPoint topRight)
+{
+	this->bottomLeft = bottomLeft;
+	this->topRight = topRight;
+	return *this;
+}
+
 DisplayBoundaries &DisplayBoundaries::addBorder(float top, float bottom, float left, float right)
 {
 	// account for horizzontalFlip
@@ -304,15 +305,6 @@ DisplayBoundaries &DisplayBoundaries::addBorder(float top, float bottom, float l
 	return *this;
 }
 
-DisplayBoundaries &DisplayBoundaries::reset(void)
-{
-	bottomLeft.x = 0.0;
-	bottomLeft.y = 0.0;
-	topRight.x = 1.0;
-	topRight.y = 1.0;
-	return *this;
-}
-
 DisplayBoundaries &DisplayBoundaries::crop(int rows, int columns, int index)
 {
 	float _width = width();
@@ -331,13 +323,13 @@ DisplayBoundaries &DisplayBoundaries::crop(int rows, int columns, int index)
 
 DisplayBoundaries &DisplayBoundaries::horizzontalFlip(void)
 {
-	SWAP(bottomLeft.x, topRight.x, float);
+	swap(bottomLeft.x, topRight.x, float);
 	return *this;
 }
 
 DisplayBoundaries &DisplayBoundaries::verticalFlip(void)
 {
-	SWAP(bottomLeft.y, topRight.y, float);
+	swap(bottomLeft.y, topRight.y, float);
 	return *this;
 }
 
@@ -373,22 +365,30 @@ RoundDisplayBoundaries::RoundDisplayBoundaries()
 	reset();
 }
 
+DisplayBoundaries &RoundDisplayBoundaries::reset()
+{
+	DisplayBoundaries::reset();
+	innerRadius = 0.0;
+	// setup to simulate clock (start at 12, clockwise)
+	beginAngle = 0;
+	endAngle = 2 * M_PI;
+	//automatically compute outer radius
+	update();
+	return *this;
+}
+
+DisplayBoundaries &RoundDisplayBoundaries::set(DataPoint bottomLeft, DataPoint topRight)
+{
+	DisplayBoundaries::set(bottomLeft, topRight);
+	update();
+	return *this;
+}
+
 //TODO update circle every time a slice is done
 DisplayBoundaries &RoundDisplayBoundaries::addBorder(float top, float bottom, float left, float right)
 {
 	DisplayBoundaries::addBorder(top, bottom, left, right);
 	update();
-	return *this;
-}
-
-DisplayBoundaries &RoundDisplayBoundaries::reset(void)
-{
-	DisplayBoundaries::reset();
-	innerRadius = 0.0;
-	outerRadius = min(width(), height()) / 2.0;
-	// setup to simulate clock (start at 12, clockwise)
-	beginAngle = 0;
-	endAngle = 2 * M_PI;
 	return *this;
 }
 
@@ -434,13 +434,13 @@ DisplayBoundaries &RoundDisplayBoundaries::verticalFlip(void)
 
 DisplayBoundaries &RoundDisplayBoundaries::horizzontalFlipRadial(void)
 {
-	SWAP(beginAngle, endAngle, float);
+	swap(beginAngle, endAngle, float);
 	return *this;
 }
 
 DisplayBoundaries &RoundDisplayBoundaries::verticalFlipRadial(void)
 {
-	SWAP(innerRadius, outerRadius, float);
+	swap(innerRadius, outerRadius, float);
 	return *this;
 }
 

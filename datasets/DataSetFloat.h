@@ -3,19 +3,6 @@
 
 #include "../Data.h"
 
-#ifndef NULL
-#define NULL (0)
-#endif
-
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef max
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-#endif
-
-
 class DataSetFloat : public DataSet
 {
 public:
@@ -46,9 +33,9 @@ private:
 
 void DataSetFloat::begin(float *yDataPoint, float zValue, int len)
 {
-	this->xDataPoint = NULL;
+	this->xDataPoint = nullptr;
 	this->yDataPoint = yDataPoint;
-	this->zDataPoint = NULL;
+	this->zDataPoint = nullptr;
 	this->zValue = zValue;
 	this->numElem = len;
 	refresh();
@@ -56,7 +43,7 @@ void DataSetFloat::begin(float *yDataPoint, float zValue, int len)
 
 void DataSetFloat::begin(float *yDataPoint, float *zDataPoint, int len)
 {
-	this->xDataPoint = NULL;
+	this->xDataPoint = nullptr;
 	this->yDataPoint = yDataPoint;
 	this->zDataPoint = zDataPoint;
 	this->zValue = 0;
@@ -68,7 +55,7 @@ void DataSetFloat::begin(float *xDataPoint, float *yDataPoint, float zValue, int
 {
 	this->xDataPoint = xDataPoint;
 	this->yDataPoint = yDataPoint;
-	this->zDataPoint = NULL;
+	this->zDataPoint = nullptr;
 	this->zValue = zValue;
 	this->numElem = len;
 	refresh();
@@ -92,7 +79,7 @@ DataPoint DataSetFloat::getDataPoint(int index)
 		// normalize dataset to a 0.0 .. 1.0 value
 		p.y = (yDataPoint[index] - yMin) / (yMax - yMin);
 
-		if (xDataPoint != NULL)
+		if (xDataPoint != nullptr)
 		{
 			p.x = (xDataPoint[index] - xMin) / (xMax - xMin);
 		}
@@ -102,7 +89,7 @@ DataPoint DataSetFloat::getDataPoint(int index)
 		}
 
 		//rewrite ho zdata is defined
-		if (zDataPoint != NULL)
+		if (zDataPoint != nullptr)
 		{
 			p.z = (zDataPoint[index] - zMin) / (zMax - zMin);
 		}
@@ -123,7 +110,7 @@ void DataSetFloat::refresh(void)
 {
 	if (numElem > 0)
 	{
-		if (yDataPoint != NULL)
+		if (yDataPoint != nullptr)
 		{
 			yMin = yMax = yDataPoint[0];
 			for (int i = 1; i < numElem; ++i)
@@ -133,7 +120,7 @@ void DataSetFloat::refresh(void)
 			}
 		}
 
-		if (xDataPoint != NULL)
+		if (xDataPoint != nullptr)
 		{
 			xMin = xMax = xDataPoint[0];
 			for (int i = 1; i < numElem; ++i)
@@ -143,7 +130,7 @@ void DataSetFloat::refresh(void)
 			}
 		}
 
-		if (zDataPoint != NULL)
+		if (zDataPoint != nullptr)
 		{
 			zMin = zMax = zDataPoint[0];
 			for (int i = 1; i < numElem; ++i)
