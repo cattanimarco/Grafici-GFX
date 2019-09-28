@@ -8,7 +8,7 @@ class DataSetHistogram : public DataSet
   public:
 	DataSetHistogram(){};
 	~DataSetHistogram();
-	void begin(DataSet *dataSet, int buckets);
+	void begin(DataSet &dataSet, int buckets);
 	DataPoint getDataPoint(int index);
 	void refresh();
 	int size(void);
@@ -26,9 +26,9 @@ DataSetHistogram::~DataSetHistogram()
 	// 	free(counters);
 }
 
-void DataSetHistogram::begin(DataSet *dataSet, int buckets)
+void DataSetHistogram::begin(DataSet &dataSet, int buckets)
 {
-	this->dataSet = dataSet;
+	this->dataSet = &dataSet;
 	numElem = buckets;
 	counters = (int *)malloc(sizeof(int) * buckets);
 

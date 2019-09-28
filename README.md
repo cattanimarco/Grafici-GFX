@@ -39,7 +39,7 @@ grafici.begin(gfx);
 2. Load/Generate the data
 ```
 dataset.begin(dataArray, 1, dataSize);
-dataSpline.begin(&dataset, 100); // interpolate 5 datapoints into 100 datapoint using spline
+dataSpline.begin(dataset, 100); // interpolate 5 datapoints into 100 datapoint using spline
 ```
 3. Plot
 ```
@@ -64,8 +64,8 @@ grafici.begin(gfx);
 
 // Prepare data
 dataset.begin(dataArray, 1, dataSize);
-dataSpline.begin(&dataset, 100); // interpolate 5 datapoints into 100 datapoint using spline
-dataHist.begin(&dataSpline, 15); // generate an histogram (15 bars) of the 100 interpolated points
+dataSpline.begin(dataset, 100); // interpolate 5 datapoints into 100 datapoint using spline
+dataHist.begin(dataSpline, 15); // generate an histogram (15 bars) of the 100 interpolated points
 
 // Plot
 grafici.clear();
@@ -87,7 +87,7 @@ grafici.begin(gfx);
 
 // Prepare data
 dataset.begin(dataArray, 1, dataSize);
-dataSpline.begin(&dataset, 100); // interpolate 5 datapoints into 100 datapoint using spline
+dataSpline.begin(dataset, 100); // interpolate 5 datapoints into 100 datapoint using spline
 
 // Plot
 grafici.clear();
@@ -117,7 +117,7 @@ grafici.begin(gfx);
 
 // Prepare data
 dataset.begin(dataArray, 1, dataSize);
-dataSpline.begin(&dataset, 100); // interpolate 5 datapoints into 100 datapoint using spline
+dataSpline.begin(dataset, 100); // interpolate 5 datapoints into 100 datapoint using spline
 
 // Plot
 grafici.clear();
@@ -141,7 +141,7 @@ grafici.begin(gfx);
 
 // Prepare data
 dataset.begin(dataArray, 1, dataSize);
-dataSpline.begin(&dataset, 100); // interpolate 5 datapoints into 100 datapoint using spline
+dataSpline.begin(dataset, 100); // interpolate 5 datapoints into 100 datapoint using spline
 
 // Plot
 grafici.clear();

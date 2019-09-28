@@ -8,7 +8,7 @@ class DataSetSpline : public DataSet
   public:
 	DataSetSpline(){};
 	~DataSetSpline();
-	void begin(DataSet *dataSet, int interpolationSteps);
+	void begin(DataSet &dataSet, int interpolationSteps);
 	DataPoint getDataPoint(int index);
 	void refresh();
 	int size(void);
@@ -51,16 +51,16 @@ DataSetSpline::~DataSetSpline()
 	// 	free(dValue);
 }
 
-void DataSetSpline::begin(DataSet *dataSet, int interpolationSteps)
+void DataSetSpline::begin(DataSet &dataSet, int interpolationSteps)
 {
-	this->dataSet = dataSet;
+	this->dataSet = &dataSet;
 	numElem = interpolationSteps;
-	bY = (float *)malloc(sizeof(float) * dataSet->size());
-	cY = (float *)malloc(sizeof(float) * dataSet->size());
-	dY = (float *)malloc(sizeof(float) * dataSet->size());
-	bValue = (float *)malloc(sizeof(float) * dataSet->size());
-	cValue = (float *)malloc(sizeof(float) * dataSet->size());
-	dValue = (float *)malloc(sizeof(float) * dataSet->size());
+	bY = (float *)malloc(sizeof(float) * dataSet.size());
+	cY = (float *)malloc(sizeof(float) * dataSet.size());
+	dY = (float *)malloc(sizeof(float) * dataSet.size());
+	bValue = (float *)malloc(sizeof(float) * dataSet.size());
+	cValue = (float *)malloc(sizeof(float) * dataSet.size());
+	dValue = (float *)malloc(sizeof(float) * dataSet.size());
 	//TODO make sure x axis is in increasing order
 
 	refresh();

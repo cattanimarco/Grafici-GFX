@@ -6,7 +6,7 @@
 class DataSetInterpolator : public DataSet
 {
   public:
-	void begin(DataSet *dataSet, int interpolationSteps);
+	void begin(DataSet &dataSet, int interpolationSteps);
 	DataPoint getDataPoint(int index);
 	void refresh();
 	int size(void);
@@ -16,9 +16,9 @@ class DataSetInterpolator : public DataSet
 	int numElem;
 };
 
-void DataSetInterpolator::begin(DataSet *dataSet, int interpolationSteps)
+void DataSetInterpolator::begin(DataSet &dataSet, int interpolationSteps)
 {
-	this->dataSet = dataSet;
+	this->dataSet = &dataSet;
 	numElem = interpolationSteps;
 }
 
