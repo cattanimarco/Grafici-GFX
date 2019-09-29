@@ -8,7 +8,7 @@ class BarcodePlot : public PlotObj
   public:
 	BarcodePlot()
 	{
-		thickness = 0.0;
+		thickness = 0.9;
 	};
 
 	void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
