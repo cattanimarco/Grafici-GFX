@@ -73,6 +73,8 @@ grafici.plot(barPlot, dataHist); // plot histogram using barplot
 ![histogram analisis](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/histogram.bmp)
 
 ### Subplot
+It is also possible to compare data by having multiple plots side by side
+
 1. Initialize
 ```
 DataSetFloat dataset;
@@ -87,20 +89,24 @@ dataSpline.begin(dataset, 100); // interpolate 5 datapoints into 100 datapoint u
 3. Plot
 ```
 grafici.clear();
-
-// Reset boundaries, i.e. set to full screen plotting, then divide screen in 1 row and 2 colums. 
-// Select the first column and add a blank border
+```
+First we reset our plotting libraries, i.e. set the boundaries to use the full screen display. Then, we divide the screen into sub boundaries by slicing the full screen into 1 row and 2 columns. Finally, we select the region with index 0 and add an empty border around the plot for elegance. 
+Sub boundaries are indexed from bottom to top and from left to right. Thus, in this case index 0 meanse the leftmost sub boundary.
+```
 grafici.boundaries.reset().crop(1, 2, 0).addBorder(0.04, 0.04, 0.04, 0.02);
 grafici.plot(linePlot, dataSpline);
-
-// same as before, but select the second column
+```
+We repeat the same boundary transformation again. This time we select the rightmost sub boundary (with index = 1).
+```
 grafici.boundaries.reset().crop(1, 2, 1).addBorder(0.04, 0.04, 0.02, 0.04);
 grafici.plot(barPlot, dataSpline);
 ```
 
+
 ![interpolated data](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/subplot.bmp)
 
 ### Multiplot
+It is possible to have draw multiple plot one over each other in a layered fashion. This can be achieved just by calling the plot function multiple times without changing the boundaries before
 1. Initialize
 ```
 DataSetFloat dataset;
@@ -113,9 +119,13 @@ dataset.begin(dataArray, 1, dataSize);
 dataSpline.begin(dataset, 100); // interpolate 5 datapoints into 100 datapoint using spline
 ```
 3. Plot 
+
 ```
 grafici.clear();
 grafici.boundaries.reset().addBorder(0.04, 0.04, 0.04, 0.04); 
+```
+By not changing the boundaries between the two plot calls, we overimpose the two plots.
+```
 grafici.plot(linePlot, dataSpline); // using the same boundaries, plot multiple times
 grafici.plot(scatterPlot, dataSpline);
 ```
@@ -123,6 +133,9 @@ grafici.plot(scatterPlot, dataSpline);
 ![interpolated data](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/multiplot.bmp)
 
 ### Boundaries tranformation
+Creating sub boundaries and adding empty boarders are just two of the tranformations available in Grafici GFX.
+It is possible, for example, to mirror the boundaries both horizzontally and/or vertically in order to flip the plot accordingly.
+
 1.Initialize
 ```
 DataSetFloat dataset;
@@ -139,24 +152,36 @@ dataSpline.begin(dataset, 100); // interpolate 5 datapoints into 100 datapoint u
 3. Plot
 ```
 grafici.clear();
-
 grafici.boundaries.reset().crop(2, 2, 0).addBorder(0.02, 0.02, 0.02, 0.02);
 grafici.plot(barPlot, dataSpline);
-
+```
+Horizzontal flip
+```
 grafici.boundaries.reset().crop(2, 2, 1).addBorder(0.02, 0.02, 0.02, 0.02);
 grafici.boundaries.horizzontalFlip();
 grafici.plot(barPlot, dataSpline);
-
+```
+Vertical flip
+```
 grafici.boundaries.reset().crop(2, 2, 2).addBorder(0.02, 0.02, 0.02, 0.02);
 grafici.boundaries.verticalFlip();
 grafici.plot(barPlot, dataSpline);
-
+```
+Horizzontal and vertical flips
+```
 grafici.boundaries.reset().crop(2, 2, 3).addBorder(0.02, 0.02, 0.02, 0.02);
 grafici.boundaries.horizzontalFlip().verticalFlip();
 grafici.plot(barPlot, dataSpline);
 ```
 
 ![interpolated data](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/transformations.bmp)
+
+### Circular boundaries
+Boundaries transformations are not limited to rectangular displays. It is possible, for example, to produce circular plots just by using circular boundaries. All boundaries transformation still applies.
+
+![interpolated data](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/round_1.bmp)
+
+![interpolated data](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/round_2.bmp)
 
 ### Colors
 
