@@ -127,6 +127,7 @@ class RoundDisplayBoundaries : public DisplayBoundaries
 	DisplayBoundaries &set(	DataPoint bottomLeft, DataPoint topRight);
 
 	DisplayBoundaries &addBorder(float top, float bottom, float left, float right);
+	DisplayBoundaries &addBorderRadial(float top, float bottom, float left, float right);
 	DisplayBoundaries &crop(int rows, int columns, int index);
 	DisplayBoundaries &cropRadial(int rows, int columns, int index);
 	DisplayBoundaries &horizzontalFlip(void);
@@ -138,7 +139,6 @@ class RoundDisplayBoundaries : public DisplayBoundaries
 	Pixel project(DataPoint &dataPoint);
 
   private:
-	void update(void);
 
 	DataPoint center;
 	float innerRadius;

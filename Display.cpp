@@ -369,66 +369,69 @@ DisplayBoundaries &RoundDisplayBoundaries::reset()
 {
 	DisplayBoundaries::reset();
 	innerRadius = 0.0;
-	// setup to simulate clock (start at 12, clockwise)
-	beginAngle = 0;
-	endAngle = 2 * M_PI;
-	//automatically compute outer radius
-	update();
+	outerRadius = 1.0;
+	beginAngle = 0.0;
+	endAngle = 1.0;
 	return *this;
 }
 
 DisplayBoundaries &RoundDisplayBoundaries::set(DataPoint bottomLeft, DataPoint topRight)
 {
 	DisplayBoundaries::set(bottomLeft, topRight);
-	update();
 	return *this;
 }
 
-//TODO update circle every time a slice is done
 DisplayBoundaries &RoundDisplayBoundaries::addBorder(float top, float bottom, float left, float right)
 {
 	DisplayBoundaries::addBorder(top, bottom, left, right);
-	update();
 	return *this;
 }
 
-//TODO update circle every time a slice is done
+DisplayBoundaries &RoundDisplayBoundaries::addBorderRadial(float top, float bottom, float left, float right)
+{
+	float deltaRadius = outerRadius = innerRadius;	
+	innerRadius += bottom * deltaRadius;
+	outerRadius -= top * deltaRadius;
+
+	float deltaAngle = endAngle - beginAngle;
+	beginAngle += right * deltaAngle;
+	endAngle -= left * deltaAngle;
+
+	return *this;
+}
+
 DisplayBoundaries &RoundDisplayBoundaries::crop(int rows, int columns, int index)
 {
 	DisplayBoundaries::crop(rows, columns, index);
-	update();
 	return *this;
 }
 
 DisplayBoundaries &RoundDisplayBoundaries::cropRadial(int rows, int columns, int index)
 {
-	float _width = endAngle - beginAngle;
-	float _height = outerRadius - innerRadius;
+	float deltaAngle = endAngle - beginAngle;
+	float deltaRadius = outerRadius - innerRadius;
 
-	_width /= columns;
-	_height /= rows;
+	deltaAngle /= columns;
+	deltaRadius /= rows;
 
-	beginAngle += (index % columns) * _width;
-	endAngle = beginAngle + _width;
+	beginAngle += (index % columns) * deltaAngle;
+	endAngle = beginAngle + deltaAngle;
 
-	innerRadius += (index / columns) * _height;
-	outerRadius = innerRadius + _height;
+	innerRadius += (index / columns) * deltaRadius;
+	outerRadius = innerRadius + deltaRadius;
 
-	//cout << index << " " << innerRadius << " " << outerRadius << endl;
 	return *this;
 }
 
 DisplayBoundaries &RoundDisplayBoundaries::horizzontalFlip(void)
 {
 	DisplayBoundaries::horizzontalFlip();
-	update();
 	return *this;
 }
 
 DisplayBoundaries &RoundDisplayBoundaries::verticalFlip(void)
 {
 	DisplayBoundaries::verticalFlip();
-	update();
 	return *this;
 }
 
@@ -450,16 +453,10 @@ Pixel RoundDisplayBoundaries::project(DataPoint &dataPoint)
 
 	float radius = innerRadius * (1.0 - dataPoint.y) + outerRadius * dataPoint.y;
 	float angle = beginAngle * (1.0 - dataPoint.x) + endAngle * dataPoint.x;
-	p.x = (getCenter().x + radius * cos(angle));
-	p.y = (getCenter().y + radius * sin(angle));
+	p.x = (getCenter().x + (radius*(width()/2)) * cos(angle*2*M_PI));
+	p.y = (getCenter().y + (radius*(height()/2)) * sin(angle*2*M_PI));
 
 	return p;
-}
-
-void RoundDisplayBoundaries::update(void)
-{
-	//compute circle parameter depending on enclosing boundaries
-	outerRadius = min(width(), height()) / 2.0;
 }
 
 PlotObj::PlotObj()
