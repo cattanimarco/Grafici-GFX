@@ -185,6 +185,9 @@ Boundaries transformations are not limited to rectangular displays. It is possib
 
 ### Colors
 
+![interpolated data](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/colors.bmp)
+
+
 ### Plot types
 1. Initialize
 ```
