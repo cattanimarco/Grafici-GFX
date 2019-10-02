@@ -389,7 +389,7 @@ DisplayBoundaries &RoundDisplayBoundaries::addBorder(float top, float bottom, fl
 
 DisplayBoundaries &RoundDisplayBoundaries::addBorderRadial(float top, float bottom, float left, float right)
 {
-	float deltaRadius = outerRadius = innerRadius;	
+	float deltaRadius = outerRadius - innerRadius;	
 	innerRadius += bottom * deltaRadius;
 	outerRadius -= top * deltaRadius;
 
