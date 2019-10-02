@@ -16,11 +16,6 @@ public:
 	void refresh();
 	int size(void);
 
-private:
-	float *xDataPoint;
-	float *yDataPoint;
-	float *zDataPoint;
-	float zValue;
 	float xMin;
 	float yMin;
 	float zMin;
@@ -28,6 +23,11 @@ private:
 	float yMax;
 	float zMax;
 	
+private:
+	float *xDataPoint;
+	float *yDataPoint;
+	float *zDataPoint;
+	float zValue;
 	int numElem;
 };
 
