@@ -15,13 +15,11 @@ class DataSetSpline : public DataSet
 
   private:
 	DataSet *dataSet;
-	float xMin;
 	float yMin;
-	float valueMin;
+	float zMin;
 
-	float xMax;
 	float yMax;
-	float valueMax;
+	float zMax;
 
 	int numElem;
 
@@ -30,9 +28,9 @@ class DataSetSpline : public DataSet
 	float *cY;
 	float *dY;
 
-	float *bValue;
-	float *cValue;
-	float *dValue;
+	float *bZ;
+	float *cZ;
+	float *dZ;
 };
 
 DataSetSpline::~DataSetSpline()
@@ -43,12 +41,12 @@ DataSetSpline::~DataSetSpline()
 	// 	free(cY);
 	// if (dY != nullptr)
 	// 	free(dY);
-	// if (bValue != nullptr)
-	// 	free(bValue);
-	// if (cValue != nullptr)
-	// 	free(cValue);
-	// if (dValue != nullptr)
-	// 	free(dValue);
+	// if (bZ != nullptr)
+	// 	free(bZ);
+	// if (cZ != nullptr)
+	// 	free(cZ);
+	// if (dZ != nullptr)
+	// 	free(dZ);
 }
 
 void DataSetSpline::begin(DataSet &dataSet, int interpolationSteps)
@@ -58,9 +56,9 @@ void DataSetSpline::begin(DataSet &dataSet, int interpolationSteps)
 	bY = (float *)malloc(sizeof(float) * dataSet.size());
 	cY = (float *)malloc(sizeof(float) * dataSet.size());
 	dY = (float *)malloc(sizeof(float) * dataSet.size());
-	bValue = (float *)malloc(sizeof(float) * dataSet.size());
-	cValue = (float *)malloc(sizeof(float) * dataSet.size());
-	dValue = (float *)malloc(sizeof(float) * dataSet.size());
+	bZ = (float *)malloc(sizeof(float) * dataSet.size());
+	cZ = (float *)malloc(sizeof(float) * dataSet.size());
+	dZ = (float *)malloc(sizeof(float) * dataSet.size());
 	//TODO make sure x axis is in increasing order
 
 	refresh();
@@ -92,12 +90,12 @@ DataPoint DataSetSpline::getDataPoint(int index)
 
 		// compute interpolated value
 		p.z = dataSet->getDataPoint(bin).z +
-		      bValue[bin] * (p.x - dataSet->getDataPoint(bin).x) +
-		      cValue[bin] * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x) +
-		      dValue[bin] * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x);
+		      bZ[bin] * (p.x - dataSet->getDataPoint(bin).x) +
+		      cZ[bin] * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x) +
+		      dZ[bin] * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x) * (p.x - dataSet->getDataPoint(bin).x);
 
 		// normalize dataSet to a 0.0 .. 1.0 value
-		p.z = (p.z - valueMin) / (valueMax - valueMin);
+		p.z = (p.z - zMin) / (zMax - zMin);
 	}
 
 	return p;
@@ -115,8 +113,8 @@ void DataSetSpline::refresh(void)
 	// compute spline parameter, than scan all x values to find new min max
 	yMax = 1;
 	yMin = 0;
-	valueMax = 1;
-	valueMin = 0;
+	zMax = 1;
+	zMin = 0;
 
 	if (numElem >= dataSet->size())
 	{
@@ -205,16 +203,16 @@ void DataSetSpline::refresh(void)
 
 		l[n] = 1;
 		z[n] = 0;
-		cValue[n] = 0;
+		cZ[n] = 0;
 
 		for (int j = n - 1; j >= 0; --j)
 		{
-			cValue[j] = z[j] - u[j] * cValue[j + 1];
-			bValue[j] = (dataSet->getDataPoint(j + 1).z - dataSet->getDataPoint(j).z) / h[j] - h[j] * (cValue[j + 1] + 2 * cValue[j]) / 3;
-			dValue[j] = (cValue[j + 1] - cValue[j]) / (3 * h[j]);
+			cZ[j] = z[j] - u[j] * cZ[j + 1];
+			bZ[j] = (dataSet->getDataPoint(j + 1).z - dataSet->getDataPoint(j).z) / h[j] - h[j] * (cZ[j + 1] + 2 * cZ[j]) / 3;
+			dZ[j] = (cZ[j + 1] - cZ[j]) / (3 * h[j]);
 		}
 
-		// Interpolation done, check for new valueMin valueMax
+		// Interpolation done, check for new zMin zMax
 		bin = 0;
 		for (float px = 0; px < 1; px += (1.0 / numElem))
 		{
@@ -226,15 +224,15 @@ void DataSetSpline::refresh(void)
 
 			/* compute interpolated y value */
 			valueInter = dataSet->getDataPoint(bin).z +
-			             bValue[bin] * (px - dataSet->getDataPoint(bin).x) +
-			             cValue[bin] * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x) +
-			             dValue[bin] * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x);
+			             bZ[bin] * (px - dataSet->getDataPoint(bin).x) +
+			             cZ[bin] * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x) +
+			             dZ[bin] * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x) * (px - dataSet->getDataPoint(bin).x);
 
 			/* Updated dataSet min/max */
-			if (valueInter < valueMin)
-				valueMin = valueInter;
-			if (valueInter > valueMax)
-				valueMax = valueInter;
+			if (valueInter < zMin)
+				zMin = valueInter;
+			if (valueInter > zMax)
+				zMax = valueInter;
 		}
 		free(h);
 		free(A);

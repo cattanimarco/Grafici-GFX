@@ -47,6 +47,7 @@ class ColorTheme
 
 	Color project(DataPoint &dataPoint);
 	Color getColor(float val);
+	void setPalette(ColorPalette &colorPalette){this->colorPalette = &colorPalette;};
 
 	ColorPalette *colorPalette;
 	ColorSource colorSource;
