@@ -223,7 +223,7 @@ grafici.plot(axisPlot, dataSpline);
 grafici.plot(barcodePlot, dataSpline);
 ```
 
-![interpolated data](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/types.bmp)
+![interpolated data](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/styles.bmp)
 
 ## Contribute
 

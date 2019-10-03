@@ -3,26 +3,12 @@
 
 #include "Grafici.h"
 
-#include "plotters/spaghettiPlot.h"
-#include "plotters/linePlot.h"
-#include "datasets/DatasetFloat.h"
-#include "decorators/DatasetInterpolator.h"
-#include "decorators/DatasetSpline.h"
-#include "color_schemes/heat.h"
-
 #include "Display.h"
 
 MCUFRIEND_kbv gfx;
 
-float dataArrayValue[11] = {0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2};
-float dataArrayY[11] = {0, 2, 2, 2, 2, 6, 5, 10, 10, 10, 9};
-
-Grafici grafici;
-
-DatasetFloat dataset;
-DatasetSpline dataSpline;
-DatasetInterpolator dataInterpolator;
-Boundaries left, mid, right;
+DataSetFloat dataset;
+float dataArray[5] = { 1, 0, 2, 1, 2 };
 
 void setup(void)
 {
@@ -31,29 +17,10 @@ void setup(void)
 
 	grafici.begin(gfx);
 
-	dataset.begin(dataArrayY, dataArrayValue, 11);
-	dataInterpolator.begin(&dataset, 50);
-	dataSpline.begin(&dataset, 50);
+	dataset.begin(dataArray, 1, 5);
 
-	left = grafici.baseBoundaries();
-	left.crop(1, 3, 0);
-	left.addBorder(10, 10, 10, 5);
-
-	mid = grafici.baseBoundaries();
-	mid.crop(1, 3, 1);
-	mid.addBorder(10, 10, 5, 5);
-
-	right = grafici.baseBoundaries();
-	right.crop(1, 3, 2);
-	right.addBorder(10, 10, 5, 10);
-
-	grafici.clear(csHeat);
-
-	grafici.plot(spaghettiPlot, dataset, csHeat, left);
-
-	grafici.plot(spaghettiPlot, dataInterpolator, csHeat, mid);
-
-	grafici.plot(spaghettiPlot, dataSpline, csHeat, right);
+	grafici.clear();
+	grafici.plot(linePlot, dataset);
 }
 
 void loop(void)
