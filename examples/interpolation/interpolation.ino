@@ -2,8 +2,10 @@
 #include <MCUFRIEND_kbv.h>
 
 #include "Grafici.h"
-
 #include "Display.h"
+
+#include "utility/linePlot.h"
+#include "utility/DataSetFloat.h"
 
 MCUFRIEND_kbv gfx;
 
