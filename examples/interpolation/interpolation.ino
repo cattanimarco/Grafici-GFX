@@ -6,6 +6,7 @@
 
 #include "utility/linePlot.h"
 #include "utility/DataSetFloat.h"
+#include "utility/DataSetSpline.h"
 
 MCUFRIEND_kbv gfx;
 
