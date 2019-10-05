@@ -43,7 +43,7 @@ enum ColorSource
 class ColorTheme
 {
   public:
-	ColorTheme(); //{colorPalette = &csBw; colorSource = ColorSource::computeFromZ;};//ColorPalette &colorPalette, ColorSource colorSource) : colorPalette(&colorPalette), colorSource(colorSource){};
+	ColorTheme(); 
 
 	Color project(DataPoint &dataPoint);
 	Color getColor(float val);
