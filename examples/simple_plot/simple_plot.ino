@@ -8,8 +8,6 @@
 MCUFRIEND_kbv gfx;
 
 DataSetFloat dataset;
-DataSetSpline dataSpline;
-
 float dataArray[5] = { 1, 0, 2, 1, 2 };
 
 void setup(void)
@@ -20,11 +18,9 @@ void setup(void)
 	grafici.begin(gfx);
 
 	dataset.begin(dataArray, 1, 5);
-	dataSpline.begin(dataset, 100);
-
 
 	grafici.clear();
-	grafici.plot(linePlot, dataSpline);
+	grafici.plot(linePlot, dataset);
 }
 
 void loop(void)

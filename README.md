@@ -2,31 +2,30 @@
 Grafici GFX is a data plotting library for Adafruit GFX graphic libraries. 
 This modular library allows you to easily manage and plot data on any arduino display/lcd supporting the Adafruit GFX library.
 
-## Usage
-Given an Adafruit_GFX object and an array of floats
-```
-Adafruit_GFX gfx;
-float dataArray[dataSize] = { 1, 0, 2, 1, 2 };
-```
-creating a plot with the Grafici GFX library only takes 3 small steps:
-1. Initialize 
+## Simple plot
+Given an Adafruit_GFX object and an array of floats, creating a plot with the Grafici GFX library only takes two simple steps:
+
+1. Setup the library
 ```
 DataSetFloat dataset;
+float dataArray[5] = { 1, 0, 2, 1, 2 };
+
+gfx.begin();
+gfx.setRotation(1);
 grafici.begin(gfx);
+dataset.begin(dataArray, 1, 5);
 ```
-2. Load the data
-```
-dataset.begin(dataArray, 1, dataSize);
-```
-3. Plot
+
+2. Plot 
 ```
 grafici.clear();
 grafici.plot(linePlot, dataset);
 ```
 
-![simplest plot](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/usage.bmp)
+The result is the following
+![simplest plot](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/simple_plot.bmp)
 
-Now that we plotted our first dataset, let make it looks better.
+Now that we plotted our first dataset, lets make it look better.
 
 ### Data Interpolation
 In order to make the plot smoother, it is possible to increase the number of datapoint using interpolation. In the example below, for example, it is possible to use a spline interpolation to increase the number of datapoints from 5 to 100.
