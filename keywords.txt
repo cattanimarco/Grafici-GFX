@@ -1,0 +1,54 @@
+#######################################
+# Syntax Coloring Map For Test
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Grafici	KEYWORD1
+Color	KEYWORD1
+ColorPalette    KEYWORD1
+ColorSource KEYWORD1
+ColorTheme  KEYWORD1
+Pixel   KEYWORD1
+DisplayDriver   KEYWORD1
+DisplayBoundaries   KEYWORD1
+RoundDisplayBoundaries  KEYWORD1
+PlotObj KEYWORD1
+DataPointIterator   KEYWORD1
+DataPoint   KEYWORD1
+DataSet KEYWORD1
+AxisPlot    KEYWORD1
+BarPlot KEYWORD1
+LinePlot    KEYWORD1
+ScatterPlot KEYWORD1
+DataSetFloat    KEYWORD1
+DataSetHistogram    KEYWORD1
+DataSetInterpolator KEYWORD1
+DataSetSpline   KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+doSomething	KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+grafici KEYWORD2
+colorBlack  KEYWORD2
+colorDarkGray   KEYWORD2
+colorLightGray  KEYWORD2
+colorWhite  KEYWORD2
+axisPlot    KEYWORD2
+barPlot KEYWORD2
+linePlot    KEYWORD2
+scatterPlot KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
