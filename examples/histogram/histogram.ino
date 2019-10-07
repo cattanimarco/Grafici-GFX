@@ -7,13 +7,15 @@
 #include "utility/linePlot.h"
 #include "utility/DataSetFloat.h"
 #include "utility/DataSetSpline.h"
+#include "utility/DataSetHistogram.h"
 
 MCUFRIEND_kbv gfx;
 
 DataSetFloat dataset;
 DataSetSpline dataSpline;
+DataSetHistogram dataHist;
 
-float dataArray[5] = { 1, 0, 2, 1, 2 };
+float dataArray[5] = { 1, 0, 2, 2, 1 };
 
 void setup(void)
 {
@@ -24,9 +26,10 @@ void setup(void)
 
 	dataset.begin(dataArray, 1, 5); // load array of 5 floats
 	dataSpline.begin(dataset, 100); // interpolate 5 dataPoints to 100 dataPoints
+	dataHist.begin(dataSpline, 30); // create a new dataset with a 30-bucket histogram of the interpolated dataset
 
 	grafici.clear();
-	grafici.plot(linePlot, dataSpline);
+	grafici.plot(barPlot, dataHist); // plot histogram using a bar plot
 }
 
 void loop(void)

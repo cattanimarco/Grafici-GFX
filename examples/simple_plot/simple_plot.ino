@@ -17,7 +17,7 @@ void setup(void)
 
 	grafici.begin(gfx);
 
-	dataset.begin(dataArray, 1, 5);
+	dataset.begin(dataArray, 1, 5); // load array of 5 floats
 
 	grafici.clear();
 	grafici.plot(linePlot, dataset);
