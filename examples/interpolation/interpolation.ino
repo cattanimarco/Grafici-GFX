@@ -4,9 +4,9 @@
 #include "Grafici.h"
 #include "Display.h"
 
-#include "utility/linePlot.h"
-#include "utility/DataSetFloat.h"
-#include "utility/DataSetSpline.h"
+#include "modules/linePlot.h"
+#include "modules/DataSetFloat.h"
+#include "modules/DataSetSpline.h"
 
 MCUFRIEND_kbv gfx;
 
@@ -26,7 +26,7 @@ void setup(void)
 	dataSpline.begin(dataset, 100); // interpolate 5 dataPoints to 100 dataPoints
 
 	grafici.clear();
-	grafici.plot(linePlot, dataSpline);
+	grafici.plot(linePlot, dataSpline); // plot interpolated dataset using a simple line
 }
 
 void loop(void)

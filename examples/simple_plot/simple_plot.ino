@@ -20,7 +20,7 @@ void setup(void)
 	dataset.begin(dataArray, 1, 5); // load array of 5 floats
 
 	grafici.clear();
-	grafici.plot(linePlot, dataset);
+	grafici.plot(linePlot, dataset); // plot dataSet using a simple line
 }
 
 void loop(void)

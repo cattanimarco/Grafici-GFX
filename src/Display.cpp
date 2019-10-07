@@ -1,5 +1,5 @@
 #include "Display.h"
-#include "utility/bw.h"
+#include "modules/bw.h"
 
 
 Color colorBlack = { 0, 0, 0 };

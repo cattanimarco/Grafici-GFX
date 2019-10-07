@@ -32,8 +32,6 @@ DataSetSpline   KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
-doSomething	KEYWORD2
-
 #######################################
 # Instances (KEYWORD2)
 #######################################

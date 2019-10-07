@@ -4,10 +4,10 @@
 #include "Grafici.h"
 #include "Display.h"
 
-#include "utility/linePlot.h"
-#include "utility/DataSetFloat.h"
-#include "utility/DataSetSpline.h"
-#include "utility/DataSetHistogram.h"
+#include "modules/barPlot.h"
+#include "modules/DataSetFloat.h"
+#include "modules/DataSetSpline.h"
+#include "modules/DataSetHistogram.h"
 
 MCUFRIEND_kbv gfx;
 
