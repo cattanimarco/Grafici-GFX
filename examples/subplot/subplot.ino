@@ -4,6 +4,7 @@
 #include "Grafici.h"
 #include "Display.h"
 
+#include "modules/linePlot.h"
 #include "modules/barPlot.h"
 #include "modules/DataSetFloat.h"
 #include "modules/DataSetSpline.h"
