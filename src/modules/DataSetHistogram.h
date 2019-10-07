@@ -31,7 +31,7 @@ void DataSetHistogram::begin(DataSet &dataSet, int buckets)
 	this->dataSet = &dataSet;
 	numElem = buckets;
 	counters = (int *)malloc(sizeof(int) * buckets);
-
+	memset(counters, 0, sizeof(int) * buckets);
 	refresh();
 }
 
