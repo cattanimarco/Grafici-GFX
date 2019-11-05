@@ -68,15 +68,15 @@ dataSpline.begin(dataset, 100); // interpolate 5 datapoints into 100 datapoint u
 ```
 grafici.clear();
 ```
-First we reset our plotting libraries, i.e. set the boundaries to use the full screen display. Then, we divide the screen into sub boundaries by slicing the full screen into 1 row and 2 columns. Finally, we select the region with index 0 and add an empty border around the plot for elegance. 
+First we fullScreen our plotting libraries, i.e. set the boundaries to use the full screen display. Then, we divide the screen into sub boundaries by slicing the full screen into 1 row and 2 columns. Finally, we select the region with index 0 and add an empty border around the plot for elegance. 
 Sub boundaries are indexed from bottom to top and from left to right. Thus, in this case index 0 meanse the leftmost sub boundary.
 ```
-grafici.boundaries.reset().crop(1, 2, 0).addBorder(0.04, 0.04, 0.04, 0.02);
+grafici.boundaries.fullScreen().subBoundaries(1, 2, 0).addBorder(0.04, 0.04, 0.04, 0.02);
 grafici.plot(linePlot, dataSpline);
 ```
 We repeat the same boundary transformation again. This time we select the rightmost sub boundary (with index = 1).
 ```
-grafici.boundaries.reset().crop(1, 2, 1).addBorder(0.04, 0.04, 0.02, 0.04);
+grafici.boundaries.fullScreen().subBoundaries(1, 2, 1).addBorder(0.04, 0.04, 0.02, 0.04);
 grafici.plot(barPlot, dataSpline);
 ```
 
@@ -100,7 +100,7 @@ dataSpline.begin(dataset, 100); // interpolate 5 datapoints into 100 datapoint u
 
 ```
 grafici.clear();
-grafici.boundaries.reset().addBorder(0.04, 0.04, 0.04, 0.04); 
+grafici.boundaries.fullScreen().addBorder(0.04, 0.04, 0.04, 0.04); 
 ```
 By not changing the boundaries between the two plot calls, we overimpose the two plots.
 ```
@@ -130,24 +130,24 @@ dataSpline.begin(dataset, 100); // interpolate 5 datapoints into 100 datapoint u
 3. Plot
 ```
 grafici.clear();
-grafici.boundaries.reset().crop(2, 2, 0).addBorder(0.02, 0.02, 0.02, 0.02);
+grafici.boundaries.fullScreen().subBoundaries(2, 2, 0).addBorder(0.02, 0.02, 0.02, 0.02);
 grafici.plot(barPlot, dataSpline);
 ```
 Horizzontal flip
 ```
-grafici.boundaries.reset().crop(2, 2, 1).addBorder(0.02, 0.02, 0.02, 0.02);
+grafici.boundaries.fullScreen().subBoundaries(2, 2, 1).addBorder(0.02, 0.02, 0.02, 0.02);
 grafici.boundaries.horizzontalFlip();
 grafici.plot(barPlot, dataSpline);
 ```
 Vertical flip
 ```
-grafici.boundaries.reset().crop(2, 2, 2).addBorder(0.02, 0.02, 0.02, 0.02);
+grafici.boundaries.fullScreen().subBoundaries(2, 2, 2).addBorder(0.02, 0.02, 0.02, 0.02);
 grafici.boundaries.verticalFlip();
 grafici.plot(barPlot, dataSpline);
 ```
 Horizzontal and vertical flips
 ```
-grafici.boundaries.reset().crop(2, 2, 3).addBorder(0.02, 0.02, 0.02, 0.02);
+grafici.boundaries.fullScreen().subBoundaries(2, 2, 3).addBorder(0.02, 0.02, 0.02, 0.02);
 grafici.boundaries.horizzontalFlip().verticalFlip();
 grafici.plot(barPlot, dataSpline);
 ```
@@ -184,19 +184,19 @@ grafici.clear();
 grafici.style.colorPalette = &csBright;
 grafici.style.colorSource = ColorSource::computeFromY;
 
-grafici.boundaries.reset().crop(2, 3, 0).addBorder(0.02, 0.02, 0.02, 0.02);
+grafici.boundaries.fullScreen().subBoundaries(2, 3, 0).addBorder(0.02, 0.02, 0.02, 0.02);
 grafici.plot(axisPlot, dataSpline);
 grafici.plot(linePlot, dataSpline);
 
-grafici.boundaries.reset().crop(2, 3, 1).addBorder(0.02, 0.02, 0.02, 0.02);
+grafici.boundaries.fullScreen().subBoundaries(2, 3, 1).addBorder(0.02, 0.02, 0.02, 0.02);
 grafici.plot(axisPlot, dataSpline);
 grafici.plot(barPlot, dataSpline);
 
-grafici.boundaries.reset().crop(2, 3, 2).addBorder(0.02, 0.02, 0.02, 0.02);
+grafici.boundaries.fullScreen().subBoundaries(2, 3, 2).addBorder(0.02, 0.02, 0.02, 0.02);
 grafici.plot(axisPlot, dataSpline);
 grafici.plot(scatterPlot, dataSpline);
 
-grafici.boundaries.reset().crop(2, 3, 3).addBorder(0.02, 0.02, 0.02, 0.02);
+grafici.boundaries.fullScreen().subBoundaries(2, 3, 3).addBorder(0.02, 0.02, 0.02, 0.02);
 grafici.plot(axisPlot, dataSpline);
 grafici.plot(barcodePlot, dataSpline);
 ```

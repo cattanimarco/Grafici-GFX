@@ -1,13 +1,13 @@
 #include "Adafruit_GFX.h" // Hardware-specific library
 #include <MCUFRIEND_kbv.h>
 
-#include "Grafici.h"
 #include "Display.h"
+#include "Grafici.h"
 
-#include "modules/linePlot.h"
-#include "modules/scatterPlot.h"
 #include "modules/DataSetFloat.h"
 #include "modules/DataSetSpline.h"
+#include "modules/linePlot.h"
+#include "modules/scatterPlot.h"
 
 MCUFRIEND_kbv gfx;
 
@@ -23,13 +23,12 @@ void setup(void)
 
 	grafici.begin(gfx);
 
-	dataset.begin(dataArray, 1, 5); // load array of 5 floats
-	dataSpline.begin(dataset, 100); // interpolate 5 dataPoints to 100 dataPoints
+	dataset.begin(dataArray, 1, 5);  // load array of 5 floats
+	dataSpline.begin(dataset, 100);  // interpolate 5 dataPoints to 100 dataPoints
 	scatterPlot.markerSize = 0.0002; // this is defined a proportion of the area of the plot
 
-		
 	grafici.clear();
-	grafici.boundaries.reset().addBorder(0.04, 0.04, 0.04, 0.04); // add empty border
+	grafici.boundaries.fullScreen().addBorder(0.04, 0.04, 0.04, 0.04); // add empty border
 	grafici.plot(linePlot, dataSpline);
 	// keep the same boundaries and plot a second time
 	grafici.plot(scatterPlot, dataSpline);

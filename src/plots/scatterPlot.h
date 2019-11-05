@@ -3,18 +3,21 @@
 
 #include "../Grafici.h"
 
-class ScatterPlot : public PlotObj
+class ScatterPlot : public Plotter
 {
 
   public:
-	ScatterPlot(){markerSize = 0.0001;};
+	ScatterPlot()
+	{
+		markerSize = 0.0001;
+	};
 
-	void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
+	void plot(DisplayDriver *displayDriver, DataSet *dataSet, Boundaries *boundaries, ColorTheme *theme)
 	{
 
-		for (DataPointIterator it = dataSet->beginIt(); it != dataSet->endIt(); ++it)
+		for (DataCoordinateIterator it = dataSet->begin(); it != dataSet->end(); ++it)
 		{
-			DataPoint dataPoint = *it;
+			DataCoordinates dataPoint = *it;
 			displayDriver->drawCircle(boundaries->project(dataPoint),
 			                          markerSize,
 			                          theme->project(dataPoint));

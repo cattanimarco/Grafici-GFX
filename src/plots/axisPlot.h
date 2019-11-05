@@ -3,16 +3,21 @@
 
 #include "../Grafici.h"
 
-class AxisPlot : public PlotObj
+class AxisPlot : public Plotter
 {
   public:
-	AxisPlot(){numAxisX =1; numAxisY = 1;plotColor = colorDarkGray;};
+	AxisPlot()
+	{
+		numAxisX = 1;
+		numAxisY = 1;
+		plotColor = colorDarkGray;
+	};
 
 	int numAxisX;
 	int numAxisY;
 	Color plotColor;
 
-	void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
+	void plot(DisplayDriver *displayDriver, DataSet *dataSet, Boundaries *boundaries, ColorTheme *theme)
 	{
 		// unused variable
 		(void)dataSet;
@@ -20,8 +25,8 @@ class AxisPlot : public PlotObj
 		//vertical lines
 		for (int itX = 0; itX <= numAxisX; itX++)
 		{
-			DataPoint a(itX / (float)numAxisX, 0.0);
-			DataPoint b(itX / (float)numAxisX, 1.0);
+			DataCoordinates a(itX / (float)numAxisX, 0.0);
+			DataCoordinates b(itX / (float)numAxisX, 1.0);
 			displayDriver->drawLine(boundaries->project(a),
 			                        boundaries->project(b),
 			                        plotColor);
@@ -31,8 +36,8 @@ class AxisPlot : public PlotObj
 			{
 				if (itX < numAxisX)
 				{
-					DataPoint a(itX / (float)numAxisX, itY / (float)numAxisY);
-					DataPoint b((itX + 1.0) / (float)numAxisX, itY / (float)numAxisY);
+					DataCoordinates a(itX / (float)numAxisX, itY / (float)numAxisY);
+					DataCoordinates b((itX + 1.0) / (float)numAxisX, itY / (float)numAxisY);
 					displayDriver->drawLine(boundaries->project(a),
 					                        boundaries->project(b),
 					                        plotColor);

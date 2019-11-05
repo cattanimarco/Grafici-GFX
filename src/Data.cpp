@@ -1,45 +1,37 @@
 #include "Data.h"
 
-DataPoint::DataPoint(void) : x(0), y(0), z(1.0) {}
-
-DataPoint::DataPoint(float x, float y) : x(x), y(y), z(1.0) {}
-
-DataPoint::DataPoint(float x, float y, float z) : x(x), y(y), z(z) {}
-
-DataPointIterator DataSet::beginIt()
+int DataSet::length() const
 {
-	DataPointIterator it(this, 0);
-	return it;
+	return arrayLength;
+};
+
+void DataSet::setLength(int arrayLength)
+{
+	this->arrayLength = arrayLength;
 }
 
-DataPointIterator DataSet::endIt()
+DataCoordinateIterator DataSet::begin() const
 {
-	DataPointIterator it(this, size());
-	return it;
-}
+	return DataCoordinateIterator(this, 0);
+};
 
-DataPoint DataPointIterator::operator*()
+DataCoordinateIterator DataSet::end() const
 {
-	return dataSet->getDataPoint(dataIndex);
-}
+	return DataCoordinateIterator(this, length());
+};
 
-DataPointIterator &DataPointIterator::operator++()
+DataCoordinate DataCoordinateIterator::operator*()
+{
+	return dataSet->getDataCoordinate(dataIndex);
+};
+
+DataCoordinateIterator &DataCoordinateIterator::operator++()
 {
 	++dataIndex;
 	return *this;
-}
+};
 
-DataPointIterator DataPointIterator::operator++(int postfix)
-{
-	//unused variable
-	(void)postfix;
-
-	DataPointIterator result = *this;
-	++dataIndex;
-	return result;
-}
-
-bool DataPointIterator::operator!=(DataPointIterator const &other)
+bool DataCoordinateIterator::operator!=(DataCoordinateIterator const &other)
 {
 	return (((this->dataSet) != (other.dataSet)) || ((this->dataIndex) != (other.dataIndex)));
-}
+};

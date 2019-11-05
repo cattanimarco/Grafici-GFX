@@ -1,38 +1,34 @@
 #ifndef GRAFICI_GFX_API_H
 #define GRAFICI_GFX_API_H
 
+#include "Arduino.h"
+#include "Boundaries.h"
+#include "Color.h"
+#include "Color_defs.h"
 #include "Data.h"
 #include "Display.h"
-#include "Macros.h"
+#include "Plotter.h"
+#include "Utils.h"
 
 class Grafici
 {
   public:
-	void begin(Adafruit_GFX &tft);
+	Grafici(Adafruit_GFX &tft);
 
-	/* use default boundaries and theme */
-	void plot(PlotObj &plotObj, DataSet &dataSet);
-	/* use default theme */
-	void plot(PlotObj &plotObj, DataSet &dataSet, DisplayBoundaries &customBoundaries);
+	void plot(Plotter &plotter, DataSet &x, DataSet &y, DataSet &z);
 
-	/* use default boundaries and theme */
-	void clear();
-	/* use default theme */
-	void clear(DisplayBoundaries &boundaries);
+	void clear(ColorCoordinates color);
 
-	// void setColorPalette(ColorPalette &colorPalette) { colorTheme->colorPalette = &colorPalette;};
-	// void setColorSource(const ColorSource &colorSource) {colorTheme->colorSource = colorSource;};
+	void useColors(ColorMap &colorSet)
+	{
+		this->colorSet = &colorSet;
+	}
 
-	// TODO declare lamda function to project space and color to a pixel
-	// TODO make functor to pass to plot function?
-	//Pixel project(DataPoint dataPoint);
-
-	DisplayBoundaries boundaries;
-	ColorTheme style;
-	Color backgroundColor;
+	Boundaries boundaries;
 
   private:
-	DisplayDriver displayDriver;
+	Display display;
+	ColorMap *colorSet;
 };
 
 /* Instance of a Grafici object. Used instead of a singleton patter as it is simpler 

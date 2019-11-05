@@ -2,44 +2,58 @@
 #define GRAFICI_DATA_H
 
 #include "Arduino.h"
-#include "Macros.h"
+#include "Utils.h"
 
-class DataPointIterator;
+typedef float DataCoordinate;
 
-class DataPoint
+class DataCoordinateIterator;
+
+struct IntLimits
 {
-public:
-	DataPoint(void);
-	DataPoint(float x, float y);
-	DataPoint(float x, float y, float z);
-	float x;
-	float y;
-	float z; // third dimension only visualized via color/size/etc..
+	int low;
+	int high;
+};
+
+struct FloatLimits
+{
+	float low;
+	float high;
+};
+
+struct DataCoordinates
+{
+	DataCoordinate x;
+	DataCoordinate y;
+	DataCoordinate z; // third dimension only visualized via color/size/etc..
 };
 
 class DataSet
 {
-public:
-	virtual DataPoint getDataPoint(int index) = 0;
-	virtual int size(void) = 0;
+  public:
+	virtual DataCoordinate getDataCoordinate(int index) const = 0 ;
 	virtual void refresh() = 0;
-	 DataPointIterator beginIt();
-	 DataPointIterator endIt();
+
+	int length() const;
+	void setLength(int arrayLength);
+	DataCoordinateIterator begin() const;
+	DataCoordinateIterator end() const;
+
+  private:
+	int arrayLength{ 0 };
 };
 
-class DataPointIterator
+class DataCoordinateIterator
 {
+  public:
+	DataCoordinateIterator(const DataSet * const dataSet, int dataIndex)
+	    : dataSet{ dataSet }
+	    , dataIndex{ dataIndex } {};
+	DataCoordinate operator*();
+	DataCoordinateIterator &operator++();
+	bool operator!=(DataCoordinateIterator const &other);
 
-public:
-	DataPointIterator(DataSet *dataSet, int dataIndex) : dataSet(dataSet), dataIndex(dataIndex){};
-
-	DataPoint operator*();
-	DataPointIterator &operator++();
-	DataPointIterator operator++(int postfix);
-	bool operator!=(DataPointIterator const &other);
-
-private:
-	DataSet *dataSet;
+  private:
+	const DataSet *const dataSet;
 	int dataIndex;
 };
 
