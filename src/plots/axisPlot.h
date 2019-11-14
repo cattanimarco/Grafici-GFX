@@ -20,8 +20,8 @@ class AxisPlot : public PlotObj
 		//vertical lines
 		for (int itX = 0; itX <= numAxisX; itX++)
 		{
-			DataPoint a(itX / (float)numAxisX, 0.0);
-			DataPoint b(itX / (float)numAxisX, 1.0);
+			Vector a(itX / (float)numAxisX, 0.0);
+			Vector b(itX / (float)numAxisX, 1.0);
 			displayDriver->drawLine(boundaries->project(a),
 			                        boundaries->project(b),
 			                        plotColor);
@@ -31,8 +31,8 @@ class AxisPlot : public PlotObj
 			{
 				if (itX < numAxisX)
 				{
-					DataPoint a(itX / (float)numAxisX, itY / (float)numAxisY);
-					DataPoint b((itX + 1.0) / (float)numAxisX, itY / (float)numAxisY);
+					Vector a(itX / (float)numAxisX, itY / (float)numAxisY);
+					Vector b((itX + 1.0) / (float)numAxisX, itY / (float)numAxisY);
 					displayDriver->drawLine(boundaries->project(a),
 					                        boundaries->project(b),
 					                        plotColor);

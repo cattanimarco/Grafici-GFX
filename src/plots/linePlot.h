@@ -12,11 +12,11 @@ class LinePlot : public PlotObj
 	void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 	{
 
-		DataPointIterator it = dataSet->beginIt();
+		VectorIterator it = dataSet->beginIt();
 
-		for (DataPoint previous = *(it++); it != dataSet->endIt(); previous = *(it++))
+		for (Vector previous = *(it++); it != dataSet->endIt(); previous = *(it++))
 		{
-			DataPoint actual = *it;
+			Vector actual = *it;
 			displayDriver->drawLine(boundaries->project(previous),
 			                        boundaries->project(actual),
 			                        theme->project(actual));

@@ -12,9 +12,9 @@ class ScatterPlot : public PlotObj
 	void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 	{
 
-		for (DataPointIterator it = dataSet->beginIt(); it != dataSet->endIt(); ++it)
+		for (VectorIterator it = dataSet->beginIt(); it != dataSet->endIt(); ++it)
 		{
-			DataPoint dataPoint = *it;
+			Vector dataPoint = *it;
 			displayDriver->drawCircle(boundaries->project(dataPoint),
 			                          markerSize,
 			                          theme->project(dataPoint));
