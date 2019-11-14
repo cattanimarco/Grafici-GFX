@@ -16,8 +16,8 @@ DisplayDriver   KEYWORD1
 DisplayBoundaries   KEYWORD1
 RoundDisplayBoundaries  KEYWORD1
 PlotObj KEYWORD1
-DataPointIterator   KEYWORD1
-DataPoint   KEYWORD1
+VectorIterator   KEYWORD1
+Vector   KEYWORD1
 DataSet KEYWORD1
 AxisPlot    KEYWORD1
 BarPlot KEYWORD1

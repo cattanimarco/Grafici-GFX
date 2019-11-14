@@ -4,6 +4,7 @@
 #include "Data.h"
 #include "Display.h"
 #include "Macros.h"
+#include "Colors.h"
 
 class Grafici
 {
@@ -25,7 +26,7 @@ class Grafici
 
 	// TODO declare lamda function to project space and color to a pixel
 	// TODO make functor to pass to plot function?
-	//Pixel project(DataPoint dataPoint);
+	//Pixel project(Vector dataPoint);
 
 	DisplayBoundaries boundaries;
 	ColorTheme style;

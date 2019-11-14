@@ -7,12 +7,15 @@ class ScatterPlot : public PlotObj
 {
 
   public:
-	ScatterPlot(){markerSize = 0.0001;};
+	ScatterPlot()
+	{
+		markerSize = 0.0001;
+	};
 
 	void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 	{
 
-		for (VectorIterator it = dataSet->beginIt(); it != dataSet->endIt(); ++it)
+		for (VectorIterator it = dataSet->begin(); it != dataSet->end(); ++it)
 		{
 			Vector dataPoint = *it;
 			displayDriver->drawCircle(boundaries->project(dataPoint),

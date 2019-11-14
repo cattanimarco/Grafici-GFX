@@ -45,7 +45,7 @@ class ColorTheme
   public:
 	ColorTheme(); 
 
-	Color project(DataPoint &dataPoint);
+	Color project(Vector &dataPoint);
 	Color getColor(float val);
 	void setPalette(ColorPalette &colorPalette){this->colorPalette = &colorPalette;};
 
@@ -98,7 +98,7 @@ class DisplayBoundaries
 	DisplayBoundaries();
 
 	virtual DisplayBoundaries &reset(void);
-	virtual DisplayBoundaries &set(	DataPoint bottomLeft, DataPoint topRight);
+	virtual DisplayBoundaries &set(	Vector bottomLeft, Vector topRight);
 
 	//transformation function
 	virtual DisplayBoundaries &addBorder(float top, float bottom, float left, float right);
@@ -109,14 +109,14 @@ class DisplayBoundaries
 	// getter functions
 	float width(void);
 	float height(void);
-	DataPoint getCenter(void);
+	Vector getCenter(void);
 
 	// projection function(s)
-	virtual Pixel project(DataPoint &dataPoint);
+	virtual Pixel project(Vector &dataPoint);
 
   protected:
-	DataPoint bottomLeft;
-	DataPoint topRight;
+	Vector bottomLeft;
+	Vector topRight;
 };
 
 class RoundDisplayBoundaries : public DisplayBoundaries
@@ -125,7 +125,7 @@ class RoundDisplayBoundaries : public DisplayBoundaries
 	RoundDisplayBoundaries();
 
 	DisplayBoundaries &reset(void);
-	DisplayBoundaries &set(	DataPoint bottomLeft, DataPoint topRight);
+	DisplayBoundaries &set(	Vector bottomLeft, Vector topRight);
 
 	DisplayBoundaries &addBorder(float top, float bottom, float left, float right);
 	DisplayBoundaries &addBorderRadial(float top, float bottom, float left, float right);
@@ -137,11 +137,11 @@ class RoundDisplayBoundaries : public DisplayBoundaries
 	DisplayBoundaries &verticalFlipRadial(void);
 	//void rotateRadial(float value);
 
-	Pixel project(DataPoint &dataPoint);
+	Pixel project(Vector &dataPoint);
 
   private:
 
-	DataPoint center;
+	Vector center;
 	float innerRadius;
 	float outerRadius;
 	float beginAngle;

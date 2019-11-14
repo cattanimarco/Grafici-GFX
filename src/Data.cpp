@@ -1,45 +1,74 @@
 #include "Data.h"
 
-DataPoint::DataPoint(void) : x(0), y(0), z(1.0) {}
-
-DataPoint::DataPoint(float x, float y) : x(x), y(y), z(1.0) {}
-
-DataPoint::DataPoint(float x, float y, float z) : x(x), y(y), z(z) {}
-
-DataPointIterator DataSet::beginIt()
+VectorIterator DataSet::begin()
 {
-	DataPointIterator it(this, 0);
-	return it;
-}
-
-DataPointIterator DataSet::endIt()
+	return VectorIterator(this, 0);
+};
+VectorIterator DataSet::end()
 {
-	DataPointIterator it(this, size());
-	return it;
-}
+	return VectorIterator(this, size());
+};
 
-DataPoint DataPointIterator::operator*()
+FloatIterator DataSet::beginX()
 {
-	return dataSet->getDataPoint(dataIndex);
-}
+	return FloatIterator(this, 0, FloatIterator::FloatSource::X);
+};
+FloatIterator DataSet::endX()
+{
+	return FloatIterator(this, size(), FloatIterator::FloatSource::X);
+};
 
-DataPointIterator &DataPointIterator::operator++()
+FloatIterator DataSet::beginY()
+{
+	return FloatIterator(this, 0, FloatIterator::FloatSource::Y);
+};
+FloatIterator DataSet::endY()
+{
+	return FloatIterator(this, size(), FloatIterator::FloatSource::Y);
+};
+
+FloatIterator DataSet::beginZ()
+{
+	return FloatIterator(this, 0, FloatIterator::FloatSource::Z);
+};
+FloatIterator DataSet::endZ()
+{
+	return FloatIterator(this, size(), FloatIterator::FloatSource::Z);
+};
+
+Vector VectorIterator::operator*()
+{
+	return dataSet->getVector(dataIndex);
+};
+
+VectorIterator &VectorIterator::operator++()
 {
 	++dataIndex;
 	return *this;
-}
+};
 
-DataPointIterator DataPointIterator::operator++(int postfix)
-{
-	//unused variable
-	(void)postfix;
-
-	DataPointIterator result = *this;
-	++dataIndex;
-	return result;
-}
-
-bool DataPointIterator::operator!=(DataPointIterator const &other)
+bool VectorIterator::operator!=(VectorIterator const &other)
 {
 	return (((this->dataSet) != (other.dataSet)) || ((this->dataIndex) != (other.dataIndex)));
-}
+};
+
+float FloatIterator::operator*()
+{
+	if (floatSource == FloatSource::X)
+		return (*vectorIterator).x;
+	else if (floatSource == FloatSource::Y)
+		return (*vectorIterator).y;
+	else /* (floatSource == FloatSource::Z) */
+		return (*vectorIterator).z;
+};
+
+FloatIterator &FloatIterator::operator++()
+{
+	++vectorIterator;
+	return *this;
+};
+
+bool FloatIterator::operator!=(FloatIterator const &other)
+{
+	return (((this->floatSource) != (other.floatSource)) || ((this->vectorIterator) != (other.vectorIterator)));
+};

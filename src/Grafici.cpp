@@ -29,8 +29,8 @@ void Grafici::clear()
 /* use default theme */
 void Grafici::clear(DisplayBoundaries &displayBoundaries)
 {
-	DataPoint bl(0.0, 0.0);
-	DataPoint tr(1.0, 1.0);
+	Vector bl(0.0, 0.0);
+	Vector tr(1.0, 1.0);
 
 	displayDriver.fillRectangle(displayBoundaries.project(bl),
 								displayBoundaries.project(tr),

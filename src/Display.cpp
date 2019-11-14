@@ -1,5 +1,5 @@
 #include "Display.h"
-#include "modules/bw.h"
+#include "Colors.h"
 
 
 Color colorBlack = { 0, 0, 0 };
@@ -44,7 +44,7 @@ ColorTheme::ColorTheme()
 	//ColorPalette &colorPalette, ColorSource colorSource) : colorPalette(&colorPalette), colorSource(colorSource){};
 }
 
-Color ColorTheme::project(DataPoint &dataPoint)
+Color ColorTheme::project(Vector &dataPoint)
 {
 	switch (colorSource)
 	{
@@ -270,7 +270,7 @@ DisplayBoundaries &DisplayBoundaries::reset()
 	return *this;
 }
 
-DisplayBoundaries &DisplayBoundaries::set(DataPoint bottomLeft, DataPoint topRight)
+DisplayBoundaries &DisplayBoundaries::set(Vector bottomLeft, Vector topRight)
 {
 	this->bottomLeft = bottomLeft;
 	this->topRight = topRight;
@@ -343,15 +343,15 @@ float DisplayBoundaries::height(void)
 	return (topRight.y - bottomLeft.y);
 }
 
-DataPoint DisplayBoundaries::getCenter(void)
+Vector DisplayBoundaries::getCenter(void)
 {
-	DataPoint center;
+	Vector center;
 	center.x = (bottomLeft.x + topRight.x) / 2.0;
 	center.y = (bottomLeft.y + topRight.y) / 2.0;
 	return center;
 }
 
-Pixel DisplayBoundaries::project(DataPoint &dataPoint)
+Pixel DisplayBoundaries::project(Vector &dataPoint)
 {
 	Pixel p;
 	p.x = (dataPoint.x * topRight.x + (1.0 - dataPoint.x) * bottomLeft.x);
@@ -375,7 +375,7 @@ DisplayBoundaries &RoundDisplayBoundaries::reset()
 	return *this;
 }
 
-DisplayBoundaries &RoundDisplayBoundaries::set(DataPoint bottomLeft, DataPoint topRight)
+DisplayBoundaries &RoundDisplayBoundaries::set(Vector bottomLeft, Vector topRight)
 {
 	DisplayBoundaries::set(bottomLeft, topRight);
 	return *this;
@@ -447,7 +447,7 @@ DisplayBoundaries &RoundDisplayBoundaries::verticalFlipRadial(void)
 	return *this;
 }
 
-Pixel RoundDisplayBoundaries::project(DataPoint &dataPoint)
+Pixel RoundDisplayBoundaries::project(Vector &dataPoint)
 {
 	Pixel p;
 

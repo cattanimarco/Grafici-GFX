@@ -13,7 +13,7 @@ class BarcodePlot : public PlotObj
 
 	void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
 	{
-		for (VectorIterator it = dataSet->beginIt(); it != dataSet->endIt();
+		for (VectorIterator it = dataSet->begin(); it != dataSet->end();
 		     ++it)
 		{
 			Vector baseVector = *it;
