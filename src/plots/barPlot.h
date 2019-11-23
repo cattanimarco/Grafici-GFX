@@ -3,7 +3,7 @@
 
 #include "../Grafici.h"
 
-class BarPlot : public PlotObj
+class BarPlot : public Plotter
 {
   public:
 	BarPlot()
@@ -11,30 +11,30 @@ class BarPlot : public PlotObj
 		thickness = 0.0;
 	};
 
-	void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
+	void plot(DisplayDriver *displayDriver, DataSet *dataSet, Boundaries *boundaries, ColorTheme *theme)
 	{
-		for (VectorIterator it = dataSet->begin(); it != dataSet->end(); ++it)
+		for (DataCoordinateIterator it = dataSet->begin(); it != dataSet->end(); ++it)
 		{
-			Vector baseVector = *it;
-			Vector topVector = baseVector;
+			DataCoordinates baseDataCoordinates = *it;
+			DataCoordinates topDataCoordinates = baseDataCoordinates;
 
-			baseVector.y = 0;
+			baseDataCoordinates.y = 0;
 
 			if (0.0 == thickness)
 			{
-				displayDriver->drawLine(boundaries->project(baseVector),
-				                        boundaries->project(topVector),
-				                        theme->project(topVector));
+				displayDriver->drawLine(boundaries->project(baseDataCoordinates),
+				                        boundaries->project(topDataCoordinates),
+				                        theme->project(topDataCoordinates));
 			}
 			else
 			{
-				baseVector.x = (baseVector.x * dataSet->size()) / (dataSet->size() + 1);
-				baseVector.x += (((1.0 - thickness) / 2.0) / (dataSet->size() + 1));
-				topVector.x = baseVector.x + (thickness / (dataSet->size() + 1));
+				baseDataCoordinates.x = (baseDataCoordinates.x * dataSet->size()) / (dataSet->size() + 1);
+				baseDataCoordinates.x += (((1.0 - thickness) / 2.0) / (dataSet->size() + 1));
+				topDataCoordinates.x = baseDataCoordinates.x + (thickness / (dataSet->size() + 1));
 
-				displayDriver->fillRectangle(boundaries->project(baseVector),
-				                             boundaries->project(topVector),
-				                             theme->project(topVector));
+				displayDriver->fillRectangle(boundaries->project(baseDataCoordinates),
+				                             boundaries->project(topDataCoordinates),
+				                             theme->project(topDataCoordinates));
 			}
 		}
 	};

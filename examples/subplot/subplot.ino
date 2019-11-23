@@ -1,14 +1,14 @@
 #include "Adafruit_GFX.h" // Hardware-specific library
 #include <MCUFRIEND_kbv.h>
 
-#include "Grafici.h"
 #include "Display.h"
+#include "Grafici.h"
 
-#include "modules/linePlot.h"
-#include "modules/barPlot.h"
 #include "modules/DataSetFloat.h"
-#include "modules/DataSetSpline.h"
 #include "modules/DataSetHistogram.h"
+#include "modules/DataSetSpline.h"
+#include "modules/barPlot.h"
+#include "modules/linePlot.h"
 
 MCUFRIEND_kbv gfx;
 
@@ -31,16 +31,15 @@ void setup(void)
 
 	grafici.clear();
 
-	// Divide the screen boundaries in 1 row and 2 columns. Select the sub-boundaries with index 0 (column on left). 
+	// Divide the screen boundaries in 1 row and 2 columns. Select the sub-boundaries with index 0 (column on left).
 	// Add a border of 4% on top, bottom and left. Add a border of 2% on right
-	grafici.boundaries.reset().crop(1, 2, 0).addBorder(0.04, 0.04, 0.04, 0.02);
+	grafici.boundaries.fullScreen().subBoundaries(1, 2, 0).addBorder(0.04, 0.04, 0.04, 0.02);
 	grafici.plot(linePlot, dataSpline);
 
-	// Divide the screen boundaries in 1 row and 2 columns. Select the sub-boundaries with index 1 (column on right). 
+	// Divide the screen boundaries in 1 row and 2 columns. Select the sub-boundaries with index 1 (column on right).
 	// Add a border of 4% on top, bottom and right. Add a border of 2% on left
-	grafici.boundaries.reset().crop(1, 2, 1).addBorder(0.04, 0.04, 0.02, 0.04);
+	grafici.boundaries.fullScreen().subBoundaries(1, 2, 1).addBorder(0.04, 0.04, 0.02, 0.04);
 	grafici.plot(barPlot, dataHist);
-		
 }
 
 void loop(void)

@@ -9,7 +9,7 @@ class DataSetSpline : public DataSet
 	DataSetSpline(){};
 	~DataSetSpline();
 	void begin(DataSet &dataSet, int interpolationSteps);
-	Vector getVector(int index);
+	DataCoordinates getDataCoordinate(int index);
 	void refresh();
 	int size(void);
 
@@ -64,35 +64,35 @@ void DataSetSpline::begin(DataSet &dataSet, int interpolationSteps)
 	refresh();
 }
 
-Vector DataSetSpline::getVector(int index)
+DataCoordinates DataSetSpline::getDataCoordinate(int index)
 {
 	int bin = 0;
-	Vector p;
+	DataCoordinates p;
 
 	if (index < numElem)
 	{
 		p.x = (1.0 * index) / (numElem - 1);
 
 		// check that we are in the correct bin
-		while ((p.x > dataSet->getVector(bin + 1).x))
+		while ((p.x > dataSet->getDataCoordinate(bin + 1).x))
 		{
 			bin++;
 		}
 
 		// compute interpolated y
-		p.y = dataSet->getVector(bin).y +
-		      bY[bin] * (p.x - dataSet->getVector(bin).x) +
-		      cY[bin] * (p.x - dataSet->getVector(bin).x) * (p.x - dataSet->getVector(bin).x) +
-		      dY[bin] * (p.x - dataSet->getVector(bin).x) * (p.x - dataSet->getVector(bin).x) * (p.x - dataSet->getVector(bin).x);
+		p.y = dataSet->getDataCoordinate(bin).y +
+		      bY[bin] * (p.x - dataSet->getDataCoordinate(bin).x) +
+		      cY[bin] * (p.x - dataSet->getDataCoordinate(bin).x) * (p.x - dataSet->getDataCoordinate(bin).x) +
+		      dY[bin] * (p.x - dataSet->getDataCoordinate(bin).x) * (p.x - dataSet->getDataCoordinate(bin).x) * (p.x - dataSet->getDataCoordinate(bin).x);
 
 		// normalize dataSet to a 0.0 .. 1.0 value
 		p.y = (p.y - yMin) / (yMax - yMin);
 
 		// compute interpolated value
-		p.z = dataSet->getVector(bin).z +
-		      bZ[bin] * (p.x - dataSet->getVector(bin).x) +
-		      cZ[bin] * (p.x - dataSet->getVector(bin).x) * (p.x - dataSet->getVector(bin).x) +
-		      dZ[bin] * (p.x - dataSet->getVector(bin).x) * (p.x - dataSet->getVector(bin).x) * (p.x - dataSet->getVector(bin).x);
+		p.z = dataSet->getDataCoordinate(bin).z +
+		      bZ[bin] * (p.x - dataSet->getDataCoordinate(bin).x) +
+		      cZ[bin] * (p.x - dataSet->getDataCoordinate(bin).x) * (p.x - dataSet->getDataCoordinate(bin).x) +
+		      dZ[bin] * (p.x - dataSet->getDataCoordinate(bin).x) * (p.x - dataSet->getDataCoordinate(bin).x) * (p.x - dataSet->getDataCoordinate(bin).x);
 
 		// normalize dataSet to a 0.0 .. 1.0 value
 		p.z = (p.z - zMin) / (zMax - zMin);
@@ -130,13 +130,13 @@ void DataSetSpline::refresh(void)
 
 		for (int i = 0; i <= n - 1; ++i)
 		{
-			h[i] = dataSet->getVector(i + 1).x - dataSet->getVector(i).x;
+			h[i] = dataSet->getDataCoordinate(i + 1).x - dataSet->getDataCoordinate(i).x;
 		}
 
 		// Interpolate Y axe
 		for (int i = 1; i <= n - 1; ++i)
 		{
-			A[i] = 3 * (dataSet->getVector(i + 1).y - dataSet->getVector(i).y) / h[i] - 3 * (dataSet->getVector(i).y - dataSet->getVector(i - 1).y) / h[i - 1];
+			A[i] = 3 * (dataSet->getDataCoordinate(i + 1).y - dataSet->getDataCoordinate(i).y) / h[i] - 3 * (dataSet->getDataCoordinate(i).y - dataSet->getDataCoordinate(i - 1).y) / h[i - 1];
 		}
 
 		l[0] = 1;
@@ -145,7 +145,7 @@ void DataSetSpline::refresh(void)
 
 		for (int i = 1; i <= n - 1; ++i)
 		{
-			l[i] = 2 * (dataSet->getVector(i + 1).x - dataSet->getVector(i - 1).x) - h[i - 1] * u[i - 1];
+			l[i] = 2 * (dataSet->getDataCoordinate(i + 1).x - dataSet->getDataCoordinate(i - 1).x) - h[i - 1] * u[i - 1];
 			u[i] = h[i] / l[i];
 			z[i] = (A[i] - h[i - 1] * z[i - 1]) / l[i];
 		}
@@ -157,7 +157,7 @@ void DataSetSpline::refresh(void)
 		for (int j = n - 1; j >= 0; --j)
 		{
 			cY[j] = z[j] - u[j] * cY[j + 1];
-			bY[j] = (dataSet->getVector(j + 1).y - dataSet->getVector(j).y) / h[j] - h[j] * (cY[j + 1] + 2 * cY[j]) / 3;
+			bY[j] = (dataSet->getDataCoordinate(j + 1).y - dataSet->getDataCoordinate(j).y) / h[j] - h[j] * (cY[j + 1] + 2 * cY[j]) / 3;
 			dY[j] = (cY[j + 1] - cY[j]) / (3 * h[j]);
 		}
 
@@ -166,16 +166,16 @@ void DataSetSpline::refresh(void)
 		for (float px = 0; px < 1; px += (1.0 / numElem))
 		{
 			/* check that we are in the correct bin */
-			while ((px > dataSet->getVector(bin + 1).x))
+			while ((px > dataSet->getDataCoordinate(bin + 1).x))
 			{
 				bin++;
 			}
 
 			/* compute interpolated y value */
-			yInter = dataSet->getVector(bin).y +
-			         bY[bin] * (px - dataSet->getVector(bin).x) +
-			         cY[bin] * (px - dataSet->getVector(bin).x) * (px - dataSet->getVector(bin).x) +
-			         dY[bin] * (px - dataSet->getVector(bin).x) * (px - dataSet->getVector(bin).x) * (px - dataSet->getVector(bin).x);
+			yInter = dataSet->getDataCoordinate(bin).y +
+			         bY[bin] * (px - dataSet->getDataCoordinate(bin).x) +
+			         cY[bin] * (px - dataSet->getDataCoordinate(bin).x) * (px - dataSet->getDataCoordinate(bin).x) +
+			         dY[bin] * (px - dataSet->getDataCoordinate(bin).x) * (px - dataSet->getDataCoordinate(bin).x) * (px - dataSet->getDataCoordinate(bin).x);
 
 			/* Updated dataSet min/max */
 			if (yInter < yMin)
@@ -187,7 +187,7 @@ void DataSetSpline::refresh(void)
 		// Interpolate value
 		for (int i = 1; i <= n - 1; ++i)
 		{
-			A[i] = 3 * (dataSet->getVector(i + 1).z - dataSet->getVector(i).z) / h[i] - 3 * (dataSet->getVector(i).z - dataSet->getVector(i - 1).z) / h[i - 1];
+			A[i] = 3 * (dataSet->getDataCoordinate(i + 1).z - dataSet->getDataCoordinate(i).z) / h[i] - 3 * (dataSet->getDataCoordinate(i).z - dataSet->getDataCoordinate(i - 1).z) / h[i - 1];
 		}
 
 		l[0] = 1;
@@ -196,7 +196,7 @@ void DataSetSpline::refresh(void)
 
 		for (int i = 1; i <= n - 1; ++i)
 		{
-			l[i] = 2 * (dataSet->getVector(i + 1).x - dataSet->getVector(i - 1).x) - h[i - 1] * u[i - 1];
+			l[i] = 2 * (dataSet->getDataCoordinate(i + 1).x - dataSet->getDataCoordinate(i - 1).x) - h[i - 1] * u[i - 1];
 			u[i] = h[i] / l[i];
 			z[i] = (A[i] - h[i - 1] * z[i - 1]) / l[i];
 		}
@@ -208,7 +208,7 @@ void DataSetSpline::refresh(void)
 		for (int j = n - 1; j >= 0; --j)
 		{
 			cZ[j] = z[j] - u[j] * cZ[j + 1];
-			bZ[j] = (dataSet->getVector(j + 1).z - dataSet->getVector(j).z) / h[j] - h[j] * (cZ[j + 1] + 2 * cZ[j]) / 3;
+			bZ[j] = (dataSet->getDataCoordinate(j + 1).z - dataSet->getDataCoordinate(j).z) / h[j] - h[j] * (cZ[j + 1] + 2 * cZ[j]) / 3;
 			dZ[j] = (cZ[j + 1] - cZ[j]) / (3 * h[j]);
 		}
 
@@ -217,16 +217,16 @@ void DataSetSpline::refresh(void)
 		for (float px = 0; px < 1; px += (1.0 / numElem))
 		{
 			/* check that we are in the correct bin */
-			while ((px > dataSet->getVector(bin + 1).x))
+			while ((px > dataSet->getDataCoordinate(bin + 1).x))
 			{
 				bin++;
 			}
 
 			/* compute interpolated y value */
-			valueInter = dataSet->getVector(bin).z +
-			             bZ[bin] * (px - dataSet->getVector(bin).x) +
-			             cZ[bin] * (px - dataSet->getVector(bin).x) * (px - dataSet->getVector(bin).x) +
-			             dZ[bin] * (px - dataSet->getVector(bin).x) * (px - dataSet->getVector(bin).x) * (px - dataSet->getVector(bin).x);
+			valueInter = dataSet->getDataCoordinate(bin).z +
+			             bZ[bin] * (px - dataSet->getDataCoordinate(bin).x) +
+			             cZ[bin] * (px - dataSet->getDataCoordinate(bin).x) * (px - dataSet->getDataCoordinate(bin).x) +
+			             dZ[bin] * (px - dataSet->getDataCoordinate(bin).x) * (px - dataSet->getDataCoordinate(bin).x) * (px - dataSet->getDataCoordinate(bin).x);
 
 			/* Updated dataSet min/max */
 			if (valueInter < zMin)

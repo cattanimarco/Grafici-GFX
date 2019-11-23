@@ -5,7 +5,7 @@ void VisitorDrawHeat::visit(Dataset *dataset, Boundaries *boundaries)
 
 	// for (DatapointIterator it = dataset->begin(); it != dataset->end(); ++it)
 	// {
-	// 	driver->drawPixel((*it).projectDatapoint(boundaries));
+	// 	driver->drawFloatVector((*it).projectDatapoint(boundaries));
 	// }
 
 	// for (int px = 0; px < (this->width / HEATMAP_PIXEL_SIZE); px++)

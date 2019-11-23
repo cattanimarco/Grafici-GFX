@@ -3,7 +3,7 @@
 
 #include "../Grafici.h"
 
-class ScatterPlot : public PlotObj
+class ScatterPlot : public Plotter
 {
 
   public:
@@ -12,12 +12,12 @@ class ScatterPlot : public PlotObj
 		markerSize = 0.0001;
 	};
 
-	void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
+	void plot(DisplayDriver *displayDriver, DataSet *dataSet, Boundaries *boundaries, ColorTheme *theme)
 	{
 
-		for (VectorIterator it = dataSet->begin(); it != dataSet->end(); ++it)
+		for (DataCoordinateIterator it = dataSet->begin(); it != dataSet->end(); ++it)
 		{
-			Vector dataPoint = *it;
+			DataCoordinates dataPoint = *it;
 			displayDriver->drawCircle(boundaries->project(dataPoint),
 			                          markerSize,
 			                          theme->project(dataPoint));
