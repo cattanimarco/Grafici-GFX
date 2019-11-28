@@ -47,7 +47,7 @@ FloatLimits DataSetFloat::dataLimits()
 }
 
 /* setters */
-FloatLimits DataSetFloat::dataLimits(FloatLimits limits)
+FloatLimits DataSetFloat::setDataLimits(FloatLimits limits)
 {
 	this->limits = limits;
 	return dataLimits();

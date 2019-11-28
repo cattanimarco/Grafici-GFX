@@ -26,7 +26,7 @@ class DataSetParametric : public DataSet
 	void refresh() override;
 
 	FloatLimits dataLimits();
-	FloatLimits dataLimits(FloatLimits limits);
+	FloatLimits setDataLimits(FloatLimits limits);
 
   private:
 	FloatLimits limits{ 0, 0 };

@@ -11,8 +11,8 @@ class DataSetHistogram : public DataSet
 	DataCoordinate getDataCoordinate(int index) override;
 	void refresh() override;
 
-	FloatLimits dataLimits();
-	FloatLimits dataLimits(FloatLimits limits);
+	IntLimits dataLimits();
+	IntLimits setDataLimits(IntLimits limits);
 
   private:
 	IntLimits limits{ 0, 0 };

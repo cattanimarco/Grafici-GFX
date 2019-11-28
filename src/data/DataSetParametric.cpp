@@ -44,7 +44,7 @@ FloatLimits DataSetParametric::dataLimits()
 }
 
 /* setters */
-FloatLimits DataSetParametric::dataLimits(FloatLimits limits)
+FloatLimits DataSetParametric::setDataLimits(FloatLimits limits)
 {
 	this->limits = limits;
 	return dataLimits();

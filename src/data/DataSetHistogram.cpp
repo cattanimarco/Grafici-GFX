@@ -49,10 +49,13 @@ void DataSetHistogram::refresh(void)
 	}
 }
 
-IntLimits dataLimits()
+IntLimits DataSetHistogram::dataLimits()
 {
+	return limits;
 }
 
-IntLimits dataLimits(IntLimits limits)
+IntLimits DataSetHistogram::setDataLimits(IntLimits limits)
 {
+	this->limits = limits;
+	return dataLimits();
 }
