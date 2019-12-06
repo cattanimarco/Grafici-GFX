@@ -31,14 +31,14 @@ class Boundaries
 	Boundaries &verticalFlipRadial();
 
 	/* getter functions */
-	DisplayCoordinate xDelta();
-	DisplayCoordinate yDelta();
-	DisplayCoordinate aDelta();
-	DisplayCoordinate rDelta();
+	DisplayCoordinate xDelta() const;
+	DisplayCoordinate yDelta() const;
+	DisplayCoordinate aDelta() const;
+	DisplayCoordinate rDelta() const;
 
 	/* projection functions */
-	DisplayCoordinates project(DataCoordinate xData, DataCoordinate yData);
-	DisplayCoordinates projectRadial(DataCoordinate xData, DataCoordinate yData);
+	DisplayCoordinates project(DataCoordinate xData, DataCoordinate yData) const;
+	DisplayCoordinates projectRadial(DataCoordinate xData, DataCoordinate yData) const;
 
   private:
 	/* euclidean coordinates */

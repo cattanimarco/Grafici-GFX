@@ -19,7 +19,7 @@ DataSetHistogram::~DataSetHistogram()
 	}
 }
 
-DataCoordinate DataSetHistogram::getDataCoordinate(int index)
+DataCoordinate DataSetHistogram::getDataCoordinate(int index) const
 {
 	if (index < length())
 	{
@@ -44,7 +44,7 @@ void DataSetHistogram::refresh(void)
 			DataCoordinate dataCoordinate = *it;
 			int target = round(dataCoordinate * (length() - 1));
 			buckets[target]++;
-			limits.high = max(buckets[target], limits.high);
+			limits.high = graficiMax<int>(buckets[target], limits.high);
 		}
 	}
 }

@@ -1,6 +1,6 @@
 #include "Data.h"
 
-int DataSet::length()
+int DataSet::length() const
 {
 	return arrayLength;
 };
@@ -10,11 +10,12 @@ void DataSet::setLength(int arrayLength)
 	this->arrayLength = arrayLength;
 }
 
-DataCoordinateIterator DataSet::begin()
+DataCoordinateIterator DataSet::begin() const
 {
 	return DataCoordinateIterator(this, 0);
 };
-DataCoordinateIterator DataSet::end()
+
+DataCoordinateIterator DataSet::end() const
 {
 	return DataCoordinateIterator(this, length());
 };

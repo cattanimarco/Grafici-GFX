@@ -7,7 +7,7 @@ DataSetFloat::DataSetFloat(float *floatArray, int arrayLength)
 	refresh();
 }
 
-DataCoordinate DataSetFloat::getDataCoordinate(int index)
+DataCoordinate DataSetFloat::getDataCoordinate(int index) const
 {
 	if ((floatArray != nullptr) && (index < length()))
 	{
@@ -22,16 +22,13 @@ DataCoordinate DataSetFloat::getDataCoordinate(int index)
 
 void DataSetFloat::refresh()
 {
-	if (floatArray != nullptr)
+	if ((floatArray != nullptr) && (length() > 0))
 	{
-		if (length() > 0)
+		limits.low = limits.high = floatArray[0];
+		for (int i = 1; i < length(); ++i)
 		{
-			limits.low = limits.high = floatArray[0];
-			for (int i = 1; i < length(); ++i)
-			{
-				limits.low = min(limits.low, floatArray[i]);
-				limits.high = max(limits.high, floatArray[i]);
-			}
+			limits.low = graficiMin<float>(limits.low, floatArray[i]);
+			limits.high = graficiMax<float>(limits.high, floatArray[i]);
 		}
 	}
 	else

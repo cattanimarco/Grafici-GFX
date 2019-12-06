@@ -1,22 +1,22 @@
 #ifndef GRAFICI_UTILS_H
 #define GRAFICI_UTILS_H
 
-#ifndef swap
-#define swap(x, y, T) \
-	do                \
-	{                 \
-		T swap = x;   \
-		x = y;        \
-		y = swap;     \
-	} while (0)
-#endif
+template <typename T>
+void graficiSwap(T &a, T &b)
+{
+	T swap = a;
+	a = b;
+	b = swap;
+}
 
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
+template <typename T>
+T graficiMin(const T &a, const T &b)
+{
+	return (a < b ? a : b);
+}
 
-#ifndef max
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-#endif
-
-#endif
+template <typename T>
+T graficiMax(const T &a, const T &b)
+{
+	return (a > b ? a : b);
+}

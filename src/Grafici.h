@@ -19,7 +19,7 @@ class Grafici
 
 	void clear(ColorCoordinates color);
 
-	void useColors(ColorSet &colorSet)
+	void useColors(ColorMap &colorSet)
 	{
 		this->colorSet = &colorSet;
 	}
@@ -28,7 +28,7 @@ class Grafici
 
   private:
 	Display display;
-	ColorSet *colorSet;
+	ColorMap *colorSet;
 };
 
 /* Instance of a Grafici object. Used instead of a singleton patter as it is simpler 

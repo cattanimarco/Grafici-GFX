@@ -60,13 +60,13 @@ Boundaries &Boundaries::subBoundaries(int rows, int columns, int row, int column
 
 Boundaries &Boundaries::horizzontalFlip()
 {
-	swap(xMin, xMax, DisplayCoordinate);
+	graficiSwap<DisplayCoordinate>(xMin, xMax);
 	return *this;
 }
 
 Boundaries &Boundaries::verticalFlip()
 {
-	swap(yMin, yMax, DisplayCoordinate);
+	graficiSwap<DisplayCoordinate>(yMin, yMax);
 	return *this;
 }
 
@@ -110,45 +110,45 @@ Boundaries &Boundaries::subBoundariesRadial(int rows, int columns, int row, int 
 
 Boundaries &Boundaries::horizzontalFlipRadial()
 {
-	swap(aMin, aMax, DisplayCoordinate);
+	graficiSwap<DisplayCoordinate>(aMin, aMax);
 	return *this;
 }
 
 Boundaries &Boundaries::verticalFlipRadial()
 {
-	swap(rMin, rMax, DisplayCoordinate);
+	graficiSwap<DisplayCoordinate>(rMin, rMax);
 	return *this;
 }
 
 /* getter functions */
-DisplayCoordinate Boundaries::xDelta()
+DisplayCoordinate Boundaries::xDelta() const
 {
 	return (xMax - xMin);
 }
 
-DisplayCoordinate Boundaries::yDelta()
+DisplayCoordinate Boundaries::yDelta() const
 {
 	return (yMax - yMin);
 }
 
-DisplayCoordinate Boundaries::aDelta()
+DisplayCoordinate Boundaries::aDelta() const
 {
 	return (aMax - aMin);
 }
 
-DisplayCoordinate Boundaries::rDelta()
+DisplayCoordinate Boundaries::rDelta() const
 {
 	return (rMax - rMin);
 }
 
 /* projection functions */
-DisplayCoordinates Boundaries::project(DataCoordinate xData, DataCoordinate yData)
+DisplayCoordinates Boundaries::project(DataCoordinate xData, DataCoordinate yData) const
 {
 	return DisplayCoordinates{ static_cast<DisplayCoordinate>(xData * xMax + (1.0 - xData) * xMin),
 		                       static_cast<DisplayCoordinate>(yData * yMax + (1.0 - yData) * yMin) };
 };
 
-DisplayCoordinates Boundaries::projectRadial(DataCoordinate xData, DataCoordinate yData)
+DisplayCoordinates Boundaries::projectRadial(DataCoordinate xData, DataCoordinate yData) const
 {
 	DisplayCoordinate xMid = (xMin + xMax) / 2;
 	DisplayCoordinate yMid = (yMin + yMax) / 2;

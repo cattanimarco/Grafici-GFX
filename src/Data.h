@@ -24,19 +24,19 @@ struct DataCoordinates
 {
 	DataCoordinate x;
 	DataCoordinate y;
-	DataCoordinate z; // third dimension only visualized via color/size/etc..
+	//	DataCoordinate z; // third dimension only visualized via color/size/etc..
 };
 
 class DataSet
 {
   public:
-	virtual DataCoordinate getDataCoordinate(int index) = 0;
+	virtual DataCoordinate getDataCoordinate(int index) const = 0;
 	virtual void refresh() = 0;
 
-	int length();
+	int length() const;
 	void setLength(int arrayLength);
-	DataCoordinateIterator begin();
-	DataCoordinateIterator end();
+	DataCoordinateIterator begin() const;
+	DataCoordinateIterator end() const;
 
   private:
 	int arrayLength{ 0 };
@@ -45,7 +45,7 @@ class DataSet
 class DataCoordinateIterator
 {
   public:
-	DataCoordinateIterator(DataSet *dataSet, int dataIndex)
+	DataCoordinateIterator(const DataSet *const dataSet, int dataIndex)
 	    : dataSet{ dataSet }
 	    , dataIndex{ dataIndex } {};
 	DataCoordinate operator*();
@@ -53,7 +53,7 @@ class DataCoordinateIterator
 	bool operator!=(DataCoordinateIterator const &other);
 
   private:
-	DataSet *dataSet;
+	const DataSet *const dataSet;
 	int dataIndex;
 };
 

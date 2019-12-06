@@ -1,6 +1,6 @@
 #include "Color.h"
 
-ColorCoordinates ColorSet::project(DataCoordinate val)
+ColorCoordinates ColorMap::project(DataCoordinate val) const
 {
 	int idx1;               // |-- Our desired color will be between these two indexes in "color".
 	int idx2;               // |
@@ -27,7 +27,7 @@ ColorCoordinates ColorSet::project(DataCoordinate val)
 		                     static_cast<ColorCoordinate>(colors[idx2].blue * fractBetween + colors[idx1].blue * (1 - fractBetween)) };
 }
 
-ColorGFX ColorSet::projectGFX(DataCoordinate val)
+ColorGFX ColorMap::projectGFX(DataCoordinate val) const
 {
 	ColorCoordinates color = project(val);
 	ColorGFX r = (color.red / 255.0) * 31;

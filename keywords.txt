@@ -8,7 +8,7 @@
 
 Grafici	KEYWORD1
 Color	KEYWORD1
- ColorSet    KEYWORD1
+ColorMap    KEYWORD1
 ColorSource KEYWORD1
 ColorTheme  KEYWORD1
 FloatVector   KEYWORD1

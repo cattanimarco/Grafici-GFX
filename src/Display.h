@@ -24,8 +24,8 @@ class Display
   public:
 	Display(const Adafruit_GFX &tft)
 	    : tft(tft){};
-	PixelCoordinates project(DisplayCoordinates displayCoordinates);
-	PixelCoordinates project(DisplayCoordinate x, DisplayCoordinate y);
+	PixelCoordinates project(DisplayCoordinates displayCoordinates) const;
+	PixelCoordinates project(DisplayCoordinate x, DisplayCoordinate y) const;
 
   private:
 	const Adafruit_GFX &tft;

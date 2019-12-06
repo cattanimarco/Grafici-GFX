@@ -6,17 +6,20 @@
 class DataSetInterpolator : public DataSet
 {
   public:
-	DataSetInterpolator(DataSet &dataSet, int interpolationSteps);
+	DataSetInterpolator(DataSet &dataSetX, DataSet &dataSetY, int interpolationSteps);
 
-	DataCoordinate getDataCoordinate(int index) override;
+	DataCoordinates getDataCoordinate(int index) const override;
 	void refresh() override;
 
-	FloatLimits dataLimits();
-	FloatLimits setDataLimits(FloatLimits limits);
+	FloatLimits dataLimitsX();
+	FloatLimits setDataLimitsX(FloatLimits limits);
+	FloatLimits dataLimitsY();
+	FloatLimits setDataLimitsY(FloatLimits limits);
 
   private:
 	FloatLimits limits{ 0, 0 };
-	DataSet *dataSet{ nullptr };
+	DataSet *dataSetX{ nullptr };
+	DataSet *dataSetY{ nullptr };
 };
 
 #endif /* GRAFICI_DATASET_INTERPOLATE_H */

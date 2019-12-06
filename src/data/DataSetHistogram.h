@@ -8,7 +8,7 @@ class DataSetHistogram : public DataSet
   public:
 	DataSetHistogram(DataSet &dataSet, int buckets);
 
-	DataCoordinate getDataCoordinate(int index) override;
+	DataCoordinate getDataCoordinate(int index) const override;
 	void refresh() override;
 
 	IntLimits dataLimits();

@@ -16,18 +16,18 @@ struct ColorCoordinates
 	ColorCoordinate blue;
 };
 
-class ColorSet
+class ColorMap
 {
   public:
-	ColorSet(ColorCoordinates *colors, int size)
+	ColorMap(const ColorCoordinates *const colors, int size)
 	    : colors(colors)
 	    , size(size){};
-	ColorCoordinates project(DataCoordinate val);
-	ColorGFX projectGFX(DataCoordinate val);
+	ColorCoordinates project(DataCoordinate val) const;
+	ColorGFX projectGFX(DataCoordinate val) const;
 
   private:
-	ColorCoordinates *colors;
-	int size;
+	const ColorCoordinates *const colors;
+	const int size;
 };
 
 #endif /* GRAFICI_COLOR_H */

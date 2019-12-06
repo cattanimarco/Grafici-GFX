@@ -2,18 +2,18 @@
 #define GRAFICI_COLORS_H
 #include "Color.h"
 
-extern ColorCoordinates colorBlack;
-extern ColorCoordinates colorDarkGray;
-extern ColorCoordinates colorLightGray;
-extern ColorCoordinates colorWhite;
+extern const ColorCoordinates colorBlack;
+extern const ColorCoordinates colorDarkGray;
+extern const ColorCoordinates colorLightGray;
+extern const ColorCoordinates colorWhite;
 
-extern ColorSet csBright;
-extern ColorSet csBw;
-extern ColorSet csCmyk;
-extern ColorSet csFrance;
-extern ColorSet csHeat;
-extern ColorSet csNeon;
-extern ColorSet csParula;
-extern ColorSet csRainbow;
+extern const ColorMap csBright;
+extern const ColorMap csBw;
+extern const ColorMap csCmyk;
+extern const ColorMap csFrance;
+extern const ColorMap csHeat;
+extern const ColorMap csNeon;
+extern const ColorMap csParula;
+extern const ColorMap csRainbow;
 
 #endif //GRAFICI_COLORS_H

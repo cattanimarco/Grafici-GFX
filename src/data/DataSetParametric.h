@@ -22,7 +22,7 @@ class DataSetParametric : public DataSet
 
 	DataSetParametric(DataSetGenerator dataSetGenerator, int arrayLength);
 
-	DataCoordinate getDataCoordinate(int index) override;
+	DataCoordinate getDataCoordinate(int index) const override;
 	void refresh() override;
 
 	FloatLimits dataLimits();

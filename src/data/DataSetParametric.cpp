@@ -7,7 +7,7 @@ DataSetParametric::DataSetParametric(DataSetGenerator dataSetGenerator, int arra
 	refresh();
 }
 
-DataCoordinate DataSetParametric::getDataCoordinate(int index)
+DataCoordinate DataSetParametric::getDataCoordinate(int index) const
 {
 	if (dataSetGenerator != nullptr)
 	{
@@ -27,8 +27,8 @@ void DataSetParametric::refresh()
 		/* provide obvious implementation that iterates */
 		for (int idx = 1; idx < length(); ++idx)
 		{
-			limits.low = min(limits.low, dataSetGenerator(idx));
-			limits.high = max(limits.high, dataSetGenerator(idx));
+			limits.low = graficiMin<float>(limits.low, dataSetGenerator(idx));
+			limits.high = graficiMax<float>(limits.high, dataSetGenerator(idx));
 		}
 	}
 	else
