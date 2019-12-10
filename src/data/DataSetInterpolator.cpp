@@ -1,60 +1,62 @@
 #include "DataSetInterpolator.h"
 
 DataSetInterpolator::DataSetInterpolator(DataSet &dataSetX, DataSet &dataSetY, int interpolationSteps)
+    : dataSetInX(&dataSetX)
+    , dataSetInY(&dataSetY)
+// , dataSetX(generatorX, interpolationSteps)
+// , dataSetY(generatorY, interpolationSteps)
 {
-	this->dataSetX = &dataSetX;
-	this->dataSetY = &dataSetY;
+	dataSetX = new DataSetParametric(&generatorX, interpolationSteps);
 	setLength(interpolationSteps);
 	refresh();
 }
 
-DataCoordinates DataSetInterpolator::getDataCoordinate(int index) const
+DataCoordinate DataSetInterpolator::getDataCoordinate(int index) const
+{
+	return generatorY(index);
+}
+
+void DataSetInterpolator::refresh(void)
+{
+	dataSetInX->refresh();
+	dataSetInY->refresh();
+}
+
+DataCoordinate DataSetInterpolator::generatorX(int index)
+{
+	if (index < length())
+	{
+		return DataCoordinate{ (1.0 * index) / (length() - 1) };
+	}
+	else
+	{
+		return DataCoordinate{ 0 };
+	}
+}
+
+DataCoordinate DataSetInterpolator::generatorY(int index)
 {
 	if (index < length())
 	{
 		int bin = 0;
+		DataCoordinate x = generatorX(index);
 
-		DataCoordinate x = (1.0 * index) / (length() - 1);
 		// check that we are in the correct bin
-		while (x > dataSetX->getDataCoordinate(bin + 1))
+		while (x > dataSetInX->getDataCoordinate(bin + 1))
 		{
 			bin++;
-			if (bin == dataSetX->length())
+			if (bin == dataSetInX->length())
 			{
 				bin--;
 				break;
 			}
 		}
-		float fractBetween = (x - dataSetX->getDataCoordinate(bin)) / (dataSetX->getDataCoordinate(bin + 1) - dataSetX->getDataCoordinate(bin));
-		DataCoordinate y = dataSetY->getDataCoordinate(bin + 1) * fractBetween + dataSetY->getDataCoordinate(bin) * (1.0 - fractBetween);
-		return DataCoordinates{ x, y };
+
+		float fractBetween = (x - dataSetInX->getDataCoordinate(bin)) / (dataSetInX->getDataCoordinate(bin + 1) - dataSetX->getDataCoordinate(bin));
+		return DataCoordinate{ dataSetInY->getDataCoordinate(bin + 1) * fractBetween + dataSetInY->getDataCoordinate(bin) * (1.0 - fractBetween) };
 	}
 	else
 	{
-		return DataCoordinates{ 0, 0 };
+		return DataCoordinate{ 0 };
 	}
-
-	return p;
-}
-
-void DataSetInterpolator::refresh(void)
-{
-	dataSetX->refresh();
-	dataSetY->refresh();
-}
-
-FloatLimits DataSetInterpolator::dataLimitsX()
-{
-}
-
-FloatLimits DataSetInterpolator::setDataLimitsX(FloatLimits limits)
-{
-}
-
-FloatLimits DataSetInterpolator::dataLimitsY()
-{
-}
-
-FloatLimits DataSetInterpolator::setDataLimitsY(FloatLimits limits)
-{
 }

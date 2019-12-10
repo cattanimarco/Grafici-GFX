@@ -27,8 +27,8 @@ void DataSetParametric::refresh()
 		/* provide obvious implementation that iterates */
 		for (int idx = 1; idx < length(); ++idx)
 		{
-			limits.low = graficiMin<float>(limits.low, dataSetGenerator(idx));
-			limits.high = graficiMax<float>(limits.high, dataSetGenerator(idx));
+			limits.low = graficiMin<DataCoordinate>(limits.low, dataSetGenerator(idx));
+			limits.high = graficiMax<DataCoordinate>(limits.high, dataSetGenerator(idx));
 		}
 	}
 	else
