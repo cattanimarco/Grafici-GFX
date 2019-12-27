@@ -6,7 +6,8 @@
 
 typedef float DataCoordinate;
 
-class DataCoordinateIterator;
+class DataSourceIterator;
+class DataSetIterator;
 
 struct IntLimits
 {
@@ -20,14 +21,20 @@ struct FloatLimits
 	float high;
 };
 
+struct DataCoordinateLimits
+{
+	DataCoordinate low;
+	DataCoordinate high;
+};
 struct DataCoordinates
 {
 	DataCoordinate x;
 	DataCoordinate y;
-	//	DataCoordinate z; // third dimension only visualized via color/size/etc..
+	DataCoordinate z;
+	DataCoordinate color;
 };
 
-class DataSet
+class DataSource
 {
   public:
 	virtual DataCoordinate getDataCoordinate(int index) const = 0;
@@ -35,26 +42,75 @@ class DataSet
 
 	int length() const;
 	void setLength(int arrayLength);
-	DataCoordinateIterator begin() const;
-	DataCoordinateIterator end() const;
+	DataSourceIterator begin() const;
+	DataSourceIterator end() const;
 
   private:
 	int arrayLength{ 0 };
 };
 
-class DataCoordinateIterator
+class DataSet : public DataSource
 {
   public:
-	DataCoordinateIterator(const DataSet *const dataSet, int dataIndex)
-	    : dataSet{ dataSet }
+
+	DataSource DataSourceX() const{};
+	DataSource DataSourceY() const{};
+	DataSource DataSourceZ() const;
+	DataSource DataSourceColor() const;
+	
+	DataCoordinate getDataCoordinate(int index) const override;
+	void refresh() override;
+
+	int length() const;
+	void setLength(int arrayLength);
+	DataSourceIterator begin() const;
+	DataSourceIterator end() const;
+	
+  protected:
+	enum class SelectedDataSource
+	{
+		none,
+		x,
+		y,
+		z,
+		color
+	};
+
+	SelectedDataSource selectedDataSource{ SelectedDataSource::none };
+	DataSource *dataSourceX{ nullptr };
+	DataSource *dataSourceY{ nullptr };
+	DataSource *dataSourceZ{ nullptr };
+	DataSource *dataSourceColor{ nullptr };
+};
+
+class DataSourceIterator
+{
+  public:
+	DataSourceIterator(const DataSource *const dataSource, int dataIndex)
+	    : dataSource{ dataSource }
 	    , dataIndex{ dataIndex } {};
 	DataCoordinate operator*();
-	DataCoordinateIterator &operator++();
-	bool operator!=(DataCoordinateIterator const &other);
+	DataSourceIterator &operator++();
+	bool operator!=(DataSourceIterator const &other);
 
   private:
-	const DataSet *const dataSet;
+	const DataSource *const dataSource;
 	int dataIndex;
 };
+
+// class DataCoordinatesIterator
+// {
+//   public:
+// 	DataSourceIterator(const DataSourceIterator &const aataCoordinateIterator, int dataIndex)
+// 	    : dataSource{ dataSource }
+// 	    , dataIndex{ dataIndex } {};
+// 	DataCoordinate operator*();
+// 	DataSourceIterator &operator++();
+// 	bool operator!=(DataSourceIterator const &other);
+
+//   private:
+// 	const DataSource *const dataSource;
+// 	int dataIndex;
+// };
 
 #endif //GRAFICI_DATA_H

@@ -22,10 +22,11 @@ class ColorMap
 	ColorMap(const ColorCoordinates *const colors, int size)
 	    : colors(colors)
 	    , size(size){};
-	ColorCoordinates project(DataCoordinate val) const;
-	ColorGFX projectGFX(DataCoordinate val) const;
+	ColorGFX colorToGFX(ColorCoordinates color) const;
+	ColorGFX project(DataCoordinate val) const;
 
   private:
+	ColorCoordinates valueToColor(DataCoordinate val) const;
 	const ColorCoordinates *const colors;
 	const int size;
 };

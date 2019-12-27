@@ -1,13 +1,13 @@
-#include "DataSetFloat.h"
+#include "DataSourceFloat.h"
 
-DataSetFloat::DataSetFloat(float *floatArray, int arrayLength)
+DataSourceFloat::DataSourceFloat(float *floatArray, int arrayLength)
 {
 	this->floatArray = floatArray;
 	setLength(arrayLength);
 	refresh();
 }
 
-DataCoordinate DataSetFloat::getDataCoordinate(int index) const
+DataCoordinate DataSourceFloat::getDataCoordinate(int index) const
 {
 	if ((floatArray != nullptr) && (index < length()))
 	{
@@ -20,7 +20,7 @@ DataCoordinate DataSetFloat::getDataCoordinate(int index) const
 	}
 }
 
-void DataSetFloat::refresh()
+void DataSourceFloat::refresh()
 {
 	if ((floatArray != nullptr) && (length() > 0))
 	{
@@ -38,13 +38,13 @@ void DataSetFloat::refresh()
 }
 
 /* getters */
-FloatLimits DataSetFloat::dataLimits()
+FloatLimits DataSourceFloat::dataLimits()
 {
 	return limits;
 }
 
 /* setters */
-FloatLimits DataSetFloat::setDataLimits(FloatLimits limits)
+FloatLimits DataSourceFloat::setDataLimits(FloatLimits limits)
 {
 	this->limits = limits;
 	return dataLimits();

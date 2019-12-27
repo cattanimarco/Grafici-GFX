@@ -17,10 +17,10 @@ class AxisPlot : public Plotter
 	int numAxisY;
 	Color plotColor;
 
-	void plot(DisplayDriver *displayDriver, DataSet *dataSet, Boundaries *boundaries, ColorTheme *theme)
+	void plot(DisplayDriver *displayDriver, DataSource *dataSource, Boundaries *boundaries, ColorTheme *theme)
 	{
 		// unused variable
-		(void)dataSet;
+		(void)dataSource;
 
 		//vertical lines
 		for (int itX = 0; itX <= numAxisX; itX++)

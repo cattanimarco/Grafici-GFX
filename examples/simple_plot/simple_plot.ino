@@ -7,7 +7,7 @@
 
 MCUFRIEND_kbv gfx;
 
-DataSetFloat dataset;
+DataSourceFloat dataset;
 float dataArray[5] = { 1, 0, 2, 1, 2 };
 
 void setup(void)
@@ -20,7 +20,7 @@ void setup(void)
 	dataset.begin(dataArray, 1, 5); // load array of 5 floats
 
 	grafici.clear();
-	grafici.plot(linePlot, dataset); // plot dataSet using a simple line
+	grafici.plot(linePlot, dataset); // plot dataSource using a simple line
 }
 
 void loop(void)

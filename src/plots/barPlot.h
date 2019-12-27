@@ -11,9 +11,9 @@ class BarPlot : public Plotter
 		thickness = 0.0;
 	};
 
-	void plot(DisplayDriver *displayDriver, DataSet *dataSet, Boundaries *boundaries, ColorTheme *theme)
+	void plot(DisplayDriver *displayDriver, DataSource *dataSource, Boundaries *boundaries, ColorTheme *theme)
 	{
-		for (DataCoordinateIterator it = dataSet->begin(); it != dataSet->end(); ++it)
+		for (DataSourceIterator it = dataSource->begin(); it != dataSource->end(); ++it)
 		{
 			DataCoordinates baseDataCoordinates = *it;
 			DataCoordinates topDataCoordinates = baseDataCoordinates;
@@ -28,9 +28,9 @@ class BarPlot : public Plotter
 			}
 			else
 			{
-				baseDataCoordinates.x = (baseDataCoordinates.x * dataSet->size()) / (dataSet->size() + 1);
-				baseDataCoordinates.x += (((1.0 - thickness) / 2.0) / (dataSet->size() + 1));
-				topDataCoordinates.x = baseDataCoordinates.x + (thickness / (dataSet->size() + 1));
+				baseDataCoordinates.x = (baseDataCoordinates.x * dataSource->size()) / (dataSource->size() + 1);
+				baseDataCoordinates.x += (((1.0 - thickness) / 2.0) / (dataSource->size() + 1));
+				topDataCoordinates.x = baseDataCoordinates.x + (thickness / (dataSource->size() + 1));
 
 				displayDriver->fillRectangle(boundaries->project(baseDataCoordinates),
 				                             boundaries->project(topDataCoordinates),

@@ -3,10 +3,10 @@
 
 #include "../Data.h"
 
-class DataSetFloat : public DataSet
+class DataSourceFloat : public DataSource
 {
   public:
-	DataSetFloat(float *floatArray, int arrayLength);
+	DataSourceFloat(float *floatArray, int arrayLength);
 
 	DataCoordinate getDataCoordinate(int index) const override;
 	void refresh() override;

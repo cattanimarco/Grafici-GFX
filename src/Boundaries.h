@@ -10,7 +10,7 @@ class Boundaries
 {
   public:
 	/* Constructors */
-	Boundaries();
+	Boundaries() = default;
 	Boundaries(DisplayCoordinate xMin, DisplayCoordinate yMin, DisplayCoordinate xMax, DisplayCoordinate yMax);
 	Boundaries(DisplayCoordinate xMin, DisplayCoordinate yMin, DisplayCoordinate xDelta, DisplayCoordinate yDelta);
 

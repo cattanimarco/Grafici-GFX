@@ -4,15 +4,15 @@
 #include "Display.h"
 #include "Grafici.h"
 
-#include "modules/DataSetFloat.h"
-#include "modules/DataSetSpline.h"
+#include "modules/DataSourceFloat.h"
+#include "modules/DataSourceSpline.h"
 #include "modules/linePlot.h"
 #include "modules/scatterPlot.h"
 
 MCUFRIEND_kbv gfx;
 
-DataSetFloat dataset;
-DataSetSpline dataSpline;
+DataSourceFloat dataset;
+DataSourceSpline dataSpline;
 
 float dataArray[5] = { 1, 0, 2, 1, 2 };
 

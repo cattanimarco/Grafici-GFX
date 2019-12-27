@@ -7,7 +7,7 @@ Given an Adafruit_GFX object and an array of floats, creating a plot with the Gr
 
 1. Setup the library
 ```
-DataSetFloat dataset;
+DataSourceFloat dataset;
 float dataArray[5] = { 1, 0, 2, 1, 2 };
 
 grafici.begin(gfx);
@@ -30,7 +30,7 @@ Now that we plotted our first dataset, lets make it look better.
 In order to make the plot smoother, it is possible to increase the number of datapoint using interpolation. In the example below, for example, it is possible to use a spline interpolation to increase the number of datapoints from 5 to 100.
 
 ```
-DataSetSpline dataSpline;
+DataSourceSpline dataSpline;
 dataSpline.begin(dataset, 100);
 grafici.plot(linePlot, dataSpline);
 ```
@@ -43,7 +43,7 @@ The resulting plot line is much nicer and smoother. Note though that the spline 
 Grafici-GFX allows you to analyze the data with utlity such as the histogram tranformation, which takes as an input a dataset and outputs a new dataset of the datapoint frequencies. In the example below, we divide the data range into 15 buckets and count the number of occurences for each bucket sub-range.
 
 ```
-DataSetHistogram dataHist;
+DataSourceHistogram dataHist;
 dataHist.begin(dataSpline, 15);
 grafici.plot(barPlot, dataHist);
 ```
@@ -55,8 +55,8 @@ It is also possible to compare data by having multiple plots side by side
 
 1. Initialize
 ```
-DataSetFloat dataset;
-DataSetSpline dataSpline;
+DataSourceFloat dataset;
+DataSourceSpline dataSpline;
 grafici.begin(gfx);
 ```
 2. Load the data
@@ -87,8 +87,8 @@ grafici.plot(barPlot, dataSpline);
 It is possible to have draw multiple plot one over each other in a layered fashion. This can be achieved just by calling the plot function multiple times without changing the boundaries before
 1. Initialize
 ```
-DataSetFloat dataset;
-DataSetSpline dataSpline;
+DataSourceFloat dataset;
+DataSourceSpline dataSpline;
 grafici.begin(gfx);
 ```
 2. Load data
@@ -116,8 +116,8 @@ It is possible, for example, to mirror the boundaries both horizzontally and/or 
 
 1.Initialize
 ```
-DataSetFloat dataset;
-DataSetSpline dataSpline;
+DataSourceFloat dataset;
+DataSourceSpline dataSpline;
 grafici.begin(gfx);
 ```
 
@@ -169,8 +169,8 @@ Boundaries transformations are not limited to rectangular displays. It is possib
 ### Plot types
 1. Initialize
 ```
-DataSetFloat dataset;
-DataSetSpline dataSpline;
+DataSourceFloat dataset;
+DataSourceSpline dataSpline;
 grafici.begin(gfx);
 ```
 2. Load data

@@ -5,15 +5,15 @@
 #include "Display.h"
 
 #include "modules/barPlot.h"
-#include "modules/DataSetFloat.h"
-#include "modules/DataSetSpline.h"
-#include "modules/DataSetHistogram.h"
+#include "modules/DataSourceFloat.h"
+#include "modules/DataSourceSpline.h"
+#include "modules/DataSourceHistogram.h"
 
 MCUFRIEND_kbv gfx;
 
-DataSetFloat dataset;
-DataSetSpline dataSpline;
-DataSetHistogram dataHist;
+DataSourceFloat dataset;
+DataSourceSpline dataSpline;
+DataSourceHistogram dataHist;
 
 float dataArray[5] = { 1, 0, 2, 2, 1 };
 

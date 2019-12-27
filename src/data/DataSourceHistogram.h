@@ -3,10 +3,10 @@
 
 #include "../Data.h"
 
-class DataSetHistogram : public DataSet
+class DataSourceHistogram : public DataSource
 {
   public:
-	DataSetHistogram(DataSet &dataSet, int buckets);
+	DataSourceHistogram(DataSource &dataSource, int buckets);
 
 	DataCoordinate getDataCoordinate(int index) const override;
 	void refresh() override;
@@ -16,7 +16,7 @@ class DataSetHistogram : public DataSet
 
   private:
 	IntLimits limits{ 0, 0 };
-	DataSet *dataSet{ nullptr };
+	DataSource *dataSource{ nullptr };
 	int *buckets{ nullptr };
 };
 

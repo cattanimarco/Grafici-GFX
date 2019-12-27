@@ -1,37 +1,76 @@
 #include "Data.h"
 
-int DataSet::length() const
+int DataSource::length() const
 {
 	return arrayLength;
 };
 
-void DataSet::setLength(int arrayLength)
+void DataSource::setLength(int arrayLength)
 {
 	this->arrayLength = arrayLength;
 }
 
-DataCoordinateIterator DataSet::begin() const
+DataSourceIterator DataSource::begin() const
 {
-	return DataCoordinateIterator(this, 0);
+	return DataSourceIterator(this, 0);
 };
 
-DataCoordinateIterator DataSet::end() const
+DataSourceIterator DataSource::end() const
 {
-	return DataCoordinateIterator(this, length());
+	return DataSourceIterator(this, length());
 };
 
-DataCoordinate DataCoordinateIterator::operator*()
+DataCoordinate DataSourceIterator::operator*()
 {
-	return dataSet->getDataCoordinate(dataIndex);
+	return dataSource->getDataCoordinate(dataIndex);
 };
 
-DataCoordinateIterator &DataCoordinateIterator::operator++()
+DataSourceIterator &DataSourceIterator::operator++()
 {
 	++dataIndex;
 	return *this;
 };
 
-bool DataCoordinateIterator::operator!=(DataCoordinateIterator const &other)
+bool DataSourceIterator::operator!=(DataSourceIterator const &other)
 {
-	return (((this->dataSet) != (other.dataSet)) || ((this->dataIndex) != (other.dataIndex)));
+	return (((this->dataSource) != (other.dataSource)) || ((this->dataIndex) != (other.dataIndex)));
 };
+
+DataCoordinate DataSet::getDataCoordinate(int index) const
+{
+	switch (selectedDataSource)
+	{
+	case SelectedDataSource::x:
+	{
+		return dataSourceX->getDataCoordinate(index);
+	}
+
+	case SelectedDataSource::y:
+	{
+		return dataSourceY->getDataCoordinate(index);
+	}
+
+	case SelectedDataSource::z:
+	{
+		return dataSourceZ->getDataCoordinate(index);
+	}
+
+		case SelectedDataSource::color:
+	{
+		return dataSourceColor->getDataCoordinate(index);
+	}
+
+	default:
+	{
+		return DataCoordinate{ 0 };
+	}
+	}
+}
+
+void DataSourceTuple::refresh() override
+{
+	dataSourceX->refresh();
+	dataSourceY->refresh();
+		dataSourceZ->refresh();
+	dataSourceColor->refresh();
+}

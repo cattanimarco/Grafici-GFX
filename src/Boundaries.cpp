@@ -1,9 +1,5 @@
 #include "Boundaries.h"
 
-Boundaries::Boundaries()
-{
-}
-
 Boundaries::Boundaries(DisplayCoordinate xMin, DisplayCoordinate yMin, DisplayCoordinate xMax, DisplayCoordinate yMax)
 {
 	set(xMin, yMin, xMax, yMax);

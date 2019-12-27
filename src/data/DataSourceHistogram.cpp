@@ -1,8 +1,8 @@
-#include "DataSetHistogram.h"
+#include "DataSourceHistogram.h"
 
-DataSetHistogram::DataSetHistogram(DataSet &dataSet, int buckets)
+DataSourceHistogram::DataSourceHistogram(DataSource &dataSource, int buckets)
 {
-	this->dataSet = &dataSet;
+	this->dataSource = &dataSource;
 	this->buckets = (int *)malloc(sizeof(int) * buckets);
 	if (this->buckets != nullptr)
 	{
@@ -11,7 +11,7 @@ DataSetHistogram::DataSetHistogram(DataSet &dataSet, int buckets)
 	refresh();
 }
 
-DataSetHistogram::~DataSetHistogram()
+DataSourceHistogram::~DataSourceHistogram()
 {
 	if (buckets != nullptr)
 	{
@@ -19,7 +19,7 @@ DataSetHistogram::~DataSetHistogram()
 	}
 }
 
-DataCoordinate DataSetHistogram::getDataCoordinate(int index) const
+DataCoordinate DataSourceHistogram::getDataCoordinate(int index) const
 {
 	if (index < length())
 	{
@@ -31,7 +31,7 @@ DataCoordinate DataSetHistogram::getDataCoordinate(int index) const
 	}
 }
 
-void DataSetHistogram::refresh(void)
+void DataSourceHistogram::refresh(void)
 {
 	if (buckets != nullptr)
 	{
@@ -39,7 +39,7 @@ void DataSetHistogram::refresh(void)
 
 		limits = { 0, 0 };
 
-		for (DataCoordinateIterator it = dataSet->begin(); it != dataSet->end(); ++it)
+		for (DataSourceIterator it = dataSource->begin(); it != dataSource->end(); ++it)
 		{
 			DataCoordinate dataCoordinate = *it;
 			int target = round(dataCoordinate * (length() - 1));
@@ -49,12 +49,12 @@ void DataSetHistogram::refresh(void)
 	}
 }
 
-IntLimits DataSetHistogram::dataLimits()
+IntLimits DataSourceHistogram::dataLimits()
 {
 	return limits;
 }
 
-IntLimits DataSetHistogram::setDataLimits(IntLimits limits)
+IntLimits DataSourceHistogram::setDataLimits(IntLimits limits)
 {
 	this->limits = limits;
 	return dataLimits();

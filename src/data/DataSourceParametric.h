@@ -4,12 +4,12 @@
 #include "../Data.h"
 
 // TODO convert to template
-typedef DataCoordinate (*DataSetGenerator)(int index);
+typedef DataCoordinate (*DataSourceGenerator)(int index);
 
-class DataSetParametric : public DataSet
+class DataSourceParametric : public DataSource
 {
   public:
-	DataSetParametric(DataSetGenerator dataSetGenerator, int arrayLength);
+	DataSourceParametric(DataSourceGenerator dataSourceGenerator, int arrayLength);
 
 	DataCoordinate getDataCoordinate(int index) const override;
 	void refresh() override;
@@ -19,7 +19,7 @@ class DataSetParametric : public DataSet
 
   private:
 	FloatLimits limits{ 0, 0 };
-	DataSetGenerator dataSetGenerator{ nullptr };
+	DataSourceGenerator dataSourceGenerator{ nullptr };
 };
 
 DataCoordinate LinearGenerator(int index)
