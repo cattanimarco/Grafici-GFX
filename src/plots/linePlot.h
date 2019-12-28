@@ -3,20 +3,20 @@
 
 #include "../Grafici.h"
 
-class LinePlot : public PlotObj
+class LinePlot : public Plotter
 {
 
   public:
 	LinePlot(){};
 
-	void plot(DisplayDriver *displayDriver, DataSet *dataSet, DisplayBoundaries *boundaries, ColorTheme *theme)
+	void plot(DisplayDriver *displayDriver, DataSet *dataSet, Boundaries *boundaries, ColorTheme *theme)
 	{
 
-		DataPointIterator it = dataSet->beginIt();
+		DataCoordinateIterator it = dataSet->begin();
 
-		for (DataPoint previous = *(it++); it != dataSet->endIt(); previous = *(it++))
+		for (DataCoordinates previous = *(++it); it != dataSet->end(); previous = *(++it))
 		{
-			DataPoint actual = *it;
+			DataCoordinates actual = *it;
 			displayDriver->drawLine(boundaries->project(previous),
 			                        boundaries->project(actual),
 			                        theme->project(actual));

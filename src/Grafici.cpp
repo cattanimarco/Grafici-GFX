@@ -5,19 +5,19 @@ Grafici grafici;
 void Grafici::begin(Adafruit_GFX &tft)
 {
 	displayDriver.begin(&tft);
-	backgroundColor =  colorBlack;
+	backgroundColor = colorBlack;
 }
 
 /* use default boundaries and theme */
-void Grafici::plot(PlotObj &plotObj, DataSet &dataSet)
+void Grafici::plot(Plotter &plotter, DataSet &dataSet)
 {
-	plot(plotObj, dataSet, boundaries);
+	plot(plotter, dataSet, boundaries);
 }
 
 /* use default theme */
-void Grafici::plot(PlotObj &plotObj, DataSet &dataSet, DisplayBoundaries &customBoundaries)
+void Grafici::plot(Plotter &plotter, DataSet &dataSet, Boundaries &customBoundaries)
 {
-	(&plotObj)->plot(&displayDriver, &dataSet, &customBoundaries, &style);
+	(&plotter)->plot(&displayDriver, &dataSet, &customBoundaries, &style);
 }
 
 /* use default boundaries and theme */
@@ -27,12 +27,12 @@ void Grafici::clear()
 }
 
 /* use default theme */
-void Grafici::clear(DisplayBoundaries &displayBoundaries)
+void Grafici::clear(Boundaries &displayBoundaries)
 {
-	DataPoint bl(0.0, 0.0);
-	DataPoint tr(1.0, 1.0);
+	DataCoordinates bl(0.0, 0.0);
+	DataCoordinates tr(1.0, 1.0);
 
 	displayDriver.fillRectangle(displayBoundaries.project(bl),
-								displayBoundaries.project(tr),
-								backgroundColor);
+	                            displayBoundaries.project(tr),
+	                            backgroundColor);
 }

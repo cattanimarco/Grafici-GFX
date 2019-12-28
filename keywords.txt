@@ -8,16 +8,16 @@
 
 Grafici	KEYWORD1
 Color	KEYWORD1
-ColorPalette    KEYWORD1
+ColorMap    KEYWORD1
 ColorSource KEYWORD1
 ColorTheme  KEYWORD1
-Pixel   KEYWORD1
+FloatVector   KEYWORD1
 DisplayDriver   KEYWORD1
-DisplayBoundaries   KEYWORD1
-RoundDisplayBoundaries  KEYWORD1
-PlotObj KEYWORD1
-DataPointIterator   KEYWORD1
-DataPoint   KEYWORD1
+Boundaries   KEYWORD1
+RoundBoundaries  KEYWORD1
+Plotter KEYWORD1
+DataCoordinateIterator   KEYWORD1
+DataCoordinates   KEYWORD1
 DataSet KEYWORD1
 AxisPlot    KEYWORD1
 BarPlot KEYWORD1
