@@ -4,113 +4,105 @@
 #include "Arduino.h"
 #include "Utils.h"
 
-typedef float DataCoordinate;
+using DataNorm = float;
 
-class DataSourceIterator;
-class DataSetIterator;
-
-struct IntLimits
+template <typename T = DataNorm>
+class DataCoordinates
 {
-	int low;
-	int high;
+	T x;
+	T y;
+	T z;
+	T color;
 };
 
-struct FloatLimits
+template <typename T>
+class DataLimits
 {
-	float low;
-	float high;
+  public:
+	T low;
+	T high;
 };
 
-struct DataCoordinateLimits
-{
-	DataCoordinate low;
-	DataCoordinate high;
-};
-struct DataCoordinates
-{
-	DataCoordinate x;
-	DataCoordinate y;
-	DataCoordinate z;
-	DataCoordinate color;
-};
+template <typename T>
+class DataIterator;
 
+template <typename T = DataNorm>
 class DataSource
 {
   public:
-	virtual DataCoordinate getDataCoordinate(int index) const = 0;
+	virtual T getData(int index) const = 0;
 	virtual void refresh() = 0;
+	int length() const
+	{
+		return arrayLength;
+	};
+	void setLength(int arrayLength)
+	{
+		this->arrayLength = arrayLength;
+	};
+	DataIterator<T> begin() const
+	{
+		return DataIterator<T>(this, 0);
+	};
+	DataIterator<T> end() const
+	{
+		return DataIterator<T>(this, length());
+	};
 
-	int length() const;
-	void setLength(int arrayLength);
-	DataSourceIterator begin() const;
-	DataSourceIterator end() const;
-
-  private:
+  protected:
 	int arrayLength{ 0 };
 };
 
-class DataSet : public DataSource
+template <typename T = DataNorm>
+class DataSet : public DataSource<DataCoordinates<T>>
 {
   public:
+	DataSet(DataSource<T> &dataSourceX, DataSource<T> &dataSourceY, DataSource<T> &dataSourceZ, DataSource<T> &dataSourceColor)
+	    : dataSourceX{ &dataSourceX }
+	    , dataSourceY{ &dataSourceY }
+	    , dataSourceZ{ &dataSourceZ }
+	    , dataSourceColor{ &dataSourceColor } {};
 
-	DataSource DataSourceX() const{};
-	DataSource DataSourceY() const{};
-	DataSource DataSourceZ() const;
-	DataSource DataSourceColor() const;
-	
-	DataCoordinate getDataCoordinate(int index) const override;
-	void refresh() override;
-
-	int length() const;
-	void setLength(int arrayLength);
-	DataSourceIterator begin() const;
-	DataSourceIterator end() const;
-	
-  protected:
-	enum class SelectedDataSource
+	DataCoordinates<T> getData(int index) const override;
+	void refresh() override
 	{
-		none,
-		x,
-		y,
-		z,
-		color
+		dataSourceX->refresh();
+		dataSourceY->refresh();
+		dataSourceZ->refresh();
+		dataSourceColor->refresh();
 	};
 
-	SelectedDataSource selectedDataSource{ SelectedDataSource::none };
-	DataSource *dataSourceX{ nullptr };
-	DataSource *dataSourceY{ nullptr };
-	DataSource *dataSourceZ{ nullptr };
-	DataSource *dataSourceColor{ nullptr };
+  private:
+	DataSource<T> *dataSourceX{ nullptr };
+	DataSource<T> *dataSourceY{ nullptr };
+	DataSource<T> *dataSourceZ{ nullptr };
+	DataSource<T> *dataSourceColor{ nullptr };
 };
 
-class DataSourceIterator
+template <typename T = DataNorm>
+class DataIterator
 {
   public:
-	DataSourceIterator(const DataSource *const dataSource, int dataIndex)
+	DataIterator(const DataSource<T> *const dataSource, int dataIndex)
 	    : dataSource{ dataSource }
 	    , dataIndex{ dataIndex } {};
-	DataCoordinate operator*();
-	DataSourceIterator &operator++();
-	bool operator!=(DataSourceIterator const &other);
+	T operator*()
+	{
+		return dataSource->getData(dataIndex);
+	};
+	DataIterator<T> &operator++()
+	{
+		++dataIndex;
+		return *this;
+	};
+	bool operator!=(DataIterator<T> const &other)
+	{
+		return (((this->dataSource) != (other.dataSource)) || ((this->dataIndex) != (other.dataIndex)));
+	};
 
   private:
-	const DataSource *const dataSource;
+	const DataSource<T> *const dataSource;
 	int dataIndex;
 };
-
-// class DataCoordinatesIterator
-// {
-//   public:
-// 	DataSourceIterator(const DataSourceIterator &const aataCoordinateIterator, int dataIndex)
-// 	    : dataSource{ dataSource }
-// 	    , dataIndex{ dataIndex } {};
-// 	DataCoordinate operator*();
-// 	DataSourceIterator &operator++();
-// 	bool operator!=(DataSourceIterator const &other);
-
-//   private:
-// 	const DataSource *const dataSource;
-// 	int dataIndex;
-// };
 
 #endif //GRAFICI_DATA_H

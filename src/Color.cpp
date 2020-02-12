@@ -1,6 +1,7 @@
 #include "Color.h"
 
-ColorCoordinates ColorMap::valueToColor(DataCoordinate val) const
+template <>
+ColorCoordinates<ColorCoordinate> ColorMap<ColorCoordinate, DataNorm>::valueToColor(DataNorm val) const
 {
 	int idx1;               // |-- Our desired color will be between these two indexes in "color".
 	int idx2;               // |
@@ -22,12 +23,13 @@ ColorCoordinates ColorMap::valueToColor(DataCoordinate val) const
 		fractBetween = val - float(idx1);
 	}
 
-	return ColorCoordinates{ static_cast<ColorCoordinate>(colors[idx2].red * fractBetween + colors[idx1].red * (1 - fractBetween)),
-		                     static_cast<ColorCoordinate>(colors[idx2].green * fractBetween + colors[idx1].green * (1 - fractBetween)),
-		                     static_cast<ColorCoordinate>(colors[idx2].blue * fractBetween + colors[idx1].blue * (1 - fractBetween)) };
+	return ColorCoordinates<ColorCoordinate>{ static_cast<ColorCoordinate>(colors[idx2].red * fractBetween + colors[idx1].red * (1 - fractBetween)),
+		                                      static_cast<ColorCoordinate>(colors[idx2].green * fractBetween + colors[idx1].green * (1 - fractBetween)),
+		                                      static_cast<ColorCoordinate>(colors[idx2].blue * fractBetween + colors[idx1].blue * (1 - fractBetween)) };
 }
 
-ColorGFX ColorMap::colorToGFX(ColorCoordinates color) const
+template <>
+ColorGFX ColorMap<ColorCoordinate, DataNorm>::colorToGFX(ColorCoordinates<ColorCoordinate> color) const
 {
 	ColorGFX r = (color.red / 255.0) * 31;
 	ColorGFX g = (color.green / 255.0) * 63;
@@ -37,7 +39,8 @@ ColorGFX ColorMap::colorToGFX(ColorCoordinates color) const
 	};
 }
 
-ColorGFX ColorMap::project(DataCoordinate val) const
+template <>
+ColorGFX ColorMap<ColorCoordinate, DataNorm>::project(DataNorm val) const
 {
 	return colorToGFX(valueToColor(val));
 }

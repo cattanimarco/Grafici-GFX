@@ -21,4 +21,4 @@ T graficiMax(const T &a, const T &b)
 	return (a > b ? a : b);
 }
 
-#endif
+#endif /* GRAFICI_UTILS_H */

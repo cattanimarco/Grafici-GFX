@@ -5,28 +5,36 @@
 #include "Data.h"
 #include "Utils.h"
 
-typedef unsigned char ColorCoordinate;
+using ColorCoordinate = unsigned char;
+using ColorGFX = uint16_t;
 
-typedef uint16_t ColorGFX;
-
-struct ColorCoordinates
+template <typename T>
+class ColorCoordinates
 {
-	ColorCoordinate red;
-	ColorCoordinate green;
-	ColorCoordinate blue;
+  public:
+	ColorCoordinates(T r, T g, T b)
+	    : red{ r }
+	    , green{ g }
+	    , blue{ b }
+	{
+	}
+	T red;
+	T green;
+	T blue;
 };
 
+template <typename C = ColorCoordinate, typename D = DataNorm>
 class ColorMap
 {
   public:
-	ColorMap(const ColorCoordinates *const colors, int size)
+	ColorMap(const ColorCoordinates<C> *const colors, int size)
 	    : colors(colors)
 	    , size(size){};
-	ColorGFX colorToGFX(ColorCoordinates color) const;
-	ColorGFX project(DataCoordinate val) const;
+	ColorGFX colorToGFX(ColorCoordinates<C> color) const;
+	ColorGFX project(D val) const;
 
   private:
-	ColorCoordinates valueToColor(DataCoordinate val) const;
+	ColorCoordinates<C> valueToColor(D val) const;
 	const ColorCoordinates *const colors;
 	const int size;
 };

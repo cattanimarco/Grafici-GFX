@@ -4,53 +4,58 @@
 #include "Adafruit_GFX.h"
 #include "Color.h"
 
-typedef float DisplayCoordinate;
+using DisplayNorm = float;
+using DisplayPixel = int;
 
-struct DisplayCoordinates
+template <typename T>
+class DisplayCoordinates
 {
-	DisplayCoordinate x;
-	DisplayCoordinate y;
+  public:
+	T x;
+	T y;
 };
 
-typedef int PixelCoordinate;
-
-struct PixelCoordinates
+template <typename T>
+DisplayCoordinates<T> operator-(const DisplayCoordinates<T> &left, DisplayCoordinates<T> &right)
 {
-	PixelCoordinate x;
-	PixelCoordinate y;
+	return DisplayCoordinates<T>{ left.x - right.x, left.y - right.y };
 };
 
-PixelCoordinates operator-(const PixelCoordinates &left, PixelCoordinates &right)
+template <typename T>
+DisplayCoordinates<T> operator+(const DisplayCoordinates<T> &left, DisplayCoordinates<T> &right)
 {
-	return PixelCoordinates{ left.x - right.x, left.y - right.y };
-};
-
-PixelCoordinates operator+(const PixelCoordinates &left, PixelCoordinates &right)
-{
-	return PixelCoordinates{ left.x + right.x, left.y + right.y };
+	return DisplayCoordinates<T>{ left.x + right.x, left.y + right.y };
 };
 
 class Display
 {
   public:
-	void begin(Adafruit_GFX &tft)
+	void begin(Adafruit_GFX &displayDriver)
 	{
-		this->tft = &tft;
+		this->displayDriver = displayDriver;
 	}
 	Adafruit_GFX &gfx()
 	{
-		return *tft;
+		return displayDriver;
 	}
 	void clear()
 	{
-		gfx().fillScreen(colorToGFX(colorBlack));
+		displayDriver.fillScreen(colorToGFX(colorBlack));
 	}
 
-	PixelCoordinates project(DisplayCoordinates displayCoordinates) const;
-	PixelCoordinates project(DisplayCoordinate x, DisplayCoordinate y) const;
+	DisplayCoordinates<DisplayPixel> project(DisplayCoordinates<DisplayNorm> displayCoordinates) const
+	{
+		return DisplayCoordinates<DisplayPixel>{ displayCoordinates.x * tft->width(),
+			                                     (1 - displayCoordinates.y) * tft->height() };
+	};
+
+	DisplayCoordinates<DisplayPixel> project(DisplayNorm x, DisplayNorm y) const
+	{
+		return project(DisplayCoordinates<DisplayNorm>{ x, y });
+	};
 
   private:
-	Adafruit_GFX *tft;
+	Adafruit_GFX &displayDriver;
 };
 
 extern Display grafici;
