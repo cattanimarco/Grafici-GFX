@@ -1,19 +1,32 @@
-#ifndef GRAFICI_COLORS_H
-#define GRAFICI_COLORS_H
+#ifndef GRAFICI_COLOR_DEFS_H
+#define GRAFICI_COLOR_DEFS_H
+
 #include "Color.h"
 
-extern const ColorCoordinates<ColorCoordinate> colorBlack;
-extern const ColorCoordinates<ColorCoordinate> colorDarkGray;
-extern const ColorCoordinates<ColorCoordinate> colorLightGray;
-extern const ColorCoordinates<ColorCoordinate> colorWhite;
+namespace grafici_colors
+{
 
-extern const ColorMap<ColorCoordinate, DataNorm> csBright;
-extern const ColorMap<ColorCoordinate, DataNorm> csBw;
-extern const ColorMap<ColorCoordinate, DataNorm> csCmyk;
-extern const ColorMap<ColorCoordinate, DataNorm> csFrance;
-extern const ColorMap<ColorCoordinate, DataNorm> csHeat;
-extern const ColorMap<ColorCoordinate, DataNorm> csNeon;
-extern const ColorMap<ColorCoordinate, DataNorm> csParula;
-extern const ColorMap<ColorCoordinate, DataNorm> csRainbow;
+extern const ColorVector black;
+extern const ColorVector silver;
+extern const ColorVector red;
+extern const ColorVector green;
+extern const ColorVector blue;
+extern const ColorVector cyan;
+extern const ColorVector yellow;
+extern const ColorVector orange;
+extern const ColorVector magenta;
+extern const ColorVector white;
+extern const ColorVector a_dash_of_light; // add/subtract a_dash_of_light to make a color lighter/darker (max 5 steps)
 
-#endif //GRAFICI_COLORS_H
+extern const ColorMap rainbow;
+extern const ColorMap temperature;
+extern const ColorMap blackAndWhite;
+extern const ColorMap cmyk;
+extern const ColorMap csHeat;
+extern const ColorMap bright;
+extern const ColorMap csNeon;
+extern const ColorMap csParula;
+
+} // namespace grafici_colors
+
+#endif //GRAFICI_COLOR_DEFS_H

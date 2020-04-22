@@ -1,63 +1,48 @@
 #ifndef GRAFICI_DISPLAY_H
 #define GRAFICI_DISPLAY_H
 
+#include "Types.h"
 #include "Adafruit_GFX.h"
-#include "Color.h"
-
-using DisplayNorm = float;
-using DisplayPixel = int;
-
-template <typename T>
-class DisplayCoordinates
-{
-  public:
-	T x;
-	T y;
-};
-
-template <typename T>
-DisplayCoordinates<T> operator-(const DisplayCoordinates<T> &left, DisplayCoordinates<T> &right)
-{
-	return DisplayCoordinates<T>{ left.x - right.x, left.y - right.y };
-};
-
-template <typename T>
-DisplayCoordinates<T> operator+(const DisplayCoordinates<T> &left, DisplayCoordinates<T> &right)
-{
-	return DisplayCoordinates<T>{ left.x + right.x, left.y + right.y };
-};
+#include "Vector.h"
 
 class Display
 {
   public:
-	void begin(Adafruit_GFX &displayDriver)
+	void begin(Adafruit_GFX &driver)
 	{
-		this->displayDriver = displayDriver;
-	}
-	Adafruit_GFX &gfx()
-	{
-		return displayDriver;
-	}
-	void clear()
-	{
-		displayDriver.fillScreen(colorToGFX(colorBlack));
+		_driver = &driver;
 	}
 
-	DisplayCoordinates<DisplayPixel> project(DisplayCoordinates<DisplayNorm> displayCoordinates) const
+	Adafruit_GFX &driver()
 	{
-		return DisplayCoordinates<DisplayPixel>{ displayCoordinates.x * tft->width(),
-			                                     (1 - displayCoordinates.y) * tft->height() };
-	};
+		return *_driver;
+	}
 
-	DisplayCoordinates<DisplayPixel> project(DisplayNorm x, DisplayNorm y) const
+	void line(CartesianVector<DisplayNorm> begin, CartesianVector<DisplayNorm> end, ColorGFX color) const
 	{
-		return project(DisplayCoordinates<DisplayNorm>{ x, y });
+		auto pixel_begin = project(begin);
+		auto pixel_end = project(end);
+		/* TODO add color blending between two points */
+		_driver->writeLine(pixel_begin.x(), pixel_begin.y(), pixel_end.x(), pixel_end.y(), color);
+	}
+
+	void fillRect(CartesianVector<DisplayNorm> bl, CartesianVector<DisplayNorm> tr, ColorGFX color) const
+	{
+		CartesianVector<DisplayAbd> pixel_bl = project(bl);
+		CartesianVector<DisplayAbd> pixel_tr = project(tr);
+		CartesianVector<DisplayAbd> pixel_delta = pixel_tr - pixel_bl;
+		_driver->fillRect(pixel_bl.x(), pixel_bl.y(), pixel_delta.x(), pixel_delta.y(), color);
+	}
+
+	/* from normalized display vector to absolute pixel vector */
+	CartesianVector<DisplayAbd> project(CartesianVector<DisplayNorm> vector) const
+	{
+		return CartesianVector<DisplayAbd>{ vector.x() * _driver->width(),
+			                                (1 - vector.y()) * _driver->height() };
 	};
 
   private:
-	Adafruit_GFX &displayDriver;
+	Adafruit_GFX *_driver;
 };
-
-extern Display grafici;
 
 #endif /* GRAFICI_DISPLAY_H */

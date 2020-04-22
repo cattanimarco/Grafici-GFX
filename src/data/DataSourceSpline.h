@@ -9,7 +9,7 @@ class DataSourceSpline : public DataSourceTuple
 	DataSourceSpline(DataSource &dataSetX, DataSource &dataSetY, int interpolationSteps);
 	~DataSourceSpline();
 
-	DataCoordinate getDataCoordinate(int index) const override;
+	DataCoordinate at(int index) const override;
 	void refresh() override;
 
 	DataSource DataSourceX() const override;

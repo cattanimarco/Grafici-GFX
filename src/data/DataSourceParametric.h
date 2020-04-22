@@ -11,7 +11,7 @@ class DataSourceParametric : public DataSource
   public:
 	DataSourceParametric(DataSourceGenerator dataSourceGenerator, int arrayLength);
 
-	DataCoordinate getDataCoordinate(int index) const override;
+	DataCoordinate at(int index) const override;
 	void refresh() override;
 
 	FloatLimits dataLimits();

@@ -19,7 +19,7 @@ DataSourceSpline::~DataSourceSpline()
 	free(d);
 }
 
-DataCoordinate DataSourceSpline::getDataCoordinate(int index) const
+DataCoordinate DataSourceSpline::at(int index) const
 {
 	if (SelectedDataSource::none == selectedDataSource)
 	{
@@ -37,7 +37,7 @@ DataCoordinate DataSourceSpline::getDataCoordinate(int index) const
 		}
 
 		// check that we are in the correct bin
-		while (x > dataSourceX->getDataCoordinate(bin + 1))
+		while (x > dataSourceX->at(bin + 1))
 		{
 			bin++;
 			if (bin == dataSourceX->length())
@@ -48,10 +48,10 @@ DataCoordinate DataSourceSpline::getDataCoordinate(int index) const
 		}
 
 		// compute interpolated y
-		DataCoordinate y = dataSourceY->getDataCoordinate(bin) +
-		                   b[bin] * (x - dataSourceX->getDataCoordinate(bin)) +
-		                   c[bin] * (x - dataSourceX->getDataCoordinate(bin)) * (x - dataSourceX->getDataCoordinate(bin)) +
-		                   d[bin] * (x - dataSourceX->getDataCoordinate(bin)) * (x - dataSourceX->getDataCoordinate(bin)) * (x - dataSourceX->getDataCoordinate(bin));
+		DataCoordinate y = dataSourceY->at(bin) +
+		                   b[bin] * (x - dataSourceX->at(bin)) +
+		                   c[bin] * (x - dataSourceX->at(bin)) * (x - dataSourceX->at(bin)) +
+		                   d[bin] * (x - dataSourceX->at(bin)) * (x - dataSourceX->at(bin)) * (x - dataSourceX->at(bin));
 
 		// normalize dataSource to a 0.0 .. 1.0 value
 		return DataCoordinate{ (y - limits.low) / (limits.high - limits.low) };
@@ -92,13 +92,13 @@ void DataSourceSpline::refresh(void)
 
 		for (int i = 0; i <= n - 1; ++i)
 		{
-			h[i] = dataSourceX->getDataCoordinate(i + 1) - dataSourceX->getDataCoordinate(i);
+			h[i] = dataSourceX->at(i + 1) - dataSourceX->at(i);
 		}
 
 		// Interpolate Y axis
 		for (int i = 1; i <= n - 1; ++i)
 		{
-			A[i] = 3 * (dataSourceY->getDataCoordinate(i + 1) - dataSourceY->getDataCoordinate(i)) / h[i] - 3 * (dataSourceY->getDataCoordinate(i) - dataSourceY->getDataCoordinate(i - 1)) / h[i - 1];
+			A[i] = 3 * (dataSourceY->at(i + 1) - dataSourceY->at(i)) / h[i] - 3 * (dataSourceY->at(i) - dataSourceY->at(i - 1)) / h[i - 1];
 		}
 
 		l[0] = 1;
@@ -107,7 +107,7 @@ void DataSourceSpline::refresh(void)
 
 		for (int i = 1; i <= n - 1; ++i)
 		{
-			l[i] = 2 * (dataSourceX->getDataCoordinate(i + 1) - dataSourceX->getDataCoordinate(i - 1)) - h[i - 1] * u[i - 1];
+			l[i] = 2 * (dataSourceX->at(i + 1) - dataSourceX->at(i - 1)) - h[i - 1] * u[i - 1];
 			u[i] = h[i] / l[i];
 			z[i] = (A[i] - h[i - 1] * z[i - 1]) / l[i];
 		}
@@ -119,7 +119,7 @@ void DataSourceSpline::refresh(void)
 		for (int j = n - 1; j >= 0; --j)
 		{
 			c[j] = z[j] - u[j] * c[j + 1];
-			b[j] = (dataSourceY->getDataCoordinate(j + 1) - dataSourceY->getDataCoordinate(j)) / h[j] - h[j] * (c[j + 1] + 2 * c[j]) / 3;
+			b[j] = (dataSourceY->at(j + 1) - dataSourceY->at(j)) / h[j] - h[j] * (c[j + 1] + 2 * c[j]) / 3;
 			d[j] = (c[j + 1] - c[j]) / (3 * h[j]);
 		}
 
@@ -128,16 +128,16 @@ void DataSourceSpline::refresh(void)
 		for (float px = 0; px < 1; px += (1.0 / this->length()))
 		{
 			/* check that we are in the correct bin */
-			while (px > dataSourceX->getDataCoordinate(bin + 1))
+			while (px > dataSourceX->at(bin + 1))
 			{
 				bin++;
 			}
 
 			/* compute interpolated y value */
-			yInter = dataSourceY->getDataCoordinate(bin) +
-			         b[bin] * (px - dataSourceX->getDataCoordinate(bin)) +
-			         c[bin] * (px - dataSourceX->getDataCoordinate(bin)) * (px - dataSourceX->getDataCoordinate(bin)) +
-			         d[bin] * (px - dataSourceX->getDataCoordinate(bin)) * (px - dataSourceX->getDataCoordinate(bin)) * (px - dataSourceX->getDataCoordinate(bin));
+			yInter = dataSourceY->at(bin) +
+			         b[bin] * (px - dataSourceX->at(bin)) +
+			         c[bin] * (px - dataSourceX->at(bin)) * (px - dataSourceX->at(bin)) +
+			         d[bin] * (px - dataSourceX->at(bin)) * (px - dataSourceX->at(bin)) * (px - dataSourceX->at(bin));
 
 			/* Updated dataSource min/max */
 			if (yInter < limits.low)

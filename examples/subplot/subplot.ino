@@ -31,14 +31,14 @@ void setup(void)
 
 	grafici.clear();
 
-	// Divide the screen boundaries in 1 row and 2 columns. Select the sub-boundaries with index 0 (column on left).
+	// Divide the screen boundary in 1 row and 2 columns. Select the sub-boundary with index 0 (column on left).
 	// Add a border of 4% on top, bottom and left. Add a border of 2% on right
-	grafici.boundaries.fullScreen().subBoundaries(1, 2, 0).addBorder(0.04, 0.04, 0.04, 0.02);
+	grafici.boundary.fullScreen().subBoundary(1, 2, 0).addBorder(0.04, 0.04, 0.04, 0.02);
 	grafici.plot(linePlot, dataSpline);
 
-	// Divide the screen boundaries in 1 row and 2 columns. Select the sub-boundaries with index 1 (column on right).
+	// Divide the screen boundary in 1 row and 2 columns. Select the sub-boundary with index 1 (column on right).
 	// Add a border of 4% on top, bottom and right. Add a border of 2% on left
-	grafici.boundaries.fullScreen().subBoundaries(1, 2, 1).addBorder(0.04, 0.04, 0.02, 0.04);
+	grafici.boundary.fullScreen().subBoundary(1, 2, 1).addBorder(0.04, 0.04, 0.02, 0.04);
 	grafici.plot(barPlot, dataHist);
 }
 

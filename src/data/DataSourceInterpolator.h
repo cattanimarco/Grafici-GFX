@@ -8,7 +8,7 @@ class DataSourceInterpolator : public DataSourceTuple
   public:
 	DataSourceInterpolator(DataSource &dataSourceX, DataSource &dataSourceY, int interpolationSteps);
 
-	DataCoordinate getDataCoordinate(int index) const override;
+	DataCoordinate at(int index) const override;
 	void refresh() override;
 
 	DataSource DataSourceX() const override;

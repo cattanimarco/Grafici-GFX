@@ -11,7 +11,7 @@ class BarcodePlot : public Plotter
 		thickness = 0.9;
 	};
 
-	void plot(DisplayDriver *displayDriver, DataSource *dataSource, Boundaries *boundaries, ColorTheme *theme)
+	void plot(DisplayDriver *displayDriver, DataSource *dataSource, Boundary *boundary, ColorTheme *theme)
 	{
 		for (DataSourceIterator it = dataSource->begin(); it != dataSource->end();
 		     ++it)
@@ -25,8 +25,8 @@ class BarcodePlot : public Plotter
 
 			if (0.0 == thickness)
 			{
-				displayDriver->drawLine(boundaries->project(baseDataCoordinates),
-				                        boundaries->project(topDataCoordinates),
+				displayDriver->drawLine(boundary->project(baseDataCoordinates),
+				                        boundary->project(topDataCoordinates),
 				                        theme->project(colorDataCoordinates));
 			}
 			else
@@ -35,8 +35,8 @@ class BarcodePlot : public Plotter
 				baseDataCoordinates.x += (((1.0 - thickness) / 2.0) / (dataSource->size() + 1));
 				topDataCoordinates.x = baseDataCoordinates.x + (thickness / (dataSource->size() + 1));
 
-				displayDriver->fillRectangle(boundaries->project(baseDataCoordinates),
-				                             boundaries->project(topDataCoordinates),
+				displayDriver->fillRectangle(boundary->project(baseDataCoordinates),
+				                             boundary->project(topDataCoordinates),
 				                             theme->project(colorDataCoordinates));
 			}
 		}

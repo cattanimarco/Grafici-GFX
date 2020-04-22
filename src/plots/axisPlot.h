@@ -17,7 +17,7 @@ class AxisPlot : public Plotter
 	int numAxisY;
 	Color plotColor;
 
-	void plot(DisplayDriver *displayDriver, DataSource *dataSource, Boundaries *boundaries, ColorTheme *theme)
+	void plot(DisplayDriver *displayDriver, DataSource *dataSource, Boundary *boundary, ColorTheme *theme)
 	{
 		// unused variable
 		(void)dataSource;
@@ -27,8 +27,8 @@ class AxisPlot : public Plotter
 		{
 			DataCoordinates a(itX / (float)numAxisX, 0.0);
 			DataCoordinates b(itX / (float)numAxisX, 1.0);
-			displayDriver->drawLine(boundaries->project(a),
-			                        boundaries->project(b),
+			displayDriver->drawLine(boundary->project(a),
+			                        boundary->project(b),
 			                        plotColor);
 
 			//horrizontal sub line
@@ -38,8 +38,8 @@ class AxisPlot : public Plotter
 				{
 					DataCoordinates a(itX / (float)numAxisX, itY / (float)numAxisY);
 					DataCoordinates b((itX + 1.0) / (float)numAxisX, itY / (float)numAxisY);
-					displayDriver->drawLine(boundaries->project(a),
-					                        boundaries->project(b),
+					displayDriver->drawLine(boundary->project(a),
+					                        boundary->project(b),
 					                        plotColor);
 				}
 			}

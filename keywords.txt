@@ -13,8 +13,8 @@ ColorSource KEYWORD1
 ColorTheme  KEYWORD1
 FloatVector   KEYWORD1
 DisplayDriver   KEYWORD1
-Boundaries   KEYWORD1
-RoundBoundaries  KEYWORD1
+Boundary   KEYWORD1
+RoundBoundary  KEYWORD1
 Plotter KEYWORD1
 DataSourceIterator   KEYWORD1
 DataCoordinates   KEYWORD1

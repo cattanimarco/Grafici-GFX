@@ -7,7 +7,7 @@ DataSourceParametric::DataSourceParametric(DataSourceGenerator dataSourceGenerat
 	refresh();
 }
 
-DataCoordinate DataSourceParametric::getDataCoordinate(int index) const
+DataCoordinate DataSourceParametric::at(int index) const
 {
 	if (dataSourceGenerator != nullptr)
 	{

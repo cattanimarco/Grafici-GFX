@@ -8,7 +8,7 @@ DataSourceInterpolator::DataSourceInterpolator(DataSource &dataSourceX, DataSour
 	refresh();
 }
 
-DataCoordinate DataSourceInterpolator::getDataCoordinate(int index) const
+DataCoordinate DataSourceInterpolator::at(int index) const
 {
 	if (SelectedDataSource::none == selectedDataSource)
 	{
@@ -26,7 +26,7 @@ DataCoordinate DataSourceInterpolator::getDataCoordinate(int index) const
 		}
 
 		// check that we are in the correct bin
-		while (x > dataSourceX->getDataCoordinate(bin + 1))
+		while (x > dataSourceX->at(bin + 1))
 		{
 			bin++;
 			if (bin == dataSourceX->length())
@@ -36,8 +36,8 @@ DataCoordinate DataSourceInterpolator::getDataCoordinate(int index) const
 			}
 		}
 
-		float fractBetween = (x - dataSourceX->getDataCoordinate(bin)) / (dataSourceX->getDataCoordinate(bin + 1) - dataSourceX->getDataCoordinate(bin));
-		return DataCoordinate{ dataSourceY->getDataCoordinate(bin + 1) * fractBetween + dataSourceY->getDataCoordinate(bin) * (1.0 - fractBetween) };
+		float fractBetween = (x - dataSourceX->at(bin)) / (dataSourceX->at(bin + 1) - dataSourceX->at(bin));
+		return DataCoordinate{ dataSourceY->at(bin + 1) * fractBetween + dataSourceY->at(bin) * (1.0 - fractBetween) };
 	}
 	else
 	{

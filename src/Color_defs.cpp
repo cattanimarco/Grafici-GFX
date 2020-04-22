@@ -1,11 +1,73 @@
 #include "Color_defs.h"
 
-const ColorCoordinates<ColorCoordinate> colorBlack = { 0, 0, 0 };
-const ColorCoordinates<ColorCoordinate> colorDarkGray{ 50, 50, 50 };
-const ColorCoordinates<ColorCoordinate> colorLightGray{ 200, 200, 200 };
-const ColorCoordinates<ColorCoordinate> colorWhite{ 255, 255, 255 };
+namespace grafici_colors
+{
 
-const ColorCoordinates<ColorCoordinate> cBright[6] = {
+/* base colors */
+const ColorVector black{ 0, 0, 0 };
+const ColorVector silver{ 192, 192, 192 };
+const ColorVector red{ 255, 0, 0 };
+const ColorVector green{ 0, 255, 0 };
+const ColorVector blue{ 0, 0, 255 };
+
+/* composite colors */
+const ColorVector cyan = green + blue;
+const ColorVector yellow = red + green;
+const ColorVector orange = red + green * 0.5;
+const ColorVector magenta = red + blue;
+const ColorVector white = red + green + blue;
+
+/* special colors */
+const ColorVector a_dash_of_light = white * 0.2; // add/subtract a_dash_of_light to make a color lighter/darker (max 5 steps)
+
+/* Color palettes */
+static const ColorVector _rainbow[6] = {
+	blue,
+	cyan,
+	green,
+	yellow,
+	red,
+	magenta
+};
+const ColorMap rainbow(_rainbow,6);
+
+static const ColorVector _temperature[3] = {
+	blue,
+	white,
+	red
+};
+const ColorMap temperature(_temperature,3);
+
+static const ColorVector _blackAndWhite[2] = {
+	black,
+	white
+};
+const ColorMap blackAndWhite(_blackAndWhite,2);
+
+const ColorVector _cmyk[4] = {
+	black,
+	yellow,
+	magenta,
+	cyan
+};
+const ColorMap cmyk(_cmyk,4);
+
+static const ColorVector cHeat[11] = {
+	black,
+	red * 0.05,
+	red * 0.3,
+	red * 0.55,
+	red * 0.85,
+	red,
+	red + green * 0.3,
+	red + green * 0.55,
+	red + green,
+	red + green + blue * 0.10,
+	white
+};
+const ColorMap csHeat(cHeat,11);
+
+static const ColorVector _bright[6] = {
 	{ 212, 53, 59 },
 	{ 100, 88, 246 },
 	{ 85, 180, 249 },
@@ -13,45 +75,9 @@ const ColorCoordinates<ColorCoordinate> cBright[6] = {
 	{ 248, 239, 94 },
 	{ 240, 137, 53 },
 };
-const ColorMap<ColorCoordinate, DataNorm> csBright(&cBright[0], 6);
+const ColorMap bright(_bright,6);
 
-const ColorCoordinates<ColorCoordinate> cBw[2] = {
-	{ 0, 0, 0 },
-	{ 255, 255, 255 },
-};
-const ColorMap<ColorCoordinate, DataNorm> csBw(&cBw[0], 2);
-
-const ColorCoordinates<ColorCoordinate> cCmyk[4] = {
-	{ 0, 0, 0 },
-	{ 255, 254, 85 },
-	{ 234, 59, 245 },
-	{ 116, 251, 253 },
-};
-const ColorMap<ColorCoordinate, DataNorm> csCmyk(&cCmyk[0], 4);
-
-const ColorCoordinates<ColorCoordinate> cFrance[3] = {
-	{ 0, 0, 255 },
-	{ 255, 255, 255 },
-	{ 255, 0, 0 },
-};
-const ColorMap<ColorCoordinate, DataNorm> csFrance(&cFrance[0], 3);
-
-const ColorCoordinates<ColorCoordinate> cHeat[11] = {
-	{ 0, 0, 0 },
-	{ 10, 0, 0 },
-	{ 75, 0, 0 },
-	{ 140, 0, 0 },
-	{ 215, 0, 0 },
-	{ 255, 11, 0 },
-	{ 255, 95, 0 },
-	{ 255, 160, 0 },
-	{ 255, 255, 0 },
-	{ 252, 255, 29 },
-	{ 255, 255, 255 },
-};
-const ColorMap<ColorCoordinate, DataNorm> csHeat(&cHeat[0], 11);
-
-const ColorCoordinates<ColorCoordinate> cNeon[12] = {
+static const ColorVector cNeon[12] = {
 	{ 29, 29, 29 },
 	{ 29, 29, 29 },
 	{ 0, 217, 10 },
@@ -65,9 +91,9 @@ const ColorCoordinates<ColorCoordinate> cNeon[12] = {
 	{ 220, 91, 35 },
 	{ 29, 29, 29 },
 };
-const ColorMap<ColorCoordinate, DataNorm> csNeon(&cNeon[0], 12);
+const ColorMap csNeon(cNeon,12);
 
-const ColorCoordinates<ColorCoordinate> cParula[11] = {
+static const ColorVector cParula[11] = {
 	{ 62, 38, 168 },
 	{ 71, 65, 229 },
 	{ 69, 99, 252 },
@@ -80,14 +106,6 @@ const ColorCoordinates<ColorCoordinate> cParula[11] = {
 	{ 254, 195, 56 },
 	{ 245, 233, 36 },
 };
-const ColorMap<ColorCoordinate, DataNorm> csParula(&cParula[0], 11);
+const ColorMap csParula(cParula,11);
 
-const ColorCoordinates<ColorCoordinate> cRainbow[6] = {
-	{ 0, 0, 255 },
-	{ 0, 255, 255 },
-	{ 0, 255, 0 },
-	{ 255, 255, 0 },
-	{ 255, 0, 0 },
-	{ 255, 0, 255 },
-};
-const ColorMap<ColorCoordinate, DataNorm> csRainbow(&cRainbow[0], 6);
+} // namespace grafici_colors

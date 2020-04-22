@@ -6,7 +6,7 @@
 class VisitorDrawHeat : public VisitorDraw
 {
 public:
-	void visit(Dataset *dataset, Boundaries *boundaries);
+	void visit(Dataset *dataset, Boundary *boundary);
 };
 
 
