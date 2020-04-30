@@ -17,7 +17,7 @@ class AxisPlot : public Plotter
 	int numAxisY;
 	Color plotColor;
 
-	void plot(DisplayDriver *displayDriver, DataSource *dataSource, Boundary *boundary, ColorTheme *theme)
+	void plot(DisplayDriver *displayDriver, DataSource:: *dataSource, Boundary *boundary, ColorTheme *theme)
 	{
 		// unused variable
 		(void)dataSource;

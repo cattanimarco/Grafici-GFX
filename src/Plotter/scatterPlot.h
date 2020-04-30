@@ -12,10 +12,10 @@ class ScatterPlot : public Plotter
 		markerSize = 0.0001;
 	};
 
-	void plot(DisplayDriver *displayDriver, DataSource *dataSource, Boundary *boundary, ColorTheme *theme)
+	void plot(DisplayDriver *displayDriver, DataSource:: *dataSource, Boundary *boundary, ColorTheme *theme)
 	{
 
-		for (DataSourceIterator it = dataSource->begin(); it != dataSource->end(); ++it)
+		for (DataSource::Iterator it = dataSource->begin(); it != dataSource->end(); ++it)
 		{
 			DataCoordinates dataPoint = *it;
 			displayDriver->drawCircle(boundary->project(dataPoint),

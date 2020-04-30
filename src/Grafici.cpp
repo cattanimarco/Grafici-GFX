@@ -1,5 +1,6 @@
 #include "Grafici.h"
 
 Grafici grafici;
-LinePlot linePlot;
+Plotter::Line line;
+Plotter::Bar bar;
 Boundary fullScreen;

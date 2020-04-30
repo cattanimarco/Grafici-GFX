@@ -37,8 +37,8 @@ class Display
 	/* from normalized display vector to absolute pixel vector */
 	CartesianVector<DisplayAbd> project(CartesianVector<DisplayNorm> vector) const
 	{
-		return CartesianVector<DisplayAbd>{ vector.x() * _driver->width(),
-			                                (1 - vector.y()) * _driver->height() };
+		return CartesianVector<DisplayAbd>{ vector.x() * (_driver->width()-1),
+			                                (1 - vector.y()) * (_driver->height()-1) };
 	};
 
   private:

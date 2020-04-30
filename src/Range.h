@@ -52,6 +52,12 @@ class Range : public Vector2D<T>
 		return (max() + min()) / 2;
 	};
 
+	void update(T value)
+	{
+		min() = graficiMin<T>(min(), value);
+		max() = graficiMax<T>(max(), value);
+	}
+
 	/* map a value in the range to a double between 0 and 1 */
 	double normalize(T value) const
 	{
@@ -63,7 +69,7 @@ class Range : public Vector2D<T>
 	T map(double value) const
 	{
 		/* TODO assert value is between 0.0 and 1.0 */
-		return static_cast<T>( value * max() + (1.0 - value) * min() );
+		return static_cast<T>(value * max() + (1.0 - value) * min());
 	};
 
 	/* shrink a given range by a (normalized) factor */

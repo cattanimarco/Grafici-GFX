@@ -1,12 +1,15 @@
-#ifndef GRAFICI_GFX_PLOT_LINE_H
-#define GRAFICI_GFX_PLOT_LINE_H
+#ifndef GRAFICI_GFX_PLOTTER_LINE_H
+#define GRAFICI_GFX_PLOTTER_LINE_H
 
 #include "../Plotter.h"
 
-class LinePlot : public Plotter
+namespace Plotter
+{
+
+class Line : public Base
 {
   public:
-	void plot(const Display &display, const DataSet &data, const Boundary &boundary, const ColorMap &colorMap) const override
+	void plot(const Display &display, const DataSet::Base &data, const Boundary &boundary, const ColorMap &colorMap) const override
 	{
 		auto it = data.begin();
 		for (auto previous = *(it++); it != data.end(); previous = *(it++))
@@ -20,4 +23,5 @@ class LinePlot : public Plotter
 	}
 };
 
-#endif //GRAFICI_GFX_PLOT_LINE_H
+}
+#endif //GRAFICI_GFX_PLOTTER_LINE_H

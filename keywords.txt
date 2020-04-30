@@ -16,17 +16,17 @@ DisplayDriver   KEYWORD1
 Boundary   KEYWORD1
 RoundBoundary  KEYWORD1
 Plotter KEYWORD1
-DataSourceIterator   KEYWORD1
+DataSource::Iterator   KEYWORD1
 DataCoordinates   KEYWORD1
-DataSource KEYWORD1
+DataSource:: KEYWORD1
 AxisPlot    KEYWORD1
 BarPlot KEYWORD1
 LinePlot    KEYWORD1
 ScatterPlot KEYWORD1
-DataSourceFloat    KEYWORD1
-DataSourceHistogram    KEYWORD1
-DataSourceInterpolator KEYWORD1
-DataSourceSpline   KEYWORD1
+DataSource::Float    KEYWORD1
+DataSource::Histogram    KEYWORD1
+DataSource::LinearInterpolator KEYWORD1
+DataSource::Spline   KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -43,7 +43,7 @@ colorLightGray  KEYWORD2
 colorWhite  KEYWORD2
 axisPlot    KEYWORD2
 barPlot KEYWORD2
-linePlot    KEYWORD2
+Line    KEYWORD2
 scatterPlot KEYWORD2
 
 #######################################

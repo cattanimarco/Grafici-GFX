@@ -4,19 +4,21 @@
 #include "Types.h"
 #include "Adafruit_GFX.h"
 #include "Plotter.h"
-#include "Data.h"
+#include "DataSet.h"
 #include "Boundary.h"
 #include "Color.h"
 #include "Color_defs.h"
 #include "Display.h"
-#include "plots/linePlot.h"
+#include "Plotter/Line.h"
+#include "Plotter/Bar.h"
 
 /* Instance of a Grafici object. Used instead of a singleton patter as it is simpler 
 to use this way for arduino users and there can be multiple instances of this object if it is relly needed */
 class Grafici;
 extern Grafici grafici;
 extern Boundary fullScreen;
-extern LinePlot linePlot;
+extern Plotter::Line line;
+extern Plotter::Bar bar;
 
 class Grafici
 {
@@ -30,17 +32,17 @@ class Grafici
 		_colorMap = &colorMap;
 	}
 
-	void plot(const Plotter &plotter, const DataSet &data, const Boundary &boundary = fullScreen) const
+	void plot(const Plotter::Base &plotter, const DataSet::Base &data, const Boundary &boundary = fullScreen) const
 	{
 		plotter.plot(_display, data, boundary, *_colorMap);
 	}
 
-	void plot(const Plotter &plotter, DataSource<DataNorm> &x, DataSource<DataNorm> &y, DataSource<DataNorm> &c, DataSource<DataNorm> &opt, const Boundary &boundary = fullScreen) const
+	void plot(const Plotter::Base &plotter, DataSource::Base<DataNorm> &x, DataSource::Base<DataNorm> &y, DataSource::Base<DataNorm> &c, DataSource::Base<DataNorm> &opt, const Boundary &boundary = fullScreen) const
 	{
 		plot(plotter, { x, y, c, opt }, boundary);
 	};
 
-	void plot(const Plotter &plotter, DataSource<DataNorm> &x, DataSource<DataNorm> &y, DataSource<DataNorm> &c, const Boundary &boundary = fullScreen) const
+	void plot(const Plotter::Base &plotter, DataSource::Base<DataNorm> &x, DataSource::Base<DataNorm> &y, DataSource::Base<DataNorm> &c, const Boundary &boundary = fullScreen) const
 	{
 		plot(plotter, { x, y, c, c }, boundary);
 	};
@@ -70,7 +72,7 @@ class Grafici
   private:
 	Display _display;
 	const ColorMap *_colorMap;
-	ColorVector _bkgColor{ grafici_colors::black };
+	ColorVector _bkgColor{ Colors::black };
 };
 
 

@@ -1,30 +1,33 @@
-#ifndef GRAFICI_GFX_PLOT_BAR_H
-#define GRAFICI_GFX_PLOT_BAR_H
+#ifndef GRAFICI_GFX_PLOT_BARCODE_H
+#define GRAFICI_GFX_PLOT_BARCODE_H
 
 #include "../Grafici.h"
 
-class BarPlot : public Plotter
+class BarcodePlot : public Plotter
 {
   public:
-	BarPlot()
+	BarcodePlot()
 	{
-		thickness = 0.0;
+		thickness = 0.9;
 	};
 
-	void plot(DisplayDriver *displayDriver, DataSource *dataSource, Boundary *boundary, ColorTheme *theme)
+	void plot(DisplayDriver *displayDriver, DataSource:: *dataSource, Boundary *boundary, ColorTheme *theme)
 	{
-		for (DataSourceIterator it = dataSource->begin(); it != dataSource->end(); ++it)
+		for (DataSource::Iterator it = dataSource->begin(); it != dataSource->end();
+		     ++it)
 		{
 			DataCoordinates baseDataCoordinates = *it;
 			DataCoordinates topDataCoordinates = baseDataCoordinates;
+			DataCoordinates colorDataCoordinates = baseDataCoordinates;
 
 			baseDataCoordinates.y = 0;
+			topDataCoordinates.y = 1;
 
 			if (0.0 == thickness)
 			{
 				displayDriver->drawLine(boundary->project(baseDataCoordinates),
 				                        boundary->project(topDataCoordinates),
-				                        theme->project(topDataCoordinates));
+				                        theme->project(colorDataCoordinates));
 			}
 			else
 			{
@@ -34,7 +37,7 @@ class BarPlot : public Plotter
 
 				displayDriver->fillRectangle(boundary->project(baseDataCoordinates),
 				                             boundary->project(topDataCoordinates),
-				                             theme->project(topDataCoordinates));
+				                             theme->project(colorDataCoordinates));
 			}
 		}
 	};
@@ -43,6 +46,6 @@ class BarPlot : public Plotter
 };
 
 // Declare default plotter object
-BarPlot barPlot;
+BarcodePlot barcodePlot;
 
-#endif //GRAFICI_GFX_PLOT_BAR_H
+#endif // GRAFICI_GFX_PLOT_BARCODES_H

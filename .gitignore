@@ -1,11 +1,5 @@
-#Adafruit_GFX.h
-#Adafruit_GFX.cpp
-#gfxfont.h
-
 *.bin
 .vscode
 *.o
-testing/test
-testing/test.exe
-testing/*.bmp
 *.DS_Store
+*.TODO

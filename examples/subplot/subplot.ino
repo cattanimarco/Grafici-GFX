@@ -4,17 +4,17 @@
 #include "Display.h"
 #include "Grafici.h"
 
-#include "modules/DataSourceFloat.h"
-#include "modules/DataSourceHistogram.h"
-#include "modules/DataSourceSpline.h"
+#include "modules/DataSource::Float.h"
+#include "modules/DataSource::Histogram.h"
+#include "modules/DataSource::Spline.h"
 #include "modules/barPlot.h"
-#include "modules/linePlot.h"
+#include "modules/Line.h"
 
 MCUFRIEND_kbv gfx;
 
-DataSourceFloat dataset;
-DataSourceSpline dataSpline;
-DataSourceHistogram dataHist;
+DataSource::Float dataset;
+DataSource::Spline dataSpline;
+DataSource::Histogram dataHist;
 
 float dataArray[5] = { 1, 0, 2, 2, 1 };
 
@@ -34,7 +34,7 @@ void setup(void)
 	// Divide the screen boundary in 1 row and 2 columns. Select the sub-boundary with index 0 (column on left).
 	// Add a border of 4% on top, bottom and left. Add a border of 2% on right
 	grafici.boundary.fullScreen().subBoundary(1, 2, 0).addBorder(0.04, 0.04, 0.04, 0.02);
-	grafici.plot(linePlot, dataSpline);
+	grafici.plot(Line, dataSpline);
 
 	// Divide the screen boundary in 1 row and 2 columns. Select the sub-boundary with index 1 (column on right).
 	// Add a border of 4% on top, bottom and right. Add a border of 2% on left

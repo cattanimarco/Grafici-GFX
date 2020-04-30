@@ -1,6 +1,6 @@
 #include "Color_defs.h"
 
-namespace grafici_colors
+namespace Colors
 {
 
 /* base colors */
@@ -108,4 +108,4 @@ static const ColorVector cParula[11] = {
 };
 const ColorMap csParula(cParula,11);
 
-} // namespace grafici_colors
+} // namespace Colors

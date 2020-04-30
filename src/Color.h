@@ -1,7 +1,7 @@
 #ifndef GRAFICI_COLOR_H
 #define GRAFICI_COLOR_H
 
-#include "Data.h"
+#include "DataVector.h"
 #include "Range.h"
 #include "Types.h"
 #include "Utils.h"

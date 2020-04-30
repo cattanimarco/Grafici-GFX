@@ -4,14 +4,14 @@
 #include "Grafici.h"
 #include "Display.h"
 
-#include "modules/linePlot.h"
-#include "modules/DataSourceFloat.h"
-#include "modules/DataSourceSpline.h"
+#include "modules/Line.h"
+#include "modules/DataSource::Float.h"
+#include "modules/DataSource::Spline.h"
 
 MCUFRIEND_kbv gfx;
 
-DataSourceFloat dataset;
-DataSourceSpline dataSpline;
+DataSource::Float dataset;
+DataSource::Spline dataSpline;
 
 float dataArray[5] = { 1, 0, 2, 1, 2 };
 
@@ -26,7 +26,7 @@ void setup(void)
 	dataSpline.begin(dataset, 100); // interpolate 5 dataPoints to 100 dataPoints
 
 	grafici.clear();
-	grafici.plot(linePlot, dataSpline); // plot interpolated dataset using a simple line
+	grafici.plot(Line, dataSpline); // plot interpolated dataset using a simple line
 }
 
 void loop(void)

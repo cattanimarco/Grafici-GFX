@@ -3,7 +3,7 @@
 
 #include "Color.h"
 
-namespace grafici_colors
+namespace Colors
 {
 
 extern const ColorVector black;
@@ -27,6 +27,6 @@ extern const ColorMap bright;
 extern const ColorMap csNeon;
 extern const ColorMap csParula;
 
-} // namespace grafici_colors
+} // namespace Colors
 
 #endif //GRAFICI_COLOR_DEFS_H

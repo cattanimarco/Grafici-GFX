@@ -4,15 +4,15 @@
 #include "Display.h"
 #include "Grafici.h"
 
-#include "modules/DataSourceFloat.h"
-#include "modules/DataSourceSpline.h"
-#include "modules/linePlot.h"
+#include "modules/DataSource::Float.h"
+#include "modules/DataSource::Spline.h"
+#include "modules/Line.h"
 #include "modules/scatterPlot.h"
 
 MCUFRIEND_kbv gfx;
 
-DataSourceFloat dataset;
-DataSourceSpline dataSpline;
+DataSource::Float dataset;
+DataSource::Spline dataSpline;
 
 float dataArray[5] = { 1, 0, 2, 1, 2 };
 
@@ -29,7 +29,7 @@ void setup(void)
 
 	grafici.clear();
 	grafici.boundary.fullScreen().addBorder(0.04, 0.04, 0.04, 0.04); // add empty border
-	grafici.plot(linePlot, dataSpline);
+	grafici.plot(Line, dataSpline);
 	// keep the same boundary and plot a second time
 	grafici.plot(scatterPlot, dataSpline);
 }

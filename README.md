@@ -7,7 +7,7 @@ Given an Adafruit_GFX object and an array of floats, creating a plot with the Gr
 
 1. Setup the library
 ```
-DataSourceFloat dataset;
+DataSource::Float dataset;
 float dataArray[5] = { 1, 0, 2, 1, 2 };
 
 grafici.begin(gfx);
@@ -17,7 +17,7 @@ dataset.begin(dataArray, 1, 5);
 2. Plot 
 ```
 grafici.clear();
-grafici.plot(linePlot, dataset);
+grafici.plot(Line, dataset);
 ```
 
 The result is the following
@@ -30,9 +30,9 @@ Now that we plotted our first dataset, lets make it look better.
 In order to make the plot smoother, it is possible to increase the number of datapoint using interpolation. In the example below, for example, it is possible to use a spline interpolation to increase the number of datapoints from 5 to 100.
 
 ```
-DataSourceSpline dataSpline;
+DataSource::Spline dataSpline;
 dataSpline.begin(dataset, 100);
-grafici.plot(linePlot, dataSpline);
+grafici.plot(Line, dataSpline);
 ```
 
 The resulting plot line is much nicer and smoother. Note though that the spline interpolation can introduce new minimum and maximum, especially when there are drastic changes in the plot steepness.
@@ -43,7 +43,7 @@ The resulting plot line is much nicer and smoother. Note though that the spline 
 Grafici-GFX allows you to analyze the data with utlity such as the histogram tranformation, which takes as an input a dataset and outputs a new dataset of the datapoint frequencies. In the example below, we divide the data range into 15 buckets and count the number of occurences for each bucket sub-range.
 
 ```
-DataSourceHistogram dataHist;
+DataSource::Histogram dataHist;
 dataHist.begin(dataSpline, 15);
 grafici.plot(barPlot, dataHist);
 ```
@@ -55,8 +55,8 @@ It is also possible to compare data by having multiple plots side by side
 
 1. Initialize
 ```
-DataSourceFloat dataset;
-DataSourceSpline dataSpline;
+DataSource::Float dataset;
+DataSource::Spline dataSpline;
 grafici.begin(gfx);
 ```
 2. Load the data
@@ -72,7 +72,7 @@ First we fullScreen our plotting libraries, i.e. set the boundary to use the ful
 Sub boundary are indexed from bottom to top and from left to right. Thus, in this case index 0 meanse the leftmost sub boundary.
 ```
 grafici.boundary.fullScreen().subBoundary(1, 2, 0).addBorder(0.04, 0.04, 0.04, 0.02);
-grafici.plot(linePlot, dataSpline);
+grafici.plot(Line, dataSpline);
 ```
 We repeat the same boundary transformation again. This time we select the rightmost sub boundary (with index = 1).
 ```
@@ -87,8 +87,8 @@ grafici.plot(barPlot, dataSpline);
 It is possible to have draw multiple plot one over each other in a layered fashion. This can be achieved just by calling the plot function multiple times without changing the boundary before
 1. Initialize
 ```
-DataSourceFloat dataset;
-DataSourceSpline dataSpline;
+DataSource::Float dataset;
+DataSource::Spline dataSpline;
 grafici.begin(gfx);
 ```
 2. Load data
@@ -104,7 +104,7 @@ grafici.boundary.fullScreen().addBorder(0.04, 0.04, 0.04, 0.04);
 ```
 By not changing the boundary between the two plot calls, we overimpose the two plots.
 ```
-grafici.plot(linePlot, dataSpline); // using the same boundary, plot multiple times
+grafici.plot(Line, dataSpline); // using the same boundary, plot multiple times
 grafici.plot(scatterPlot, dataSpline);
 ```
 
@@ -116,8 +116,8 @@ It is possible, for example, to mirror the boundary both horizzontally and/or ve
 
 1.Initialize
 ```
-DataSourceFloat dataset;
-DataSourceSpline dataSpline;
+DataSource::Float dataset;
+DataSource::Spline dataSpline;
 grafici.begin(gfx);
 ```
 
@@ -169,8 +169,8 @@ Boundary transformations are not limited to rectangular displays. It is possible
 ### Plot types
 1. Initialize
 ```
-DataSourceFloat dataset;
-DataSourceSpline dataSpline;
+DataSource::Float dataset;
+DataSource::Spline dataSpline;
 grafici.begin(gfx);
 ```
 2. Load data
@@ -186,7 +186,7 @@ grafici.style.colorSource = ColorSource::computeFromY;
 
 grafici.boundary.fullScreen().subBoundary(2, 3, 0).addBorder(0.02, 0.02, 0.02, 0.02);
 grafici.plot(axisPlot, dataSpline);
-grafici.plot(linePlot, dataSpline);
+grafici.plot(Line, dataSpline);
 
 grafici.boundary.fullScreen().subBoundary(2, 3, 1).addBorder(0.02, 0.02, 0.02, 0.02);
 grafici.plot(axisPlot, dataSpline);
