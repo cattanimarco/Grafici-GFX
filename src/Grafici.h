@@ -19,6 +19,7 @@ extern Grafici grafici;
 extern Boundary fullScreen;
 extern Plotter::Line line;
 extern Plotter::Bar bar;
+extern Plotter::Bar bar90;
 
 class Grafici
 {

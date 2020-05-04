@@ -5,6 +5,12 @@
 #include "Types.h"
 #include "Vector.h"
 
+enum class BoundaryRotation
+{
+	clockWise0,
+	clockWise90,
+};
+
 class Boundary
 {
   public:
@@ -70,13 +76,25 @@ class Boundary
 	/* from normalized data vector to normalized display vector */
 	virtual CartesianVector<DisplayNorm> project(CartesianVector<DataNorm> data) const
 	{
-		return CartesianVector<DisplayNorm>{ x.map(data.x()), y.map(data.y()) };
+		if (_boundaryRotation == BoundaryRotation::clockWise90)
+		{
+			return CartesianVector<DisplayNorm>{ x.map(data.y()), y.map(data.x()) };
+		}
+		else
+		{
+			return CartesianVector<DisplayNorm>{ x.map(data.x()), y.map(data.y()) };
+		}
 	};
 
 	CartesianVector<DisplayNorm> project(DataVector<DataNorm> data) const
 	{
 		return project({ data.x(), data.y() });
 	}
+
+	BoundaryRotation &boundaryRotation()
+	{
+		return _boundaryRotation;
+	};
 
   protected:
 	/* crop the boundary according to an element in a grid */
@@ -95,6 +113,7 @@ class Boundary
 	/* euclidean coordinates */
 	Range<DisplayNorm> x{ 0, 1 };
 	Range<DisplayNorm> y{ 0, 1 };
+	BoundaryRotation _boundaryRotation{ BoundaryRotation::clockWise0 };
 };
 
 class PolarBoundary : public Boundary

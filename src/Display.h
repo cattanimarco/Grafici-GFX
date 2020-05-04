@@ -1,9 +1,10 @@
 #ifndef GRAFICI_DISPLAY_H
 #define GRAFICI_DISPLAY_H
 
-#include "Types.h"
 #include "Adafruit_GFX.h"
+#include "Types.h"
 #include "Vector.h"
+#include "Utils.h"
 
 class Display
 {
@@ -31,14 +32,16 @@ class Display
 		CartesianVector<DisplayAbd> pixel_bl = project(bl);
 		CartesianVector<DisplayAbd> pixel_tr = project(tr);
 		CartesianVector<DisplayAbd> pixel_delta = pixel_tr - pixel_bl;
-		_driver->fillRect(pixel_bl.x(), pixel_bl.y(), pixel_delta.x(), pixel_delta.y(), color);
+		/* Use min betwee bl and tr as Adafruit GFX does not handle when top is actually bottom and viceversa */
+		/* This can happen when we flip our boundary */
+		_driver->fillRect(graficiMin(pixel_bl.x(),pixel_tr.x()), graficiMin(pixel_bl.y(),pixel_tr.y()), abs(pixel_delta.x()), abs(pixel_delta.y()), color);
 	}
 
 	/* from normalized display vector to absolute pixel vector */
 	CartesianVector<DisplayAbd> project(CartesianVector<DisplayNorm> vector) const
 	{
-		return CartesianVector<DisplayAbd>{ vector.x() * (_driver->width()-1),
-			                                (1 - vector.y()) * (_driver->height()-1) };
+		return CartesianVector<DisplayAbd>{ vector.x() * (_driver->width() - 1),
+			                                (1 - vector.y()) * (_driver->height() - 1) };
 	};
 
   private:

@@ -52,8 +52,7 @@ const ColorVector _cmyk[4] = {
 };
 const ColorMap cmyk(_cmyk,4);
 
-static const ColorVector cHeat[11] = {
-	black,
+static const ColorVector cHeat[10] = {
 	red * 0.05,
 	red * 0.3,
 	red * 0.55,
@@ -65,7 +64,7 @@ static const ColorVector cHeat[11] = {
 	red + green + blue * 0.10,
 	white
 };
-const ColorMap csHeat(cHeat,11);
+const ColorMap csHeat(cHeat,10);
 
 static const ColorVector _bright[6] = {
 	{ 212, 53, 59 },
@@ -77,21 +76,16 @@ static const ColorVector _bright[6] = {
 };
 const ColorMap bright(_bright,6);
 
-static const ColorVector cNeon[12] = {
-	{ 29, 29, 29 },
-	{ 29, 29, 29 },
+static const ColorVector cNeon[7] = {
 	{ 0, 217, 10 },
 	{ 217, 133, 0 },
 	{ 163, 0, 217 },
 	{ 255, 0, 0 },
-	{ 29, 29, 29 },
 	{ 225, 56, 232 },
-	{ 29, 29, 29 },
 	{ 133, 217, 0 },
 	{ 220, 91, 35 },
-	{ 29, 29, 29 },
 };
-const ColorMap csNeon(cNeon,12);
+const ColorMap csNeon(cNeon,7);
 
 static const ColorVector cParula[11] = {
 	{ 62, 38, 168 },

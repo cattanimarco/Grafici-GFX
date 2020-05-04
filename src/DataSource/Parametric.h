@@ -7,10 +7,10 @@ namespace DataSource
 {
 
 template <typename T>
-class Generative : public DataSource::Base<DataNorm>
+class Parametric : public DataSource::Base<DataNorm>
 {
   public:
-	Generative(size_t length)
+	Parametric(size_t length)
 	{
 		_length = length;
 	}
@@ -55,11 +55,11 @@ class Generative : public DataSource::Base<DataNorm>
 	Range<T> _limits{ 0, 0 };
 };
 
-class Linear : public Generative<int>
+class Linear : public Parametric<int>
 {
   public:
 	Linear(size_t length, int offset = 0, int slope = 1)
-	    : Generative{ length }
+	    : Parametric{ length }
 	    , _offset{ offset }
 	    , _slope{ slope }
 	{
@@ -82,11 +82,31 @@ class Linear : public Generative<int>
 	int _slope;
 };
 
-class Constant : public Generative<double>
+class BarIndex : public Parametric<double>
+{
+  public:
+	BarIndex(size_t length)
+	    : Parametric{ length }
+	{
+		refresh();
+	}
+
+	double valueAt(size_t index) const override
+	{
+		return 0.5 + index;
+	}
+
+	void refresh() override
+	{
+		_limits = { 0.0, static_cast<double>(_length)};
+	}
+};
+
+class Constant : public Parametric<double>
 {
   public:
 	Constant(size_t length, double value)
-	    : Generative{ length }
+	    : Parametric{ length }
 	    , _value{ value }
 	{
 		_limits = { 0.0, 1.0 };
