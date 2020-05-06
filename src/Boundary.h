@@ -43,10 +43,17 @@ class Boundary
 	};
 
 	/* addBorderCartesian({leftBorder,rightBorder},{bottomBorder,TopBorder}) */
-	Boundary &shrinkCartesian(const Range<double> &horizzontal, const Range<double> &vertical)
+	Boundary &addBorderRelativeCartesian(const Range<double> &horizzontal, const Range<double> &vertical)
 	{
-		x.shrink(horizzontal);
-		y.shrink(vertical);
+		x.addBorderRelative(horizzontal);
+		y.addBorderRelative(vertical);
+		return *this;
+	};
+
+	Boundary &addBorderAbsoluteCartesian(const Range<double> &horizzontal, const Range<double> &vertical)
+	{
+		x.addBorderAbsolute(horizzontal);
+		y.addBorderAbsolute(vertical);
 		return *this;
 	};
 
@@ -144,10 +151,17 @@ class PolarBoundary : public Boundary
 	};
 
 	/* addBorderPolar({innerRadius,outerRadius},{startAngle,endAngle}) */
-	PolarBoundary &shrinkPolar(const Range<double> &angle, const Range<double> &radius)
+	PolarBoundary &addBorderRelativePolar(const Range<double> &angle, const Range<double> &radius)
 	{
-		a.shrink(angle);
-		r.shrink(radius);
+		a.addBorderRelative(angle);
+		r.addBorderRelative(radius);
+		return *this;
+	};
+	
+	PolarBoundary &addBorderAbsolutePolar(const Range<double> &angle, const Range<double> &radius)
+	{
+		a.addBorderAbsolute(angle);
+		r.addBorderAbsolute(radius);
 		return *this;
 	};
 

@@ -72,13 +72,20 @@ class Range : public Vector2D<T>
 		return static_cast<T>(value * max() + (1.0 - value) * min());
 	};
 
-	/* shrink a given range by a (normalized) factor */
-	void shrink(const Range<double> &shrinkFactor)
+	/* addBorderRelative a given range by a (normalized) factor */
+	void addBorderRelative(const Range<double> &shrinkFactor)
 	{
 		min() += delta() * shrinkFactor.min();
 		max() -= delta() * shrinkFactor.max();
 	};
 
+	/* addBorderRelative a given range by a (normalized) factor */
+	void addBorderAbsolute(const Range<double> &shrinkValue)
+	{
+		min() += shrinkValue.min();
+		max() -= shrinkValue.max();
+	};
+	
 	void flip()
 	{
 		graficiSwap<T>(min(), max());
