@@ -201,7 +201,8 @@ class SplineInterpolator : public Base
 		{
 			_splineData(source, splineData);
 
-			splineData.limits = { 1, 0 };
+			/* we only change the limits if the interpolation overflows the 0-1 range */
+			splineData.limits = { 0, 1 };
 			for (double x = 0; x < 1; x += (1.0 / length()))
 			{
 				/* update splineData min/max */

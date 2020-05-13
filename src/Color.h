@@ -83,14 +83,21 @@ class ColorMap
 	ColorMap() = default;
 
 	ColorMap(const ColorVector *const colors, size_t size)
-	    : colors{ colors }
-	    , size{ size } {};
+	    : _colors{ colors }
+	    , _size{ size } {};
 
 	/* from normalized data value to color in Adafruit GFX format (according to the map) */
 	ColorGFX project(DataVector<DataNorm> val) const
 	{
 		return valueToColor(val.c()).toColorGFX();
 	}
+
+	/* from integer index to color in Adafruit GFX format (according to the map) */
+	ColorGFX project(size_t index) const
+	{
+		return valueToColor(static_cast<DataNorm>(index % _size)/static_cast<DataNorm>(_size-1)).toColorGFX();
+	}
+
 
   private:
 	ColorVector valueToColor(DataNorm val) const
@@ -105,22 +112,22 @@ class ColorMap
 		} // accounts for an input <=0
 		else if (val >= 1)
 		{
-			idx1 = idx2 = size - 1;
+			idx1 = idx2 = _size - 1;
 		} // accounts for an input >=0
 		else
 		{
-			val = val * (size - 1);
+			val = val * (_size - 1);
 			idx1 = floor(val);
 			idx2 = idx1 + 1;
 			fractBetween = val - float(idx1);
 		}
 
-		return ColorVector{ static_cast<ColorUint8>( colors[idx2].red() * fractBetween + colors[idx1].red() * (1 - fractBetween)     ),
-			                static_cast<ColorUint8>( colors[idx2].green() * fractBetween + colors[idx1].green() * (1 - fractBetween) ),
-			                static_cast<ColorUint8>( colors[idx2].blue() * fractBetween + colors[idx1].blue() * (1 - fractBetween)   ) };
+		return ColorVector{ static_cast<ColorUint8>( _colors[idx2].red()   * fractBetween + _colors[idx1].red()   * (1 - fractBetween) ),
+			                static_cast<ColorUint8>( _colors[idx2].green() * fractBetween + _colors[idx1].green() * (1 - fractBetween) ),
+			                static_cast<ColorUint8>( _colors[idx2].blue()  * fractBetween + _colors[idx1].blue()  * (1 - fractBetween) ) };
 	}
-	const ColorVector *const colors;
-	const size_t size;
+	const ColorVector *const _colors;
+	const size_t _size;
 };
 
 #endif /* GRAFICI_COLOR_H */

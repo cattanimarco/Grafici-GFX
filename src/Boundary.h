@@ -18,48 +18,48 @@ class Boundary
 	Boundary() = default;
 
 	Boundary(const Range<DisplayNorm> &horizzontal, const Range<DisplayNorm> &vertical)
-	    : x{ horizzontal }
-	    , y{ vertical } {};
+	    : _x{ horizzontal }
+	    , _y{ vertical } {};
 
 	Boundary(const CartesianVector<DisplayNorm> &origin, const CartesianVector<DisplayNorm> &dimensions)
 	{
-		x = { origin.x(), origin.x() + dimensions.x() };
-		y = { origin.y(), origin.y() + dimensions.y() };
+		_x = { origin.x(), origin.x() + dimensions.x() };
+		_y = { origin.y(), origin.y() + dimensions.y() };
 	};
 
 	/* Transformation functions */
 	Boundary &fullScreen()
 	{
-		x = { 0, 1 };
-		y = { 0, 1 };
+		_x = { 0, 1 };
+		_y = { 0, 1 };
 		return *this;
 	};
 
 	Boundary &setCartesian(const Range<DisplayNorm> &horizzontal, const Range<DisplayNorm> &vertical)
 	{
-		x = horizzontal;
-		y = vertical;
+		_x = horizzontal;
+		_y = vertical;
 		return *this;
 	};
 
-	/* addBorderCartesian({leftBorder,rightBorder},{bottomBorder,TopBorder}) */
-	Boundary &addBorderRelativeCartesian(const Range<double> &horizzontal, const Range<double> &vertical)
+	/* cropCartesian({leftBorder,rightBorder},{bottomBorder,TopBorder}) */
+	Boundary &cropRelativeCartesian(const Range<double> &horizzontal, const Range<double> &vertical)
 	{
-		x.addBorderRelative(horizzontal);
-		y.addBorderRelative(vertical);
+		_x.cropRelative(horizzontal);
+		_y.cropRelative(vertical);
 		return *this;
 	};
 
-	Boundary &addBorderAbsoluteCartesian(const Range<double> &horizzontal, const Range<double> &vertical)
+	Boundary &cropAbsoluteCartesian(const Range<double> &horizzontal, const Range<double> &vertical)
 	{
-		x.addBorderAbsolute(horizzontal);
-		y.addBorderAbsolute(vertical);
+		_x.cropAbsolute(horizzontal);
+		_y.cropAbsolute(vertical);
 		return *this;
 	};
 
 	Boundary &cropGridCartesian(unsigned int rows, unsigned int columns, unsigned int index)
 	{
-		cropGrid(x, y, rows, columns, index);
+		cropGrid(_x, _y, rows, columns, index);
 		return *this;
 	};
 
@@ -70,13 +70,13 @@ class Boundary
 
 	Boundary &horizzontalFlip()
 	{
-		x.flip();
+		_x.flip();
 		return *this;
 	};
 
 	Boundary &verticalFlip()
 	{
-		y.flip();
+		_y.flip();
 		return *this;
 	};
 
@@ -85,12 +85,17 @@ class Boundary
 	{
 		if (_boundaryRotation == BoundaryRotation::clockWise90)
 		{
-			return CartesianVector<DisplayNorm>{ x.map(data.y()), y.map(data.x()) };
+			return CartesianVector<DisplayNorm>{ _x.map(data.y()), _y.map(data.x()) };
 		}
 		else
 		{
-			return CartesianVector<DisplayNorm>{ x.map(data.x()), y.map(data.y()) };
+			return CartesianVector<DisplayNorm>{ _x.map(data.x()), _y.map(data.y()) };
 		}
+	};
+
+	virtual CartesianVector<DisplayNorm> project(DataNorm data) const
+	{
+		return project({ data, data });
 	};
 
 	CartesianVector<DisplayNorm> project(DataVector<DataNorm> data) const
@@ -101,6 +106,11 @@ class Boundary
 	BoundaryRotation &boundaryRotation()
 	{
 		return _boundaryRotation;
+	};
+
+	CartesianVector<DisplayNorm> origin() const
+	{
+		return {_x.min(), _y.min() };
 	};
 
   protected:
@@ -118,8 +128,8 @@ class Boundary
 	};
 
 	/* euclidean coordinates */
-	Range<DisplayNorm> x{ 0, 1 };
-	Range<DisplayNorm> y{ 0, 1 };
+	Range<DisplayNorm> _x{ 0, 1 };
+	Range<DisplayNorm> _y{ 0, 1 };
 	BoundaryRotation _boundaryRotation{ BoundaryRotation::clockWise0 };
 };
 
@@ -150,18 +160,18 @@ class PolarBoundary : public Boundary
 		return *this;
 	};
 
-	/* addBorderPolar({innerRadius,outerRadius},{startAngle,endAngle}) */
-	PolarBoundary &addBorderRelativePolar(const Range<double> &angle, const Range<double> &radius)
+	/* cropPolar({innerRadius,outerRadius},{startAngle,endAngle}) */
+	PolarBoundary &cropRelativePolar(const Range<double> &angle, const Range<double> &radius)
 	{
-		a.addBorderRelative(angle);
-		r.addBorderRelative(radius);
+		a.cropRelative(angle);
+		r.cropRelative(radius);
 		return *this;
 	};
-	
-	PolarBoundary &addBorderAbsolutePolar(const Range<double> &angle, const Range<double> &radius)
+
+	PolarBoundary &cropAbsolutePolar(const Range<double> &angle, const Range<double> &radius)
 	{
-		a.addBorderAbsolute(angle);
-		r.addBorderAbsolute(radius);
+		a.cropAbsolute(angle);
+		r.cropAbsolute(radius);
 		return *this;
 	};
 
@@ -193,8 +203,8 @@ class PolarBoundary : public Boundary
 	{
 		DisplayNorm angle = a.map(data.x());
 		DisplayNorm radius = r.map(data.y());
-		return CartesianVector<DisplayNorm>{ x.mid() + (radius * (x.delta() / 2)) * cos(angle * 2 * M_PI),
-			                                 y.mid() + (radius * (y.delta() / 2)) * sin(angle * 2 * M_PI) };
+		return CartesianVector<DisplayNorm>{ _x.mid() + (radius * (_x.delta() / 2)) * cos(angle * 2 * M_PI),
+			                                 _y.mid() + (radius * (_y.delta() / 2)) * sin(angle * 2 * M_PI) };
 	};
 
   private:

@@ -3,8 +3,8 @@
 
 #include "Adafruit_GFX.h"
 #include "Types.h"
-#include "Vector.h"
 #include "Utils.h"
+#include "Vector.h"
 
 class Display
 {
@@ -34,7 +34,14 @@ class Display
 		CartesianVector<DisplayAbd> pixel_delta = pixel_tr - pixel_bl;
 		/* Use min betwee bl and tr as Adafruit GFX does not handle when top is actually bottom and viceversa */
 		/* This can happen when we flip our boundary */
-		_driver->fillRect(graficiMin(pixel_bl.x(),pixel_tr.x()), graficiMin(pixel_bl.y(),pixel_tr.y()), abs(pixel_delta.x()), abs(pixel_delta.y()), color);
+		_driver->fillRect(graficiMin(pixel_bl.x(), pixel_tr.x()), graficiMin(pixel_bl.y(), pixel_tr.y()), abs(pixel_delta.x()), abs(pixel_delta.y()), color);
+	}
+
+	void circle(CartesianVector<DisplayNorm> center, CartesianVector<DisplayNorm> radius, ColorGFX color) const
+	{
+		CartesianVector<DisplayAbd> circle_center = project(center);
+		CartesianVector<DisplayAbd> circle_radius = project(radius);
+		_driver->drawCircle(circle_center.x(), circle_center.y(), graficiMin(circle_radius.x(),circle_radius.y()), color);
 	}
 
 	/* from normalized display vector to absolute pixel vector */

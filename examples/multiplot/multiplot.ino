@@ -28,7 +28,7 @@ void setup(void)
 	scatterPlot.markerSize = 0.0002; // this is defined a proportion of the area of the plot
 
 	grafici.clear();
-	grafici.boundary.fullScreen().addBorder(0.04, 0.04, 0.04, 0.04); // add empty border
+	grafici.boundary.fullScreen().crop(0.04, 0.04, 0.04, 0.04); // add empty border
 	grafici.plot(Line, dataSpline);
 	// keep the same boundary and plot a second time
 	grafici.plot(scatterPlot, dataSpline);

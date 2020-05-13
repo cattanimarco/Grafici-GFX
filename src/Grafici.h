@@ -11,6 +11,7 @@
 #include "Display.h"
 #include "Plotter/Line.h"
 #include "Plotter/Bar.h"
+#include "Plotter/Scatter.h"
 
 /* Instance of a Grafici object. Used instead of a singleton patter as it is simpler 
 to use this way for arduino users and there can be multiple instances of this object if it is relly needed */
@@ -19,7 +20,7 @@ extern Grafici grafici;
 extern Boundary fullScreen;
 extern Plotter::Line line;
 extern Plotter::Bar bar;
-extern Plotter::Bar bar90;
+extern Plotter::Scatter scatter;
 
 class Grafici
 {

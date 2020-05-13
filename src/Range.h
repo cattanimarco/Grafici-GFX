@@ -72,15 +72,15 @@ class Range : public Vector2D<T>
 		return static_cast<T>(value * max() + (1.0 - value) * min());
 	};
 
-	/* addBorderRelative a given range by a (normalized) factor */
-	void addBorderRelative(const Range<double> &shrinkFactor)
+	/* cropRelative a given range by a (normalized) factor */
+	void cropRelative(const Range<double> &shrinkFactor)
 	{
 		min() += delta() * shrinkFactor.min();
 		max() -= delta() * shrinkFactor.max();
 	};
 
-	/* addBorderRelative a given range by a (normalized) factor */
-	void addBorderAbsolute(const Range<double> &shrinkValue)
+	/* cropRelative a given range by a (normalized) factor */
+	void cropAbsolute(const Range<double> &shrinkValue)
 	{
 		min() += shrinkValue.min();
 		max() -= shrinkValue.max();
