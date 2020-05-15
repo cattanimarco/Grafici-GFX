@@ -110,7 +110,7 @@ class Boundary
 
 	CartesianVector<DisplayNorm> origin() const
 	{
-		return {_x.min(), _y.min() };
+		return {_x.low(), _y.low() };
 	};
 
   protected:
@@ -123,8 +123,8 @@ class Boundary
 		cDelta /= columns;
 		rDelta /= rows;
 
-		columnAxe = { columnAxe.min() + (index % columns) * cDelta, columnAxe.min() + ((index % columns) + 1) * cDelta };
-		rowAxe = { rowAxe.min() + (index / columns) * rDelta, rowAxe.min() + ((index / columns) + 1) * rDelta };
+		columnAxe = { columnAxe.low() + (index % columns) * cDelta, columnAxe.low() + ((index % columns) + 1) * cDelta };
+		rowAxe = { rowAxe.low() + (index / columns) * rDelta, rowAxe.low() + ((index / columns) + 1) * rDelta };
 	};
 
 	/* euclidean coordinates */

@@ -31,7 +31,7 @@ T graficiTrim(const T &value, Range<T> range)
 	range.sort();
 	if (range.contains(value))
 	{
-		return graficiMax<T>(range.min(), graficiMin<T>(range.max(), value));
+		return graficiMax<T>(range.low(), graficiMin<T>(range.high(), value));
 	}
 	else
 	{

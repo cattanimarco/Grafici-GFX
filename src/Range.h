@@ -22,78 +22,78 @@ class Range : public Vector2D<T>
 	{
 	}
 
-	T &min()
+	T &low()
 	{
 		return Vector2D<T>::_first;
 	}
 
-	T &max()
+	T &high()
 	{
 		return Vector2D<T>::_second;
 	}
 
-	const T &min() const
+	const T &low() const
 	{
 		return Vector2D<T>::_first;
 	}
 
-	const T &max() const
+	const T &high() const
 	{
 		return Vector2D<T>::_second;
 	}
 
 	T delta() const
 	{
-		return (max() - min());
+		return (high() - low());
 	};
 
 	T mid() const
 	{
-		return (max() + min()) / 2;
+		return (high() + low()) / 2;
 	};
 
 	void update(T value)
 	{
-		min() = graficiMin<T>(min(), value);
-		max() = graficiMax<T>(max(), value);
+		low() = graficiMin<T>(low(), value);
+		high() = graficiMax<T>(high(), value);
 	}
 
 	/* map a value in the range to a double between 0 and 1 */
 	double normalize(T value) const
 	{
 		/* TODO assert value is between min and max */
-		return (value - min()) / (1.0 * delta());
+		return (value - low()) / (1.0 * delta());
 	};
 
 	/* map a double value from 0 to 1 to the range's corrsponding value  */
 	T map(double value) const
 	{
 		/* TODO assert value is between 0.0 and 1.0 */
-		return static_cast<T>(value * max() + (1.0 - value) * min());
+		return static_cast<T>(value * high() + (1.0 - value) * low());
 	};
 
 	/* cropRelative a given range by a (normalized) factor */
 	void cropRelative(const Range<double> &shrinkFactor)
 	{
-		min() += delta() * shrinkFactor.min();
-		max() -= delta() * shrinkFactor.max();
+		low() += delta() * shrinkFactor.low();
+		high() -= delta() * shrinkFactor.high();
 	};
 
 	/* cropRelative a given range by a (normalized) factor */
 	void cropAbsolute(const Range<double> &shrinkValue)
 	{
-		min() += shrinkValue.min();
-		max() -= shrinkValue.max();
+		low() += shrinkValue.low();
+		high() -= shrinkValue.high();
 	};
 	
 	void flip()
 	{
-		graficiSwap<T>(min(), max());
+		graficiSwap<T>(low(), high());
 	};
 
 	void sort()
 	{
-		if (max() < min())
+		if (high() < low())
 		{
 			flip();
 		}
@@ -101,7 +101,7 @@ class Range : public Vector2D<T>
 
 	bool contains(T value)
 	{
-		if ((graficiMin<T>(min(), max()) <= value) && (value <= graficiMax<T>(min(), max())))
+		if ((graficiMin<T>(low(), high()) <= value) && (value <= graficiMax<T>(low(), high())))
 		{
 			return true;
 		}
