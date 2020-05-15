@@ -25,12 +25,12 @@ class SplineInterpolator : public Base
 		free(_ySpline.b);
 		free(_ySpline.c);
 		free(_ySpline.d);
-		free(_cSpline.b);
-		free(_cSpline.c);
-		free(_cSpline.d);
-		free(_optSpline.b);
-		free(_optSpline.c);
-		free(_optSpline.d);
+		// free(_cSpline.b);
+		// free(_cSpline.c);
+		// free(_cSpline.d);
+		// free(_optSpline.b);
+		// free(_optSpline.c);
+		// free(_optSpline.d);
 	}
 
 	DataVector<DataNorm> at(size_t index) const override
@@ -42,8 +42,10 @@ class SplineInterpolator : public Base
 		{
 			result.x() = _indexToX(index);
 			result.y() = _interpolatedIndex(_y, _ySpline, index);
-			result.c() = _interpolatedIndex(_c, _cSpline, index);
-			result.opt() = _interpolatedIndex(_opt, _optSpline, index);
+			result.c() = _interpolatedIndex(_y, _ySpline, index);
+			result.opt() = _interpolatedIndex(_y, _ySpline, index);
+			//result.c() = _interpolatedIndex(_c, _cSpline, index);
+			//result.opt() = _interpolatedIndex(_opt, _optSpline, index);
 		}
 		return result;
 	}
@@ -68,8 +70,8 @@ class SplineInterpolator : public Base
 
 		/* compute spline params for y, c, and opt channels */
 		_refresh(_y, _ySpline);
-		_refresh(_c, _cSpline);
-		_refresh(_opt, _optSpline);
+		//_refresh(_c, _cSpline);
+		//_refresh(_opt, _optSpline);
 	}
 
 	/* methods to get a datasource from the interpolated dataset */
@@ -212,8 +214,8 @@ class SplineInterpolator : public Base
 	}
 
 	_SplineData _ySpline;
-	_SplineData _cSpline;
-	_SplineData _optSpline;
+	//_SplineData _cSpline;
+	//_SplineData _optSpline;
 	size_t _sourceLength;
 };
 
