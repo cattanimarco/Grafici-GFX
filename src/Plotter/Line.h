@@ -23,5 +23,6 @@ class Line : public Base
 	}
 };
 
-}
+} // namespace Plotter
+
 #endif //GRAFICI_GFX_PLOTTER_LINE_H

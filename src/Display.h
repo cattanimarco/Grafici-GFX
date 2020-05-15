@@ -23,8 +23,7 @@ class Display
 	{
 		auto pixel_begin = project(begin);
 		auto pixel_end = project(end);
-		/* TODO add color blending between two points */
-		_driver->writeLine(pixel_begin.x(), pixel_begin.y(), pixel_end.x(), pixel_end.y(), color);
+		_driver->drawLine(pixel_begin.x(), pixel_begin.y(), pixel_end.x(), pixel_end.y(), color);
 	}
 
 	void fillRect(CartesianVector<DisplayNorm> bl, CartesianVector<DisplayNorm> tr, ColorGFX color) const
@@ -41,7 +40,7 @@ class Display
 	{
 		CartesianVector<DisplayAbd> circle_center = project(center);
 		CartesianVector<DisplayAbd> circle_radius = project(radius);
-		_driver->drawCircle(circle_center.x(), circle_center.y(), graficiMin(circle_radius.x(),circle_radius.y()), color);
+		_driver->drawCircle(circle_center.x(), circle_center.y(), graficiMin(circle_radius.x(), circle_radius.y()), color);
 	}
 
 	/* from normalized display vector to absolute pixel vector */

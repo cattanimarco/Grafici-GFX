@@ -17,8 +17,8 @@ void setup(void)
 	gfx.setRotation(1);
 
 	grafici.begin(gfx, Colors::blackAndWhite);
-  grafici.clear();
-  grafici.plot(line, x, y, c);
+	grafici.clear();
+	grafici.plot(line, x, y, c);
 }
 
 void loop(void)
