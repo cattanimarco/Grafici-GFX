@@ -9,9 +9,20 @@
 #include "Color.h"
 #include "Color_defs.h"
 #include "Display.h"
+
 #include "Plotter/Line.h"
 #include "Plotter/Bar.h"
 #include "Plotter/Scatter.h"
+
+#include "DataSet/LinearInterpolator.h"
+#include "DataSet/SplineInterpolator.h"
+
+#include "DataSource/Array.h"
+#include "DataSource/BarIndex.h"
+#include "DataSource/Constant.h"
+#include "DataSource/Histogram.h"
+#include "DataSource/Linear.h"
+#include "DataSource/Parametric.h"
 
 /* Instance of a Grafici object. Used instead of a singleton patter as it is simpler 
 to use this way for arduino users and there can be multiple instances of this object if it is relly needed */
