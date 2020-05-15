@@ -3,7 +3,7 @@
 
 #include "Grafici.h"
 
-Adafruit_ILI9341 gfx = Adafruit_ILI9341(10, 9);
+Adafruit_ILI9341 tft = Adafruit_ILI9341(10, 9);
 
 constexpr size_t num_elem = 5;
 float array[num_elem] = { 1, 0, 2, 1, 2 };
@@ -13,10 +13,10 @@ DataSource::Constant c(num_elem, 1);
 
 void setup(void)
 {
-	gfx.begin();
-	gfx.setRotation(1);
+	tft.begin();
+	tft.setRotation(1);
 
-	grafici.begin(gfx, Colors::blackAndWhite);
+	grafici.begin(tft, Colors::blackAndWhite);
 	grafici.clear();
 	grafici.plot(line, x, y, c);
 }
