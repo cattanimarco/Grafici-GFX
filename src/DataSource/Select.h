@@ -49,6 +49,10 @@ class Select : public DataSource::Base<DataNorm>
 		{
 			return dataSet.opt();
 		}
+		default:
+		{
+			return 0;
+		}
 		}
 	};
 
@@ -57,14 +61,8 @@ class Select : public DataSource::Base<DataNorm>
 		return _source.length();
 	};
 
-	// size_t &length() override
-	// {
-	// 	return _source.length();
-	// };
-
-	void refresh() override
-	{
-//		_source.refresh();
+	void refresh() override{
+		//		_source.refresh();
 	};
 
   private:
