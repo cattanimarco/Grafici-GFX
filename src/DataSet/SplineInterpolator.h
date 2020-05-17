@@ -1,22 +1,17 @@
 #ifndef GRAFICI_DATASET_SPLINE_INTERPOLATOR_H
 #define GRAFICI_DATASET_SPLINE_INTERPOLATOR_H
 
-#include "../DataSet.h"
-#include "../DataSource/Select.h"
+#include "LinearInterpolator.h"
 
 namespace DataSet
 {
 
-class SplineInterpolator : public Base
+class SplineInterpolator : public LinearInterpolator
 {
   public:
 	SplineInterpolator(DataSource::Base<DataNorm> &x, DataSource::Base<DataNorm> &y, DataSource::Base<DataNorm> &c, DataSource::Base<DataNorm> &opt, size_t interpolationSteps)
-	    : Base(x, y, c, opt)
+	    : LinearInterpolator(x, y, c, opt, interpolationSteps)
 	{
-		// TODO make sure interpolationSteps > _length?
-		// TODO make sure x axis is in increasing order
-		_sourceLength = _length;
-		_length = interpolationSteps;
 		refresh();
 	}
 
@@ -35,61 +30,24 @@ class SplineInterpolator : public Base
 
 	DataVector<DataNorm> at(size_t index) const override
 	{
-
-		DataVector<DataNorm> result{ 0.0, 0.0, 0.0, 0.0 };
-
+		DataVector<DataNorm> result = LinearInterpolator::at(index);
 		if (index < length())
 		{
-			result.x() = _indexToX(index);
 			result.y() = _interpolatedIndex(_y, _ySpline, index);
-			result.c() = _interpolatedIndex(_y, _ySpline, index);
-			result.opt() = _interpolatedIndex(_y, _ySpline, index);
 			//result.c() = _interpolatedIndex(_c, _cSpline, index);
 			//result.opt() = _interpolatedIndex(_opt, _optSpline, index);
 		}
 		return result;
 	}
 
-	size_t &length() override
-	{
-		return _length;
-	};
-
-	const size_t &length() const override
-	{
-		return _length;
-	};
-
 	void refresh() override
 	{
-		/* we save the interpolation steps as the base refresh override the _length value */
-		auto interpolationSteps = _length;
-		Base::refresh();
-		_sourceLength = _length;
-		_length = interpolationSteps;
+		LinearInterpolator::refresh();
 
 		/* compute spline params for y, c, and opt channels */
 		_refresh(_y, _ySpline);
 		//_refresh(_c, _cSpline);
 		//_refresh(_opt, _optSpline);
-	}
-
-	/* methods to get a datasource from the interpolated dataset */
-	DataSource::Select x() const
-	{
-		return DataSource::Select(*this, DataSource::Channel::x);
-	}
-	DataSource::Select y() const
-	{
-		return DataSource::Select(*this, DataSource::Channel::y);
-	}
-	DataSource::Select c() const
-	{
-		return DataSource::Select(*this, DataSource::Channel::c);
-	}
-	DataSource::Select opt() const
-	{
-		return DataSource::Select(*this, DataSource::Channel::opt);
 	}
 
   private:
@@ -121,11 +79,6 @@ class SplineInterpolator : public Base
 		                 splineData.c[bin] * (x - _x.at(bin)) * (x - _x.at(bin)) +
 		                 splineData.d[bin] * (x - _x.at(bin)) * (x - _x.at(bin)) * (x - _x.at(bin));
 		return value;
-	}
-
-	DataNorm _indexToX(const size_t index) const
-	{
-		return (1.0 * index) / (length() - 1);
 	}
 
 	DataNorm _interpolatedIndex(const DataSource::Base<DataNorm> &source, const _SplineData &splineData, const size_t index) const
@@ -216,7 +169,6 @@ class SplineInterpolator : public Base
 	_SplineData _ySpline;
 	//_SplineData _cSpline;
 	//_SplineData _optSpline;
-	size_t _sourceLength;
 };
 
 } // namespace DataSet

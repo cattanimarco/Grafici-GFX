@@ -13,7 +13,9 @@ class LinearInterpolator : public Base
 	LinearInterpolator(DataSource::Base<DataNorm> &x, DataSource::Base<DataNorm> &y, DataSource::Base<DataNorm> &c, DataSource::Base<DataNorm> &opt, size_t interpolationSteps)
 	    : Base(x, y, c, opt)
 	{
+		//TODO warning if datasources have different lengths
 		//make sure interpolationSteps > _length?
+		// TODO make sure x axis is in increasing order
 		_sourceLength = _length;
 		_length = interpolationSteps;
 	}
@@ -25,7 +27,7 @@ class LinearInterpolator : public Base
 		if (index < length())
 		{
 			size_t bin = 0;
-			result.x() = (1.0 * index) / (length() - 1);
+			result.x() = _indexToX(index);
 
 			// compute in which x bin we are
 			while (result.x() > _x.at(bin + 1))
@@ -92,8 +94,13 @@ class LinearInterpolator : public Base
 		return DataSource::Select(*this, DataSource::Channel::opt);
 	}
 
-  private:
+  protected:
 	size_t _sourceLength;
+
+	DataNorm _indexToX(const size_t index) const
+	{
+		return (1.0 * index) / (length() - 1);
+	}
 };
 
 } // namespace DataSet
