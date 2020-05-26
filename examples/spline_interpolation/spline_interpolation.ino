@@ -6,14 +6,14 @@
 Adafruit_ILI9341 tft = Adafruit_ILI9341(10, 9);
 
 constexpr size_t array_elements = 5;
-constexpr size_t interpolated_elements = 50;
+// Chose a big enough number for the samples. Too small and you risk sub-sampling issues
+// Even better chose samples = n + (n-1) * x (in this example x = 20)
+constexpr size_t interpolated_elements = 85;
 
 float dataArray[array_elements] = { 1, 0, 2, 1, 2 };
-float colorArray[array_elements] = { 0, 1, 2, 3, 4 };
 DataSource::Linear x(array_elements);
 DataSource::Array<float> y(dataArray, array_elements);
-DataSource::Array<float> c(colorArray, array_elements);
-DataSet::SplineInterpolator dataSpline{ x, y, c, c, interpolated_elements };
+DataSet::SplineInterpolator dataSpline{ x, y, y, y, interpolated_elements };
 
 void setup(void)
 {
