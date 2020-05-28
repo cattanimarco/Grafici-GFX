@@ -10,10 +10,23 @@ class Histogram : public DataSource::Base<DataNorm>
 {
   public:
 	Histogram(const DataSource::Base<DataNorm> &source, size_t buckets)
-	    : _source{ source }
 	{
 		_buckets = static_cast<size_t *>(malloc(sizeof(size_t) * buckets));
 		_length = buckets;
+		/* Compute histogram */
+		if (_buckets != nullptr)
+		{
+			memset(_buckets, 0, sizeof(size_t) * length());
+			_limits = { 0, 0 };
+
+			for (auto it = source.begin(); it != source.end(); it++)
+			{
+				auto value = *it;
+				size_t bucketIdx = round(value * (length() - 1));
+				_buckets[bucketIdx]++;
+				_limits.update(_buckets[bucketIdx]);
+			}
+		}
 		refresh();
 	};
 
@@ -35,19 +48,7 @@ class Histogram : public DataSource::Base<DataNorm>
 	};
 	void refresh() override
 	{
-		if (_buckets != nullptr)
-		{
-			memset(_buckets, 0, sizeof(size_t) * length());
-			_limits = { 0, 0 };
-
-			for (auto it = _source.begin(); it != _source.end(); it++)
-			{
-				auto value = *it;
-				size_t bucketIdx = round(value * (length() - 1));
-				_buckets[bucketIdx]++;
-				_limits.update(_buckets[bucketIdx]);
-			}
-		}
+		/* We cannot refresh as this class is a one shot */
 	};
 
 	Range<size_t> &limits()
@@ -56,7 +57,6 @@ class Histogram : public DataSource::Base<DataNorm>
 	};
 
   private:
-	const DataSource::Base<DataNorm> &_source;
 	size_t *_buckets{ nullptr };
 	Range<size_t> _limits{ 0, 0 };
 };

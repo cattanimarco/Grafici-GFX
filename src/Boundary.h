@@ -4,6 +4,7 @@
 #include "Range.h"
 #include "Types.h"
 #include "Vector.h"
+#include "DataVector.h"
 
 enum class BoundaryRotation
 {

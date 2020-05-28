@@ -77,19 +77,19 @@ class LinearInterpolator : public Base
 	};
 
 	/* methods to get a datasource from the interpolated dataset */
-	DataSource::Select x() const
+	virtual DataSource::Select x() const
 	{
 		return DataSource::Select(*this, DataSource::Channel::x);
 	}
-	DataSource::Select y() const
+	virtual DataSource::Select y() const
 	{
 		return DataSource::Select(*this, DataSource::Channel::y);
 	}
-	DataSource::Select c() const
+	virtual DataSource::Select c() const
 	{
 		return DataSource::Select(*this, DataSource::Channel::c);
 	}
-	DataSource::Select opt() const
+	virtual DataSource::Select opt() const
 	{
 		return DataSource::Select(*this, DataSource::Channel::opt);
 	}
