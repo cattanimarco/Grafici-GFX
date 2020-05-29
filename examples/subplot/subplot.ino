@@ -7,7 +7,7 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(10, 9);
 
 constexpr size_t source_data_size = 6;
 constexpr size_t spline_size = 56;
-constexpr size_t histogram_size = 20;
+constexpr size_t histogram_size = 10;
 float array[source_data_size] = { 1, 0, 2, 1, 2, 2 };
 
 DataSource::Linear x(source_data_size);
