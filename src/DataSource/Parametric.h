@@ -29,8 +29,19 @@ class Parametric : public DataSource::Base<DataNorm>
 
 	virtual T valueAt(size_t index) const = 0;
 
+	Range<T> &limits()
+	{
+		return _limits;
+	};
+
+	const Range<T> &limits() const
+	{
+		return _limits;
+	};
+
+  protected:
 	/* provide obvious implementation that iterates over all value */
-	virtual void refresh() override
+	virtual void computeLimits()
 	{
 		if (length() > 0)
 		{
@@ -40,21 +51,11 @@ class Parametric : public DataSource::Base<DataNorm>
 				_limits.update(valueAt(idx));
 			}
 		}
-		else
-		{
-			_limits = { 0, 0 };
-		}
 	}
 
-	Range<T> &limits()
-	{
-		return _limits;
-	};
-
-  protected:
 	Range<T> _limits{ 0, 0 };
 };
 
-}
+} // namespace DataSource
 
 #endif /* GRAFICI_DATASOURCE_PARAMETRIC_H */

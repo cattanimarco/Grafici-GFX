@@ -12,7 +12,7 @@ class SplineInterpolator : public LinearInterpolator
 	SplineInterpolator(DataSource::Base<DataNorm> &x, DataSource::Base<DataNorm> &y, DataSource::Base<DataNorm> &c, DataSource::Base<DataNorm> &opt, size_t interpolationSteps)
 	    : LinearInterpolator(x, y, c, opt, interpolationSteps)
 	{
-		refresh();
+		_computeSpline(_y, _ySpline);
 	}
 
 	~SplineInterpolator()
@@ -38,16 +38,6 @@ class SplineInterpolator : public LinearInterpolator
 			//result.opt() = _interpolatedIndex(_opt, _optSpline, index);
 		}
 		return result;
-	}
-
-	void refresh() override
-	{
-		LinearInterpolator::refresh();
-
-		/* compute spline params for y, c, and opt channels */
-		_refresh(_y, _ySpline);
-		//_refresh(_c, _cSpline);
-		//_refresh(_opt, _optSpline);
 	}
 
   private:
@@ -149,7 +139,7 @@ class SplineInterpolator : public LinearInterpolator
 		}
 	}
 
-	void _refresh(const DataSource::Base<DataNorm> &source, _SplineData &splineData)
+	void _computeSpline(const DataSource::Base<DataNorm> &source, _SplineData &splineData)
 	{
 		/* compute spline parameter, than scan all x values to find new min max */
 		if (length() >= _sourceLength)

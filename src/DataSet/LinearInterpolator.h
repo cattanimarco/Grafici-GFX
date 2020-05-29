@@ -67,15 +67,6 @@ class LinearInterpolator : public Base
 		return _length;
 	};
 
-	void refresh() override
-	{
-		/* we save the interpolation steps as the base refresh override the _length value */
-		auto interpolationSteps = _length;
-		Base::refresh();
-		_sourceLength = _length;
-		_length = interpolationSteps;
-	};
-
 	/* methods to get a datasource from the interpolated dataset */
 	virtual DataSource::Select x() const
 	{

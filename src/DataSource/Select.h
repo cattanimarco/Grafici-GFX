@@ -61,10 +61,6 @@ class Select : public DataSource::Base<DataNorm>
 		return _source.length();
 	};
 
-	void refresh() override{
-		//		_source.refresh();
-	};
-
   private:
 	const DataSet::Base &_source;
 	Channel _selection;

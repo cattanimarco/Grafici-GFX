@@ -1,17 +1,17 @@
 #ifndef GRAFICI_GRAFICI_H
 #define GRAFICI_GRAFICI_H
 
-#include "Types.h"
 #include "Adafruit_GFX.h"
-#include "Plotter.h"
-#include "DataSet.h"
 #include "Boundary.h"
 #include "Color.h"
 #include "Color_defs.h"
+#include "DataSet.h"
 #include "Display.h"
+#include "Plotter.h"
+#include "Types.h"
 
-#include "Plotter/Line.h"
 #include "Plotter/Bar.h"
+#include "Plotter/Line.h"
 #include "Plotter/Scatter.h"
 
 #include "DataSet/LinearInterpolator.h"
@@ -36,8 +36,7 @@ extern Plotter::Scatter scatter;
 class Grafici
 {
   public:
-
-  	Grafici() = default;
+	Grafici() = default;
 
 	void begin(Adafruit_GFX &tft, const ColorMap &colorMap)
 	{
@@ -50,12 +49,12 @@ class Grafici
 		plotter.plot(_display, data, boundary, *_colorMap);
 	}
 
-	void plot(const Plotter::Base &plotter, DataSource::Base<DataNorm> &x, DataSource::Base<DataNorm> &y, DataSource::Base<DataNorm> &c, DataSource::Base<DataNorm> &opt, const Boundary &boundary = fullScreen) const
+	void plot(const Plotter::Base &plotter, const DataSource::Base<DataNorm> &x, const DataSource::Base<DataNorm> &y, const DataSource::Base<DataNorm> &c, const DataSource::Base<DataNorm> &opt, const Boundary &boundary = fullScreen) const
 	{
 		plot(plotter, { x, y, c, opt }, boundary);
 	};
 
-	void plot(const Plotter::Base &plotter, DataSource::Base<DataNorm> &x, DataSource::Base<DataNorm> &y, DataSource::Base<DataNorm> &c, const Boundary &boundary = fullScreen) const
+	void plot(const Plotter::Base &plotter, const DataSource::Base<DataNorm> &x, const DataSource::Base<DataNorm> &y, const DataSource::Base<DataNorm> &c, const Boundary &boundary = fullScreen) const
 	{
 		plot(plotter, { x, y, c, c }, boundary);
 	};
@@ -65,7 +64,7 @@ class Grafici
 		return _bkgColor;
 	}
 
-	const ColorMap** colorMap()
+	const ColorMap **colorMap()
 	{
 		return &_colorMap;
 	}
@@ -87,6 +86,5 @@ class Grafici
 	const ColorMap *_colorMap;
 	ColorVector _bkgColor{ Colors::black };
 };
-
 
 #endif //GRAFICI_GRAFICI_H

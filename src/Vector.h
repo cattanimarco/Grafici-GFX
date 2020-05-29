@@ -11,15 +11,15 @@ class Vector2D
 	{
 	}
 
-Vector2D<T> operator-(const Vector2D<T> &other)
-{
-	return Vector2D<T>{ static_cast<T>(this->_first - other._first), static_cast<T>(this->_second - other._second) };
-};
+	Vector2D<T> operator-(const Vector2D<T> &other)
+	{
+		return Vector2D<T>{ static_cast<T>(this->_first - other._first), static_cast<T>(this->_second - other._second) };
+	};
 
-Vector2D<T> operator+(const Vector2D<T> &other)
-{
-	return Vector2D<T>{ static_cast<T>(this->_first + other._first), static_cast<T>(this->_second + other._second) };
-};
+	Vector2D<T> operator+(const Vector2D<T> &other)
+	{
+		return Vector2D<T>{ static_cast<T>(this->_first + other._first), static_cast<T>(this->_second + other._second) };
+	};
 
   protected:
 	T _first;
@@ -34,7 +34,7 @@ class CartesianVector : public Vector2D<T>
 	    : Vector2D<T>{ x, y }
 	{
 	}
-	CartesianVector(Vector2D<T> vector)
+	CartesianVector(const Vector2D<T> vector)
 	    : Vector2D<T>{ vector }
 	{
 	}
@@ -65,11 +65,23 @@ class PolarVector : public Vector2D<T>
 	    : Vector2D<T>{ a, r }
 	{
 	}
+	PolarVector(const Vector2D<T> vector)
+	    : Vector2D<T>{ vector }
+	{
+	}
 	T &a()
 	{
 		return Vector2D<T>::_first;
 	}
 	T &r()
+	{
+		return Vector2D<T>::_second;
+	}
+	const T &a() const
+	{
+		return Vector2D<T>::_first;
+	}
+	const T &r() const
 	{
 		return Vector2D<T>::_second;
 	}

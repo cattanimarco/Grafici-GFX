@@ -27,7 +27,6 @@ class Histogram : public DataSource::Base<DataNorm>
 				_limits.update(_buckets[bucketIdx]);
 			}
 		}
-		refresh();
 	};
 
 	~Histogram()
@@ -46,12 +45,13 @@ class Histogram : public DataSource::Base<DataNorm>
 			return 0.0;
 		}
 	};
-	void refresh() override
-	{
-		/* We cannot refresh as this class is a one shot */
-	};
 
 	Range<size_t> &limits()
+	{
+		return _limits;
+	};
+
+	const Range<size_t> &limits() const
 	{
 		return _limits;
 	};

@@ -11,7 +11,7 @@ class Constant : public Parametric<double>
   public:
 	Constant(size_t length, double value)
 	    : Parametric{ length }
-	    , _value{ value }
+	    , _value{ graficiTrim(value, { 0.0, 1.0 }) }
 	{
 		_limits = { 0.0, 1.0 };
 	}
@@ -21,14 +21,10 @@ class Constant : public Parametric<double>
 		return _value;
 	}
 
-	void refresh() override
-	{
-	}
-
   private:
 	double _value;
 };
 
-}
+} // namespace DataSource
 
 #endif /* GRAFICI_DATASOURCE_CONSTANT_H */

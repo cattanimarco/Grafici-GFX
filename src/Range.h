@@ -17,7 +17,7 @@ template <typename T>
 class Range : public Vector2D<T>
 {
   public:
-	Range(T min, T max)
+	Range(const T min, const T max)
 	    : Vector2D<T>{ min, max }
 	{
 	}
@@ -52,21 +52,21 @@ class Range : public Vector2D<T>
 		return (high() + low()) / 2;
 	};
 
-	void update(T value)
+	void update(const T value)
 	{
 		low() = graficiMin<T>(low(), value);
 		high() = graficiMax<T>(high(), value);
 	}
 
 	/* map a value in the range to a double between 0 and 1 */
-	double normalize(T value) const
+	double normalize(const T value) const
 	{
 		/* TODO assert value is between min and max */
 		return (value - low()) / (1.0 * delta());
 	};
 
 	/* map a double value from 0 to 1 to the range's corrsponding value  */
-	T map(double value) const
+	T map(const double value) const
 	{
 		/* TODO assert value is between 0.0 and 1.0 */
 		return static_cast<T>(value * high() + (1.0 - value) * low());
@@ -85,7 +85,7 @@ class Range : public Vector2D<T>
 		low() += shrinkValue.low();
 		high() -= shrinkValue.high();
 	};
-	
+
 	void flip()
 	{
 		graficiSwap<T>(low(), high());
@@ -99,7 +99,7 @@ class Range : public Vector2D<T>
 		}
 	}
 
-	bool contains(T value)
+	bool contains(const T value) const
 	{
 		if ((graficiMin<T>(low(), high()) <= value) && (value <= graficiMax<T>(low(), high())))
 		{

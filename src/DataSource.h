@@ -15,9 +15,7 @@ class Base
 {
   public:
 	virtual T at(size_t index) const = 0;
-	
-	virtual void refresh() = 0;
-	
+
 	virtual const size_t &length() const
 	{
 		return _length;
@@ -47,7 +45,7 @@ template <typename T>
 class DataIterator
 {
   public:
-	DataIterator(const DataSource::Base<T> &source, int index)
+	DataIterator(const DataSource::Base<T> &source, size_t index)
 	    : _source{ source }
 	    , _index{ index } {};
 	T operator*()
@@ -75,7 +73,7 @@ class DataIterator
 
   private:
 	const DataSource::Base<T> &_source;
-	int _index;
+	size_t _index;
 };
 
 #endif //GRAFICI_DATA_SOURCE_H

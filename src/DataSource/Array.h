@@ -15,8 +15,8 @@ class Array : public DataSource::Base<DataNorm>
 
 	{
 		_length = length;
-		refresh();
-	};
+		computeLimits();
+	}
 
 	DataNorm at(size_t index) const override
 	{
@@ -31,7 +31,18 @@ class Array : public DataSource::Base<DataNorm>
 		}
 	};
 
-	void refresh() override
+	Range<T> &limits()
+	{
+		return _limits;
+	};
+
+	const Range<T> &limits() const
+	{
+		return _limits;
+	};
+
+  private:
+	void computeLimits()
 	{
 		if ((_dataArray != nullptr) && (length() > 0))
 		{
@@ -41,21 +52,11 @@ class Array : public DataSource::Base<DataNorm>
 				_limits.update(_dataArray[idx]);
 			}
 		}
-		else
-		{
-			_limits = { 0, 0 };
-		}
-	};
+	}
 
-	Range<T> &limits()
-	{
-		return _limits;
-	};
-
-  private:
 	Range<T> _limits{ 0, 0 };
 	T *_dataArray{ nullptr };
-};
+}; // namespace DataSource
 
-}
+} // namespace DataSource
 #endif /* GRAFICI_DATASOURCE_ARRAY_H */
