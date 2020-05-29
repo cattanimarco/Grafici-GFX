@@ -12,12 +12,8 @@ float array[source_data_size] = { 1, 0, 2, 1, 2, 2 };
 
 DataSource::Linear x(source_data_size);
 DataSource::Array<float> y(array, source_data_size);
-DataSource::BarIndex histogramX(histogram_size);
-DataSource::Constant dataOpt1(histogram_size, 0.5);
 DataSet::SplineInterpolator dataSpline{ x, y, y, y, spline_size };
 DataSource::Histogram dataHistogram{ dataSpline.y(), histogram_size };
-DataSource::Constant barY(spline_size, 1.0);
-DataSource::Constant dataOpt2(spline_size, 0.0);
 
 Boundary leftBoundary;
 Boundary rightTopBoundary;
@@ -32,16 +28,16 @@ void setup(void)
   grafici.begin(tft, Colors::csParula);
   grafici.clear();
 
-  leftBoundary.cropGridCartesian(1, 2, 0, 0).cropAbsoluteCartesian({ 0.04, 0.02 }, { 0.04, 0.04 });
-  rightTopBoundary.cropGridCartesian(2, 2, 0, 1).cropAbsoluteCartesian({ 0.02, 0.04 }, { 0.04, 0.02 });
-  rightBottomBoundary.cropGridCartesian(2, 2, 1, 1).cropAbsoluteCartesian({ 0.02, 0.04 }, { 0.02, 0.04 });
+  leftBoundary.cropGridCartesian(1, 2, 0, 0);
+  leftBoundary.cropAbsoluteCartesian({ 0.04, 0.02 }, { 0.04, 0.04 });
+  rightTopBoundary.cropGridCartesian(2, 2, 0, 1);
+  rightTopBoundary.cropAbsoluteCartesian({ 0.02, 0.04 }, { 0.04, 0.02 });
+  rightBottomBoundary.cropGridCartesian(2, 2, 1, 1);
+  rightBottomBoundary.cropAbsoluteCartesian({ 0.02, 0.04 }, { 0.02, 0.04 });
 
   grafici.plot(line, dataSpline, leftBoundary);
-  grafici.plot(bar, histogramX, dataHistogram, histogramX, dataOpt1, rightTopBoundary);
-  DataSource::Select splineY = dataSpline.y();
-  grafici.plot(bar, splineY, barY, splineY, dataOpt2, rightBottomBoundary);
-
-
+  grafici.plot(bar, DataSource::BarIndex(histogram_size), dataHistogram, DataSource::BarIndex(histogram_size), DataSource::Constant(histogram_size, 0.5), rightTopBoundary);
+  grafici.plot(bar, dataSpline.y(), DataSource::Constant(spline_size, 1.0), dataSpline.y(), DataSource::Constant(spline_size, 0.0), rightBottomBoundary);
 }
 
 void loop(void)

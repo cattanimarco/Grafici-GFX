@@ -19,12 +19,13 @@ DataSet::LinearInterpolator dataLinear{ x, y, c, c, interpolated_elements };
 
 void setup(void)
 {
-	tft.begin();
-	tft.setRotation(1);
+  tft.begin();
+  tft.setRotation(1);
 
-	grafici.begin(tft, Colors::csHeat);
-	grafici.clear();
-	grafici.plot(line, dataLinear);
+  grafici.begin(tft, Colors::csHeat);
+  grafici.clear();
+
+  grafici.plot(line, dataLinear);
 }
 
 void loop(void)
