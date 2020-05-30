@@ -11,9 +11,9 @@ constexpr size_t array_elements = 5;
 constexpr size_t interpolated_elements = 85;
 float dataArray[array_elements] = { 1, 0, 2, 1, 2 };
 
-DataSource::Linear x(array_elements);
-DataSource::Array<float> y(dataArray, array_elements);
-DataSet::SplineInterpolator dataSpline{ x, y, y, y, interpolated_elements };
+Linear x(array_elements);
+ArrayFloat y(dataArray, array_elements);
+SplineInterpolator dataSpline{ x, y, y, y, interpolated_elements };
 
 void setup(void)
 {

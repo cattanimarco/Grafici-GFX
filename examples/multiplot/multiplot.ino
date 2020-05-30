@@ -10,10 +10,10 @@ constexpr size_t spline_size = 56;
 constexpr size_t histogram_size = 20;
 float array[source_data_size] = { 1, 0, 2, 1, 2, 2 };
 
-DataSource::Linear x(source_data_size);
-DataSource::Array<float> y(array, source_data_size);
-DataSet::SplineInterpolator dataSpline{ x, y, y, y, spline_size };
-DataSource::Histogram dataHistogram{ dataSpline.y(), histogram_size };
+Linear x(source_data_size);
+ArrayFloat y(array, source_data_size);
+SplineInterpolator dataSpline{ x, y, y, y, spline_size };
+Histogram dataHistogram{ dataSpline.y(), histogram_size };
 
 Boundary barBoundary;
 Boundary lineBoundary;
@@ -30,7 +30,7 @@ void setup(void)
   barBoundary.boundaryRotation() = BoundaryRotation::clockWise90;
   lineBoundary.cropRelativeCartesian({ 0.04, 0.04 }, { 0.04, 0.04 });
 
-  grafici.plot(bar, DataSource::BarIndex(histogram_size), dataHistogram, DataSource::BarIndex(histogram_size), DataSource::Constant(histogram_size, 0.0), barBoundary);
+  grafici.plot(bar, BarIndex(histogram_size), dataHistogram, BarIndex(histogram_size), Constant(histogram_size, 0.0), barBoundary);
   grafici.plot(line, dataSpline, lineBoundary);
 }
 

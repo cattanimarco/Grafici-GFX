@@ -12,10 +12,10 @@ constexpr size_t interpolated_elements = 85;
 
 float dataArray[array_elements] = { 1, 0, 2, 1, 2 };
 float colorArray[array_elements] = { 0, 1, 2, 3, 4 };
-DataSource::Linear x(array_elements);
-DataSource::Array<float> y(dataArray, array_elements);
-DataSource::Array<float> c(colorArray, array_elements);
-DataSet::LinearInterpolator dataLinear{ x, y, c, c, interpolated_elements };
+Linear x(array_elements);
+ArrayFloat y(dataArray, array_elements);
+ArrayFloat c(colorArray, array_elements);
+LinearInterpolator dataLinear{ x, y, c, c, interpolated_elements };
 
 void setup(void)
 {

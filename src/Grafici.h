@@ -26,6 +26,8 @@
 
 /* Instance of a Grafici object. Used instead of a singleton patter as it is simpler 
 to use this way for arduino users and there can be multiple instances of this object if it is relly needed */
+
+/* GLOBAL VARS */
 class Grafici;
 extern Grafici grafici;
 extern Boundary fullScreen;
@@ -33,6 +35,24 @@ extern Plotter::Line line;
 extern Plotter::Bar bar;
 extern Plotter::Scatter scatter;
 
+/* ALIASES */
+namespace DataSource
+{
+/* this is to hide templates to final users */
+using ArrayFloat = Array<float>;
+using ArrayInt = Array<int>;
+} // namespace DataSource
+
+using DataSet::SplineInterpolator;
+using DataSet::LinearInterpolator;
+using DataSource::Constant;
+using DataSource::Linear;
+using DataSource::BarIndex;
+using DataSource::ArrayFloat;
+using DataSource::ArrayInt;
+using DataSource::Histogram;
+
+/* MAIN CLASS */
 class Grafici
 {
   public:
