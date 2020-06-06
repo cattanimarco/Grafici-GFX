@@ -1,10 +1,10 @@
 #ifndef GRAFICI_BOUNDARY_H
 #define GRAFICI_BOUNDARY_H
 
+#include "DataVector.h"
 #include "Range.h"
 #include "Types.h"
 #include "Vector.h"
-#include "DataVector.h"
 
 enum class BoundaryRotation
 {
@@ -104,6 +104,21 @@ class Boundary
 		return project({ data.x(), data.y() });
 	}
 
+	CartesianVector<DisplayNorm> projectAbs(CartesianVector<DataNorm> data) const
+	{
+		return { data.x() * _x.delta(), data.y() * _y.delta() };
+	}
+
+	CartesianVector<DisplayNorm> projectAbs(DataVector<DataNorm> data) const
+	{
+		return projectAbs({ data.x(), data.y() });
+	}
+
+	CartesianVector<DisplayNorm> projectAbs(DataNorm data) const
+	{
+		return projectAbs({ data, data });
+	}
+
 	BoundaryRotation &boundaryRotation()
 	{
 		return _boundaryRotation;
@@ -111,7 +126,7 @@ class Boundary
 
 	CartesianVector<DisplayNorm> origin() const
 	{
-		return {_x.low(), _y.low() };
+		return { _x.low(), _y.low() };
 	};
 
   protected:

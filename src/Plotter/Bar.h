@@ -14,9 +14,9 @@ class Bar : public Base
 
 		for (auto it = data.begin(); it != data.end(); ++it)
 		{
-			auto top = *it;
-			auto bottom = top;
-			bottom.y() = 0.0;
+			auto tr = *it;
+			auto bl = tr;
+			bl.y() = 0.0;
 
 			/* use optional channel to decide thickness */
 			auto thickness = (*it).opt();
@@ -24,17 +24,24 @@ class Bar : public Base
 
 			if (0.0 == thickness)
 			{
-				auto b = boundary.project(bottom);
-				auto t = boundary.project(top);
+				auto b = boundary.project(bl);
+				auto t = boundary.project(tr);
 				display.line(b, t, color);
 			}
 			else
 			{
-				bottom.x() -= thickness / (data.length() * 2.0);
-				top.x() += thickness / (data.length() * 2.0);
-				auto b = boundary.project(bottom);
-				auto t = boundary.project(top);
-				display.fillRect(b, t, color);
+				auto br = bl;
+				auto tl = tr;
+				auto d = thickness / (data.length() * 2.0);
+				bl.x() -= d;
+				br.x() += d;
+				tr.x() += d;
+				tl.x() -= d;
+				auto b0 = boundary.project(bl);
+				auto b1 = boundary.project(br);
+				auto t0 = boundary.project(tl);
+				auto t1 = boundary.project(tr);
+				display.fillRect(b0, b1, t0, t1, color);
 			}
 		}
 	}
