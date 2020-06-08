@@ -13,6 +13,7 @@
 #include "Plotter/Bar.h"
 #include "Plotter/Line.h"
 #include "Plotter/Scatter.h"
+#include "Plotter/Axis.h"
 
 #include "DataSet/LinearInterpolator.h"
 #include "DataSet/SplineInterpolator.h"
@@ -34,6 +35,7 @@ extern Boundary fullScreen;
 extern Plotter::Line line;
 extern Plotter::Bar bar;
 extern Plotter::Scatter scatter;
+extern Plotter::Axis axis;
 
 /* ALIASES */
 namespace DataSource

@@ -16,7 +16,7 @@ class LinearInterpolator : public Base
 		//TODO warning if datasources have different lengths
 		//make sure interpolationSteps > _length?
 		// TODO make sure x axis is in increasing order
-		_sourceLength = _length;
+		_sourceLength = _x.length();
 		_length = interpolationSteps;
 	}
 

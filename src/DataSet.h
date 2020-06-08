@@ -35,9 +35,9 @@ class Base : public DataSource::Base<DataVector<DataNorm>>
 	{
 		/* TODO warning if lengths are different */
 		size_t len = _x.length();
-		len = graficiMin<size_t>(len, _y.length());
-		len = graficiMin<size_t>(len, _c.length());
-		len = graficiMin<size_t>(len, _opt.length());
+		len = graficiMax<size_t>(len, _y.length());
+		len = graficiMax<size_t>(len, _c.length());
+		len = graficiMax<size_t>(len, _opt.length());
 		return len;
 	}
 
