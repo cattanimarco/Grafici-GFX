@@ -22,7 +22,7 @@ void setup(void)
   tft.begin();
   tft.setRotation(1);
 
-  grafici.begin(tft, Colors::csHeat);
+  grafici.begin(tft, Colors::heat);
   grafici.clear();
 
   grafici.plot(line, dataLinear);

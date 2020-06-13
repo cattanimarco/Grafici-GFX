@@ -25,7 +25,7 @@ void setup(void)
   tft.begin();
   tft.setRotation(1);
 
-  grafici.begin(tft, Colors::csParula);
+  grafici.begin(tft, Colors::parula);
   grafici.clear();
 
   leftBoundary.cropGridCartesian(1, 2, 0, 0);

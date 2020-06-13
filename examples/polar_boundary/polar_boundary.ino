@@ -19,7 +19,7 @@ void setup(void)
   tft.begin();
   tft.setRotation(1);
 
-  grafici.begin(tft, Colors::csParula);
+  grafici.begin(tft, Colors::parula);
   grafici.clear();
 
   PolarBoundary leftBoundary;

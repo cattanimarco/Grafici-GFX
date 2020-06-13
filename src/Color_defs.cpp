@@ -18,16 +18,16 @@ const ColorVector magenta = red + blue;
 const ColorVector white = red + green + blue;
 
 /* special colors */
-const ColorVector a_dash_of_light = white * 0.2; // add/subtract a_dash_of_light to make a color lighter/darker (max 5 steps)
+const ColorVector a_dash_of_light = white * 0.1; // add/subtract a_dash_of_light to make a color lighter/darker (max 5 steps)
 
 /* Color palettes */
 static const ColorVector _rainbow[6] = {
+	magenta,
 	blue,
 	cyan,
 	green,
 	yellow,
 	red,
-	magenta
 };
 const ColorMap rainbow(_rainbow,6);
 
@@ -44,16 +44,14 @@ static const ColorVector _blackAndWhite[2] = {
 };
 const ColorMap blackAndWhite(_blackAndWhite,2);
 
-const ColorVector _cmyk[4] = {
-	black,
+const ColorVector _cmy[3] = {
 	yellow,
 	magenta,
 	cyan
 };
-const ColorMap cmyk(_cmyk,4);
+const ColorMap cmy(_cmy,3);
 
-static const ColorVector cHeat[10] = {
-	red * 0.05,
+static const ColorVector _heat[9] = {
 	red * 0.3,
 	red * 0.55,
 	red * 0.85,
@@ -64,7 +62,7 @@ static const ColorVector cHeat[10] = {
 	red + green + blue * 0.10,
 	white
 };
-const ColorMap csHeat(cHeat,10);
+const ColorMap heat(_heat,9);
 
 static const ColorVector _bright[6] = {
 	{ 212, 53, 59 },
@@ -76,18 +74,14 @@ static const ColorVector _bright[6] = {
 };
 const ColorMap bright(_bright,6);
 
-static const ColorVector cNeon[7] = {
-	{ 0, 217, 10 },
-	{ 217, 133, 0 },
-	{ 163, 0, 217 },
-	{ 255, 0, 0 },
-	{ 225, 56, 232 },
-	{ 133, 217, 0 },
-	{ 220, 91, 35 },
+static const ColorVector _semaphore[3] = {
+	green,
+	yellow,
+	red,
 };
-const ColorMap csNeon(cNeon,7);
+const ColorMap semaphore(_semaphore,3);
 
-static const ColorVector cParula[11] = {
+static const ColorVector _parula[11] = {
 	{ 62, 38, 168 },
 	{ 71, 65, 229 },
 	{ 69, 99, 252 },
@@ -100,6 +94,6 @@ static const ColorVector cParula[11] = {
 	{ 254, 195, 56 },
 	{ 245, 233, 36 },
 };
-const ColorMap csParula(cParula,11);
+const ColorMap parula(_parula,11);
 
 } // namespace Colors

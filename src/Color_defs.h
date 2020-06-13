@@ -21,11 +21,11 @@ extern const ColorVector a_dash_of_light; // add/subtract a_dash_of_light to mak
 extern const ColorMap rainbow;
 extern const ColorMap temperature;
 extern const ColorMap blackAndWhite;
-extern const ColorMap cmyk;
-extern const ColorMap csHeat;
+extern const ColorMap cmy;
+extern const ColorMap heat;
 extern const ColorMap bright;
-extern const ColorMap csNeon;
-extern const ColorMap csParula;
+extern const ColorMap semaphore;
+extern const ColorMap parula;
 
 } // namespace Colors
 
