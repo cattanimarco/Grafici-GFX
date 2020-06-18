@@ -5,6 +5,7 @@ namespace Colors
 
 /* base colors */
 const ColorVector black{ 0, 0, 0 };
+const ColorVector gunpowder{ 63, 63, 63 };
 const ColorVector silver{ 192, 192, 192 };
 const ColorVector red{ 255, 0, 0 };
 const ColorVector green{ 0, 255, 0 };
@@ -39,7 +40,7 @@ static const ColorVector _temperature[3] = {
 const ColorMap temperature(_temperature,3);
 
 static const ColorVector _blackAndWhite[2] = {
-	black,
+	gunpowder,
 	white
 };
 const ColorMap blackAndWhite(_blackAndWhite,2);

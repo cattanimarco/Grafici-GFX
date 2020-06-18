@@ -7,6 +7,7 @@ namespace Colors
 {
 
 extern const ColorVector black;
+extern const ColorVector gunpowder;
 extern const ColorVector silver;
 extern const ColorVector red;
 extern const ColorVector green;
