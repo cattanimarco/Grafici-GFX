@@ -62,7 +62,7 @@ class Range : public Vector2D<T>
 	double normalize(const T value) const
 	{
 		/* TODO assert value is between min and max */
-		return (value - low()) / (1.0 * delta());
+		return static_cast<double>(value - low()) / static_cast<double>(delta());
 	};
 
 	/* map a double value from 0 to 1 to the range's corrsponding value  */

@@ -26,6 +26,8 @@ class Vector2D
 	T _second;
 };
 
+
+
 template <typename T>
 class CartesianVector : public Vector2D<T>
 {

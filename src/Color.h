@@ -92,6 +92,11 @@ class ColorMap
 		return valueToColor(val.c()).toColorGFX();
 	}
 
+	ColorGFX project(DataNorm val) const
+	{
+		return valueToColor(val).toColorGFX();
+	}
+
 	/* from integer index to color in Adafruit GFX format (according to the map) */
 	ColorGFX project(size_t index) const
 	{

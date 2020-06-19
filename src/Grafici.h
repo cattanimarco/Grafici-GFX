@@ -13,6 +13,7 @@
 #include "Plotter/Bar.h"
 #include "Plotter/Line.h"
 #include "Plotter/Scatter.h"
+#include "Plotter/Heatmap.h"
 #include "Plotter/Axis.h"
 
 #include "DataSet/LinearInterpolator.h"
@@ -35,6 +36,7 @@ extern Boundary fullScreen;
 extern Plotter::Line line;
 extern Plotter::Bar bar;
 extern Plotter::Scatter scatter;
+extern Plotter::Heatmap heatmap;
 extern Plotter::Axis axis;
 
 /* ALIASES */
@@ -47,6 +49,7 @@ using ArrayInt = Array<int>;
 
 using DataSet::SplineInterpolator;
 using DataSet::LinearInterpolator;
+
 using DataSource::Constant;
 using DataSource::Linear;
 using DataSource::BarIndex;
