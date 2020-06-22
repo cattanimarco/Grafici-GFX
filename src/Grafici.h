@@ -14,6 +14,7 @@
 #include "Plotter/Line.h"
 #include "Plotter/Scatter.h"
 #include "Plotter/Heatmap.h"
+#include "Plotter/Bubblemap.h"
 #include "Plotter/Axis.h"
 
 #include "DataSet/LinearInterpolator.h"
@@ -37,6 +38,7 @@ extern Plotter::Line line;
 extern Plotter::Bar bar;
 extern Plotter::Scatter scatter;
 extern Plotter::Heatmap heatmap;
+extern Plotter::Bubblemap bubblemap;
 extern Plotter::Axis axis;
 
 /* ALIASES */

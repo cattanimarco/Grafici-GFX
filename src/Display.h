@@ -64,6 +64,22 @@ class Display
 		}
 	}
 
+	/* TODO provide a deformable circle given a 4-point rectangle */
+	void fillCircle(CartesianVector<DisplayNorm> center, CartesianVector<DisplayNorm> radius, ColorGFX color) const
+	{
+		CartesianVector<DisplayAbd> circle_center = project(center);
+
+		if ((radius.x() == 0) || (radius.y() == 0))
+		{
+			_driver->drawPixel(circle_center.x(), circle_center.y(), color);
+		}
+		else
+		{
+			CartesianVector<DisplayAbd> circle_radius = project(radius);
+			_driver->fillCircle(circle_center.x(), circle_center.y(), graficiMin(circle_radius.x(), circle_radius.y()), color);
+		}
+	}
+
 	void point(CartesianVector<DisplayNorm> center, ColorGFX color) const
 	{
 		circle(center, { 0, 0 }, color);

@@ -16,7 +16,7 @@ class Scatter : public Base
 			auto dataPoint = *it;
 			auto center = boundary.project(dataPoint);
 			/* we need a vector with origin 0,0 to be used as a radius */
-			auto radius = boundary.projectAbs(dataPoint.opt());
+			auto radius = boundary.projectAbs(dataPoint.opt()/2.0);
 			auto color = colorMap.project(dataPoint);
 			display.circle(center, radius, color);
 		}
