@@ -15,17 +15,18 @@
 #include "Plotter/Scatter.h"
 #include "Plotter/Heatmap.h"
 #include "Plotter/Bubblemap.h"
+#include "Plotter/Cliquegraph.h"
 #include "Plotter/Axis.h"
 
-#include "DataSet/LinearInterpolator.h"
-#include "DataSet/SplineInterpolator.h"
+#include "DataSets/LinearInterpolator.h"
+#include "DataSets/SplineInterpolator.h"
 
-#include "DataSource/Array.h"
-#include "DataSource/BarIndex.h"
-#include "DataSource/Constant.h"
-#include "DataSource/Histogram.h"
-#include "DataSource/Linear.h"
-#include "DataSource/Parametric.h"
+#include "DataSources/Array.h"
+#include "DataSources/BarIndex.h"
+#include "DataSources/Constant.h"
+#include "DataSources/Histogram.h"
+#include "DataSources/Linear.h"
+#include "DataSources/Parametric.h"
 
 /* Instance of a Grafici object. Used instead of a singleton patter as it is simpler 
 to use this way for arduino users and there can be multiple instances of this object if it is relly needed */
@@ -39,25 +40,26 @@ extern Plotter::Bar bar;
 extern Plotter::Scatter scatter;
 extern Plotter::Heatmap heatmap;
 extern Plotter::Bubblemap bubblemap;
+extern Plotter::Cliquegraph cliquegraph;
 extern Plotter::Axis axis;
 
 /* ALIASES */
-namespace DataSource
+namespace DataSources
 {
 /* this is to hide templates to final users */
 using ArrayFloat = Array<float>;
 using ArrayInt = Array<int>;
-} // namespace DataSource
+} // namespace DataSources
 
-using DataSet::SplineInterpolator;
-using DataSet::LinearInterpolator;
+using DataSets::SplineInterpolator;
+using DataSets::LinearInterpolator;
 
-using DataSource::Constant;
-using DataSource::Linear;
-using DataSource::BarIndex;
-using DataSource::ArrayFloat;
-using DataSource::ArrayInt;
-using DataSource::Histogram;
+using DataSources::Constant;
+using DataSources::Linear;
+using DataSources::BarIndex;
+using DataSources::ArrayFloat;
+using DataSources::ArrayInt;
+using DataSources::Histogram;
 
 /* MAIN CLASS */
 class Grafici
@@ -71,17 +73,17 @@ class Grafici
 		_colorMap = &colorMap;
 	}
 
-	void plot(const Plotter::Base &plotter, const DataSet::Base &data, const Boundary &boundary = fullScreen) const
+	void plot(const Plotter::Base &plotter, const DataSets::DataSet &data, const Boundary &boundary = fullScreen) const
 	{
 		plotter.plot(_display, data, boundary, *_colorMap);
 	}
 
-	void plot(const Plotter::Base &plotter, const DataSource::Base<DataNorm> &x, const DataSource::Base<DataNorm> &y, const DataSource::Base<DataNorm> &c, const DataSource::Base<DataNorm> &opt, const Boundary &boundary = fullScreen) const
+	void plot(const Plotter::Base &plotter, const DataSources::DataSource<DataNorm> &x, const DataSources::DataSource<DataNorm> &y, const DataSources::DataSource<DataNorm> &c, const DataSources::DataSource<DataNorm> &opt, const Boundary &boundary = fullScreen) const
 	{
 		plot(plotter, { x, y, c, opt }, boundary);
 	};
 
-	void plot(const Plotter::Base &plotter, const DataSource::Base<DataNorm> &x, const DataSource::Base<DataNorm> &y, const DataSource::Base<DataNorm> &c, const Boundary &boundary = fullScreen) const
+	void plot(const Plotter::Base &plotter, const DataSources::DataSource<DataNorm> &x, const DataSources::DataSource<DataNorm> &y, const DataSources::DataSource<DataNorm> &c, const Boundary &boundary = fullScreen) const
 	{
 		plot(plotter, { x, y, c, c }, boundary);
 	};

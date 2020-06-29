@@ -3,7 +3,7 @@
 
 #include "Parametric.h"
 
-namespace DataSource
+namespace DataSources
 {
 class Linear : public Parametric<double>
 {
@@ -32,6 +32,6 @@ class Linear : public Parametric<double>
 	double _slope;
 };
 
-} // namespace DataSource
+} // namespace DataSources
 
 #endif /* GRAFICI_DATASOURCE_LINEAR_H */

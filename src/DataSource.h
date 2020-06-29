@@ -7,11 +7,11 @@
 template <typename T>
 class DataIterator;
 
-namespace DataSource
+namespace DataSources
 {
 
 template <typename T = DataNorm>
-class Base
+class DataSource
 {
   public:
 	virtual T at(size_t index) const = 0;
@@ -39,13 +39,13 @@ class Base
 	size_t _length{ 0 };
 };
 
-} // namespace DataSource
+} // namespace DataSources
 
 template <typename T>
 class DataIterator
 {
   public:
-	DataIterator(const DataSource::Base<T> &source, size_t index)
+	DataIterator(const DataSources::DataSource<T> &source, size_t index)
 	    : _source{ source }
 	    , _index{ index } {};
 	T operator*()
@@ -66,13 +66,20 @@ class DataIterator
 		return temp;
 	}
 
+	DataIterator<T> operator+(int other)
+	{
+		DataIterator<T> temp = *this;
+		temp._index+=other;
+		return temp;
+	}
+
 	bool operator!=(DataIterator<T> const &other)
 	{
 		return ((&(this->_source) != &(other._source)) || ((this->_index) != (other._index)));
 	};
 
   private:
-	const DataSource::Base<T> &_source;
+	const DataSources::DataSource<T> &_source;
 	size_t _index;
 };
 

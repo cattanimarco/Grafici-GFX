@@ -9,7 +9,7 @@ namespace Plotter
 class Line : public Base
 {
   public:
-	void plot(const Display &display, const DataSet::Base &data, const Boundary &boundary, const ColorMap &colorMap) const override
+	void plot(const Display &display, const DataSets::DataSet &data, const Boundary &boundary, const ColorMap &colorMap) const override
 	{
 		auto it = data.begin();
 		for (auto previous = *(it++); it != data.end(); previous = *(it++))

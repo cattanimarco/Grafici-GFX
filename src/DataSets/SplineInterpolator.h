@@ -3,13 +3,13 @@
 
 #include "LinearInterpolator.h"
 
-namespace DataSet
+namespace DataSets
 {
 
 class SplineInterpolator : public LinearInterpolator
 {
   public:
-	SplineInterpolator(DataSource::Base<DataNorm> &x, DataSource::Base<DataNorm> &y, DataSource::Base<DataNorm> &c, DataSource::Base<DataNorm> &opt, size_t interpolationSteps)
+	SplineInterpolator(DataSources::DataSource<DataNorm> &x, DataSources::DataSource<DataNorm> &y, DataSources::DataSource<DataNorm> &c, DataSources::DataSource<DataNorm> &opt, size_t interpolationSteps)
 	    : LinearInterpolator(x, y, c, opt, interpolationSteps)
 	{
 		_computeSpline(_y, _ySpline);
@@ -41,7 +41,7 @@ class SplineInterpolator : public LinearInterpolator
 	}
 
   private:
-	struct _SplineData
+	struct SplineData
 	{
 		Range<DataNorm> limits{ 1, 0 };
 		DataNorm *b{ nullptr };
@@ -49,7 +49,7 @@ class SplineInterpolator : public LinearInterpolator
 		DataNorm *d{ nullptr };
 	};
 
-	DataNorm _interpolatedValue(const DataSource::Base<DataNorm> &source, const _SplineData &splineData, const double x) const
+	DataNorm _interpolatedValue(const DataSources::DataSource<DataNorm> &source, const SplineData &splineData, const double x) const
 	{
 		size_t bin = 0;
 		/* Search in which x bin the datapoint is */
@@ -71,13 +71,13 @@ class SplineInterpolator : public LinearInterpolator
 		return value;
 	}
 
-	DataNorm _interpolatedIndex(const DataSource::Base<DataNorm> &source, const _SplineData &splineData, const size_t index) const
+	DataNorm _interpolatedIndex(const DataSources::DataSource<DataNorm> &source, const SplineData &splineData, const size_t index) const
 	{
 		DataNorm value = _interpolatedValue(source, splineData, _indexToX(index));
 		return splineData.limits.normalize(value);
 	}
 
-	void _splineData(const DataSource::Base<DataNorm> &source, _SplineData &splineData)
+	void _splineData(const DataSources::DataSource<DataNorm> &source, SplineData &splineData)
 	{
 		if (length() >= _sourceLength)
 		{
@@ -139,7 +139,7 @@ class SplineInterpolator : public LinearInterpolator
 		}
 	}
 
-	void _computeSpline(const DataSource::Base<DataNorm> &source, _SplineData &splineData)
+	void _computeSpline(const DataSources::DataSource<DataNorm> &source, SplineData &splineData)
 	{
 		/* compute spline parameter, than scan all x values to find new min max */
 		if (length() >= _sourceLength)
@@ -156,10 +156,10 @@ class SplineInterpolator : public LinearInterpolator
 		}
 	}
 
-	_SplineData _ySpline;
-	//_SplineData _cSpline;
-	//_SplineData _optSpline;
+	SplineData _ySpline;
+	//SplineData _cSpline;
+	//SplineData _optSpline;
 };
 
-} // namespace DataSet
+} // namespace DataSets
 #endif //GRAFICI_DATASET_SPLINE_INTERPOLATOR_H

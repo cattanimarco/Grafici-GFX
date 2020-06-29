@@ -3,11 +3,11 @@
 
 #include "../DataSource.h"
 
-namespace DataSource
+namespace DataSources
 {
 
 template <typename T>
-class Array : public DataSource::Base<DataNorm>
+class Array : public DataSources::DataSource<DataNorm>
 {
   public:
 	Array(T *data, size_t length)
@@ -56,7 +56,7 @@ class Array : public DataSource::Base<DataNorm>
 
 	Range<T> _limits{ 0, 0 };
 	T *_dataArray{ nullptr };
-}; // namespace DataSource
+}; // namespace DataSources
 
-} // namespace DataSource
+} // namespace DataSources
 #endif /* GRAFICI_DATASOURCE_ARRAY_H */

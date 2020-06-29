@@ -4,7 +4,7 @@
 #include "../DataSet.h"
 #include "../DataSource.h"
 
-namespace DataSource
+namespace DataSources
 {
 
 enum class Channel
@@ -15,10 +15,10 @@ enum class Channel
 	opt
 };
 
-class Select : public DataSource::Base<DataNorm>
+class Select : public DataSources::DataSource<DataNorm>
 {
   public:
-	Select(const DataSet::Base &source, Channel selection)
+	Select(const DataSets::DataSet &source, Channel selection)
 	    : _source{ source }
 	    , _selection{ selection }
 	{
@@ -62,10 +62,10 @@ class Select : public DataSource::Base<DataNorm>
 	};
 
   private:
-	const DataSet::Base &_source;
+	const DataSets::DataSet &_source;
 	Channel _selection;
 };
 
-} // namespace DataSource
+} // namespace DataSources
 
 #endif /* GRAFICI_DATASOURCE_SELECT_H */

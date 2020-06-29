@@ -3,11 +3,11 @@
 
 #include "../DataSource.h"
 
-namespace DataSource
+namespace DataSources
 {
 
 template <typename T>
-class Parametric : public DataSource::Base<DataNorm>
+class Parametric : public DataSources::DataSource<DataNorm>
 {
   public:
 	Parametric(size_t length)
@@ -56,6 +56,6 @@ class Parametric : public DataSource::Base<DataNorm>
 	Range<T> _limits{ 0, 0 };
 };
 
-} // namespace DataSource
+} // namespace DataSources
 
 #endif /* GRAFICI_DATASOURCE_PARAMETRIC_H */

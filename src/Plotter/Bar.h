@@ -9,7 +9,7 @@ namespace Plotter
 class Bar : public Base
 {
   public:
-	void plot(const Display &display, const DataSet::Base &data, const Boundary &boundary, const ColorMap &colorMap) const override
+	void plot(const Display &display, const DataSets::DataSet &data, const Boundary &boundary, const ColorMap &colorMap) const override
 	{
 
 		for (auto it = data.begin(); it != data.end(); ++it)

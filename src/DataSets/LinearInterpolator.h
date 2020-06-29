@@ -2,16 +2,16 @@
 #define GRAFICI_DATASET_LINEAR_INTERPOLATOR_H
 
 #include "../DataSet.h"
-#include "../DataSource/Select.h"
+#include "../DataSources/Select.h"
 
-namespace DataSet
+namespace DataSets
 {
 
-class LinearInterpolator : public Base
+class LinearInterpolator : public DataSet
 {
   public:
-	LinearInterpolator(DataSource::Base<DataNorm> &x, DataSource::Base<DataNorm> &y, DataSource::Base<DataNorm> &c, DataSource::Base<DataNorm> &opt, size_t interpolationSteps)
-	    : Base(x, y, c, opt)
+	LinearInterpolator(DataSources::DataSource<DataNorm> &x, DataSources::DataSource<DataNorm> &y, DataSources::DataSource<DataNorm> &c, DataSources::DataSource<DataNorm> &opt, size_t interpolationSteps)
+	    : DataSet(x, y, c, opt)
 	{
 		//TODO warning if datasources have different lengths
 		//make sure interpolationSteps > _length?
@@ -68,21 +68,21 @@ class LinearInterpolator : public Base
 	};
 
 	/* methods to get a datasource from the interpolated dataset */
-	virtual DataSource::Select x() const
+	virtual DataSources::Select x() const
 	{
-		return DataSource::Select(*this, DataSource::Channel::x);
+		return DataSources::Select(*this, DataSources::Channel::x);
 	}
-	virtual DataSource::Select y() const
+	virtual DataSources::Select y() const
 	{
-		return DataSource::Select(*this, DataSource::Channel::y);
+		return DataSources::Select(*this, DataSources::Channel::y);
 	}
-	virtual DataSource::Select c() const
+	virtual DataSources::Select c() const
 	{
-		return DataSource::Select(*this, DataSource::Channel::c);
+		return DataSources::Select(*this, DataSources::Channel::c);
 	}
-	virtual DataSource::Select opt() const
+	virtual DataSources::Select opt() const
 	{
-		return DataSource::Select(*this, DataSource::Channel::opt);
+		return DataSources::Select(*this, DataSources::Channel::opt);
 	}
 
   protected:
@@ -94,6 +94,6 @@ class LinearInterpolator : public Base
 	}
 };
 
-} // namespace DataSet
+} // namespace DataSets
 
 #endif /* GRAFICI_DATASET_LINEAR_INTERPOLATOR_H */

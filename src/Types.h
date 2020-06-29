@@ -9,4 +9,7 @@ using DataNorm = float;
 using ColorUint8 = unsigned char;
 using ColorGFX = uint16_t;
 
+
+
+
 #endif /* GRAFICI_TYPES_H */

@@ -12,7 +12,7 @@ namespace Plotter
 class Base
 {
   public:
-	virtual void plot(const Display &display, const DataSet::Base &data, const Boundary &boundary, const ColorMap &colors) const = 0;
+	virtual void plot(const Display &display, const DataSets::DataSet &data, const Boundary &boundary, const ColorMap &colors) const = 0;
 };
 
 }

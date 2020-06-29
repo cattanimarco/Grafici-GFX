@@ -21,7 +21,7 @@ namespace Plotter
 class Heatmap : public Base
 {
   public:
-	void plot(const Display &display, const DataSet::Base &data, const Boundary &boundary, const ColorMap &colorMap) const override
+	void plot(const Display &display, const DataSets::DataSet &data, const Boundary &boundary, const ColorMap &colorMap) const override
 	{
 
 		Range<size_t> column_range{ 0, HEATMAP_COLUMNS };

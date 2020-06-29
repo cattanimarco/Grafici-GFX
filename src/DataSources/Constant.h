@@ -3,7 +3,7 @@
 
 #include "Parametric.h"
 
-namespace DataSource
+namespace DataSources
 {
 
 class Constant : public Parametric<double>
@@ -25,6 +25,6 @@ class Constant : public Parametric<double>
 	double _value;
 };
 
-} // namespace DataSource
+} // namespace DataSources
 
 #endif /* GRAFICI_DATASOURCE_CONSTANT_H */

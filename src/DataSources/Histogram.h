@@ -3,13 +3,13 @@
 
 #include "../DataSource.h"
 
-namespace DataSource
+namespace DataSources
 {
 
-class Histogram : public DataSource::Base<DataNorm>
+class Histogram : public DataSources::DataSource<DataNorm>
 {
   public:
-	Histogram(const DataSource::Base<DataNorm> &source, size_t buckets)
+	Histogram(const DataSources::DataSource<DataNorm> &source, size_t buckets)
 	{
 		_buckets = static_cast<size_t *>(malloc(sizeof(size_t) * buckets));
 		_length = buckets;
@@ -61,5 +61,5 @@ class Histogram : public DataSource::Base<DataNorm>
 	Range<size_t> _limits{ 0, 0 };
 };
 
-} // namespace DataSource
+} // namespace DataSources
 #endif //GRAFICI_DATASET_HISTOGRAM_H

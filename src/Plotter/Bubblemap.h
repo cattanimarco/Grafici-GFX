@@ -1,5 +1,5 @@
-#ifndef GRAFICI_GFX_PLOTTER_CIRCLEMAP_H
-#define GRAFICI_GFX_PLOTTER_CIRCLEMAP_H
+#ifndef GRAFICI_GFX_PLOTTER_BUBBLEMAP_H
+#define GRAFICI_GFX_PLOTTER_BUBBLEMAP_H
 
 #include "Heatmap.h"
 
@@ -23,4 +23,4 @@ class Bubblemap : public Heatmap
 };
 
 } // namespace Plotter
-#endif //GRAFICI_GFX_PLOTTER_CIRCLEMAP_H
+#endif //GRAFICI_GFX_PLOTTER_BUBBLEMAP_H

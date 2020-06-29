@@ -4,12 +4,12 @@
 #include "DataSource.h"
 #include "DataVector.h"
 
-namespace DataSet
+namespace DataSets
 {
-class Base : public DataSource::Base<DataVector<DataNorm>>
+class DataSet : public DataSources::DataSource<DataVector<DataNorm>>
 {
   public:
-	Base(const DataSource::Base<DataNorm> &x, const DataSource::Base<DataNorm> &y, const DataSource::Base<DataNorm> &c, const DataSource::Base<DataNorm> &opt)
+	DataSet(const DataSources::DataSource<DataNorm> &x, const DataSources::DataSource<DataNorm> &y, const DataSources::DataSource<DataNorm> &c, const DataSources::DataSource<DataNorm> &opt)
 	    : _x{ x }
 	    , _y{ y }
 	    , _c{ c }
@@ -41,11 +41,11 @@ class Base : public DataSource::Base<DataVector<DataNorm>>
 		return len;
 	}
 
-	const DataSource::Base<DataNorm> &_x;
-	const DataSource::Base<DataNorm> &_y;
-	const DataSource::Base<DataNorm> &_c;
-	const DataSource::Base<DataNorm> &_opt;
+	const DataSources::DataSource<DataNorm> &_x;
+	const DataSources::DataSource<DataNorm> &_y;
+	const DataSources::DataSource<DataNorm> &_c;
+	const DataSources::DataSource<DataNorm> &_opt;
 };
-} // namespace DataSet
+} // namespace DataSets
 
 #endif //GRAFICI_DATASET_BASE_H

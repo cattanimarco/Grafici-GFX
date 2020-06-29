@@ -3,7 +3,7 @@
 
 #include "Parametric.h"
 
-namespace DataSource
+namespace DataSources
 {
 
 class BarIndex : public Parametric<double>
@@ -34,6 +34,6 @@ class BarIndex : public Parametric<double>
 	size_t _class_id;
 };
 
-} // namespace DataSource
+} // namespace DataSources
 
 #endif /* GRAFICI_DATASOURCE_BARINDEX_H */
