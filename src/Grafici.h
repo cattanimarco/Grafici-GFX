@@ -1,6 +1,22 @@
 #ifndef GRAFICI_GRAFICI_H
 #define GRAFICI_GRAFICI_H
 
+#ifndef MAP_COLUMNS
+#define MAP_COLUMNS 32
+#endif
+
+#ifndef MAP_ROWS
+#define MAP_ROWS 24
+#endif
+
+#ifndef HEATMAP_AUTORANGE
+#define HEATMAP_AUTORANGE true
+#endif
+
+#ifndef CELLMAP_TRESHOLD
+#define CELLMAP_TRESHOLD 0.1
+#endif
+
 #include "Adafruit_GFX.h"
 #include "Boundary.h"
 #include "Color.h"
@@ -10,13 +26,14 @@
 #include "Plotter.h"
 #include "Types.h"
 
+#include "Plotter/Axis.h"
 #include "Plotter/Bar.h"
+#include "Plotter/Bubblemap.h"
+#include "Plotter/Cellmap.h"
+#include "Plotter/Cliquegraph.h"
+#include "Plotter/Heatmap.h"
 #include "Plotter/Line.h"
 #include "Plotter/Scatter.h"
-#include "Plotter/Heatmap.h"
-#include "Plotter/Bubblemap.h"
-#include "Plotter/Cliquegraph.h"
-#include "Plotter/Axis.h"
 
 #include "DataSets/LinearInterpolator.h"
 #include "DataSets/SplineInterpolator.h"
@@ -40,6 +57,7 @@ extern Plotter::Bar bar;
 extern Plotter::Scatter scatter;
 extern Plotter::Heatmap heatmap;
 extern Plotter::Bubblemap bubblemap;
+extern Plotter::Cellmap cellmap;
 extern Plotter::Cliquegraph cliquegraph;
 extern Plotter::Axis axis;
 
@@ -51,15 +69,15 @@ using ArrayFloat = Array<float>;
 using ArrayInt = Array<int>;
 } // namespace DataSources
 
-using DataSets::SplineInterpolator;
 using DataSets::LinearInterpolator;
+using DataSets::SplineInterpolator;
 
-using DataSources::Constant;
-using DataSources::Linear;
-using DataSources::BarIndex;
 using DataSources::ArrayFloat;
 using DataSources::ArrayInt;
+using DataSources::BarIndex;
+using DataSources::Constant;
 using DataSources::Histogram;
+using DataSources::Linear;
 
 /* MAIN CLASS */
 class Grafici

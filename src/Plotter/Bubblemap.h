@@ -8,17 +8,15 @@ namespace Plotter
 
 class Bubblemap : public Heatmap
 {
-  public:
   protected:
-
-	virtual void draw_block(const Display &display,
-	                        const Boundary &boundary,
-	                        const ColorMap &colorMap,
-	                        Range<DataNorm> x,
-	                        Range<DataNorm> y,
-	                        DataNorm c) const override
+	void draw_block(const Display &display,
+	                const Boundary &boundary,
+	                const ColorMap &colorMap,
+	                Range<DataNorm> x,
+	                Range<DataNorm> y,
+	                DataNorm c) const override
 	{
-		display.fillCircle(boundary.project({x.mid(),y.mid()}), boundary.projectAbs({c*x.delta()/2.0,c*y.delta()/2.0}), colorMap.project(c));
+		display.fillCircle(boundary.project({ x.mid(), y.mid() }), boundary.projectAbs({ c * x.delta() / 2.0, c * y.delta() / 2.0 }), colorMap.project(c));
 	};
 };
 
