@@ -6,7 +6,7 @@
 namespace DataSources
 {
 
-class Histogram : public DataSources::DataSource<DataNorm>
+class Histogram : public DataSources::DataSource<DataNorm>, public Ranged<size_t>
 {
   public:
 	Histogram(const DataSources::DataSource<DataNorm> &source, size_t buckets)
@@ -17,14 +17,14 @@ class Histogram : public DataSources::DataSource<DataNorm>
 		if (_buckets != nullptr)
 		{
 			memset(_buckets, 0, sizeof(size_t) * length());
-			_limits = { 0, 0 };
+			range = { 0, 0 };
 
 			for (auto it = source.begin(); it != source.end(); it++)
 			{
 				auto value = *it;
 				size_t bucketIdx = round(value * (length() - 1));
 				_buckets[bucketIdx]++;
-				_limits.update(_buckets[bucketIdx]);
+				range.update(_buckets[bucketIdx]);
 			}
 		}
 	};
@@ -38,7 +38,7 @@ class Histogram : public DataSources::DataSource<DataNorm>
 	{
 		if (index < length())
 		{
-			return _limits.normalize(_buckets[index]);
+			return range.normalize(_buckets[index]);
 		}
 		else
 		{
@@ -46,19 +46,8 @@ class Histogram : public DataSources::DataSource<DataNorm>
 		}
 	};
 
-	Range<size_t> &limits()
-	{
-		return _limits;
-	};
-
-	const Range<size_t> &limits() const
-	{
-		return _limits;
-	};
-
   private:
 	size_t *_buckets{ nullptr };
-	Range<size_t> _limits{ 0, 0 };
 };
 
 } // namespace DataSources

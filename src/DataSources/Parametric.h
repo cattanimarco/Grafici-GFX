@@ -7,7 +7,7 @@ namespace DataSources
 {
 
 template <typename T>
-class Parametric : public DataSources::DataSource<DataNorm>
+class Parametric : public DataSources::DataSource<DataNorm>, public Ranged<T>
 {
   public:
 	Parametric(size_t length)
@@ -19,7 +19,7 @@ class Parametric : public DataSources::DataSource<DataNorm>
 	{
 		if (index < length())
 		{
-			return _limits.normalize(valueAt(index));
+			return Ranged<T>::range.normalize(valueAt(index));
 		}
 		else
 		{
@@ -29,31 +29,19 @@ class Parametric : public DataSources::DataSource<DataNorm>
 
 	virtual T valueAt(size_t index) const = 0;
 
-	Range<T> &limits()
-	{
-		return _limits;
-	};
-
-	const Range<T> &limits() const
-	{
-		return _limits;
-	};
-
   protected:
 	/* provide obvious implementation that iterates over all value */
 	virtual void computeLimits()
 	{
 		if (length() > 0)
 		{
-			_limits = { valueAt(0), valueAt(0) };
+			Ranged<T>::range = { valueAt(0), valueAt(0) };
 			for (size_t idx = 1; idx < length(); ++idx)
 			{
-				_limits.update(valueAt(idx));
+				Ranged<T>::range.update(valueAt(idx));
 			}
 		}
 	}
-
-	Range<T> _limits{ 0, 0 };
 };
 
 } // namespace DataSources

@@ -7,7 +7,7 @@ namespace DataSources
 {
 
 template <typename T>
-class Array : public DataSources::DataSource<DataNorm>
+class Array : public DataSource<DataNorm>, public Ranged<T>
 {
   public:
 	Array(T *data, size_t length)
@@ -22,8 +22,8 @@ class Array : public DataSources::DataSource<DataNorm>
 	{
 		if ((_dataArray != nullptr) && (index < length()))
 		{
-			/* normalize DataCoordinate against the _limits range */
-			return _limits.normalize(_dataArray[index]);
+			/* normalize DataCoordinate against the range range */
+			return Ranged<T>::range.normalize(_dataArray[index]);
 		}
 		else
 		{
@@ -31,30 +31,19 @@ class Array : public DataSources::DataSource<DataNorm>
 		}
 	};
 
-	Range<T> &limits()
-	{
-		return _limits;
-	};
-
-	const Range<T> &limits() const
-	{
-		return _limits;
-	};
-
   private:
 	void computeLimits()
 	{
 		if ((_dataArray != nullptr) && (length() > 0))
 		{
-			_limits = { _dataArray[0], _dataArray[0] };
+			Ranged<T>::range = { _dataArray[0], _dataArray[0] };
 			for (size_t idx = 1; idx < length(); ++idx)
 			{
-				_limits.update(_dataArray[idx]);
+				Ranged<T>::range.update(_dataArray[idx]);
 			}
 		}
 	}
 
-	Range<T> _limits{ 0, 0 };
 	T *_dataArray{ nullptr };
 }; // namespace DataSources
 

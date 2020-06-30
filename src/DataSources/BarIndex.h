@@ -27,7 +27,7 @@ class BarIndex : public Parametric<double>
   private:
 	void computeLimits() override
 	{
-		_limits = { 0.0, static_cast<double>(_length * _num_classes) };
+		range = { 0.0, static_cast<double>(_length * _num_classes) };
 	}
 
 	size_t _num_classes;

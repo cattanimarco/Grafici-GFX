@@ -24,8 +24,8 @@ class Linear : public Parametric<double>
   private:
 	void computeLimits() override
 	{
-		_limits = { valueAt(0), valueAt(0) };
-		_limits.update(valueAt(length() - 1));
+		range = { valueAt(0), valueAt(0) };
+		range.update(valueAt(length() - 1));
 	}
 
 	double _offset;

@@ -13,7 +13,7 @@ class Constant : public Parametric<double>
 	    : Parametric{ length }
 	    , _value{ graficiTrim(value, { 0.0, 1.0 }) }
 	{
-		_limits = { 0.0, 1.0 };
+		range = { 0.0, 1.0 };
 	}
 
 	double valueAt(size_t index __attribute__((unused))) const override

@@ -39,6 +39,24 @@ class DataSource
 	size_t _length{ 0 };
 };
 
+template <typename T>
+class Ranged
+{
+  public:
+	Range<T> &limits()
+	{
+		return range;
+	};
+
+	const Range<T> &limits() const
+	{
+		return range;
+	};
+
+  protected:
+	Range<T> range{ 0, 0 };
+};
+
 } // namespace DataSources
 
 template <typename T>
@@ -69,7 +87,7 @@ class DataIterator
 	DataIterator<T> operator+(int other)
 	{
 		DataIterator<T> temp = *this;
-		temp._index+=other;
+		temp._index += other;
 		return temp;
 	}
 
