@@ -111,9 +111,9 @@ class Grafici
 		return _bkgColor;
 	}
 
-	const ColorMap **colorMap()
+	void colorMap(const ColorMap &colorMap)
 	{
-		return &_colorMap;
+		_colorMap = &colorMap;
 	}
 
 	void clear()
