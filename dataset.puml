@@ -1,0 +1,52 @@
+@startuml
+set namespaceSeparator ::
+
+class DataSets::DataSet
+{
+	+ at(index : size_t) : DataVector<DataNorm>
+	+ length() : size_t &
+
+  	# computeLength() : size_t 
+	# _x : DataSource<DataNorm> &
+	# _y : DataSource<DataNorm> &
+	# _c : DataSource<DataNorm> &
+	# _opt : DataSource<DataNorm> &
+}
+
+class DataSets::LinearInterpolator
+{
+	+ at(index : size_t) : DataVector<DataNorm>
+	+ length() : size_t &
+	+ x() : Select
+	+ y() : Select
+	+ c() : Select
+	+ opt() : Select
+
+	# _sourceLength : size_t
+	# _indexToX(index : size_t) : DataNorm
+}
+
+class DataSets::SplineInterpolator
+{
+	+ at(index : size_t) : DataVector<DataNorm>
+
+	- _interpolatedValue(source : DataSource<DataNorm> &, splineData :  SplineData &,  x:  float) : DataNorm
+	- _interpolatedIndex(source : DataSource<DataNorm> &, splineData : SplineData &,  index : size_t) : DataNorm
+	- _splineData(source : DataSource<DataNorm> &, splineData : SplineData &)
+	- _computeSpline(source : DataSource<DataNorm> &, splineData : SplineData &)
+	- _ySpline : SplineData
+}
+
+' -struct SplineData
+' {
+	' 	Range<DataNorm> limits{ 1, 0 };
+	' 	DataNorm *b{ nullptr };
+	' 	DataNorm *c{ nullptr };
+	' 	DataNorm *d{ nullptr };
+	'
+
+
+' class DataSet : public DataSources::DataSource<DataVector<DataNorm>>
+' SplineInterpolator public LinearInterpolator
+
+@enduml
