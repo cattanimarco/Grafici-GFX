@@ -7,7 +7,7 @@ namespace DataSources
 {
 
 template <typename T>
-class Parametric : public DataSources::DataSource<DataNorm>, public Ranged<T>
+class Parametric : public DataSources::DataSource<DataNorm>, public RangeOpt<T>
 {
   public:
 	Parametric(size_t length)
@@ -19,7 +19,7 @@ class Parametric : public DataSources::DataSource<DataNorm>, public Ranged<T>
 	{
 		if (index < length())
 		{
-			return Ranged<T>::range.normalize(valueAt(index));
+			return RangeOpt<T>::range.normalize(valueAt(index));
 		}
 		else
 		{
@@ -35,10 +35,10 @@ class Parametric : public DataSources::DataSource<DataNorm>, public Ranged<T>
 	{
 		if (length() > 0)
 		{
-			Ranged<T>::range = { valueAt(0), valueAt(0) };
+			RangeOpt<T>::range = { valueAt(0), valueAt(0) };
 			for (size_t idx = 1; idx < length(); ++idx)
 			{
-				Ranged<T>::range.update(valueAt(idx));
+				RangeOpt<T>::range.update(valueAt(idx));
 			}
 		}
 	}

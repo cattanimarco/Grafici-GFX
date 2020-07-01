@@ -6,7 +6,7 @@
 namespace DataSources
 {
 
-class Histogram : public DataSources::DataSource<DataNorm>, public Ranged<size_t>
+class Histogram : public DataSources::DataSource<DataNorm>, public RangeOpt<size_t>
 {
   public:
 	Histogram(const DataSources::DataSource<DataNorm> &source, size_t buckets)

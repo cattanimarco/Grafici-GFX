@@ -7,7 +7,7 @@ namespace DataSources
 {
 
 template <typename T>
-class Array : public DataSource<DataNorm>, public Ranged<T>
+class Array : public DataSource<DataNorm>, public RangeOpt<T>
 {
   public:
 	Array(T *data, size_t length)
@@ -23,7 +23,7 @@ class Array : public DataSource<DataNorm>, public Ranged<T>
 		if ((_dataArray != nullptr) && (index < length()))
 		{
 			/* normalize DataCoordinate against the range range */
-			return Ranged<T>::range.normalize(_dataArray[index]);
+			return RangeOpt<T>::range.normalize(_dataArray[index]);
 		}
 		else
 		{
@@ -36,10 +36,10 @@ class Array : public DataSource<DataNorm>, public Ranged<T>
 	{
 		if ((_dataArray != nullptr) && (length() > 0))
 		{
-			Ranged<T>::range = { _dataArray[0], _dataArray[0] };
+			RangeOpt<T>::range = { _dataArray[0], _dataArray[0] };
 			for (size_t idx = 1; idx < length(); ++idx)
 			{
-				Ranged<T>::range.update(_dataArray[idx]);
+				RangeOpt<T>::range.update(_dataArray[idx]);
 			}
 		}
 	}

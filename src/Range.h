@@ -110,6 +110,15 @@ class Range : public Vector2D<T>
 			return false;
 		}
 	}
+
+	Range<T> operator+(const Range<T> &other)
+	{
+		/* Implement set union for range sum */
+		Range<T> result {other._first, other._second};
+		result.update(low());
+		result.update(high());
+		return result;
+	};
 };
 
 #endif /* GRAFICI_RANGE_H */

@@ -40,7 +40,7 @@ class DataSource
 };
 
 template <typename T>
-class Ranged
+class RangeOpt
 {
   public:
 	Range<T> &limits()
