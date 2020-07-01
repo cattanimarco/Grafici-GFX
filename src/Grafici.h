@@ -89,7 +89,7 @@ class Grafici
   public:
 	Grafici() = default;
 
-	void begin(Adafruit_GFX &tft, const ColorMap &colorMap)
+	void begin(Adafruit_GFX &tft, const ColorMap &colorMap = Colors::blackAndWhite)
 	{
 		_display.begin(tft);
 		_colorMap = &colorMap;
