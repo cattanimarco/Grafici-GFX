@@ -17,6 +17,10 @@
 #define CELLMAP_TRESHOLD 0.1
 #endif
 
+#ifndef SPLINE_AUTOSCALE
+#define SPLINE_AUTOSCALE true
+#endif
+
 #include "Adafruit_GFX.h"
 #include "Boundary.h"
 #include "Color.h"

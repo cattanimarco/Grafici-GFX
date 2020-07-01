@@ -43,7 +43,7 @@ class SplineInterpolator : public LinearInterpolator
   private:
 	struct SplineData
 	{
-		Range<DataNorm> limits{ 1, 0 };
+		Range<DataNorm> limits{ 0, 1 };
 		DataNorm *b{ nullptr };
 		DataNorm *c{ nullptr };
 		DataNorm *d{ nullptr };
@@ -146,12 +146,16 @@ class SplineInterpolator : public LinearInterpolator
 		{
 			_splineData(source, splineData);
 
-			/* we only change the limits if the interpolation overflows the 0-1 range */
 			splineData.limits = { 0, 1 };
-			for (double x = 0; x < 1; x += (1.0 / length()))
+			if (SPLINE_AUTOSCALE)
 			{
-				/* update splineData min/max */
-				splineData.limits.update(_interpolatedValue(source, splineData, x));
+				/* we only change the limits if enabled and if the interpolation overflows the 0-1 range */
+
+				for (float x = 0; x < 1; x += (1.0 / length()))
+				{
+					/* update splineData min/max */
+					splineData.limits.update(_interpolatedValue(source, splineData, x));
+				}
 			}
 		}
 	}
