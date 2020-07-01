@@ -16,7 +16,7 @@ This modular library allows you to easily manage and plot data on any arduino di
 4. Compile and upload the code to your Arduino
     - `Edit > Upload` or `CMD + U`
 5. The Arduino's display should show the following
-ADD plot image 
+![simple plot](https://github.com/cattanimarco/Grafici-Test/blob/master/imgs/simple_plot.bmp)
 
 ## Documentation
 Documentation available in the [wiki](https://github.com/cattanimarco/Grafici-GFX/wiki)

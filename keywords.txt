@@ -7,26 +7,26 @@
 #######################################
 
 Grafici	KEYWORD1
-Color	KEYWORD1
-ColorMap    KEYWORD1
-ColorSource KEYWORD1
-ColorTheme  KEYWORD1
-FloatVector   KEYWORD1
-DisplayDriver   KEYWORD1
-Boundary   KEYWORD1
-RoundBoundary  KEYWORD1
-Plotter KEYWORD1
-DataSources::Iterator   KEYWORD1
-DataCoordinates   KEYWORD1
-DataSources:: KEYWORD1
-AxisPlot    KEYWORD1
-BarPlot KEYWORD1
-LinePlot    KEYWORD1
-ScatterPlot KEYWORD1
-DataSources::Float    KEYWORD1
-DataSources::Histogram    KEYWORD1
-DataSources::LinearInterpolator KEYWORD1
-DataSources::Spline   KEYWORD1
+Line	KEYWORD1
+Bar	KEYWORD1
+Scatter	KEYWORD1
+Heatmap	KEYWORD1
+Bubblemap	KEYWORD1
+Cellmap	KEYWORD1
+Cliquegraph	KEYWORD1
+Boundary	KEYWORD1
+Axis	KEYWORD1
+
+ArrayFloat	KEYWORD1
+ArrayInt	KEYWORD1
+LinearInterpolator	KEYWORD1
+SplineInterpolator	KEYWORD1
+ArrayFloat	KEYWORD1
+ArrayInt	KEYWORD1
+BarIndex	KEYWORD1
+Constant	KEYWORD1
+Histogram	KEYWORD1
+Linear	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -36,17 +36,45 @@ DataSources::Spline   KEYWORD1
 # Instances (KEYWORD2)
 #######################################
 
-grafici KEYWORD2
-colorBlack  KEYWORD2
-colorDarkGray   KEYWORD2
-colorLightGray  KEYWORD2
-colorWhite  KEYWORD2
-axisPlot    KEYWORD2
-barPlot KEYWORD2
-Line    KEYWORD2
-scatterPlot KEYWORD2
+grafici	KEYWORD2
+line	KEYWORD2
+bar	KEYWORD2
+scatter	KEYWORD2
+heatmap	KEYWORD2
+bubblemap	KEYWORD2
+cellmap	KEYWORD2
+cliquegraph	KEYWORD2
+fullScreen	KEYWORD2
+axis	KEYWORD2
+
+black	KEYWORD2
+gunpowder	KEYWORD2
+silver	KEYWORD2
+red	KEYWORD2
+green	KEYWORD2
+blue	KEYWORD2
+cyan	KEYWORD2
+yellow	KEYWORD2
+orange	KEYWORD2
+magenta	KEYWORD2
+white	KEYWORD2
+a_dash_of_light	KEYWORD2
+
+rainbow	KEYWORD2
+temperature	KEYWORD2
+blackAndWhite	KEYWORD2
+cmy	KEYWORD2
+heat	KEYWORD2
+bright	KEYWORD2
+semaphore	KEYWORD2
+parula	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
 #######################################
 
+MAP_COLUMNS	LITERAL1
+MAP_ROWS	LITERAL1
+HEATMAP_AUTORANGE	LITERAL1
+CELLMAP_TRESHOLD	LITERAL1
+SPLINE_AUTOSCALE	LITERAL1
