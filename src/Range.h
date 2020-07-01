@@ -58,29 +58,29 @@ class Range : public Vector2D<T>
 		high() = graficiMax<T>(high(), value);
 	}
 
-	/* map a value in the range to a double between 0 and 1 */
-	double normalize(const T value) const
+	/* map a value in the range to a float between 0 and 1 */
+	float normalize(const T value) const
 	{
 		/* TODO assert value is between min and max */
-		return static_cast<double>(value - low()) / static_cast<double>(delta());
+		return static_cast<float>(value - low()) / static_cast<float>(delta());
 	};
 
-	/* map a double value from 0 to 1 to the range's corrsponding value  */
-	T map(const double value) const
+	/* map a float value from 0 to 1 to the range's corrsponding value  */
+	T map(const float value) const
 	{
 		/* TODO assert value is between 0.0 and 1.0 */
 		return static_cast<T>(value * high() + (1.0 - value) * low());
 	};
 
 	/* cropRelative a given range by a (normalized) factor */
-	void cropRelative(const Range<double> &shrinkFactor)
+	void cropRelative(const Range<float> &shrinkFactor)
 	{
 		low() += delta() * shrinkFactor.low();
 		high() -= delta() * shrinkFactor.high();
 	};
 
 	/* cropRelative a given range by a (normalized) factor */
-	void cropAbsolute(const Range<double> &shrinkValue)
+	void cropAbsolute(const Range<float> &shrinkValue)
 	{
 		low() += shrinkValue.low();
 		high() -= shrinkValue.high();

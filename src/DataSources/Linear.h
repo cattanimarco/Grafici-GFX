@@ -5,10 +5,10 @@
 
 namespace DataSources
 {
-class Linear : public Parametric<double>
+class Linear : public Parametric<float>
 {
   public:
-	Linear(size_t length, double offset = 0, double slope = 1)
+	Linear(size_t length, float offset = 0, float slope = 1)
 	    : Parametric{ length }
 	    , _offset{ offset }
 	    , _slope{ slope }
@@ -16,7 +16,7 @@ class Linear : public Parametric<double>
 		computeLimits();
 	}
 
-	double valueAt(size_t index) const override
+	float valueAt(size_t index) const override
 	{
 		return (index - _offset) * _slope;
 	}
@@ -28,8 +28,8 @@ class Linear : public Parametric<double>
 		range.update(valueAt(length() - 1));
 	}
 
-	double _offset;
-	double _slope;
+	float _offset;
+	float _slope;
 };
 
 } // namespace DataSources

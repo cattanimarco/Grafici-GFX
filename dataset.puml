@@ -30,7 +30,7 @@ class DataSets::SplineInterpolator
 {
 	+ at(index : size_t) : DataVector<DataNorm>
 
-	- _interpolatedValue(source : DataSource<DataNorm> &, splineData :  SplineData &,  x:  double) : DataNorm
+	- _interpolatedValue(source : DataSource<DataNorm> &, splineData :  SplineData &,  x:  float) : DataNorm
 	- _interpolatedIndex(source : DataSource<DataNorm> &, splineData : SplineData &,  index : size_t) : DataNorm
 	- _splineData(source : DataSource<DataNorm> &, splineData : SplineData &)
 	- _computeSpline(source : DataSource<DataNorm> &, splineData : SplineData &)

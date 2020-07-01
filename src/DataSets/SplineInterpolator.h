@@ -49,7 +49,7 @@ class SplineInterpolator : public LinearInterpolator
 		DataNorm *d{ nullptr };
 	};
 
-	DataNorm _interpolatedValue(const DataSources::DataSource<DataNorm> &source, const SplineData &splineData, const double x) const
+	DataNorm _interpolatedValue(const DataSources::DataSource<DataNorm> &source, const SplineData &splineData, const float x) const
 	{
 		size_t bin = 0;
 		/* Search in which x bin the datapoint is */

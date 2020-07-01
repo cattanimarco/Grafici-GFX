@@ -52,7 +52,7 @@ class ColorVector
 		return result;
 	}
 
-	friend ColorVector operator*(const ColorVector &left, const double right)
+	friend ColorVector operator*(const ColorVector &left, const float right)
 	{
 		ColorVector result;
 		result.red() = graficiTrim(int(left.red() * right), left._trimRange);

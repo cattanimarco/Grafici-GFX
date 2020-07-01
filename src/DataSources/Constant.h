@@ -6,23 +6,23 @@
 namespace DataSources
 {
 
-class Constant : public Parametric<double>
+class Constant : public Parametric<float>
 {
   public:
-	Constant(size_t length, double value)
+	Constant(size_t length, float value)
 	    : Parametric{ length }
 	    , _value{ graficiTrim(value, { 0.0, 1.0 }) }
 	{
 		range = { 0.0, 1.0 };
 	}
 
-	double valueAt(size_t index __attribute__((unused))) const override
+	float valueAt(size_t index __attribute__((unused))) const override
 	{
 		return _value;
 	}
 
   private:
-	double _value;
+	float _value;
 };
 
 } // namespace DataSources

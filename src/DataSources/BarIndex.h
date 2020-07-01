@@ -6,7 +6,7 @@
 namespace DataSources
 {
 
-class BarIndex : public Parametric<double>
+class BarIndex : public Parametric<float>
 {
   public:
 	/* To plot multiple n bar plots, use num_classes = n and use n of this classes for the x axis.
@@ -19,7 +19,7 @@ class BarIndex : public Parametric<double>
 		computeLimits();
 	}
 
-	double valueAt(size_t index) const override
+	float valueAt(size_t index) const override
 	{
 		return 0.5 + index * _num_classes + _class_id;
 	}
@@ -27,7 +27,7 @@ class BarIndex : public Parametric<double>
   private:
 	void computeLimits() override
 	{
-		range = { 0.0, static_cast<double>(_length * _num_classes) };
+		range = { 0.0, static_cast<float>(_length * _num_classes) };
 	}
 
 	size_t _num_classes;

@@ -44,14 +44,14 @@ class Boundary
 	};
 
 	/* cropCartesian({leftBorder,rightBorder},{bottomBorder,TopBorder}) */
-	Boundary &cropRelativeCartesian(const Range<double> &horizzontal, const Range<double> &vertical)
+	Boundary &cropRelativeCartesian(const Range<float> &horizzontal, const Range<float> &vertical)
 	{
 		_x.cropRelative(horizzontal);
 		_y.cropRelative(vertical);
 		return *this;
 	};
 
-	Boundary &cropAbsoluteCartesian(const Range<double> &horizzontal, const Range<double> &vertical)
+	Boundary &cropAbsoluteCartesian(const Range<float> &horizzontal, const Range<float> &vertical)
 	{
 		_x.cropAbsolute(horizzontal);
 		_y.cropAbsolute(vertical);
@@ -177,14 +177,14 @@ class PolarBoundary : public Boundary
 	};
 
 	/* cropPolar({innerRadius,outerRadius},{startAngle,endAngle}) */
-	PolarBoundary &cropRelativePolar(const Range<double> &angle, const Range<double> &radius)
+	PolarBoundary &cropRelativePolar(const Range<float> &angle, const Range<float> &radius)
 	{
 		a.cropRelative(angle);
 		r.cropRelative(radius);
 		return *this;
 	};
 
-	PolarBoundary &cropAbsolutePolar(const Range<double> &angle, const Range<double> &radius)
+	PolarBoundary &cropAbsolutePolar(const Range<float> &angle, const Range<float> &radius)
 	{
 		a.cropAbsolute(angle);
 		r.cropAbsolute(radius);

@@ -15,7 +15,7 @@ class Heatmap : public Base
 
 		Range<size_t> column_range{ 0, MAP_COLUMNS };
 		Range<size_t> row_range{ 0, MAP_ROWS };
-		Range<double> value_range{ static_cast<double>(data.length()), 0 };
+		Range<float> value_range{ static_cast<float>(data.length()), 0 };
 
 		/* Auto range */
 		if (HEATMAP_AUTORANGE)
@@ -47,23 +47,23 @@ class Heatmap : public Base
 	}
 
   protected:
-	virtual double process_cell(Range<DataNorm> x, Range<DataNorm> y, const DataSets::DataSet &data) const
+	virtual float process_cell(Range<DataNorm> x, Range<DataNorm> y, const DataSets::DataSet &data) const
 	{
-		double cell_value = 0;
+		float cell_value = 0;
 		for (auto it = data.begin(); it != data.end(); it++)
 		{
 			auto dataPoint = *it;
-			double dx = pow(dataPoint.x() - x.mid(), 2);
-			double dy = pow(dataPoint.y() - y.mid(), 2);
-			double distance = sqrt(dx + dy);
+			float dx = pow(dataPoint.x() - x.mid(), 2);
+			float dy = pow(dataPoint.y() - y.mid(), 2);
+			float distance = sqrt(dx + dy);
 			merge_distance(cell_value, distance);
 		}
 		return cell_value;
 	}
 
-	virtual void merge_distance(double &cell_value, double distance) const
+	virtual void merge_distance(float &cell_value, float distance) const
 	{
-		cell_value = graficiMax(cell_value, 0.5 / (distance + 0.5));
+		cell_value = graficiMax<float>(cell_value, 0.5 / (distance + 0.5));
 	}
 
 	virtual void draw_block(const Display &display,

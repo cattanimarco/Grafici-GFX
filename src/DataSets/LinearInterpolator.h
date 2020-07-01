@@ -44,7 +44,7 @@ class LinearInterpolator : public DataSet
 
 			/* Compute the normal interpolation for x */
 			Range<DataNorm> rangeX{ _x.at(bin), _x.at(bin + 1) };
-			double interpolationNorm = rangeX.normalize(result.x());
+			float interpolationNorm = rangeX.normalize(result.x());
 
 			/* Use the normal interpolation for x to map the other datasources */
 			Range<DataNorm> rangeY{ _y.at(bin), _y.at(bin + 1) };
