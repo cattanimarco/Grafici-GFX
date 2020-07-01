@@ -11,12 +11,12 @@ ArrayFloat y(dataArray, num_elem);
 
 void setup(void)
 {
-  tft.begin();
-  tft.setRotation(1);
+	tft.begin();
+	tft.setRotation(1);
+	grafici.begin(tft, Colors::blackAndWhite);
+	grafici.clear();
 
-  grafici.begin(tft, Colors::blackAndWhite);
-  grafici.clear();
-  grafici.plot(line, Linear(num_elem), y, Constant(num_elem, 1.0));
+	grafici.plot(line, Linear(num_elem), y, Constant(num_elem, 1.0));
 }
 
 void loop(void)
