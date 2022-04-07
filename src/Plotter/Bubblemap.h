@@ -16,7 +16,10 @@ class Bubblemap : public Heatmap
 	                Range<DataNorm> y,
 	                DataNorm c) const override
 	{
-		display.fillCircle(boundary.project({ x.mid(), y.mid() }), boundary.projectAbs({ c * x.delta() / 2.0, c * y.delta() / 2.0 }), colorMap.project(c));
+		DataNorm u = c * x.delta() / 2.0;
+		DataNorm v = c * y.delta() / 2.0;
+
+		display.fillCircle(boundary.project({ x.mid(), y.mid() }), boundary.projectAbs({ u, v }), colorMap.project(c));
 	};
 };
 
