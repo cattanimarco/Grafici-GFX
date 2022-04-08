@@ -219,8 +219,11 @@ class PolarBoundary : public Boundary
 	{
 		DisplayNorm angle = a.map(data.x());
 		DisplayNorm radius = r.map(data.y());
-		return CartesianVector<DisplayNorm>{ _x.mid() + (radius * (_x.delta() / 2)) * cos(angle * 2 * M_PI),
-			                                 _y.mid() + (radius * (_y.delta() / 2)) * sin(angle * 2 * M_PI) };
+
+		DisplayNorm x = _x.mid() + (radius * (_x.delta() / 2)) * cos(angle * 2 * M_PI);
+		DisplayNorm y = _y.mid() + (radius * (_y.delta() / 2)) * sin(angle * 2 * M_PI);
+
+		return CartesianVector<DisplayNorm>{ x, y};
 	};
 
   private:
