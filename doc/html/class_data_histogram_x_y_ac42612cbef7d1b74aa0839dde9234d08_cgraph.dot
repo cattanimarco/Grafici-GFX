@@ -1,0 +1,11 @@
+digraph "DataHistogramXY::operator[]"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [label="DataHistogramXY::operator[]",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Return a data point."];
+  Node1 -> Node2 [color="steelblue1",style="solid"];
+  Node2 [label="DataSource\< DataVector\l \>::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_source.html#a5ddf3f13b4ab2884c950b0f7adfdfec0",tooltip="Return the number of data points in the data source."];
+}

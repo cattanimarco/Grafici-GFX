@@ -1,141 +1,158 @@
+/*!
+* \file Grafici.h
+* \author Marco Cattani <m.cattani@icloud.com>
+* \version 3.0
+* \date 26/02/2022
+* \brief 
+* \remarks None
+* 
+* 
+* 
+*/
+
+
 #ifndef GRAFICI_GRAFICI_H
 #define GRAFICI_GRAFICI_H
 
-#ifndef MAP_COLUMNS
-#define MAP_COLUMNS 32
-#endif
+/*! Importation of librairies*/
+#include "Range.h"
+#include "data/DataNorm.h"
 
-#ifndef MAP_ROWS
-#define MAP_ROWS 24
-#endif
+#include "data/DataArray.h"
+#include "data/DataArrayXY.h"
+#include "data/DataConstant.h"
+#include "data/DataFunction.h"
+#include "data/DataHistogramXY.h"
+#include "data/DataInterpolatorL.h"
+#include "data/DataLinear.h"
+#include "data/DataResize.h"
+#include "data/DataSourceNorm.h"
+#include "data/DataSpline.h"
 
-#ifndef HEATMAP_AUTORANGE
-#define HEATMAP_AUTORANGE true
-#endif
+#include "color/ColorDefinitions.h"
+#include "color/ColorMap.h"
+#include "color/Color.h"
 
-#ifndef CELLMAP_TRESHOLD
-#define CELLMAP_TRESHOLD 0.1
-#endif
+#include "display/DisplayDriver.h"
+#include "display/DisplayVector.h"
+#include "display/PolarWindow.h"
+#include "display/Window.h"
 
-#ifndef SPLINE_AUTOSCALE
-#define SPLINE_AUTOSCALE true
-#endif
+#include "plotter/PlotAxis.h"
+#include "plotter/PlotBar.h"
+#include "plotter/PlotLine.h"
+#include "plotter/PlotScatter.h"
 
-#include "Adafruit_GFX.h"
-#include "Boundary.h"
-#include "Color.h"
-#include "Color_defs.h"
-#include "DataSet.h"
-#include "Display.h"
-#include "Plotter.h"
-#include "Types.h"
-
-#include "Plotter/Axis.h"
-#include "Plotter/Bar.h"
-#include "Plotter/Bubblemap.h"
-#include "Plotter/Cellmap.h"
-#include "Plotter/Cliquegraph.h"
-#include "Plotter/Heatmap.h"
-#include "Plotter/Line.h"
-#include "Plotter/Scatter.h"
-
-#include "DataSets/LinearInterpolator.h"
-#include "DataSets/SplineInterpolator.h"
-
-#include "DataSources/Array.h"
-#include "DataSources/BarIndex.h"
-#include "DataSources/Constant.h"
-#include "DataSources/Histogram.h"
-#include "DataSources/Linear.h"
-#include "DataSources/Parametric.h"
-
-/* Instance of a Grafici object. Used instead of a singleton patter as it is simpler 
-to use this way for arduino users and there can be multiple instances of this object if it is relly needed */
-
-/* GLOBAL VARS */
-class Grafici;
-extern Grafici grafici;
-extern Boundary fullScreen;
-extern Plotter::Line line;
-extern Plotter::Bar bar;
-extern Plotter::Scatter scatter;
-extern Plotter::Heatmap heatmap;
-extern Plotter::Bubblemap bubblemap;
-extern Plotter::Cellmap cellmap;
-extern Plotter::Cliquegraph cliquegraph;
-extern Plotter::Axis axis;
-
-/* ALIASES */
-namespace DataSources
-{
-/* this is to hide templates to final users */
-using ArrayFloat = Array<float>;
-using ArrayInt = Array<int>;
-} // namespace DataSources
-
-using DataSets::LinearInterpolator;
-using DataSets::SplineInterpolator;
-
-using DataSources::ArrayFloat;
-using DataSources::ArrayInt;
-using DataSources::BarIndex;
-using DataSources::Constant;
-using DataSources::Histogram;
-using DataSources::Linear;
-
-/* MAIN CLASS */
+/**
+ * @brief Object representing the Grafici plotting library
+ *
+ */
 class Grafici
 {
   public:
-	Grafici() = default;
-
-	void begin(Adafruit_GFX &tft, const ColorMap &colorMap = Colors::blackAndWhite)
+	/**
+	 * @brief Construct a new Grafici object
+	 *
+	 * @param hal reference to the Adafruit_GFX display driver
+	 */
+	Grafici(Adafruit_GFX &hal)
+	    : _display_driver{ hal }
 	{
-		_display.begin(tft);
-		_colorMap = &colorMap;
+		_display_driver.fill_rect({ 0, 0 }, { 1, 1 }, black);
 	}
 
-	void plot(const Plotter::Base &plotter, const DataSets::DataSet &data, const Boundary &boundary = fullScreen) const
+	/**
+	 * @brief Set the default color map for plotting
+	 *
+	 * @param c reference to the color map
+	 */
+	void set_color_map(const ColorMap &c)
 	{
-		plotter.plot(_display, data, boundary, *_colorMap);
+		_color_map = &c;
 	}
 
-	void plot(const Plotter::Base &plotter, const DataSources::DataSource<DataNorm> &x, const DataSources::DataSource<DataNorm> &y, const DataSources::DataSource<DataNorm> &c, const DataSources::DataSource<DataNorm> &opt, const Boundary &boundary = fullScreen) const
+	/**
+	 * @brief Set the properties for the plot axis. If this funtion is not called, 
+	 * the default options are used, i.e. rows=0, columns=0, and style=none.
+	 *
+	 * @param opts axis properties
+	 */
+	void set_axis(PlotAxisOpts opts)
 	{
-		plot(plotter, { x, y, c, opt }, boundary);
-	};
-
-	void plot(const Plotter::Base &plotter, const DataSources::DataSource<DataNorm> &x, const DataSources::DataSource<DataNorm> &y, const DataSources::DataSource<DataNorm> &c, const Boundary &boundary = fullScreen) const
-	{
-		plot(plotter, { x, y, c, c }, boundary);
-	};
-
-	ColorVector &bkgColor()
-	{
-		return _bkgColor;
+		_axis_opts = opts;
 	}
 
-	void colorMap(const ColorMap &colorMap)
+	/**
+	 * @brief Plot a line on the display
+	 * 
+	 * @param x Data source for the x axis
+	 * @param y Data source for the y axis
+	 * @param c Data source for the color of the line  segments. Note that the final color is a function of the color map set via @ref set_color_map and the value from c
+	 * @param window Optional drawing region used to draw the line. Default is fullscreen
+	 * @param opts Optional line drawing options. There are no options available at the moment.
+	 */
+	void line(const DataSourceNorm &x,
+	          const DataSourceNorm &y,
+	          const DataSourceNorm &c,
+	          const Window &window = full_screen,
+	          const PlotLineOpts opts = {})
 	{
-		_colorMap = &colorMap;
+		if (opts.draw_background)
+		{
+			_display_driver.fill_rect({ 0, 0 }, { 1, 1 }, opts.background_color, window, opts.segments);
+		}
+		plot_axis(_display_driver, window, _axis_opts);
+		plot_line(_display_driver, window, *_color_map, x, y, c, opts);
 	}
 
-	void clear()
+	/**
+	 * @brief Plot a set of bars on the display
+	 * 
+	 * @param x Data source for the x axis
+	 * @param y Data source for the y axis
+	 * @param c Data source for the color of the bars. Note that the final color is a function of the color map set via @ref set_color_map and the value from c
+	 * @param window Optional drawing region used to draw the line. Default is fullscreen
+	 * @param opts Optional line drawing options. Default is thickness=0.8 and fill_bars=false.
+	 */
+	void bar(const DataSourceNorm &x,
+	         const DataSourceNorm &y,
+	         const DataSourceNorm &c,
+	         const Window &window = full_screen,
+	         const PlotBarOpts opts = {})
 	{
-		_display.driver().fillScreen(_bkgColor.toColorGFX());
+		if (opts.draw_background)
+		{
+			_display_driver.fill_rect({ 0, 0 }, { 1, 1 }, opts.background_color, window, opts.segments);
+		}
+		plot_axis(_display_driver, window, _axis_opts);
+		plot_bar(_display_driver, window, *_color_map, x, y, c, opts);
 	}
 
-	void clear(Boundary &boundary)
+	/**
+	 * @brief Plot a set of markers on the display
+	 * 
+	 * @param x Data source for the x axis
+	 * @param y Data source for the y axis
+	 * @param c Data source for the color of the markers. Note that the final color is a function of the color map set via @ref set_color_map and the value from c
+	 * @param s Data source for the size of the markers. The size is normalized. Hence a size of 1.0 will draw a marker as big as the display.
+	 * @param window Optional drawing region used to draw the line. Default is fullscreen
+	 * @param opts Optional scatter option. Default is the string "o", which will draw the marker as a circle. Multiple character can be used to create composite markers, e.g. "xo". All the possible marker shapes are "eps>^*x+o."
+	 */
+	void scatter(const DataSourceNorm &x,
+	             const DataSourceNorm &y,
+	             const DataSourceNorm &c,
+	             const DataSourceNorm &s,
+	             const Window &window = full_screen,
+	             const PlotScatterOpts opts = {})
 	{
-		auto bl = boundary.project({ 0.0, 0.0 });
-		auto tr = boundary.project({ 1.0, 1.0 });
-		_display.fillRect(bl, tr, _bkgColor.toColorGFX());
+		plot_axis(_display_driver, window, _axis_opts);
+		plot_scatter(_display_driver, window, *_color_map, x, y, c, s, opts);
 	}
 
   private:
-	Display _display;
-	const ColorMap *_colorMap;
-	ColorVector _bkgColor{ Colors::black };
+	const DisplayDriver _display_driver;
+	const ColorMap *_color_map{ &parula };
+	PlotAxisOpts _axis_opts{ 0, 0, none, white, 1 };
 };
 
-#endif //GRAFICI_GRAFICI_H
+#endif // GRAFICI_GRAFICI_H

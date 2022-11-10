@@ -1,0 +1,15 @@
+digraph "DataParametric::at"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [label="DataParametric::at",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [dir="back",color="steelblue1",style="solid"];
+  Node2 [label="DataParametric::operator[]",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_parametric.html#a9de12457570065becc41626fcb51f320",tooltip="Return a data point."];
+  Node1 -> Node3 [dir="back",color="steelblue1",style="solid"];
+  Node3 [label="DataParametric::update\l_range",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_parametric.html#a988c3f474820873a00e9979b32cae73a",tooltip=" "];
+  Node3 -> Node4 [dir="back",color="steelblue1",style="solid"];
+  Node4 [label="DataFunction::DataFunction",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_function.html#adf504af1df7e76b340a6558d9a9cb00f",tooltip="Construct a data source from a given function [f(0) .. f(size-1)]."];
+}

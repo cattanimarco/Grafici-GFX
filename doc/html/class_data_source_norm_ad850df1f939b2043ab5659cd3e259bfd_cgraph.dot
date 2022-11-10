@@ -1,0 +1,11 @@
+digraph "DataSourceNorm::float_to_data_norm"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [label="DataSourceNorm::float\l_to_data_norm",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Utility function to return a DataNorm from a float value."];
+  Node1 -> Node2 [color="steelblue1",style="solid"];
+  Node2 [label="DataSourceNorm::range",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_source_norm.html#a783cda59fbe99f223bae998f223aaf83",tooltip="Return the range of the DataNorm data point."];
+}

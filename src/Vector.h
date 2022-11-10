@@ -1,92 +1,61 @@
+/*!
+* \file Vector.h
+* \author Marco Cattani <m.cattani@icloud.com>
+* \version 3.0
+* \date 26/02/2022
+* \brief 
+* \remarks None
+* 
+* 
+* 
+*/
+
 #ifndef GRAFICI_VECTOR_H
 #define GRAFICI_VECTOR_H
 
+/**
+ * @brief Vector with x and y components
+ * 
+ * @tparam T type of the two components
+ */
 template <typename T>
-class Vector2D
+class Vector 
 {
   public:
-	Vector2D(T first, T second)
-	    : _first{ first }
-	    , _second{ second }
+	Vector() = default;
+
+	/**
+	 * @brief Construct a new Vector object
+	 * 
+	 * @param x x component
+	 * @param y y component
+	 */
+	Vector(const T x, const T y): x{x},y{y}
 	{
 	}
 
-	Vector2D<T> operator-(const Vector2D<T> &other)
+	Vector<T> operator-(const Vector<T> &other) const
 	{
-		return Vector2D<T>{ static_cast<T>(this->_first - other._first), static_cast<T>(this->_second - other._second) };
+		return { x - other.x, y - other.y };
 	};
 
-	Vector2D<T> operator+(const Vector2D<T> &other)
+	Vector<T> operator+(const Vector<T> &other) const
 	{
-		return Vector2D<T>{ static_cast<T>(this->_first + other._first), static_cast<T>(this->_second + other._second) };
+		return { x + other.x, y + other.y };
 	};
 
-  protected:
-	T _first;
-	T _second;
-};
+	Vector<T> operator*(const float &other) const
+	{
+		return { x * other, y * other };
+	};
 
-
-
-template <typename T>
-class CartesianVector : public Vector2D<T>
-{
-  public:
-	CartesianVector(const T &x, const T &y)
-	    : Vector2D<T>{ x, y }
+	bool operator<(const Vector<T> &other) const
 	{
+		return (x < other.x && y < other.y);
 	}
-	CartesianVector(const Vector2D<T> vector)
-	    : Vector2D<T>{ vector }
-	{
-	}
-	T &x()
-	{
-		return Vector2D<T>::_first;
-	}
-	T &y()
-	{
-		return Vector2D<T>::_second;
-	}
-
-	const T &x() const
-	{
-		return Vector2D<T>::_first;
-	}
-	const T &y() const
-	{
-		return Vector2D<T>::_second;
-	}
-};
-
-template <typename T>
-class PolarVector : public Vector2D<T>
-{
-  public:
-	PolarVector(const T &a, const T &r)
-	    : Vector2D<T>{ a, r }
-	{
-	}
-	PolarVector(const Vector2D<T> vector)
-	    : Vector2D<T>{ vector }
-	{
-	}
-	T &a()
-	{
-		return Vector2D<T>::_first;
-	}
-	T &r()
-	{
-		return Vector2D<T>::_second;
-	}
-	const T &a() const
-	{
-		return Vector2D<T>::_first;
-	}
-	const T &r() const
-	{
-		return Vector2D<T>::_second;
-	}
+	
+	T x{};
+	T y{};
 };
 
 #endif /* GRAFICI_VECTOR_H */

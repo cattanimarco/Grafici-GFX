@@ -1,0 +1,29 @@
+digraph "Range::delta"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [label="Range::delta",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Return the difference between the higher and the lower limits."];
+  Node1 -> Node2 [dir="back",color="steelblue1",style="solid"];
+  Node2 [label="PolarWindow::sub_polar\l_window",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_polar_window.html#a2ab1126e987580b26b7057bd86126a5a",tooltip=" "];
+  Node1 -> Node3 [dir="back",color="steelblue1",style="solid"];
+  Node3 [label="Window::sub_window",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_window.html#a6e76fbafc94563faafb3f764986e964b",tooltip=" "];
+  Node1 -> Node4 [dir="back",color="steelblue1",style="solid"];
+  Node4 [label="Range::value_to_norm",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_range.html#a3326d0ef82f3cadb994a9fac09a54d20",tooltip="Map a given value to a normalized number."];
+  Node4 -> Node5 [dir="back",color="steelblue1",style="solid"];
+  Node5 [label="DataInterpolatorL::\lcompute_x_bin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_interpolator_l.html#ac73039841439c687f8f0cb780dcbe7bc",tooltip=" "];
+  Node5 -> Node6 [dir="back",color="steelblue1",style="solid"];
+  Node6 [label="DataInterpolatorL::\loperator[]",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_interpolator_l.html#a863c91db9429ad0ded7d9b6ec8767431",tooltip="Return a data point."];
+  Node5 -> Node7 [dir="back",color="steelblue1",style="solid"];
+  Node7 [label="DataSpline::operator[]",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_spline.html#a0bd1f6ec0dcbc1aa28e15d8e6237ce6f",tooltip="Return a data point."];
+  Node4 -> Node8 [dir="back",color="steelblue1",style="solid"];
+  Node8 [label="DataNorm::norm",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_norm.html#aa3d26d24250db108853a4bcf62fe1926",tooltip=" "];
+  Node8 -> Node9 [dir="back",color="steelblue1",style="solid"];
+  Node9 [label="ColorMapArray::norm\l_to_color",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_color_map_array.html#ad38ac3a8dea9c006486ca8b425b7a4e7",tooltip="Translate a DataNorm object into a R5G6B5 color according to the Color Map."];
+  Node8 -> Node10 [dir="back",color="steelblue1",style="solid"];
+  Node10 [label="DataNorm::operator\<",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_norm.html#a04748d9b102a55ae2c1ad503cafdc686",tooltip=" "];
+  Node8 -> Node11 [dir="back",color="steelblue1",style="solid"];
+  Node11 [label="DataNorm::operator\>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_norm.html#af8bf6f513640a4e61177d413c4effc79",tooltip=" "];
+}

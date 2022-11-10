@@ -1,0 +1,13 @@
+digraph "DataInterpolatorL::compute_x_bin"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [label="DataInterpolatorL::\lcompute_x_bin",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [dir="back",color="steelblue1",style="solid"];
+  Node2 [label="DataInterpolatorL::\loperator[]",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_interpolator_l.html#a863c91db9429ad0ded7d9b6ec8767431",tooltip="Return a data point."];
+  Node1 -> Node3 [dir="back",color="steelblue1",style="solid"];
+  Node3 [label="DataSpline::operator[]",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_spline.html#a0bd1f6ec0dcbc1aa28e15d8e6237ce6f",tooltip="Return a data point."];
+}

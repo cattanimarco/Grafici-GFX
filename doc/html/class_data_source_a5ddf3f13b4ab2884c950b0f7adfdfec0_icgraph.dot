@@ -1,0 +1,12 @@
+digraph "DataSource::size"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [label="DataSource::size",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Return the number of data points in the data source."];
+  Node1 -> Node2 [dir="back",color="steelblue1",style="solid"];
+  Node2 [label="DataSourceNorm::min\l_data_source_size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_source_norm.html#aada7e4861b231381a05d53f0d4b4c79f",tooltip="Utility funtion to return the minimum size among a list of DataNorm data sources."];
+  Node2 -> Node2 [dir="back",color="steelblue1",style="solid"];
+}

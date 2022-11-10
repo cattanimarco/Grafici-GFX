@@ -1,0 +1,31 @@
+digraph "display/DisplayDriver.h"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [label="display/DisplayDriver.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [color="steelblue1",style="solid"];
+  Node2 [label="../color/Color.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$_color_8h.html",tooltip=" "];
+  Node1 -> Node3 [color="steelblue1",style="solid"];
+  Node3 [label="Adafruit_GFX.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node1 -> Node4 [color="steelblue1",style="solid"];
+  Node4 [label="DisplayVector.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$_display_vector_8h.html",tooltip=" "];
+  Node4 -> Node5 [color="steelblue1",style="solid"];
+  Node5 [label="../Vector.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$_vector_8h.html",tooltip=" "];
+  Node1 -> Node6 [color="steelblue1",style="solid"];
+  Node6 [label="PixelVector.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$_pixel_vector_8h.html",tooltip=" "];
+  Node6 -> Node5 [color="steelblue1",style="solid"];
+  Node1 -> Node7 [color="steelblue1",style="solid"];
+  Node7 [label="Window.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$_window_8h.html",tooltip=" "];
+  Node7 -> Node8 [color="steelblue1",style="solid"];
+  Node8 [label="../Range.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$_range_8h.html",tooltip=" "];
+  Node7 -> Node9 [color="steelblue1",style="solid"];
+  Node9 [label="../data/DataNorm.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$_data_norm_8h.html",tooltip=" "];
+  Node9 -> Node8 [color="steelblue1",style="solid"];
+  Node7 -> Node10 [color="steelblue1",style="solid"];
+  Node10 [label="../data/DataVector.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$_data_vector_8h.html",tooltip=" "];
+  Node10 -> Node5 [color="steelblue1",style="solid"];
+  Node10 -> Node9 [color="steelblue1",style="solid"];
+  Node7 -> Node4 [color="steelblue1",style="solid"];
+}

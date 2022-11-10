@@ -1,0 +1,14 @@
+digraph "Range::trim"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [label="Range::trim",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Trim a given value to the limits of the range."];
+  Node1 -> Node2 [color="steelblue1",style="solid"];
+  Node2 [label="Range::contains",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_range.html#a7a16ab26de4ed1768feeb371158058f9",tooltip="Check a given value is inside of the range."];
+  Node2 -> Node3 [color="steelblue1",style="solid"];
+  Node3 [label="Range::sort",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_range.html#a9d209e3381cbe41f9fd5868ed9d291da",tooltip="Ensure the range limits are in the correcdt order, i.e. lower < higher."];
+  Node1 -> Node3 [color="steelblue1",style="solid"];
+}

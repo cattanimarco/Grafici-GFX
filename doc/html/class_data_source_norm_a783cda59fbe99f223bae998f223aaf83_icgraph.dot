@@ -1,0 +1,21 @@
+digraph "DataSourceNorm::range"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [label="DataSourceNorm::range",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Return the range of the DataNorm data point."];
+  Node1 -> Node2 [dir="back",color="steelblue1",style="solid"];
+  Node2 [label="DataResize::DataResize",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_resize.html#afc10e82421ab90be85372604d08b6a51",tooltip="Construct a new Data Resize object."];
+  Node1 -> Node3 [dir="back",color="steelblue1",style="solid"];
+  Node3 [label="DataSourceNorm::float\l_to_data_norm",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_source_norm.html#ad850df1f939b2043ab5659cd3e259bfd",tooltip="Utility function to return a DataNorm from a float value."];
+  Node3 -> Node4 [dir="back",color="steelblue1",style="solid"];
+  Node4 [label="DataArray::operator[]",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_array.html#a2286b9681a5813092a8cfcf960106cc5",tooltip="Returns the data point at specified location idx."];
+  Node1 -> Node5 [dir="back",color="steelblue1",style="solid"];
+  Node5 [label="DataInterpolatorL::\loperator[]",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_interpolator_l.html#a863c91db9429ad0ded7d9b6ec8767431",tooltip="Return a data point."];
+  Node1 -> Node6 [dir="back",color="steelblue1",style="solid"];
+  Node6 [label="DataSpline::operator[]",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_spline.html#a0bd1f6ec0dcbc1aa28e15d8e6237ce6f",tooltip="Return a data point."];
+  Node1 -> Node7 [dir="back",color="steelblue1",style="solid"];
+  Node7 [label="DataParametric::operator[]",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_parametric.html#a9de12457570065becc41626fcb51f320",tooltip="Return a data point."];
+}

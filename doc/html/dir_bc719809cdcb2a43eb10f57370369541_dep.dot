@@ -1,0 +1,14 @@
+digraph "Documents/Grafici-Test/Grafici-GFX/src/color"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  compound=true
+  subgraph clusterdir_6a0ef80fff5cc9cf597d7220285b8fda {
+    graph [ bgcolor="#edf0f7", pencolor="grey50", label="src", fontname=Helvetica,fontsize=10 style="filled,dashed", URL="dir_6a0ef80fff5cc9cf597d7220285b8fda.html",tooltip=""]
+  dir_806917c0a6b6a777834c41bca2e61982 [label="data", fillcolor="#a2b4d6", color="grey25", style="filled", URL="dir_806917c0a6b6a777834c41bca2e61982.html",tooltip=""];
+  dir_bc719809cdcb2a43eb10f57370369541 [label="color", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_bc719809cdcb2a43eb10f57370369541.html",tooltip=""];
+  }
+  dir_bc719809cdcb2a43eb10f57370369541->dir_806917c0a6b6a777834c41bca2e61982 [headlabel="1", labeldistance=1.5 headhref="dir_000000_000001.html" color="steelblue1" fontcolor="steelblue1"];
+}

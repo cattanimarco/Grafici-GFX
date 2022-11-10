@@ -1,0 +1,11 @@
+digraph "DataNorm::raw"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [label="DataNorm::raw",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [dir="back",color="steelblue1",style="solid"];
+  Node2 [label="DataConstant::DataConstant",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$class_data_constant.html#a2387474d659d4f66710de0fc21809732",tooltip="Construct a new data source from a normalized data point."];
+}
