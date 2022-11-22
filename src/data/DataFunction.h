@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Data
+ *  @{
+ */
 
 #ifndef GRAFICI_DATA_FUNCTION_H
 #define GRAFICI_DATA_FUNCTION_H
@@ -61,3 +64,5 @@ class DataFunction : public DataParametric
 };
 
 #endif /* GRAFICI_DATA_FUNCTION_H */
+
+/** @}*/

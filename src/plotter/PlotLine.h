@@ -10,7 +10,10 @@
 * 
 */
 
-
+/** \addtogroup Plotter
+ *  @{
+ */
+ 
 #ifndef GRAFICI_GFX_PLOT_LINE_H
 #define GRAFICI_GFX_PLOT_LINE_H
 
@@ -50,3 +53,5 @@ void plot_line(const DisplayDriver &display,
 }
 
 #endif //GRAFICI_GFX_PLOT_LINE_H
+
+/** @}*/

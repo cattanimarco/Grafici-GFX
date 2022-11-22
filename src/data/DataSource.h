@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Data
+ *  @{
+ */
 
 #ifndef GRAFICI_DATA_SOURCE_H
 #define GRAFICI_DATA_SOURCE_H
@@ -56,3 +59,5 @@ class DataSource
 };
 
 #endif //GRAFICI_DATA_SOURCE_H
+
+/** @}*/

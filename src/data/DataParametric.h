@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Data
+ *  @{
+ */
 
 #ifndef GRAFICI_DATA_PARAMETRIC_H
 #define GRAFICI_DATA_PARAMETRIC_H
@@ -69,3 +72,5 @@ class DataParametric : public DataSourceNorm
 };
 
 #endif /* GRAFICI_DATA_PARAMETRIC_H */
+
+/** @}*/

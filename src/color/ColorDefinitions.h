@@ -10,7 +10,10 @@
 * 
 */
 
-
+/** \addtogroup Colors
+ *  @{
+ */
+ 
 #ifndef GRAFICI_COLOR_DEFS_H
 #define GRAFICI_COLOR_DEFS_H
 

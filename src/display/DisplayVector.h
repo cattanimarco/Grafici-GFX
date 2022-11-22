@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Display
+ *  @{
+ */
 
 #ifndef GRAFICI_DISPLAY_DISPLAY_VECTOR_H
 #define GRAFICI_DISPLAY_DISPLAY_VECTOR_H
@@ -25,3 +28,5 @@
 using DisplayVector = Vector<float>;
 
 #endif /* GRAFICI_DISPLAY_DISPLAY_VECTOR_H */
+
+/** @}*/

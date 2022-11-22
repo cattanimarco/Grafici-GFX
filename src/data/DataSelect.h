@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Data
+ *  @{
+ */
 
 #ifndef GRAFICI_DATA_SELECT_H
 #define GRAFICI_DATA_SELECT_H
@@ -85,3 +88,5 @@ class DataSelect : public DataSourceNorm
 };
 
 #endif /* GRAFICI_DATA_SELECT_H */
+
+/** @}*/

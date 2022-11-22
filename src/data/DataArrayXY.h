@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Data
+ *  @{
+ */
 
 #ifndef GRAFICI_DATA_ARRAY_XY_H
 #define GRAFICI_DATA_ARRAY_XY_H
@@ -77,3 +80,5 @@ class DataArrayXY : public DataSource<DataVector>
 };
 
 #endif /* GRAFICI_DATA_ARRAY_XY_H */
+
+/** @}*/

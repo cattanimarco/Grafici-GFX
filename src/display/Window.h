@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Display
+ *  @{
+ */
 
 #ifndef GRAFICI_RECTANGULAR_WINDOW_H
 #define GRAFICI_RECTANGULAR_WINDOW_H
@@ -145,3 +148,5 @@ class Window : public Vector<Range<float>>
 const Window full_screen;
 
 #endif /* GRAFICI_RECTANGULAR_WINDOW_H */
+
+/** @}*/

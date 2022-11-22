@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Data
+ *  @{
+ */
 
 #ifndef GRAFICI_DATA_RESIZE_H
 #define GRAFICI_DATA_RESIZE_H
@@ -55,3 +58,5 @@ class DataResize : public DataSourceNorm
 };
 
 #endif /* GRAFICI_DATA_RESIZE_H */
+
+/** @}*/

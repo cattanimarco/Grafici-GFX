@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Display
+ *  @{
+ */
 
 #ifndef GRAFICI_DISPLAY_WINDOW_POLAR_H
 #define GRAFICI_DISPLAY_WINDOW_POLAR_H
@@ -64,3 +67,5 @@ class PolarWindow : public Window
 };
 
 #endif /* GRAFICI_DISPLAY_WINDOW_POLAR_H */
+
+/** @}*/

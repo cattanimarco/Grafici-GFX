@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Plotter
+ *  @{
+ */
 
 #ifndef GRAFICI_GFX_PLOT_AXIS_H
 #define GRAFICI_GFX_PLOT_AXIS_H
@@ -72,3 +75,5 @@ void plot_axis(const DisplayDriver &display,
 }
 
 #endif //GRAFICI_GFX_PLOT_AXIS_H
+
+/** @}*/

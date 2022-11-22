@@ -10,6 +10,10 @@
 * 
 */
 
+/** \addtogroup Main
+ *  @{
+ */
+
 #ifndef GRAFICI_RANGE_H
 #define GRAFICI_RANGE_H
 
@@ -198,3 +202,5 @@ class Range
 };
 
 #endif /* GRAFICI_RANGE_H */
+
+/** @}*/

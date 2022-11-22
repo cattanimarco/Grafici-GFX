@@ -10,7 +10,10 @@
 * 
 */
 
-
+/** \addtogroup Plotter
+ *  @{
+ */
+ 
 #ifndef GRAFICI_GFX_PLOT_BAR_H
 #define GRAFICI_GFX_PLOT_BAR_H
 
@@ -68,3 +71,5 @@ void plot_bar(const DisplayDriver &display,
 }
 
 #endif //GRAFICI_GFX_PLOT_BAR_H
+
+/** @}*/

@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Data
+ *  @{
+ */
 
 #ifndef GRAFICI_DATA_ARRAY_H
 #define GRAFICI_DATA_ARRAY_H
@@ -82,3 +85,5 @@ class DataArray : public DataSourceNorm
 };
 
 #endif /* GRAFICI_DATA_ARRAY_H */
+
+/** @}*/

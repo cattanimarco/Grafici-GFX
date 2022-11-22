@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Display
+ *  @{
+ */
 
 #ifndef GRAFICI_DISPLAY_PIXEL_VECTOR_H
 #define GRAFICI_DISPLAY_PIXEL_VECTOR_H
@@ -25,3 +28,5 @@
 using PixelVector = Vector<size_t>;
 
 #endif /* GRAFICI_DISPLAY_PIXEL_VECTOR_H */
+
+/** @}*/

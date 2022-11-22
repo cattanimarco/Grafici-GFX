@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Data
+ *  @{
+ */
 
 #ifndef GRAFICI_DATA_HISTOGRAM_XY_H
 #define GRAFICI_DATA_HISTOGRAM_XY_H
@@ -102,3 +105,5 @@ class DataHistogramXY : public DataSource<DataVector>
 };
 
 #endif //GRAFICI_DATA_HISTOGRAM_XY_H
+
+/** @}*/

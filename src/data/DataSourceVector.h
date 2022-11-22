@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Data
+ *  @{
+ */
 
 #ifndef GRAFICI_DATA_SOURCE_VECTOR_H
 #define GRAFICI_DATA_SOURCE_VECTOR_H
@@ -24,3 +27,5 @@
 using DataSourceVector = DataSource<DataVector>;
 
 #endif /* GRAFICI_DATA_SOURCE_VECTOR_H */
+
+/** @}*/

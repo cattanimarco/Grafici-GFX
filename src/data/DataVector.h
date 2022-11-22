@@ -4,6 +4,10 @@
 #include "../Vector.h"
 #include "DataNorm.h"
 
+/** \addtogroup Data
+ *  @{
+ */
+
 // clang-format off
 #define INVALID_DATA_VECTOR  \
 	{                        \
@@ -19,3 +23,5 @@
 using DataVector = Vector<DataNorm>;
 
 #endif /* GRAFICI_DATA_VECTOR_H */
+
+/** @}*/

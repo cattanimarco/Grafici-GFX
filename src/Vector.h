@@ -10,6 +10,10 @@
 * 
 */
 
+/** \addtogroup Main
+ *  @{
+ */
+
 #ifndef GRAFICI_VECTOR_H
 #define GRAFICI_VECTOR_H
 
@@ -59,3 +63,5 @@ class Vector
 };
 
 #endif /* GRAFICI_VECTOR_H */
+
+/** @}*/

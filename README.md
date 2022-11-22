@@ -24,4 +24,4 @@ The Arduino's display should show the following
 ![line_and_histogram image](https://raw.githubusercontent.com/cattanimarco/Grafici-Test/master/imgs/examples/line_and_histogram.bmp)
 
 ## Documentation
-[Grafici-GFX/doc](https://htmlpreview.github.io/?https://github.com/cattanimarco/Grafici-GFX/blob/master/doc/html/class_grafici.html)
+* Have a look at the [user documentation](https://github.com/cattanimarco/Grafici-GFX/wiki/Api-Main) provided with the library

@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Data
+ *  @{
+ */
 
 #ifndef GRAFICI_DATA_SPLINE_INTERPOLATOR_H
 #define GRAFICI_DATA_SPLINE_INTERPOLATOR_H
@@ -139,3 +142,5 @@ class DataSpline : public DataInterpolatorL
 };
 
 #endif //GRAFICI_DATA_SPLINE_INTERPOLATOR_H
+
+/** @}*/

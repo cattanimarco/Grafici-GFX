@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Colors
+ *  @{
+ */
 
 #ifndef GRAFICI_COLOR_COLORMAP_H
 #define GRAFICI_COLOR_COLORMAP_H
@@ -132,3 +135,5 @@ class ColorMapArray : public ColorMap
 };
 
 #endif /* GRAFICI_COLOR_COLORMAP_H */
+
+/** @}*/

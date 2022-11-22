@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Data
+ *  @{
+ */
 
 #ifndef GRAFICI_DATA_LINEAR_INTERPOLATOR_H
 #define GRAFICI_DATA_LINEAR_INTERPOLATOR_H
@@ -106,3 +109,5 @@ class DataInterpolatorL : public DataSource<DataVector>
 };
 
 #endif /* GRAFICI_DATA_LINEAR_INTERPOLATOR_H */
+
+/** @}*/

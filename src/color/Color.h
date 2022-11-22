@@ -10,6 +10,10 @@
 * 
 */
 
+/** \addtogroup Colors
+ *  @{
+ */
+
 #ifndef GRAFICI_color_H
 #define GRAFICI_color_H
 
@@ -76,3 +80,5 @@ class Color
 };
 
 #endif /* GRAFICI_color_H */
+
+/** @}*/

@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Data
+ *  @{
+ */
 
 #ifndef GRAFICI_DATA_NORM_H
 #define GRAFICI_DATA_NORM_H
@@ -83,3 +86,5 @@ class DataNorm
 };
 
 #endif //#ifndef GRAFICI_DATA_NORM_H
+
+/** @}*/

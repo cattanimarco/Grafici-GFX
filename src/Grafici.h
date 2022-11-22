@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Main
+ *  @{
+ */
 
 #ifndef GRAFICI_GRAFICI_H
 #define GRAFICI_GRAFICI_H
@@ -156,3 +159,5 @@ class Grafici
 };
 
 #endif // GRAFICI_GRAFICI_H
+
+/** @}*/

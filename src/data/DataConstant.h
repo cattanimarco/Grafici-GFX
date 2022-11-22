@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Data
+ *  @{
+ */
 
 #ifndef GRAFICI_DATA_CONSTANT_H
 #define GRAFICI_DATA_CONSTANT_H
@@ -47,3 +50,5 @@ class DataConstant : public DataParametric
 };
 
 #endif /* GRAFICI_DATA_CONSTANT_H */
+
+/** @}*/

@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Data
+ *  @{
+ */
 
 #ifndef GRAFICI_DATA_SOURCE_NORM_H
 #define GRAFICI_DATA_SOURCE_NORM_H
@@ -91,3 +94,5 @@ class DataSourceNorm : public DataSource<DataNorm>
 };
 
 #endif //GRAFICI_DATA_SOURCE_NORM_H
+
+/** @}*/

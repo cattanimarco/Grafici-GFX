@@ -10,6 +10,9 @@
 * 
 */
 
+/** \addtogroup Display
+ *  @{
+ */
 
 #ifndef GRAFICI_DISPLAY_DRIVER_H
 #define GRAFICI_DISPLAY_DRIVER_H
@@ -244,3 +247,5 @@ class DisplayDriver
 };
 
 #endif /* GRAFICI_DISPLAY_DRIVER_H */
+
+/** @}*/

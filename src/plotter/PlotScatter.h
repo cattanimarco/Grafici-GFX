@@ -10,7 +10,10 @@
 * 
 */
 
-
+/** \addtogroup Plotter
+ *  @{
+ */
+ 
 #ifndef GRAFICI_GFX_PLOT_SCATTER_H
 #define GRAFICI_GFX_PLOT_SCATTER_H
 
@@ -110,3 +113,5 @@ void plot_scatter(const DisplayDriver &display,
 }
 
 #endif //GRAFICI_GFX_PLOT_SCATTER_H
+
+/** @}*/

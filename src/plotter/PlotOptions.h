@@ -10,7 +10,10 @@
 * 
 */
 
-
+/** \addtogroup Plotter
+ *  @{
+ */
+ 
 #ifndef GRAFICI_GFX_PLOT_OPTIONS_H
 #define GRAFICI_GFX_PLOT_OPTIONS_H
 
@@ -23,3 +26,5 @@ struct PlotOptions
 };
 
 #endif /* GRAFICI_GFX_PLOT_OPTIONS_H */
+
+/** @}*/

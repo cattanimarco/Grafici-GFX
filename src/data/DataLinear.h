@@ -10,6 +10,10 @@
 * 
 */
 
+/** \addtogroup Data
+ *  @{
+ */
+
 #ifndef GRAFICI_DATA_LINEAR_H
 #define GRAFICI_DATA_LINEAR_H
 
@@ -68,3 +72,5 @@ class DataLinear : public DataParametric
 };
 
 #endif /* GRAFICI_DATA_LINEAR_H */
+
+/** @}*/
