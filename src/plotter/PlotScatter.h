@@ -30,7 +30,7 @@ struct PlotScatterOpts
     Color background_color{black}; 
 };
 
-void plot_scatter(const DisplayDriver &display,
+inline void plot_scatter(const DisplayDriver &display,
                   const Window &window,
                   const ColorMap &colorMap,
                   const DataSourceNorm &x,

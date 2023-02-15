@@ -43,7 +43,7 @@ struct PlotAxisOpts
 	size_t segments; /* use ~45 for polar plots */
 };
 
-void plot_axis(const DisplayDriver &display,
+inline void plot_axis(const DisplayDriver &display,
                const Window &window,
                PlotAxisOpts opts = {})
 {

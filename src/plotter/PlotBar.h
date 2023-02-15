@@ -42,7 +42,7 @@ class PlotBarOpts : public PlotOptions
  * @param c data source for the color of the bars. Note that the final color is a function of colorMap and c
  * @param opts optional bar plot options 
  */
-void plot_bar(const DisplayDriver &display,
+inline void plot_bar(const DisplayDriver &display,
               const Window &window,
               const ColorMap &colorMap,
               const DataSourceNorm &x,

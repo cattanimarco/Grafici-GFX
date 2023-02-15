@@ -35,7 +35,7 @@ class PlotLineOpts : public PlotOptions
  * @param c data source for the color of the line segments. Note that the final color is a function of colorMap and c
  * @param opts optional line drawing options. There are no options available at the moment
  */
-void plot_line(const DisplayDriver &display,
+inline void plot_line(const DisplayDriver &display,
                const Window &window,
                const ColorMap &colorMap,
                const DataSourceNorm &x,
