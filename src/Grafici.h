@@ -58,10 +58,13 @@ class Grafici
 	 *
 	 * @param hal reference to the Adafruit_GFX display driver
 	 */
-	Grafici(Adafruit_GFX &hal)
+	Grafici(Adafruit_GFX &hal, bool clear_screen = true)
 	    : _display_driver{ hal }
 	{
-		_display_driver.fill_rect({ 0, 0 }, { 1, 1 }, black);
+		if (clear_screen)
+		{
+			_display_driver.fill_rect({ 0, 0 }, { 1, 1 }, black);
+		}
 	}
 
 	/**
