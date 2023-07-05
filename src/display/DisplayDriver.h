@@ -142,6 +142,7 @@ class DisplayDriver
 
 	void fill_rect(DisplayVector bottom_left, DisplayVector bottom_right, DisplayVector top_left, DisplayVector top_right, Color color, const Window &window = full_screen, size_t segments = 1) const
 	{
+		// TODO add segment support
 		fill_triangle(bottom_left,
 		              bottom_right,
 		              top_left,
@@ -184,6 +185,11 @@ class DisplayDriver
 				              window);
 			}
 		}
+	}
+
+	void fill_screen(Color color) const
+	{
+		_driver->fillScreen(color.to_R5G6B5());
 	}
 
 	// void draw_circle(CartesianVector<float> display_center, CartesianVector<float> display_radius, R5G6B5 color) const

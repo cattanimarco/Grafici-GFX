@@ -28,6 +28,7 @@ const Color silver{ 192, 192, 192 };
 const Color red{ 255, 0, 0 };
 const Color green{ 0, 255, 0 };
 const Color blue{ 0, 0, 255 };
+const Color grey{ 127, 127, 127 };
 
 /* composite colors */
 const Color cyan = green + blue;
@@ -37,25 +38,20 @@ const Color magenta = red + blue;
 const Color white = red + green + blue;
 
 /**
+ * @brief Full spectrum colormap, from ultraviolet to infrared
+ * 
+ */
+const GeneratedMapGenerated rainbow(grey, grey, white, {0, 255*0.33, 255 * 0.67});
+const GeneratedMapGenerated chrome(grey, grey, white, {0, 255*0.1, 255 * 0.2});
+
+
+/**
  * @brief Black and white color map. Ideal for displays with limited colors
  * 
  */
 const ColorMapArray<2> black_and_white{
 	black,
 	white
-};
-
-/**
- * @brief Full spectrum colormap, from ultraviolet to infrared
- * 
- */
-const ColorMapArray<6> rainbow{
-	magenta,
-	blue,
-	cyan,
-	green,
-	yellow,
-	red
 };
 
 /**

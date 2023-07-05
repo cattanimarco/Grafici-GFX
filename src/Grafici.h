@@ -25,6 +25,8 @@
 #include "data/DataArrayXY.h"
 #include "data/DataConstant.h"
 #include "data/DataFunction.h"
+#include "data/DataDistributionNormal.h"
+#include "data/DataDistributionUniform.h"
 #include "data/DataHistogramXY.h"
 #include "data/DataInterpolatorL.h"
 #include "data/DataLinear.h"
@@ -44,6 +46,7 @@
 #include "plotter/PlotAxis.h"
 #include "plotter/PlotBar.h"
 #include "plotter/PlotLine.h"
+#include "plotter/PlotArea.h"
 #include "plotter/PlotScatter.h"
 
 /**
@@ -58,13 +61,14 @@ class Grafici
 	 *
 	 * @param hal reference to the Adafruit_GFX display driver
 	 */
-	Grafici(Adafruit_GFX &hal, bool clear_screen = true)
+	Grafici(Adafruit_GFX &hal)
 	    : _display_driver{ hal }
 	{
-		if (clear_screen)
-		{
-			_display_driver.fill_rect({ 0, 0 }, { 1, 1 }, black);
-		}
+	}
+
+	void clear_screen(const Window &window = full_screen, const PlotOptions opts = {})
+	{
+		_display_driver.fill_rect({0,0}, {1,1}, black, window, opts.get_segments());
 	}
 
 	/**
@@ -75,17 +79,6 @@ class Grafici
 	void set_color_map(const ColorMap &c)
 	{
 		_color_map = &c;
-	}
-
-	/**
-	 * @brief Set the properties for the plot axis. If this funtion is not called, 
-	 * the default options are used, i.e. rows=0, columns=0, and style=none.
-	 *
-	 * @param opts axis properties
-	 */
-	void set_axis(PlotAxisOpts opts)
-	{
-		_axis_opts = opts;
 	}
 
 	/**
@@ -101,14 +94,51 @@ class Grafici
 	          const DataSourceNorm &y,
 	          const DataSourceNorm &c,
 	          const Window &window = full_screen,
-	          const PlotLineOpts opts = {})
+	          const PlotOptions opts = {})
 	{
-		if (opts.draw_background)
-		{
-			_display_driver.fill_rect({ 0, 0 }, { 1, 1 }, opts.background_color, window, opts.segments);
-		}
-		plot_axis(_display_driver, window, _axis_opts);
+		plot_axis(_display_driver, window, opts);
 		plot_line(_display_driver, window, *_color_map, x, y, c, opts);
+	}
+
+	void line(const DataSourceNorm &x,
+	          const DataSourceNorm &y,
+	          const Color &color,
+	          const Window &window = full_screen,
+	          const PlotOptions opts = {})
+	{
+		const ColorMapConstant color_map{color};
+		plot_axis(_display_driver, window, opts);
+		plot_line(_display_driver, window, color_map, x, y, y, opts);
+	}
+
+	/**
+	 * @brief Plot a line on the display
+	 * 
+	 * @param x Data source for the x axis
+	 * @param y Data source for the y axis
+	 * @param c Data source for the color of the line  segments. Note that the final color is a function of the color map set via @ref set_color_map and the value from c
+	 * @param window Optional drawing region used to draw the line. Default is fullscreen
+	 * @param opts Optional line drawing options. There are no options available at the moment.
+	 */
+	void area(const DataSourceNorm &x,
+	          const DataSourceNorm &y,
+	          const DataSourceNorm &c,
+	          const Window &window = full_screen,
+	          const PlotOptions opts = {})
+	{
+		plot_area(_display_driver, window, *_color_map, x, y, c, opts);
+		plot_axis(_display_driver, window, opts);
+	}
+
+	void area(const DataSourceNorm &x,
+	          const DataSourceNorm &y,
+	          const Color &color,
+	          const Window &window = full_screen,
+	          const PlotOptions opts = {})
+	{
+		const ColorMapConstant color_map{color};
+		plot_area(_display_driver, window, color_map, x, y, y, opts);
+		plot_axis(_display_driver, window, opts);
 	}
 
 	/**
@@ -124,14 +154,21 @@ class Grafici
 	         const DataSourceNorm &y,
 	         const DataSourceNorm &c,
 	         const Window &window = full_screen,
-	         const PlotBarOpts opts = {})
+	         const PlotOptions opts = {})
 	{
-		if (opts.draw_background)
-		{
-			_display_driver.fill_rect({ 0, 0 }, { 1, 1 }, opts.background_color, window, opts.segments);
-		}
-		plot_axis(_display_driver, window, _axis_opts);
 		plot_bar(_display_driver, window, *_color_map, x, y, c, opts);
+		plot_axis(_display_driver, window, opts);
+	}
+
+	void bar(const DataSourceNorm &x,
+	         const DataSourceNorm &y,
+	         const Color &color,
+	         const Window &window = full_screen,
+	         const PlotOptions opts = {})
+	{
+		const ColorMapConstant color_map{color};
+		plot_bar(_display_driver, window, color_map, x, y, y, opts);
+		plot_axis(_display_driver, window, opts);
 	}
 
 	/**
@@ -149,16 +186,27 @@ class Grafici
 	             const DataSourceNorm &c,
 	             const DataSourceNorm &s,
 	             const Window &window = full_screen,
-	             const PlotScatterOpts opts = {})
+	             const PlotOptions opts = {})
 	{
-		plot_axis(_display_driver, window, _axis_opts);
+		plot_axis(_display_driver, window, opts);
 		plot_scatter(_display_driver, window, *_color_map, x, y, c, s, opts);
+	}
+
+	void scatter(const DataSourceNorm &x,
+	             const DataSourceNorm &y,
+	             const Color &color,
+	             const DataSourceNorm &s,
+	             const Window &window = full_screen,
+	             const PlotOptions opts = {})
+	{
+		const ColorMapConstant color_map{color};
+		plot_axis(_display_driver, window, opts);
+		plot_scatter(_display_driver, window, color_map, x, y, y, s, opts);
 	}
 
   private:
 	const DisplayDriver _display_driver;
 	const ColorMap *_color_map{ &parula };
-	PlotAxisOpts _axis_opts{ 0, 0, none, white, 1 };
 };
 
 #endif // GRAFICI_GRAFICI_H

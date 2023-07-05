@@ -17,6 +17,8 @@
 #ifndef GRAFICI_DATA_SPLINE_INTERPOLATOR_H
 #define GRAFICI_DATA_SPLINE_INTERPOLATOR_H
 
+// https://iquilezles.org/articles/minispline/
+
 /*! Importation of librairies*/
 #include "DataInterpolatorL.h"
 

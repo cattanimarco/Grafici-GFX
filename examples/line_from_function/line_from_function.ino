@@ -1,33 +1,29 @@
-#include "Adafruit_GFX.h" // Hardware-specific library
-#include "Adafruit_ILI9341.h"
-
+#include "Adafruit_GFX.h"
+#include "Adafruit_ILI9341.h"  // display-specific library
 #include "Grafici.h"
 
-/* Setup display driver */
 Adafruit_ILI9341 gfx = Adafruit_ILI9341(10, 9);
+Grafici plot{ gfx };
 
-/* `data_x` = [0 .. 99] */
-DataLinear data_x{ 100 };
-
-/* `data_y` = [sin(0) ..  sin(PI * 99 * 0.05)] */
-DataFunction data_y{ 100, [](size_t idx) -> float { return sin(M_PI * idx * 0.05); } };
-
-void setup(void)
-{
-	/* Init display driver and select landscape mode */
-	gfx.begin();
-	gfx.setRotation(1);
-
-	/* Init the plotting library with the display driver */
-	Grafici plot{ gfx };
-
-	/* Set the color map */
-	plot.set_color_map(parula);
-
-	/* Plot data as a line. Color line using `data_y` */
-	plot.line(data_x, data_y, data_y);
+// define a nice function to plot
+float my_function(size_t x) {
+  return sin(x / 10.0) + cos(sqrt(3) * x / 10.0);
 }
 
-void loop(void)
-{
+// y = my_function(x), with x in [0,100)
+DataLinear x = DataLinear(100);
+DataFunction y = DataFunction(100, my_function);
+
+void setup(void) {
+  gfx.begin();
+  gfx.setRotation(3);
+
+  plot.clear_screen();
+  plot.set_color_map(parula);
+
+  // Plot data as a line. Color line using y
+  plot.line(x, y, y);
+}
+
+void loop(void) {
 }

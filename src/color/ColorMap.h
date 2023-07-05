@@ -69,6 +69,41 @@ class ColorMapConstant : public ColorMap
 	const Color _color;
 };
 
+class GeneratedMapGenerated : public ColorMap
+{
+  public:
+	GeneratedMapGenerated(const Color a, const Color b, const Color c, const Color d, size_t palette_size = 100)
+	    : _a{ a }
+	    , _b{ b }
+	    , _c{ c }
+	    , _d{ d }
+		, _palette_size{palette_size}
+	{
+	}
+
+	Color index_to_color(size_t idx) const override
+	{
+		return norm_to_color(idx/_palette_size);
+	}
+
+	Color norm_to_color(DataNorm val) const override
+	{
+		// https://iquilezles.org/articles/palettes/
+		Color result;
+		result.red = 255 * ((_a.red / 255.0) + (_b.red / 255.0)*cos( 2 * M_PI *((_c.red / 255.0) * val.norm() + (_d.red / 255.0)) ));
+		result.green = 255 * ((_a.green / 255.0) + (_b.green / 255.0)*cos( 2 * M_PI *((_c.green / 255.0) * val.norm() + (_d.green / 255.0)) ));
+		result.blue = 255 * ((_a.blue / 255.0) + (_b.blue / 255.0)*cos( 2 * M_PI *((_c.blue / 255.0) * val.norm() + (_d.blue / 255.0)) ));
+		return result;
+	}
+
+  private:
+	const Color _a;
+	const Color _b;
+	const Color _c;
+	const Color _d;
+	const size_t _palette_size;
+};
+
 /**
  * @brief Color Map Array
  * 

@@ -6,32 +6,61 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-Grafici	        KEYWORD1
-DataArray	    KEYWORD1
-DataArrayXY	    KEYWORD1
+Grafici	KEYWORD1
+DataArrayXY	KEYWORD1
+DataHistogramXY	KEYWORD1
+DataDistributionUniform	KEYWORD1
+DataDistributionNormal	KEYWORD1
 DataConstant	KEYWORD1
+DataResize	KEYWORD1
+DataLinear	KEYWORD1
+DataFunction	KEYWORD1
+DataArray	KEYWORD1
+PolarWindow	KEYWORD1
+Window	KEYWORD1
+PlotOptions	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
+
 #######################################
 # Instances (KEYWORD2)
 #######################################
 
-black  KEYWORD2
-gunpowder KEYWORD2
-silver KEYWORD2
-red KEYWORD2
-green KEYWORD2
-blue KEYWORD2
-cyan KEYWORD2 
-yellow KEYWORD2
-orange KEYWORD2
-magenta KEYWORD2
-white KEYWORD2
+plot_options	KEYWORD2
+full_screen	KEYWORD2
+
+#######################################
+# Structures (KEYWORD3)
+#######################################
+
+WindowTransform	KEYWORD3
 
 #######################################
 # Constants (LITERAL1)
 #######################################
 
+rainbow	LITERAL1
+chrome	LITERAL1
+black_and_white	LITERAL1
+temperature	LITERAL1
+cmy	LITERAL1
+heat	LITERAL1
+bright	LITERAL1
+semaphore	LITERAL1
+parula	LITERAL1
+
+Black	LITERAL1
+gunpowder	LITERAL1
+silver	LITERAL1
+red	LITERAL1
+green	LITERAL1
+blue	LITERAL1
+grey	LITERAL1
+cyan	LITERAL1
+yellow	LITERAL1
+orange	LITERAL1
+magenta	LITERAL1
+white	LITERAL1

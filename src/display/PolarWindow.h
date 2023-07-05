@@ -63,7 +63,7 @@ class PolarWindow : public Window
 	};
 
   private:
-	const Window &m_parent_window;
+	const Window m_parent_window;
 };
 
 #endif /* GRAFICI_DISPLAY_WINDOW_POLAR_H */

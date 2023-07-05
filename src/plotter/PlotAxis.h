@@ -17,59 +17,34 @@
 #ifndef GRAFICI_GFX_PLOT_AXIS_H
 #define GRAFICI_GFX_PLOT_AXIS_H
 
-enum AxisOptsStyle : char
-{
-	none = 0,
-	h_lines = 0x1 << 1,
-	v_lines = 0x1 << 2,
-};
-
-struct PlotAxisOpts
-{
-  public:
-	PlotAxisOpts(size_t rows = 10, size_t columns = 10, char style = h_lines | v_lines, Color color = white, size_t segments = 1)
-	    : rows{ rows }
-	    , columns{ columns }
-	    , style{ style }
-		, color{ color }
-	    , segments{ segments }
-	{
-	}
-
-	size_t rows;
-	size_t columns;
-	char style;
-	Color color;
-	size_t segments; /* use ~45 for polar plots */
-};
+#include "PlotOptions.h"
 
 inline void plot_axis(const DisplayDriver &display,
                const Window &window,
-               PlotAxisOpts opts = {})
+               const PlotOptions &opts)
 {
-
-	if (opts.style != none)
+	if (opts.get_h_axis() > 0 || opts.get_v_axis() > 0)
 	{
-		display.draw_rect({ 0, 0 }, { 1, 1 }, opts.color, window, opts.segments);
+		display.draw_rect({ 0, 0 }, { 1, 1 }, opts.get_axis_color(), window, opts.get_segments());
 	}
 
-	if (opts.style & v_lines)
+	if (opts.get_v_axis() > 1)
 	{
-		Range<size_t> x_range{ 0, opts.columns };
+		Range<size_t> x_range{ 0, opts.get_v_axis() };
 		float tick_length = 1;
-		for (size_t x_idx = 1; x_idx < opts.columns; ++x_idx)
+		for (size_t x_idx = 1; x_idx < opts.get_v_axis(); ++x_idx)
 		{
-			display.draw_line({ x_range.value_to_norm(x_idx), 0 }, { x_range.value_to_norm(x_idx), tick_length }, opts.color, opts.color, window, opts.segments);
+			display.draw_line({ x_range.value_to_norm(x_idx), 0 }, { x_range.value_to_norm(x_idx), tick_length }, opts.get_axis_color(), opts.get_axis_color(), window, opts.get_segments());
 		}
 	}
 
-	if (opts.style & h_lines)
+	if (opts.get_h_axis() > 1)
 	{
-		Range<size_t> y_range{ 0, opts.rows };
+		Range<size_t> y_range{ 0, opts.get_h_axis() };
 		float tick_length = 1;
-		for (size_t y_idx = 1; y_idx < opts.rows; ++y_idx)
+		for (size_t y_idx = 1; y_idx < opts.get_h_axis(); ++y_idx)
 		{
-			display.draw_line({ 0, y_range.value_to_norm(y_idx) }, { tick_length, y_range.value_to_norm(y_idx) }, opts.color, opts.color, window, opts.segments);
+			display.draw_line({ 0, y_range.value_to_norm(y_idx) }, { tick_length, y_range.value_to_norm(y_idx) }, opts.get_axis_color(), opts.get_axis_color(), window, opts.get_segments());
 		}
 	}
 }
