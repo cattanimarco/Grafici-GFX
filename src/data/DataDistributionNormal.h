@@ -14,8 +14,8 @@ static float generateGaussian(float mean, float stdDev) {
     } else {
         float u, v, s;
         do {
-            u = (random(0,precision+1) / (float)precision) * 2.0 - 1.0;
-            v = (random(0,precision+1) / (float)precision) * 2.0 - 1.0;
+            u = (random(precision+1) / (float)precision) * 2.0 - 1.0;
+            v = (random(precision+1) / (float)precision) * 2.0 - 1.0;
             s = u * u + v * v;
         } while (s >= 1.0 || s == 0.0);
         s = sqrt(-2.0 * log(s) / s);

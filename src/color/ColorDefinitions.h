@@ -41,8 +41,8 @@ const Color white = red + green + blue;
  * @brief Full spectrum colormap, from ultraviolet to infrared
  * 
  */
-const GeneratedMapGenerated rainbow(grey, grey, white, {0, 255*0.33, 255 * 0.67});
-const GeneratedMapGenerated chrome(grey, grey, white, {0, 255*0.1, 255 * 0.2});
+const GeneratedMapGenerated rainbow(grey, grey, white, {0, static_cast<uint8_t>(255*0.33), static_cast<uint8_t>(255 * 0.67)});
+const GeneratedMapGenerated chrome(grey, grey, white, {0, static_cast<uint8_t>(255*0.1), static_cast<uint8_t>(255 * 0.2)});
 
 
 /**
