@@ -30,7 +30,7 @@ class DataDistributionUniform : public DataParametric
 		randomSeed(seed);
 		for (size_t i = 0; i < N; ++i) 
 		{
-			uniform_data[i] =  random(0,precision+1) / (float)precision;
+			uniform_data[i] =  random(precision+1) / (float)precision;
 		}
 	}
 	
