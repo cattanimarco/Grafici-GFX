@@ -1,5 +1,5 @@
 #######################################
-# Syntax Coloring Map For Test
+# Syntax Coloring Map for Grafici-GFX
 #######################################
 
 #######################################
@@ -24,6 +24,17 @@ PlotOptions	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
+line	KEYWORD2
+scatter	KEYWORD2
+bar	KEYWORD2
+area	KEYWORD2
+histogram	KEYWORD2
+plot	KEYWORD2
+x	KEYWORD2
+y	KEYWORD2
+size	KEYWORD2
+raw	KEYWORD2
+norm	KEYWORD2
 
 #######################################
 # Instances (KEYWORD2)
@@ -33,15 +44,10 @@ plot_options	KEYWORD2
 full_screen	KEYWORD2
 
 #######################################
-# Structures (KEYWORD3)
-#######################################
-
-WindowTransform	KEYWORD3
-
-#######################################
 # Constants (LITERAL1)
 #######################################
 
+# Color Palettes
 rainbow	LITERAL1
 chrome	LITERAL1
 black_and_white	LITERAL1
@@ -52,6 +58,7 @@ bright	LITERAL1
 semaphore	LITERAL1
 parula	LITERAL1
 
+# Basic Colors
 Black	LITERAL1
 gunpowder	LITERAL1
 silver	LITERAL1
