@@ -1,0 +1,22 @@
+{
+    "name": "Grafici-GFX",
+    "version": "4.0.0",
+    "description": "Data visualization library for Arduino driven displays. Plot lines, bars, scatters, and more on both squared and round displays.",
+    "keywords": "display, graphics, visualization, plotting, charts, data",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cattanimarco/Grafici-GFX.git"
+    },
+    "authors": {
+        "name": "Marco Cattani",
+        "email": "03offices_jockey@icloud.com",
+        "url": "https://github.com/cattanimarco"
+    },
+    "license": "Apache-2.0",
+    "homepage": "https://github.com/cattanimarco/Grafici-GFX",
+    "dependencies": {
+        "adafruit/Adafruit GFX Library": "^1.11.5"
+    },
+    "frameworks": "arduino",
+    "platforms": "*"
+}
