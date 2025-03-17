@@ -66,6 +66,120 @@ void setup(void) {
 void loop(void) {}
 ```
 
+## Examples
+
+### Statistical Visualization
+Create a scatter plot with histogram using normal distribution data:
+
+```cpp
+constexpr size_t data_size = 300;
+constexpr size_t histogram_bins = 20;
+
+// Generate random data with normal distribution
+DataLinear x(data_size);
+DataDistributionNormal<data_size> y(84);
+DataConstant marker_size(data_size, 0.01);
+
+void setup(void) {
+  gfx.begin();
+  gfx.setRotation(3);
+  plot.clear_screen();
+  plot.set_color_map(cmy);
+
+  // Left window: Scatter plot (0-74% width)
+  auto left_window = full_screen.sub_window({ 0, .74 }, { 0, 1 });
+  auto left_opts = plot_options.set_axis(histogram_bins, 1, silver)
+                              .segments(10)
+                              .scatter_style("x");
+  plot.scatter(x, y, y, marker_size, left_window, left_opts);
+
+  // Right window: Histogram (76-100% width)
+  auto right_window = full_screen.sub_window({ .76, 1 }, { 0, 1 })
+                                .transform(WindowTransform::ccw_90_rotation);
+  auto right_opts = plot_options.set_axis(5, histogram_bins, silver)
+                               .bar_filled(true)
+                               .thickness(0.5);
+  
+  // Plot histogram
+  DataHistogramXY<histogram_bins> data_hist{ y };
+  plot.bar(data_hist.x(), data_hist.y(), data_hist.x(), 
+          right_window, right_opts);
+}
+```
+
+### Polar Plots
+Create a polar plot with multiple functions:
+
+```cpp
+DataLinear r(100);  // Radius data
+DataFunction theta1(100, [](size_t x) { 
+  return sin(x / 10.0); 
+});
+DataFunction theta2(100, [](size_t x) { 
+  return cos(x / 8.0); 
+});
+
+void setup(void) {
+  gfx.begin();
+  plot.clear_screen();
+  plot.set_color_map(heat);
+
+  // Create polar window
+  auto polar = PolarWindow(full_screen);
+  auto opts = plot_options.set_axis(10, 10, white);
+
+  // Plot multiple functions
+  plot.line(r, theta1, theta1, polar, opts);
+  plot.line(r, theta2, theta2, polar, opts);
+}
+```
+
+### Animated Line Plot
+Create an animated line plot:
+
+```cpp
+DataLinear x(100);
+float phase = 0;
+
+void setup(void) {
+  gfx.begin();
+  plot.set_color_map(rainbow);
+}
+
+void loop(void) {
+  plot.clear_screen();
+  
+  // Create animated function
+  DataFunction y(100, [](size_t x) {
+    return sin(x / 10.0 + phase);
+  });
+  
+  plot.line(x, y, y);
+  phase += 0.1;
+  delay(50);
+}
+```
+
+### Area Plot from Array
+Create an area plot from a C array:
+
+```cpp
+const float data[] = {0, 1, 2, 1, 0, -1, -2, -1};
+DataArray y(data, 8);
+DataLinear x(8);
+
+void setup(void) {
+  gfx.begin();
+  plot.clear_screen();
+  plot.set_color_map(temperature);
+  
+  auto opts = plot_options.set_axis(8, 4, white);
+  plot.area(x, y, y, full_screen, opts);
+}
+```
+
+For more examples, check out the [examples](examples/) directory and our [Wiki](https://github.com/cattanimarco/Grafici-GFX/wiki).
+
 ## Documentation
 
 Visit our [Wiki](https://github.com/cattanimarco/Grafici-GFX/wiki) for detailed documentation, including:
