@@ -22,6 +22,7 @@
 #include "data/DataNorm.h"
 
 #include "data/DataArray.h"
+#include "data/DataCast.h"
 #include "data/DataArrayXY.h"
 #include "data/DataConstant.h"
 #include "data/DataFunction.h"
@@ -53,20 +54,33 @@
  * @brief Object representing the Grafici plotting library
  *
  */
-class Grafici
+template <typename Scalar = float>
+class GraficiT
 {
   public:
+    using Compute = typename grafici::ComputationType<Scalar>::type;
+    using DisplayDriver = DisplayDriverT<Scalar>;
+    using Window = WindowT<Scalar>;
+    using DataSourceNorm = DataSourceNormT<Scalar>;
+    using PlotOptions = PlotOptionsT<Scalar>;
+    using Grafici = GraficiT<Scalar>;
 	/**
 	 * @brief Construct a new Grafici object
 	 *
 	 * @param hal reference to the Adafruit_GFX display driver
 	 */
-	Grafici(Adafruit_GFX &hal)
+	GraficiT(Adafruit_GFX &hal)
 	    : _display_driver{ hal }
 	{
 	}
 
-	void clear_screen(const Window &window = full_screen, const PlotOptions opts = {})
+	// A default full-screen clear needs no projected triangles or clip buffers.
+	void clear_screen()
+	{
+		_display_driver.fill_screen(black);
+	}
+
+	void clear_screen(const Window &window, const PlotOptions opts = {})
 	{
 		_display_driver.fill_rect({0,0}, {1,1}, black, window, opts.get_segments());
 	}
@@ -93,7 +107,7 @@ class Grafici
 	void line(const DataSourceNorm &x,
 	          const DataSourceNorm &y,
 	          const DataSourceNorm &c,
-	          const Window &window = full_screen,
+	          const Window &window = full_screen_for<Scalar>(),
 	          const PlotOptions opts = {})
 	{
 		plot_axis(_display_driver, window, opts);
@@ -103,7 +117,7 @@ class Grafici
 	void line(const DataSourceNorm &x,
 	          const DataSourceNorm &y,
 	          const Color &color,
-	          const Window &window = full_screen,
+	          const Window &window = full_screen_for<Scalar>(),
 	          const PlotOptions opts = {})
 	{
 		const ColorMapConstant color_map{color};
@@ -123,7 +137,7 @@ class Grafici
 	void area(const DataSourceNorm &x,
 	          const DataSourceNorm &y,
 	          const DataSourceNorm &c,
-	          const Window &window = full_screen,
+	          const Window &window = full_screen_for<Scalar>(),
 	          const PlotOptions opts = {})
 	{
 		plot_area(_display_driver, window, *_color_map, x, y, c, opts);
@@ -133,7 +147,7 @@ class Grafici
 	void area(const DataSourceNorm &x,
 	          const DataSourceNorm &y,
 	          const Color &color,
-	          const Window &window = full_screen,
+	          const Window &window = full_screen_for<Scalar>(),
 	          const PlotOptions opts = {})
 	{
 		const ColorMapConstant color_map{color};
@@ -153,7 +167,7 @@ class Grafici
 	void bar(const DataSourceNorm &x,
 	         const DataSourceNorm &y,
 	         const DataSourceNorm &c,
-	         const Window &window = full_screen,
+	         const Window &window = full_screen_for<Scalar>(),
 	         const PlotOptions opts = {})
 	{
 		plot_bar(_display_driver, window, *_color_map, x, y, c, opts);
@@ -163,7 +177,7 @@ class Grafici
 	void bar(const DataSourceNorm &x,
 	         const DataSourceNorm &y,
 	         const Color &color,
-	         const Window &window = full_screen,
+	         const Window &window = full_screen_for<Scalar>(),
 	         const PlotOptions opts = {})
 	{
 		const ColorMapConstant color_map{color};
@@ -185,7 +199,7 @@ class Grafici
 	             const DataSourceNorm &y,
 	             const DataSourceNorm &c,
 	             const DataSourceNorm &s,
-	             const Window &window = full_screen,
+	             const Window &window = full_screen_for<Scalar>(),
 	             const PlotOptions opts = {})
 	{
 		plot_axis(_display_driver, window, opts);
@@ -196,7 +210,7 @@ class Grafici
 	             const DataSourceNorm &y,
 	             const Color &color,
 	             const DataSourceNorm &s,
-	             const Window &window = full_screen,
+	             const Window &window = full_screen_for<Scalar>(),
 	             const PlotOptions opts = {})
 	{
 		const ColorMapConstant color_map{color};
@@ -208,6 +222,8 @@ class Grafici
 	const DisplayDriver _display_driver;
 	const ColorMap *_color_map{ &parula };
 };
+
+using Grafici = GraficiT<float>;
 
 #endif // GRAFICI_GRAFICI_H
 

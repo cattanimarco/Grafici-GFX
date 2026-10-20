@@ -3,228 +3,86 @@
 [![Arduino Library](https://www.ardu-badge.com/badge/Grafici-GFX.svg)](https://www.ardu-badge.com/Grafici-GFX)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-A powerful data visualization library for Arduino displays supporting the Adafruit GFX interface. Create beautiful plots, charts, and visualizations with minimal code.
+Grafici is an Arduino plotting library for displays supported by **Adafruit GFX**. Draw lines, filled areas, bars and scatter plots using reusable data sources, color maps and Cartesian or polar windows.
 
 ![Example Plot](https://raw.githubusercontent.com/cattanimarco/Grafici-Test/master/imgs/examples/line_from_array.jpg)
 
-## Features
+## Design
 
-- 📊 Multiple plot types:
-  - Line plots
-  - Scatter plots
-  - Bar charts
-  - Area plots
-  - Histograms
-  - Polar plots
-- 🎨 Customizable color schemes
-- 📐 Support for both rectangular and round displays
-- 📏 Normalized coordinate system
-- 🔄 Data processing and transformation
-- 🎯 Window-based plotting regions
+Data sources provide values and their ranges independently of the plotter and display. Arrays, functions, distributions, histograms and interpolators can feed the same plotting calls. Separate sources can control x, y, color and marker size.
 
-## Installation
+The common interface uses normalized values: each source maps its raw range into `[0,1]`, and windows transform logical coordinates into normalized display coordinates. Pixel resolution enters at the display boundary, so data and plot layouts can be reused across display sizes. Raw values and floating-point intermediates remain signed and may exceed 1; normalization does not restrict the scalar format to `[0,1]`.
 
-### Arduino IDE
-1. Open Arduino IDE
-2. Go to `Sketch` > `Include Library` > `Manage Libraries` (`SHIFT + CMD + I`)
-3. Search for `Grafici`
-4. Select `Grafici-GFX` and click `Install`
+## Getting started
 
-### Platform IO
-Add to your `platformio.ini`:
+In the Arduino IDE, open **Sketch → Include Library → Manage Libraries**, search for **Grafici-GFX** and install it. Alternatively, copy this library into your Arduino libraries folder. Install **Adafruit GFX Library** and the driver for your display as well. For PlatformIO, add:
+
 ```ini
 lib_deps = Grafici-GFX
 ```
 
-## Quick Start
+Include `Grafici.h` and pass your `Adafruit_GFX` display to `Grafici`; initialize the display before drawing. The library supports C++11.
+
+This example uses an ILI9341 display; install **Adafruit ILI9341** and adjust the driver, pins and rotation for your hardware:
 
 ```cpp
-#include "Adafruit_GFX.h"
-#include "Adafruit_ILI9341.h"
-#include "Grafici.h"
+#include <Adafruit_GFX.h>
+#include <Adafruit_ILI9341.h>
+#include <Grafici.h>
 
-Adafruit_ILI9341 gfx = Adafruit_ILI9341(10, 9);
-Grafici plot{ gfx };
+Adafruit_ILI9341 display(10, 9); // Chip select, data/command.
+Grafici plot(display);
 
-// Create data source from function
-float my_function(size_t x) {
-  return sin(x / 10.0) + cos(sqrt(3) * x / 10.0);
+float readings[] = {8.4f, 12.9f, 21.6f, 26.6f};
+DataArrayXY<float> data(readings, 4, {0, 30});
+
+void setup()
+{
+    display.begin();
+    display.setRotation(3);
+    plot.clear_screen();
+
+    auto x = data.x();
+    auto y = data.y();
+    plot.line(x, y, white, full_screen, plot_options.set_axis(4, 4));
 }
 
-DataLinear x = DataLinear(100);
-DataFunction y = DataFunction(100, my_function);
-
-void setup(void) {
-  gfx.begin();
-  gfx.setRotation(3);
-
-  plot.clear_screen();
-  plot.set_color_map(parula);
-  plot.line(x, y, y);  // Plot data as a line, color by y value
-}
-
-void loop(void) {}
+void loop() {}
 ```
 
-## Examples
+`DataArrayXY` uses sample indices for x and the supplied array for y. Here, y maps the fixed raw range `[0,30]` to the plot height; omitting that range discovers bounds from the data. Arrays are borrowed without copying, so keep them alive while their sources are used. Values outside an explicit range are clipped; missing samples leave gaps.
 
-### Statistical Visualization
-Create a scatter plot with histogram using normal distribution data:
+## Plotting and examples
 
-```cpp
-constexpr size_t data_size = 300;
-constexpr size_t histogram_bins = 20;
+Use `line()`, `area()`, `bar()` or `scatter()` with interchangeable normalized sources. Choose a constant color or supply a color source through a palette. `PlotOptions` controls axes, bar fill/thickness, marker styles and subdivision. `Window` arranges subplots and rotations; `PolarWindow` projects the same logical geometry into polar coordinates.
 
-// Generate random data with normal distribution
-DataLinear x(data_size);
-DataDistributionNormal<data_size> y(84);
-DataConstant marker_size(data_size, 0.01);
+| Example | Demonstrates |
+| --- | --- |
+| [Line from a function](examples/line_from_function/line_from_function.ino) | Independent x/y sources and data-driven color. |
+| [Animated line](examples/line_animated/line_animated.ino) | Updating a function and redrawing. |
+| [Bars from an array](examples/bars_from_c_array/bars_from_c_array.ino) | Explicit ranges, filled bars and axes. |
+| [Filled areas](examples/area_from_c_array/area_from_c_array.ino) | Combining datasets and plot styles. |
+| [Polar plots](examples/lines_from_functions_polar/lines_from_functions_polar.ino) | Reusing sources with a different window projection. |
+| [Scatter and histogram](examples/scatter_and_histogram_from_distribution/scatter_and_histogram_from_distribution.ino) | Distributions, marker channels and grouped counts. |
+| [Float16 line](examples/fp16_line/fp16_line.ino) | Selecting a smaller floating-point representation. |
 
-void setup(void) {
-  gfx.begin();
-  gfx.setRotation(3);
-  plot.clear_screen();
-  plot.set_color_map(cmy);
+## Memory and precision
 
-  // Left window: Scatter plot (0-74% width)
-  auto left_window = full_screen.sub_window({ 0, .74 }, { 0, 1 });
-  auto left_opts = plot_options.set_axis(histogram_bins, 1, silver)
-                              .segments(10)
-                              .scatter_style("x");
-  plot.scatter(x, y, y, marker_size, left_window, left_opts);
+`float` is the default and needs no configuration. Use it when precision, numerical range, CPU time or flash matter more than sample storage. Optional `grafici::Float16` stores each value in **2 bytes instead of 4**, at lower precision and with a maximum finite magnitude of 65,504. Conversions can add CPU work and flash usage.
 
-  // Right window: Histogram (76-100% width)
-  auto right_window = full_screen.sub_window({ .76, 1 }, { 0, 1 })
-                                .transform(WindowTransform::ccw_90_rotation);
-  auto right_opts = plot_options.set_axis(5, histogram_bins, silver)
-                               .bar_filled(true)
-                               .thickness(0.5);
-  
-  // Plot histogram
-  DataHistogramXY<histogram_bins> data_hist{ y };
-  plot.bar(data_hist.x(), data_hist.y(), data_hist.x(), 
-          right_window, right_opts);
-}
-```
+To compress only the quick-start sample array, change `float readings[]` to `grafici::Float16 readings[]` and `DataArrayXY<float>` to `DataArrayXY<grafici::Float16>`. Keep `Grafici` unchanged. To select Float16 throughout the pipeline, use a shared scalar alias, `using Real = grafici::Float16;`, with `GraficiT<Real>` and `DataArrayXY<Real, Real>`; the [precision guide](PRECISION.md) explains the other typed classes, tradeoffs and measured sizes.
 
-### Polar Plots
-Create a polar plot with multiple functions:
+Budget for sample storage, spline workspace, rendering scratch and any display-driver buffers. Grafici does not require a framebuffer. Increasing subdivision adds drawing work, especially for filled shapes. Six examples fit Uno R3 flash in the current build audit; the area and scatter/histogram examples need more flash or reduced complexity. The original examples were display-tested on Uno R4 Minima with the Adafruit 2.8-inch TFT Touch Shield.
 
-```cpp
-DataLinear r(100);  // Radius data
-DataFunction theta1(100, [](size_t x) { 
-  return sin(x / 10.0); 
-});
-DataFunction theta2(100, [](size_t x) { 
-  return cos(x / 8.0); 
-});
+## Documentation and testing
 
-void setup(void) {
-  gfx.begin();
-  plot.clear_screen();
-  plot.set_color_map(heat);
+- [Architecture](ARCHITECTURE.md): Mermaid diagrams, the normalized pipeline and efficiency improvements.
+- [Boundary contracts](CONTRACTS.md): valid/missing data, empty inputs, interpolation and geometric clipping.
+- [Test instructions](tests/README.md): regression coverage and Arduino builds. Run the included host checks with `python3 tests/run_checks.py --sanitize`.
+- [Correctness patches](patches/correctness/README.md): explanations, application order and Uno R3 build sizes.
 
-  // Create polar window
-  auto polar = PolarWindow(full_screen);
-  auto opts = plot_options.set_axis(10, 10, white);
+Additional tests are in [Grafici-Test](https://github.com/cattanimarco/Grafici-Test). Design notes and future ideas are available in the [project notes](https://cattanimarco.github.io/notes/Grafici).
 
-  // Plot multiple functions
-  plot.line(r, theta1, theta1, polar, opts);
-  plot.line(r, theta2, theta2, polar, opts);
-}
-```
+See the [Wiki](https://github.com/cattanimarco/Grafici-GFX/wiki) for API documentation. Contributions are welcome through pull requests; run the regression checks before submitting changes.
 
-### Animated Line Plot
-Create an animated line plot:
-
-```cpp
-DataLinear x(100);
-float phase = 0;
-
-void setup(void) {
-  gfx.begin();
-  plot.set_color_map(rainbow);
-}
-
-void loop(void) {
-  plot.clear_screen();
-  
-  // Create animated function
-  DataFunction y(100, [](size_t x) {
-    return sin(x / 10.0 + phase);
-  });
-  
-  plot.line(x, y, y);
-  phase += 0.1;
-  delay(50);
-}
-```
-
-### Area Plot from Array
-Create an area plot from a C array:
-
-```cpp
-const float data[] = {0, 1, 2, 1, 0, -1, -2, -1};
-DataArray y(data, 8);
-DataLinear x(8);
-
-void setup(void) {
-  gfx.begin();
-  plot.clear_screen();
-  plot.set_color_map(temperature);
-  
-  auto opts = plot_options.set_axis(8, 4, white);
-  plot.area(x, y, y, full_screen, opts);
-}
-```
-
-For more examples, check out the [examples](examples/) directory and our [Wiki](https://github.com/cattanimarco/Grafici-GFX/wiki).
-
-## Documentation
-
-Visit our [Wiki](https://github.com/cattanimarco/Grafici-GFX/wiki) for detailed documentation, including:
-- Complete API reference
-- Example explanations
-- Advanced usage guides
-- Window system tutorial
-
-## Hardware Compatibility
-
-### Tested Hardware
-- Arduino UNO R4 Minima
-- Adafruit 2.8" TFT Touch Shield
-
-### Memory Requirements
-Some examples may exceed available memory on older Arduino boards. The library is optimized for modern Arduino boards with adequate RAM.
-
-## Testing
-
-### Unit Tests
-The library's test suite is maintained in the [Grafici-Test](https://github.com/cattanimarco/Grafici-Test) repository. It provides:
-- Automated testing of library features
-- Example image generation
-- Documentation verification
-- JPEG/PNG output for visual testing
-
-### System Tests
-All examples are tested on actual hardware to ensure real-world compatibility.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run the test suite
-5. Submit a pull request
-
-## Future Development
-
-Check our [project notes](https://cattanimarco.github.io/notes/Grafici) for upcoming features and development ideas.
-
-## License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-
-## Dependencies
-
-- [Adafruit GFX Library](https://github.com/adafruit/Adafruit-GFX-Library)
+Licensed under [Apache 2.0](LICENSE).

@@ -1,0 +1,555 @@
+From 00c6172e38259a0fdeb001c91920df9001a15826 Mon Sep 17 00:00:00 2001
+From: Grafici patch export <patch-export@localhost>
+Date: Sun, 18 Oct 2026 10:40:44 +0100
+Subject: [PATCH] Make examples portable to AVR C++11 and document the checked
+ contracts
+
+Replace C++17 class template argument deduction in the area example with
+DataArrayXY<float>. Animation resolution is an integer sample count, and its
+callback accesses the global offset without an invalid lambda capture.
+Remove redundant function-definition semicolons rejected in strict checks
+by older AVR compilers. These changes add no runtime buffer or allocation.
+
+Add a Python runner for all ten strict C++11 regressions and two expected
+compile-time template rejections. Document boundary semantics and update
+the matched float/FP16 flash/SRAM measurements after the correctness fixes.
+
+Validation: all host checks pass with UBSan and float-cast-overflow. All eight
+examples compile with AVR GCC 7.3.0 in GNU C++11, also without -fpermissive and
+with narrowing errors enabled. Six link within Uno R3 flash; area and the
+scatter/histogram example exceed it. Static sizes exclude heap/stack peaks;
+see patches/correctness/README.md for the per-example audit.
+---
+ PRECISION.md                                  |  12 +-
+ README.md                                     | 279 +++---------------
+ .../area_from_c_array/area_from_c_array.ino   |   2 +-
+ examples/line_animated/line_animated.ino      |   4 +-
+ src/Vector.h                                  |   6 +-
+ tests/README.md                               |  47 ++-
+ tests/run_checks.py                           |  40 +++
+ 7 files changed, 134 insertions(+), 256 deletions(-)
+ create mode 100644 tests/run_checks.py
+
+diff --git a/PRECISION.md b/PRECISION.md
+index 6aa14d77dc0065cfdd5c333df14be30178cde56e..c46e2ccde0b3e6d3595d5338f3051f5073d6ea96 100644
+--- a/PRECISION.md
++++ b/PRECISION.md
+@@ -33,7 +33,7 @@ Half negative = Half(0.25f) - Half(0.75f);  // -0.5
+ 
+ UNORM16 represents only `[0,1]`. Saturating or wrapping a sum like `0.75 + 0.75`, a negative difference, a slope or a spline coefficient would change the algorithm. It is therefore unsuitable as the general scalar for this API. A future UNORM16 option belongs in an explicitly normalized sample/grid-storage adapter, decoded to a floating-point computation type before arithmetic. BF16 would preserve more exponent range at the cost of fewer fraction bits; it is not implemented here.
+ 
+-The existing explicit clipping semantics remain: `DataNormT` trims a raw value to its supplied range, and range mapping clamps at its endpoints. A raw value of 2 in `[-4,4]` is valid and normalizes to 0.75. Selecting FP16 does not introduce a universal `[0,1]` clamp or remove the library's existing clipping operations. Screen clipping is a rendering concern; arbitrary off-screen coordinates are not made safe merely by choosing a floating-point format.
++The existing explicit clipping semantics remain: `DataNormT` trims a raw value to its supplied range, and range mapping clamps at its endpoints. A raw value of 2 in `[-4,4]` is valid and normalizes to 0.75. Selecting FP16 does not introduce a universal `[0,1]` clamp or remove the library's existing clipping operations. The display layer projects geometry without per-vertex clamping, rejects non-finite projections, and clips finite lines/triangles before signed pixel conversion. See [boundary contracts](CONTRACTS.md) for validity, missing samples and clipping semantics.
+ 
+ ## Choose how much to narrow
+ 
+@@ -97,7 +97,7 @@ Object metadata, alignment, stack, display buffers and heap overhead are additio
+ 
+ FP16 does not promise faster arithmetic. Decoding, rounding and additional template instantiations can cost CPU time and flash; using both families can retain both implementations. Projection uses the matching computation type and float trigonometry for float/FP16. Memory savings and runtime need to be assessed together on the intended MCU.
+ 
+-Narrowing the entire pipeline also narrows raw range bounds, index-derived coordinates, window parameters and coefficients. Integers stop being consecutive above 2,048, and a small variation on a large raw offset can disappear. Two rounded range endpoints or spline knots can coincide. Keep the float interface/computation and compress only sample buffers when these distinctions matter. FP16 splines remain inappropriate for ill-conditioned knots or coefficients outside the format's finite range; the bounds patch does not validate all numerical preconditions.
++Narrowing the entire pipeline also narrows raw range bounds, index-derived coordinates, window parameters and coefficients. Integers stop being consecutive above 2,048, and a small variation on a large raw offset can disappear. Two rounded range endpoints or spline knots can coincide. Keep the float interface/computation and compress only sample buffers when these distinctions matter. Duplicate, reversed or non-finite knots produce an empty interpolator; non-finite spline coefficients are rejected. FP16 quantization can collapse distinct knots and range endpoints, and finite but ill-conditioned systems can still lose accuracy. These checks do not make FP16 suitable for every spline.
+ 
+ For one FP16 conversion of a normalized coordinate, nearest-even rounding has absolute error at most `1/4096`. FP32 pixel scaling turns this into about 0.078 pixels on a 320-pixel axis. Repeated rounding, raw quantization and polar projection have additional error; this bound is not an end-to-end guarantee.
+ 
+@@ -109,10 +109,10 @@ The FP16 example and the existing float `bars_from_c_array` example also build f
+ 
+ | Samples / pipeline | Flash | Static SRAM (`.data + .bss`) |
+ | --- | ---: | ---: |
+-| Float / float | 23,906 bytes | 952 bytes |
+-| FP16 / float | 24,502 bytes | 696 bytes |
+-| FP16 / FP16 | 26,178 bytes | 732 bytes |
++| Float / float | 27,230 bytes | 954 bytes |
++| FP16 / float | 27,836 bytes | 698 bytes |
++| FP16 / FP16 | 30,172 bytes | 736 bytes |
+ 
+-Each sketch owns the same 128-element sample array, initializes it with signed values in `[-2,2]`, uses a fixed `[-3,3]` y range and draws the same line and axes. Only the sample and pipeline scalar aliases change. The compact-array option saves 256 bytes of static SRAM at a cost of 596 flash bytes. The full FP16 family saves 220 bytes and costs 2,272 flash bytes. Retaining another family also retains default objects and interface metadata, so reducing individual payloads does not guarantee the smallest linked program.
++Each sketch owns the same 128-element sample array, initializes it with signed values in `[-2,2]`, uses a fixed `[-3,3]` y range and draws the same line and axes. Only the sample and pipeline scalar aliases change. The compact-array option saves 256 bytes of static SRAM at a cost of 606 flash bytes. The full FP16 family saves 218 bytes and costs 2,942 flash bytes. Retaining another family also retains default objects and interface metadata, so reducing individual payloads does not guarantee the smallest linked program.
+ 
+ These are compiler/linker results, not hardware measurements. They exclude runtime heap/stack peaks and do not establish physical display frame rate. The comparison favors FP16 sample storage with a float pipeline as the initial choice when retained arrays dominate SRAM; measure the actual application before narrowing every object.
+diff --git a/README.md b/README.md
+index b7f898ab8db3b6f2b16230b011cff5bb00f3a7a7..9fd32fe4065aa2926926b203a4aea1c67c8f7840 100644
+--- a/README.md
++++ b/README.md
+@@ -3,271 +3,86 @@
+ [![Arduino Library](https://www.ardu-badge.com/badge/Grafici-GFX.svg)](https://www.ardu-badge.com/Grafici-GFX)
+ [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+ 
+-A powerful data visualization library for Arduino displays supporting the Adafruit GFX interface. Create beautiful plots, charts, and visualizations with minimal code.
++Grafici is an Arduino plotting library for displays supported by **Adafruit GFX**. Draw lines, filled areas, bars and scatter plots using reusable data sources, color maps and Cartesian or polar windows.
+ 
+ ![Example Plot](https://raw.githubusercontent.com/cattanimarco/Grafici-Test/master/imgs/examples/line_from_array.jpg)
+ 
+-## Features
++## Design
+ 
+-- 📊 Multiple plot types:
+-  - Line plots
+-  - Scatter plots
+-  - Bar charts
+-  - Area plots
+-  - Histograms
+-  - Polar plots
+-- 🎨 Customizable color schemes
+-- 📐 Support for both rectangular and round displays
+-- 📏 Normalized coordinate system
+-- 🔄 Data processing and transformation
+-- 🎯 Window-based plotting regions
++Data sources provide values and their ranges independently of the plotter and display. Arrays, functions, distributions, histograms and interpolators can feed the same plotting calls. Separate sources can control x, y, color and marker size.
+ 
+-## Installation
++The common interface uses normalized values: each source maps its raw range into `[0,1]`, and windows transform logical coordinates into normalized display coordinates. Pixel resolution enters at the display boundary, so data and plot layouts can be reused across display sizes. Raw values and floating-point intermediates remain signed and may exceed 1; normalization does not restrict the scalar format to `[0,1]`.
+ 
+-### Arduino IDE
+-1. Open Arduino IDE
+-2. Go to `Sketch` > `Include Library` > `Manage Libraries` (`SHIFT + CMD + I`)
+-3. Search for `Grafici`
+-4. Select `Grafici-GFX` and click `Install`
++## Getting started
++
++In the Arduino IDE, open **Sketch → Include Library → Manage Libraries**, search for **Grafici-GFX** and install it. Alternatively, copy this library into your Arduino libraries folder. Install **Adafruit GFX Library** and the driver for your display as well. For PlatformIO, add:
+ 
+-### Platform IO
+-Add to your `platformio.ini`:
+ ```ini
+ lib_deps = Grafici-GFX
+ ```
+ 
+-## Quick Start
+-
+-```cpp
+-#include "Adafruit_GFX.h"
+-#include "Adafruit_ILI9341.h"
+-#include "Grafici.h"
+-
+-Adafruit_ILI9341 gfx = Adafruit_ILI9341(10, 9);
+-Grafici plot{ gfx };
+-
+-// Create data source from function
+-float my_function(size_t x) {
+-  return sin(x / 10.0) + cos(sqrt(3) * x / 10.0);
+-}
+-
+-DataLinear x = DataLinear(100);
+-DataFunction y = DataFunction(100, my_function);
+-
+-void setup(void) {
+-  gfx.begin();
+-  gfx.setRotation(3);
+-
+-  plot.clear_screen();
+-  plot.set_color_map(parula);
+-  plot.line(x, y, y);  // Plot data as a line, color by y value
+-}
+-
+-void loop(void) {}
+-```
+-
+-## Examples
++Include `Grafici.h` and pass your `Adafruit_GFX` display to `Grafici`; initialize the display before drawing. The library supports C++11.
+ 
+-### Statistical Visualization
+-Create a scatter plot with histogram using normal distribution data:
++This example uses an ILI9341 display; install **Adafruit ILI9341** and adjust the driver, pins and rotation for your hardware:
+ 
+ ```cpp
+-constexpr size_t data_size = 300;
+-constexpr size_t histogram_bins = 20;
+-
+-// Generate random data with normal distribution
+-DataLinear x(data_size);
+-DataDistributionNormal<data_size> y(84);
+-DataConstant marker_size(data_size, 0.01);
+-
+-void setup(void) {
+-  gfx.begin();
+-  gfx.setRotation(3);
+-  plot.clear_screen();
+-  plot.set_color_map(cmy);
+-
+-  // Left window: Scatter plot (0-74% width)
+-  auto left_window = full_screen.sub_window({ 0, .74 }, { 0, 1 });
+-  auto left_opts = plot_options.set_axis(histogram_bins, 1, silver)
+-                              .segments(10)
+-                              .scatter_style("x");
+-  plot.scatter(x, y, y, marker_size, left_window, left_opts);
++#include <Adafruit_GFX.h>
++#include <Adafruit_ILI9341.h>
++#include <Grafici.h>
+ 
+-  // Right window: Histogram (76-100% width)
+-  auto right_window = full_screen.sub_window({ .76, 1 }, { 0, 1 })
+-                                .transform(WindowTransform::ccw_90_rotation);
+-  auto right_opts = plot_options.set_axis(5, histogram_bins, silver)
+-                               .bar_filled(true)
+-                               .thickness(0.5);
+-  
+-  // Plot histogram
+-  DataHistogramXY<histogram_bins> data_hist{ y };
+-  plot.bar(data_hist.x(), data_hist.y(), data_hist.x(), 
+-          right_window, right_opts);
+-}
+-```
+-
+-### Polar Plots
+-Create a polar plot with multiple functions:
+-
+-```cpp
+-DataLinear r(100);  // Radius data
+-DataFunction theta1(100, [](size_t x) { 
+-  return sin(x / 10.0); 
+-});
+-DataFunction theta2(100, [](size_t x) { 
+-  return cos(x / 8.0); 
+-});
+-
+-void setup(void) {
+-  gfx.begin();
+-  plot.clear_screen();
+-  plot.set_color_map(heat);
+-
+-  // Create polar window
+-  auto polar = PolarWindow(full_screen);
+-  auto opts = plot_options.set_axis(10, 10, white);
+-
+-  // Plot multiple functions
+-  plot.line(r, theta1, theta1, polar, opts);
+-  plot.line(r, theta2, theta2, polar, opts);
+-}
+-```
+-
+-### Animated Line Plot
+-Create an animated line plot:
+-
+-```cpp
+-DataLinear x(100);
+-float phase = 0;
+-
+-void setup(void) {
+-  gfx.begin();
+-  plot.set_color_map(rainbow);
+-}
+-
+-void loop(void) {
+-  plot.clear_screen();
+-  
+-  // Create animated function
+-  DataFunction y(100, [](size_t x) {
+-    return sin(x / 10.0 + phase);
+-  });
+-  
+-  plot.line(x, y, y);
+-  phase += 0.1;
+-  delay(50);
+-}
+-```
+-
+-### Area Plot from Array
+-Create an area plot from a C array:
+-
+-```cpp
+-const float data[] = {0, 1, 2, 1, 0, -1, -2, -1};
+-DataArray y(data, 8);
+-DataLinear x(8);
+-
+-void setup(void) {
+-  gfx.begin();
+-  plot.clear_screen();
+-  plot.set_color_map(temperature);
+-  
+-  auto opts = plot_options.set_axis(8, 4, white);
+-  plot.area(x, y, y, full_screen, opts);
+-}
+-```
+-
+-For more examples, check out the [examples](examples/) directory and our [Wiki](https://github.com/cattanimarco/Grafici-GFX/wiki).
+-
+-## Documentation
+-
+-Visit our [Wiki](https://github.com/cattanimarco/Grafici-GFX/wiki) for detailed documentation, including:
+-- Complete API reference
+-- Example explanations
+-- Advanced usage guides
+-- Window system tutorial
+-
+-## Hardware Compatibility
+-
+-### Tested Hardware
+-- Arduino UNO R4 Minima
+-- Adafruit 2.8" TFT Touch Shield
+-
+-### Memory Requirements
+-Some examples may exceed available memory on older Arduino boards. The library is optimized for modern Arduino boards with adequate RAM.
+-
+-## Choosing float or Float16
+-
+-Keep `float` (the default) when RAM is sufficient, you need more numerical precision or a wider range, or CPU time and flash matter more than sample storage. Existing sketches need no changes to keep using float.
+-
+-Use `grafici::Float16` when sample arrays take too much RAM and lower precision is acceptable. Each stored value takes **2 bytes instead of 4**, with roughly three significant decimal digits and a maximum finite magnitude of 65,504. It supports negative values and values above 1; arithmetic is not clamped to `[0,1]`. Calculations use float and round when stored as Float16. Conversion can add CPU work and flash usage, so this is a RAM-saving choice, not a promise of faster drawing.
+-
+-### Start by changing the sample storage
+-
+-Change your array's element type and the first template argument of `DataArray` or `DataArrayXY`. Keep `Grafici`, windows and options unchanged. Assuming `display` is your configured Adafruit GFX display:
+-
+-```cpp
+-#include "Grafici.h"
+-
+-using Sample = grafici::Float16; // Change to float to restore FP32 storage.
+-Sample values[] = {-2.0f, 0.5f, 1.5f, 3.0f};
+-DataArrayXY<Sample> data(values, 4, {-4, 4});
++Adafruit_ILI9341 display(10, 9); // Chip select, data/command.
+ Grafici plot(display);
+ 
+-void draw_graph()
++float readings[] = {8.4f, 12.9f, 21.6f, 26.6f};
++DataArrayXY<float> data(readings, 4, {0, 30});
++
++void setup()
+ {
++    display.begin();
++    display.setRotation(3);
++    plot.clear_screen();
++
+     auto x = data.x();
+     auto y = data.y();
+-    plot.line(x, y, white);
++    plot.line(x, y, white, full_screen, plot_options.set_axis(4, 4));
+ }
+-```
+-
+-This halves the sample buffer while keeping range metadata, normalization and rendering in float. In a matched Uno R3 build with 128 samples, this saved 256 bytes of static RAM and added 596 bytes of flash. Keep integer sample buffers as integers if they already use less space.
+ 
+-### Select Float16 throughout the pipeline
+-
+-To also narrow value/range objects, window parameters and retained spline coefficients, select the same scalar for sources and plotters:
+-
+-```cpp
+-using Real = grafici::Float16; // Change this alias to float to switch back.
+-Real values[] = {-2.0f, 0.5f, 1.5f, 3.0f};
+-DataArrayXY<Real, Real> data(values, 4, {-4, 4});
+-GraficiT<Real> plot(display);
++void loop() {}
+ ```
+ 
+-Drawing calls stay the same. Explicit windows and options become `WindowT<Real>` and `PlotOptionsT<Real>`; use `full_screen_for<Real>()` where you previously passed `full_screen`. Existing template classes accept the scalar as their final argument, for example `DataSpline<32, true, Real>`. Custom sources use `DataSourceNormT<Real>`.
++`DataArrayXY` uses sample indices for x and the supplied array for y. Here, y maps the fixed raw range `[0,30]` to the plot height; omitting that range discovers bounds from the data. Arrays are borrowed without copying, so keep them alive while their sources are used. Values outside an explicit range are clipped; missing samples leave gaps.
+ 
+-Narrowing every object does not always give the smallest program. Keep float for closely spaced values on a large offset, sensitive interpolation, or values outside FP16's finite range. Spline solver scratch arrays remain float. See the [precision guide](PRECISION.md) for limits, measured sizes and the full type mapping, or the [complete FP16 sketch](examples/fp16_line/fp16_line.ino).
++## Plotting and examples
+ 
+-## Testing
++Use `line()`, `area()`, `bar()` or `scatter()` with interchangeable normalized sources. Choose a constant color or supply a color source through a palette. `PlotOptions` controls axes, bar fill/thickness, marker styles and subdivision. `Window` arranges subplots and rotations; `PolarWindow` projects the same logical geometry into polar coordinates.
+ 
+-### Unit Tests
+-The library's test suite is maintained in the [Grafici-Test](https://github.com/cattanimarco/Grafici-Test) repository. It provides:
+-- Automated testing of library features
+-- Example image generation
+-- Documentation verification
+-- JPEG/PNG output for visual testing
++| Example | Demonstrates |
++| --- | --- |
++| [Line from a function](examples/line_from_function/line_from_function.ino) | Independent x/y sources and data-driven color. |
++| [Animated line](examples/line_animated/line_animated.ino) | Updating a function and redrawing. |
++| [Bars from an array](examples/bars_from_c_array/bars_from_c_array.ino) | Explicit ranges, filled bars and axes. |
++| [Filled areas](examples/area_from_c_array/area_from_c_array.ino) | Combining datasets and plot styles. |
++| [Polar plots](examples/lines_from_functions_polar/lines_from_functions_polar.ino) | Reusing sources with a different window projection. |
++| [Scatter and histogram](examples/scatter_and_histogram_from_distribution/scatter_and_histogram_from_distribution.ino) | Distributions, marker channels and grouped counts. |
++| [Float16 line](examples/fp16_line/fp16_line.ino) | Selecting a smaller floating-point representation. |
+ 
+-### System Tests
+-All examples are tested on actual hardware to ensure real-world compatibility.
++## Memory and precision
+ 
+-## Contributing
++`float` is the default and needs no configuration. Use it when precision, numerical range, CPU time or flash matter more than sample storage. Optional `grafici::Float16` stores each value in **2 bytes instead of 4**, at lower precision and with a maximum finite magnitude of 65,504. Conversions can add CPU work and flash usage.
+ 
+-1. Fork the repository
+-2. Create a feature branch
+-3. Make your changes
+-4. Run the test suite
+-5. Submit a pull request
++To compress only the quick-start sample array, change `float readings[]` to `grafici::Float16 readings[]` and `DataArrayXY<float>` to `DataArrayXY<grafici::Float16>`. Keep `Grafici` unchanged. To select Float16 throughout the pipeline, use a shared scalar alias, `using Real = grafici::Float16;`, with `GraficiT<Real>` and `DataArrayXY<Real, Real>`; the [precision guide](PRECISION.md) explains the other typed classes, tradeoffs and measured sizes.
+ 
+-## Future Development
++Budget for sample storage, spline workspace, rendering scratch and any display-driver buffers. Grafici does not require a framebuffer. Increasing subdivision adds drawing work, especially for filled shapes. Six examples fit Uno R3 flash in the current build audit; the area and scatter/histogram examples need more flash or reduced complexity. The original examples were display-tested on Uno R4 Minima with the Adafruit 2.8-inch TFT Touch Shield.
+ 
+-Check our [project notes](https://cattanimarco.github.io/notes/Grafici) for upcoming features and development ideas.
++## Documentation and testing
+ 
+-## License
++- [Architecture](ARCHITECTURE.md): Mermaid diagrams, the normalized pipeline and efficiency improvements.
++- [Boundary contracts](CONTRACTS.md): valid/missing data, empty inputs, interpolation and geometric clipping.
++- [Test instructions](tests/README.md): regression coverage and Arduino builds. Run the included host checks with `python3 tests/run_checks.py --sanitize`.
++- [Correctness patches](patches/correctness/README.md): explanations, application order and Uno R3 build sizes.
+ 
+-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
++Additional tests are in [Grafici-Test](https://github.com/cattanimarco/Grafici-Test). Design notes and future ideas are available in the [project notes](https://cattanimarco.github.io/notes/Grafici).
+ 
+-## Dependencies
++See the [Wiki](https://github.com/cattanimarco/Grafici-GFX/wiki) for API documentation. Contributions are welcome through pull requests; run the regression checks before submitting changes.
+ 
+-- [Adafruit GFX Library](https://github.com/adafruit/Adafruit-GFX-Library)
++Licensed under [Apache 2.0](LICENSE).
+diff --git a/examples/area_from_c_array/area_from_c_array.ino b/examples/area_from_c_array/area_from_c_array.ino
+index 739e4abab34b77cb748c711301228fba92cc8428..9d70a398eee2e6cc22b0f094bcf835ea8029caf5 100644
+--- a/examples/area_from_c_array/area_from_c_array.ino
++++ b/examples/area_from_c_array/area_from_c_array.ino
+@@ -9,7 +9,7 @@ constexpr size_t num_stars = 100;
+ 
+ const float cambridge_daylight[] = { 7.49, 9.07, 10.54, 13.00, 14.56, 16.27, 16.41, 15.29, 13.36, 11.36, 9.35, 8.04 };
+ 
+-auto daylight_data = DataArrayXY(cambridge_daylight, 12, { 0, 24 });
++DataArrayXY<float> daylight_data(cambridge_daylight, 12, { 0, 24 });
+ auto star_positions_x = DataDistributionUniform<num_stars>(84);
+ auto star_positions_y = DataDistributionUniform<num_stars>(48);
+ auto star_sizes = DataConstant(num_stars, 0.01);
+diff --git a/examples/line_animated/line_animated.ino b/examples/line_animated/line_animated.ino
+index d9b4cdec05bf054160ab1f7fcb24bac1a8e74a2a..bfd308a3b576c37b41e967d6afe60e96e24159dc 100644
+--- a/examples/line_animated/line_animated.ino
++++ b/examples/line_animated/line_animated.ino
+@@ -6,11 +6,11 @@ Adafruit_ILI9341 gfx{ 10, 9 };
+ Grafici plot{ gfx };
+ 
+ static unsigned int offset = 0;
+-const float x_resolution = gfx.width() / 10.0;
++const size_t x_resolution = static_cast<size_t>(gfx.width()) / 10;
+ 
+ // define functions for x and y
+ DataLinear   x { x_resolution };
+-DataFunction y { x_resolution, [offset](size_t x) -> float { return sin((x + offset) / (x_resolution / 10.0)) + cos(sqrt(3) * (x + offset) / (x_resolution / 10.0)); } };
++DataFunction y { x_resolution, [](size_t x) -> float { return sin((x + offset) / (x_resolution / 10.0)) + cos(sqrt(3) * (x + offset) / (x_resolution / 10.0)); } };
+ 
+ void setup(void) 
+ {
+diff --git a/src/Vector.h b/src/Vector.h
+index 8f96b7a6133eea1c392ad725aa0ef9f47a84290b..d9f57278f8b93a35705c9c72899fe4bf2f6afc0c 100644
+--- a/src/Vector.h
++++ b/src/Vector.h
+@@ -41,18 +41,18 @@ class Vector
+ 	Vector<T> operator-(const Vector<T> &other) const
+ 	{
+ 		return { x - other.x, y - other.y };
+-	};
++	}
+ 
+ 	Vector<T> operator+(const Vector<T> &other) const
+ 	{
+ 		return { x + other.x, y + other.y };
+-	};
++	}
+ 
+ 	template <typename Factor>
+ 	Vector<T> operator*(const Factor &other) const
+ 	{
+ 		return { static_cast<T>(x * other), static_cast<T>(y * other) };
+-	};
++	}
+ 
+ 	bool operator<(const Vector<T> &other) const
+ 	{
+diff --git a/tests/README.md b/tests/README.md
+index d3af756d85d086976897dca923ac9c39c0a62b5a..f9ee75a9cb01783245134025335b5112942aad93 100644
+--- a/tests/README.md
++++ b/tests/README.md
+@@ -1,20 +1,43 @@
+-# Host regression checks
++# Regression checks
+ 
+-These checks need a C++11 host compiler. The plotting check supplies its own small display stub; no Arduino installation is required. Run from the repository root:
++Run all host checks from the repository root with Python 3 and a C++11 compiler:
+ 
+ ```sh
+-c++ -std=c++11 -Wall -Wextra -pedantic -I src tests/data_spline_bounds.cpp -o /tmp/grafici-spline-bounds
+-/tmp/grafici-spline-bounds
+-c++ -std=c++11 -Wall -Wextra -pedantic -I src tests/numeric_precision.cpp -o /tmp/grafici-numeric-precision
+-/tmp/grafici-numeric-precision
+-c++ -std=c++11 -Wall -Wextra -pedantic -I tests/support -I src tests/precision_plotting.cpp -o /tmp/grafici-precision-plotting
+-/tmp/grafici-precision-plotting
++python3 tests/run_checks.py --sanitize
+ ```
+ 
+-It guards every spline workspace allocation, checks interpolation including the maximum supported source count, injects failure into each allocation, and exercises empty, single-point, zero-output and oversized inputs. Unsupported inputs or allocation failure produce an empty spline (`size() == 0`), whose reads return `INVALID_DATA_VECTOR`. Source count is the minimum of x/y counts and must be between 2 and `N + 1` for the current fixed coefficient arrays.
++Omit `--sanitize` when the compiler has no UndefinedBehaviorSanitizer support. `--cxx clang++` or the `CXX` environment variable selects another compiler. The runner uses C++11, strict warnings and temporary output files. No Arduino installation is required; drawing tests use the included GFX call recorder. The recorder checks coordinates and calls, without emulating hardware rasterization.
+ 
+-It also checks that a declared x range extending beyond the supplied knots returns invalid data for an uncovered sample without reading past the source. This does not change interpolation endpoint sampling or validate every numerical precondition, such as strictly increasing knots.
++| Check | Coverage |
++| --- | --- |
++| `data_spline_bounds.cpp` | Guard every workspace allocation, inject all five allocation failures, reject unsupported coefficient/source counts, preserve cleanup and avoid uncovered-knot reads. |
++| `spline_autoscale.cpp` | Preserve unclipped cubic overshoot before discovering the output range; retain explicit clipping with autoscaling disabled. |
++| `interpolation_bounds.cpp` | Both endpoints, one/zero outputs, empty/short inputs, uncovered domains, duplicate/reversed/non-finite knots and decreasing y values. |
++| `scatter_lengths.cpp` | Short/empty radius and color sources; radius-independent dots and composite markers. |
++| `color_map_indices.cpp` | Floating-point generated-palette indexing, wrapping, large indices and zero-size handling. |
++| `color_blending.cpp` | All 65,536 midpoint channel pairs, nearest/ties-up blending and constant-color subdivision; all 256 channel values retain the former RGB565 quantization bins. |
++| `data_contracts.cpp` | Explicit missing-data validity without added payload, range extremes, finite-only bounds discovery, empty sources/histograms, invalid classes/slices, polar parent preservation and gaps. |
++| `display_clipping.cpp` | Signed pixels, geometric line/triangle intersections, non-finite/extreme coordinates, dimensions, rotation/polar transforms, native clear and 2,000 guarded polygon cases. |
++| `numeric_precision.cpp` | Every binary16 encoding and finite rounding interval; typed sources, adapters, storage sizes and arithmetic outside `[0,1]`. |
++| `precision_plotting.cpp` | Both complete precision families and the existing float API across all plotters. |
+ 
+-The numeric check validates every binary16 encoding and finite rounding interval, then exercises float/FP16 sources, borrowed casts, ranges, interpolation, splines and projection. The plotting check uses a host drawing-call recorder to instantiate both complete pipelines and check representative pixel endpoints. The recorder does not emulate hardware or rasterization.
++The runner also requires `ColorMapArray<0>` and `DataHistogramXY<0>` to fail compilation with the intended static-assert messages. Keep assertions enabled.
+ 
+-For additional host diagnostics, add `-fsanitize=address,undefined -fno-omit-frame-pointer` to the compile command when supported. Keep assertions enabled. Board SRAM/stack measurements remain separate from these host checks.
++For a single check:
++
++```sh
++c++ -std=c++11 -Wall -Wextra -Werror -pedantic -I tests/support -I src tests/display_clipping.cpp -o /tmp/grafici-clipping
++/tmp/grafici-clipping
++```
++
++## Arduino C++11 validation
++
++Install the AVR core and the display libraries used by the examples. Build a representative sketch with the standard Uno R3 GNU C++11 recipe:
++
++```sh
++arduino-cli compile --fqbn arduino:avr:uno --library . examples/fp16_line
++```
++
++`--library .` explicitly selects this checkout. The examples use explicit template arguments, integer sample counts, and capture-free function-pointer callbacks. All eight examples compile with AVR GNU C++11, including a check without `-fpermissive` and with narrowing errors enabled. Six fit Uno R3 flash; the area and scatter/histogram examples exceed it. See [the build audit](../patches/correctness/README.md#avr-build-audit) for sizes. These were originally display-tested on Uno R4 Minima.
++
++A separate host integration using the installed actual Adafruit GFX canvas confirmed full clipped-triangle coverage, horizontal-line rasterization and native clearing for float/FP16. Linked board sizes do not measure runtime stack/heap peaks or physical display timing. Clipping scratch and spline workspace must be included in an application's SRAM budget.
+diff --git a/tests/run_checks.py b/tests/run_checks.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..f26227f8d7df329c0922476e098f15199f82a0f8
+--- /dev/null
++++ b/tests/run_checks.py
+@@ -0,0 +1,40 @@
++#!/usr/bin/env python3
++"""Run C++11 host regressions and expected template diagnostics."""
++import argparse
++import os
++from pathlib import Path
++import shlex
++import subprocess
++import tempfile
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--cxx', default=os.environ.get('CXX', 'c++'))
++    parser.add_argument('--sanitize', action='store_true', help='Enable UBSan and float-cast-overflow checks')
++    args = parser.parse_args()
++    root = Path(__file__).resolve().parent.parent
++    compiler = shlex.split(args.cxx)
++    flags = ['-std=c++11', '-Wall', '-Wextra', '-Werror', '-pedantic', '-O1']
++    if args.sanitize:
++        flags += ['-fsanitize=undefined,float-cast-overflow', '-fno-sanitize-recover=all']
++    includes = ['-I', str(root/'tests/support'), '-I', str(root/'src')]
++    checks = sorted((root/'tests').glob('*.cpp'))
++    with tempfile.TemporaryDirectory(prefix='grafici-checks-') as directory:
++        for source in checks:
++            binary = str(Path(directory)/source.stem)
++            subprocess.run(compiler + flags + includes + [str(source), '-o', binary], check=True)
++            subprocess.run([binary], check=True)
++        failures = {'colormap_zero.cpp': 'requires at least one color',
++                    'histogram_zero.cpp': 'requires at least one bin'}
++        for name, diagnostic in failures.items():
++            result = subprocess.run(compiler + ['-std=c++11'] + includes +
++                                    ['-fsyntax-only', str(root/'tests/compile_fail'/name)],
++                                    text=True, capture_output=True)
++            if result.returncode == 0 or diagnostic not in result.stderr:
++                raise RuntimeError('Missing expected template rejection: ' + name + '\n' + result.stderr)
++    print(f'{len(checks)} runtime checks and {len(failures)} expected template rejections passed.', flush=True)
++
++
++if __name__ == '__main__':
++    main()

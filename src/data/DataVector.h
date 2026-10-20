@@ -11,8 +11,8 @@
 // clang-format off
 #define INVALID_DATA_VECTOR  \
 	{                        \
-		{ 0.0, {0.0, 0.0} }, \
-		{ 0.0, {0.0, 0.0} }  \
+		{ 0.0, {1.0, 0.0} }, \
+		{ 0.0, {1.0, 0.0} }  \
 	}
 // clang-format on
 
@@ -20,7 +20,10 @@
  * @brief Multi component (normalized) data point
  * 
  */
-using DataVector = Vector<DataNorm>;
+template <typename Scalar = float>
+using DataVectorT = Vector<DataNormT<Scalar>>;
+
+using DataVector = DataVectorT<float>;
 
 #endif /* GRAFICI_DATA_VECTOR_H */
 

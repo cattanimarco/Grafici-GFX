@@ -27,7 +27,7 @@
 */
 #define INVALID_DATA_NORM \
 	{                     \
-		0.0, {0.0, 0.0}     \
+		0.0, {1.0, 0.0}     \
 	}
 // clang-format on
 
@@ -35,55 +35,49 @@
  * @brief Normalized data point
  * 
  */
-class DataNorm
+template <typename Scalar = float>
+class DataNormT
 {
   public:
-	DataNorm()
-	    : _raw{ 0 }
-	    , _range{ 0, 0 }
-	{
-	}
+    using Compute = typename grafici::ComputationType<Scalar>::type;
+    using DataNorm = DataNormT<Scalar>;
+    DataNormT() = default;
+    template <typename Other>
+    DataNormT(const DataNormT<Other> &other)
+        : DataNormT(static_cast<Compute>(other.raw()), Range<Scalar>(other.range())) {}
 
-	DataNorm(const float value, const Range<float> range = { 0, 1 })
-	    : _raw{ range.trim(value) }
-	    , _range{ range }
-	{
-	}
-
-	float norm() const
-	{
-		return _range.value_to_norm(_raw);
-	}
-
-	float raw() const
-	{
-		return _raw;
-	}
-
-	void norm(float val)
-	{
-		_raw = _range.norm_to_value(val);
-	}
-
-	Range<float> range() const
-	{
-		return _range;
-	}
-
-	bool operator<(const DataNorm &other) const
-	{
-		return norm() < other.norm();
-	}
-
-	bool operator>(const DataNorm &other) const
-	{
-		return norm() > other.norm();
-	}
+    DataNormT(Compute value, Range<Scalar> range = {0, 1})
+    {
+        if (!range.valid() || !grafici::is_finite(value)) return;
+        const Scalar stored = static_cast<Scalar>(value);
+        if (!grafici::is_finite(stored)) return;
+        _raw = range.trim(stored);
+        _range = range;
+    }
+    bool valid() const { return _range.valid(); }
+    Compute norm() const { return _range.value_to_norm(_raw); }
+    Scalar raw() const { return _raw; }
+    Range<Scalar> range() const { return _range; }
+    void norm(Compute value)
+    {
+        if (!valid() || !grafici::is_finite(value)) { *this = DataNorm{}; return; }
+        _raw = _range.norm_to_value(value);
+    }
+    bool operator<(const DataNorm &other) const
+    {
+        return valid() && other.valid() && norm() < other.norm();
+    }
+    bool operator>(const DataNorm &other) const
+    {
+        return valid() && other.valid() && norm() > other.norm();
+    }
 
   private:
-	float _raw;
-	Range<float> _range;
+    Scalar _raw{0};
+    Range<Scalar> _range{1, 0}; // Invalid state uses existing metadata, no flag.
 };
+
+using DataNorm = DataNormT<float>;
 
 #endif //#ifndef GRAFICI_DATA_NORM_H
 

@@ -19,30 +19,37 @@
 
 #include "PlotOptions.h"
 
-inline void plot_bar(const DisplayDriver &display,
-              const Window &window,
+template <typename Scalar>
+inline void plot_bar(const DisplayDriverT<Scalar> &display,
+              const WindowT<Scalar> &window,
               const ColorMap &colorMap,
-              const DataSourceNorm &x,
-              const DataSourceNorm &y,
-              const DataSourceNorm &c,
-              const PlotOptions opts = {})
+              const DataSourceNormT<Scalar> &x,
+              const DataSourceNormT<Scalar> &y,
+              const DataSourceNormT<Scalar> &c,
+              const PlotOptionsT<Scalar> opts = {})
 {
 	/* in case data sources have different sizes, use the smaller one */
-	auto source_size = DataSourceNorm::min_data_source_size(x, y, c);
+	auto source_size = DataSourceNormT<Scalar>::min_data_source_size(x, y, c);
+	using Compute = typename grafici::ComputationType<Scalar>::type;
+	const Compute thickness = opts.get_thickness();
+	if (!grafici::is_finite(thickness) || thickness < 0 || source_size == 0) return;
+	const Compute half_width = thickness / (static_cast<Compute>(source_size) * Compute(2));
 
 	for (size_t idx = 0; idx < source_size; ++idx)
 	{
+		const auto vx = x[idx], vy = y[idx], vc = c[idx];
+		if (!vx.valid() || !vy.valid() || !vc.valid()) continue;
 		if (opts.get_thickness() == 0)
 		{
-			display.draw_line({ x[idx].norm(), 0 }, { x[idx].norm(), y[idx].norm() }, colorMap.norm_to_color(c[idx]), colorMap.norm_to_color(c[idx]), window, opts.get_segments());
+			display.draw_line({ vx.norm(), 0 }, { vx.norm(), vy.norm() }, colorMap.norm_to_color(vc), colorMap.norm_to_color(vc), window, opts.get_segments());
 		}
 		else if (opts.is_bar_filled())
 		{
-			display.fill_rect({ x[idx].norm() - (opts.get_thickness() / (source_size * 2)), 0 }, { x[idx].norm() + (opts.get_thickness() / (source_size * 2)), y[idx].norm() }, colorMap.norm_to_color(c[idx]), window, opts.get_segments());
+			display.fill_rect({ vx.norm() - half_width, 0 }, { vx.norm() + half_width, vy.norm() }, colorMap.norm_to_color(vc), window, opts.get_segments());
 		}
 		else
 		{
-			display.draw_rect({ x[idx].norm() - (opts.get_thickness() / (source_size * 2)), 0 }, { x[idx].norm() + (opts.get_thickness() / (source_size * 2)), y[idx].norm() }, colorMap.norm_to_color(c[idx]), window, opts.get_segments());
+			display.draw_rect({ vx.norm() - half_width, 0 }, { vx.norm() + half_width, vy.norm() }, colorMap.norm_to_color(vc), window, opts.get_segments());
 		}
 	}
 }

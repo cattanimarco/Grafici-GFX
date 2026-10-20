@@ -1,0 +1,622 @@
+From 096b079e7c4a2fa0ab0995f9c04d03eb08090999 Mon Sep 17 00:00:00 2001
+From: Grafici patch export <patch-export@localhost>
+Date: Sun, 18 Oct 2026 10:34:37 +0100
+Subject: [PATCH] Clip projected geometry before signed pixel conversion
+
+PixelVector now stores int16_t coordinates, matching GFX. Project in the
+selected computation type, reject non-finite points and nonpositive display
+dimensions, clip lines and filled triangles against the display rectangle,
+then narrow only finite coordinates in range. Line intersections handle
+opposite finite extremes without overflow in their coordinate difference.
+
+Window projection preserves coordinates outside [0,1]; removing per-vertex
+clamping avoids false edge lines and distorted triangles. Clipping follows
+projection and each subdivision leaf, preserving polar/custom transforms.
+The physical display is the clipping boundary; subwindows are transforms,
+not additional stencil masks. Tiny filled markers obey the same boundary.
+
+Clipped triangles use two fixed seven-point buffers (112 bytes of coordinate
+payload for FP32, plus locals/call stack). No heap or framebuffer is added.
+Default clear_screen() uses native GFX fill; explicit windows retain projected
+clears. This prevents a basic line sketch from retaining triangle clipping.
+
+Validation: geometric intersections, off-screen rejection, NaN/infinity,
+finite extremes, zero/maximum display sizes, rotated/polar windows and 2,000
+guarded polygon cases pass under UBSan and float-cast-overflow. The actual
+GFXcanvas16 integration confirms full triangle coverage, exact horizontal
+rasterization and native clear. The FP16 Uno R3 example builds; final linked sizes are recorded in the
+series README.
+---
+ CONTRACTS.md                 |   5 ++
+ src/Grafici.h                |   8 +-
+ src/display/Clipping.h       | 137 +++++++++++++++++++++++++++++++++++
+ src/display/DisplayDriver.h  |  91 +++++++++++++----------
+ src/display/PixelVector.h    |   3 +-
+ src/display/PolarWindow.h    |   4 +-
+ src/display/Window.h         |  18 +++--
+ tests/display_clipping.cpp   | 119 ++++++++++++++++++++++++++++++
+ tests/support/Adafruit_GFX.h |  20 ++++-
+ 9 files changed, 354 insertions(+), 51 deletions(-)
+ create mode 100644 src/display/Clipping.h
+ create mode 100644 tests/display_clipping.cpp
+
+diff --git a/CONTRACTS.md b/CONTRACTS.md
+index a12606126c6ca30bf806ee1479363e8dfccf1b0f..966c42bf154136db734a0707c30b5f2487110934 100644
+--- a/CONTRACTS.md
++++ b/CONTRACTS.md
+@@ -14,6 +14,7 @@ These contracts apply to float and Float16 sources. They add no per-sample flag
+ | Histograms | `BINS` must be positive at compile time. Missing input samples do not contribute to counts or the normalized denominator. An empty histogram retains its bins, all containing valid zero counts/frequencies. Zero class count or `class_id >= num_classes` produces size zero. Group coordinates use floating-point computation before narrowing, avoiding integer-product overflow. |
+ | Windows | Finite, ordered boundaries are valid, including collapsed ranges. Zero slice counts, out-of-range slice indices and invalid subranges produce an invalid window. `valid()` reports this state; projection of invalid input/window metadata produces non-finite coordinates, and drawing rejects invalid windows. Polar subwindows retain their parent window. |
+ | Plotters | Missing samples create gaps: lines/areas omit segments touching a missing coordinate or color, bars omit that sample, and scatter omits that marker. Dots do not require a radius; other markers also require a valid, available radius. Invalid/non-finite bar thickness produces no bars. No unbounded cache or validity buffer is created. |
++| Display boundary | Project logical geometry without per-vertex clamping. Intersect projected lines/triangles with the physical display rectangle in the computation type, reject non-finite projections, then convert to signed `int16_t` pixels. Zero/negative display dimensions draw nothing. Clipping uses the physical display rectangle; markers can extend beyond a subwindow if still on display. |
+ | Palettes | Array/generated maps return black for invalid normalized input. A zero-size generated palette reports invalid and returns black. Cosine-generated channels clamp to `[0,255]` before integer conversion. Linear color blends round to nearest, with ties upward. |
+ 
+ For example:
+@@ -31,3 +32,7 @@ DataArray<float> source(readings, 3);
+ Invalidity is encoded by reversed range bounds (`{1,0}`), so code must use `valid()` rather than inspect an old zero sentinel. Calling `norm()` on missing data returns zero for compatibility with arithmetic callers; that zero does not make the sample valid. Converting adapters preserve invalidity across precision families.
+ 
+ FP16's finite range and quantization still apply to raw counts, range metadata and coefficients. Use the float pipeline when those values are not representable. Histograms with FP16 samples and a float interface can retain large integer counters without narrowing raw count metadata. Spline construction retains its bounded heap workspace; these contracts do not remove it.
++
++Pixel conversion preserves truncation toward zero after clipping to `[0,1]`; integer pixel endpoints remain within `[0,width-1]` and `[0,height-1]`. Subdivision still happens before projection, preserving the existing polar/custom-window approximation. A clipped triangle can become a convex polygon with at most seven vertices; two seven-point buffers use 112 bytes of coordinate payload with FP32 computation, plus locals and backend call stack. This is bounded scratch storage, with no heap allocation or framebuffer.
++
++`plot.clear_screen()` uses the native GFX fill. Passing an explicit window retains projected rectangle rendering, including clipping and any requested subdivision. The native default avoids retaining the triangle renderer in simple line sketches.
+diff --git a/src/Grafici.h b/src/Grafici.h
+index 7298c24e40621bd81e4e09ece100a2b1e4be1113..6459a4ee674a16595a70f4ecaddcaa4dc3b14722 100644
+--- a/src/Grafici.h
++++ b/src/Grafici.h
+@@ -74,7 +74,13 @@ class GraficiT
+ 	{
+ 	}
+ 
+-	void clear_screen(const Window &window = full_screen_for<Scalar>(), const PlotOptions opts = {})
++	// A default full-screen clear needs no projected triangles or clip buffers.
++	void clear_screen()
++	{
++		_display_driver.fill_screen(black);
++	}
++
++	void clear_screen(const Window &window, const PlotOptions opts = {})
+ 	{
+ 		_display_driver.fill_rect({0,0}, {1,1}, black, window, opts.get_segments());
+ 	}
+diff --git a/src/display/Clipping.h b/src/display/Clipping.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..32753334af37d4ad44bc4e1185757d82bed550cb
+--- /dev/null
++++ b/src/display/Clipping.h
+@@ -0,0 +1,137 @@
++#ifndef GRAFICI_DISPLAY_CLIPPING_H
++#define GRAFICI_DISPLAY_CLIPPING_H
++
++#include "../Vector.h"
++#include "../numeric/Precision.h"
++
++namespace grafici_detail {
++
++template <typename Real>
++bool finite_point(const Vector<Real> &p)
++{
++    return grafici::is_finite(p.x) && grafici::is_finite(p.y);
++}
++
++template <typename Real>
++bool on_screen(const Vector<Real> &p)
++{
++    return finite_point(p) && p.x >= 0 && p.x <= 1 && p.y >= 0 && p.y <= 1;
++}
++
++template <typename Real>
++unsigned outcode(const Vector<Real> &p)
++{
++    return (p.x < 0 ? 1u : (p.x > 1 ? 2u : 0u)) |
++           (p.y < 0 ? 4u : (p.y > 1 ? 8u : 0u));
++}
++
++template <typename Real>
++Real fraction(Real boundary, Real a, Real b)
++{
++    const Real span = b - a;
++    // Opposite finite extremes can overflow their difference in FP32.
++    return grafici::is_finite(span) ? (boundary - a) / span
++        : (boundary * Real(0.5) - a * Real(0.5)) / (b * Real(0.5) - a * Real(0.5));
++}
++
++template <typename Real>
++Real blend_coordinate(Real a, Real b, Real weight)
++{
++    if (weight <= 0) return a;
++    if (weight >= 1) return b;
++    if ((a >= 0 && b >= 0) || (a < 0 && b < 0))
++        return a + (b - a) * weight;
++    return a * (Real(1) - weight) + b * weight;
++}
++
++// Intersect with one screen edge: left, right, bottom, top. The clipping axis
++// is set exactly to the boundary, avoiding repeated outcodes from roundoff.
++template <typename Real>
++Vector<Real> edge_intersection(const Vector<Real> &a, const Vector<Real> &b, unsigned edge)
++{
++    const Real boundary = (edge == 1 || edge == 3) ? Real(1) : Real(0);
++    if (edge < 2)
++        return {boundary, blend_coordinate(a.y, b.y, fraction(boundary, a.x, b.x))};
++    return {blend_coordinate(a.x, b.x, fraction(boundary, a.y, b.y)), boundary};
++}
++
++// Cohen-Sutherland in normalized screen coordinates, before integer conversion.
++template <typename Real>
++bool clip_line(Vector<Real> *a, Vector<Real> *b)
++{
++    if (!finite_point(*a) || !finite_point(*b)) return false;
++    for (unsigned iteration = 0; iteration < 8; ++iteration)
++    {
++        const unsigned ca = outcode(*a), cb = outcode(*b);
++        if (!(ca | cb)) return true;
++        if (ca & cb) return false;
++        const unsigned code = ca ? ca : cb;
++        const unsigned edge = (code & 8) ? 3 : ((code & 4) ? 2 : ((code & 2) ? 1 : 0));
++        const auto p = edge_intersection(*a, *b, edge);
++        if (!finite_point(p)) return false;
++        if (ca) *a = p; else *b = p;
++    }
++    return false;
++}
++
++template <typename Real>
++bool inside_edge(const Vector<Real> &p, unsigned edge)
++{
++    if (edge == 0) return p.x >= 0;
++    if (edge == 1) return p.x <= 1;
++    if (edge == 2) return p.y >= 0;
++    return p.y <= 1;
++}
++
++template <typename Real>
++bool same_point(const Vector<Real> &a, const Vector<Real> &b)
++{
++    return a.x == b.x && a.y == b.y;
++}
++
++template <typename Real>
++bool append_vertex(Vector<Real> *points, unsigned *count, const Vector<Real> &p)
++{
++    if (!finite_point(p)) return false;
++    if (*count && same_point(points[*count - 1], p)) return true;
++    if (*count == 7) return same_point(points[0], p); // Closing duplicate only.
++    points[(*count)++] = p;
++    return true;
++}
++
++// Sutherland-Hodgman. A triangle intersected with a rectangle has at most
++// seven vertices. The caller supplies seven slots; scratch uses seven more.
++template <typename Real>
++unsigned clip_triangle(Vector<Real> a, Vector<Real> b, Vector<Real> c, Vector<Real> *points)
++{
++    if (!finite_point(a) || !finite_point(b) || !finite_point(c)) return 0;
++    points[0] = a; points[1] = b; points[2] = c;
++    Vector<Real> scratch[7];
++    Vector<Real> *input = points, *output = scratch;
++    unsigned count = 3;
++    for (unsigned edge = 0; edge < 4; ++edge)
++    {
++        if (count == 0) return 0;
++        unsigned emitted = 0;
++        auto previous = input[count - 1];
++        bool previous_inside = inside_edge(previous, edge);
++        for (unsigned i = 0; i < count; ++i)
++        {
++            const auto current = input[i];
++            const bool current_inside = inside_edge(current, edge);
++            if (current_inside != previous_inside &&
++                !append_vertex(output, &emitted, edge_intersection(previous, current, edge))) return 0;
++            if (current_inside && !append_vertex(output, &emitted, current)) return 0;
++            previous = current;
++            previous_inside = current_inside;
++        }
++        if (emitted > 1 && same_point(output[0], output[emitted - 1])) --emitted;
++        count = emitted;
++        auto temp = input; input = output; output = temp;
++    }
++    // Four edges leave the final output in the caller's array.
++    return count;
++}
++
++} // namespace grafici_detail
++#endif
+diff --git a/src/display/DisplayDriver.h b/src/display/DisplayDriver.h
+index 65dabf8469fc0c52a89a94f7396ed2abfd0c7093..82dd47c7f9d02176b272994b8907fdf5b5167e87 100644
+--- a/src/display/DisplayDriver.h
++++ b/src/display/DisplayDriver.h
+@@ -23,6 +23,7 @@
+ #include "DisplayVector.h"
+ #include "PixelVector.h"
+ #include "Window.h"
++#include "Clipping.h"
+ 
+ // struct DisplayVertex
+ // {
+@@ -36,6 +37,7 @@ class DisplayDriverT
+   public:
+     using Compute = typename grafici::ComputationType<Scalar>::type;
+     using DisplayVector = DisplayVectorT<Scalar>;
++    using ClipPoint = Vector<Compute>;
+     using Window = WindowT<Scalar>;
+     using DisplayDriver = DisplayDriverT<Scalar>;
+ 	DisplayDriverT(Adafruit_GFX &driver)
+@@ -45,22 +47,18 @@ class DisplayDriverT
+ 
+ 	void draw_line(const DisplayVector display_a, const DisplayVector display_b, const Color color_a, const Color color_b, const Window &window = full_screen_for<Scalar>(), size_t segments = 1) const
+ 	{
+-		if (!window.valid()) return;
++		if (!window.valid() || !grafici_detail::finite_point(display_a) ||
++		    !grafici_detail::finite_point(display_b)) return;
+ 		const Color color_ab = color_a.midpoint(color_b);
+ 
+ 		if (segments == 1)
+ 		{
+-			/* project window display vector to full screen display vector to full screen pixel vector */
+-			auto pixel_a = display_to_pixel_vector(window.display_to_display_vector(display_a));
+-			auto pixel_b = display_to_pixel_vector(window.display_to_display_vector(display_b));
+-			auto pixel_color = color_ab.to_R5G6B5();
+-
+-			/* call base driver */
+-			_driver->drawLine(pixel_a.x,
+-			                  pixel_a.y,
+-			                  pixel_b.x,
+-			                  pixel_b.y,
+-			                  pixel_color);
++			const int16_t width = _driver->width(), height = _driver->height();
++			if (width <= 0 || height <= 0) return;
++			auto a = projected(display_a, window), b = projected(display_b, window);
++			if (!grafici_detail::clip_line(&a, &b)) return;
++			const auto pa = to_pixel(a, width, height), pb = to_pixel(b, width, height);
++			_driver->drawLine(pa.x, pa.y, pb.x, pb.y, color_ab.to_R5G6B5());
+ 		}
+ 		else if (segments > 1)
+ 		{
+@@ -72,22 +70,20 @@ class DisplayDriverT
+ 
+ 	void fill_triangle(DisplayVector display_a, DisplayVector display_b, DisplayVector display_c, Color color, const Window &window = full_screen_for<Scalar>(), size_t segments = 1) const
+ 	{
+-		if (!window.valid()) return;
++		if (!window.valid() || !grafici_detail::finite_point(display_a) ||
++		    !grafici_detail::finite_point(display_b) || !grafici_detail::finite_point(display_c)) return;
+ 		if (segments == 1)
+ 		{
+ 
+-			auto pixel_a = display_to_pixel_vector(window.display_to_display_vector(display_a));
+-			auto pixel_b = display_to_pixel_vector(window.display_to_display_vector(display_b));
+-			auto pixel_c = display_to_pixel_vector(window.display_to_display_vector(display_c));
+-			auto pixel_color = color.to_R5G6B5();
+-
+-			_driver->fillTriangle(pixel_a.x,
+-			                      pixel_a.y,
+-			                      pixel_b.x,
+-			                      pixel_b.y,
+-			                      pixel_c.x,
+-			                      pixel_c.y,
+-			                      pixel_color);
++			const int16_t width = _driver->width(), height = _driver->height();
++			if (width <= 0 || height <= 0) return;
++			const auto a = projected(display_a, window), b = projected(display_b, window), c = projected(display_c, window);
++			if (!grafici_detail::finite_point(a) || !grafici_detail::finite_point(b) || !grafici_detail::finite_point(c)) return;
++			const auto rgb = color.to_R5G6B5();
++			if (grafici_detail::on_screen(a) && grafici_detail::on_screen(b) && grafici_detail::on_screen(c))
++				emit_triangle(a, b, c, rgb, width, height);
++			else
++				fill_clipped_triangle(a, b, c, rgb, width, height);
+ 		}
+ 		else if (segments > 1)
+ 		{
+@@ -167,13 +163,16 @@ class DisplayDriverT
+ 
+ 	void fill_polygon(DisplayVector display_center, DisplayVector display_radius, unsigned int sides, Compute rotation, Color color, const Window &window = full_screen_for<Scalar>()) const
+ 	{
+-		if (!window.valid()) return;
++		const int16_t width = _driver->width(), height = _driver->height();
++		if (!window.valid() || width <= 0 || height <= 0 ||
++		    !grafici_detail::finite_point(display_center) || !grafici_detail::finite_point(display_radius)) return;
+ 		/* try to avoid == as we are comparing floats */
+ 		if (display_radius < pixel_to_display_vector({1,1}))
+ 		{
+-			auto pixel_center = display_to_pixel_vector(window.display_to_display_vector(display_center));
+-			auto pixel_color = color.to_R5G6B5();
+-			_driver->drawPixel(pixel_center.x, pixel_center.y, pixel_color);
++			const auto center = projected(display_center, window);
++			if (!grafici_detail::on_screen(center)) return;
++			const auto pixel = to_pixel(center, width, height);
++			_driver->drawPixel(pixel.x, pixel.y, color.to_R5G6B5());
+ 		}
+ 		else
+ 		{
+@@ -247,17 +246,35 @@ class DisplayDriverT
+ 		};
+ 	}
+ 
+-	/* from normalized display vector to absolute pixel vector */
+-	PixelVector display_to_pixel_vector(DisplayVector display_vector) const
++	ClipPoint projected(DisplayVector point, const Window &window) const
+ 	{
+-		PixelVector res{ static_cast<size_t>(display_vector.x * (_driver->width() - 1)),
+-			             static_cast<size_t>((1 - display_vector.y) * (_driver->height() - 1)) };
++		const auto p = window.display_to_display_vector(point);
++		return {static_cast<Compute>(p.x), static_cast<Compute>(p.y)};
++	}
+ 
+-		// std::cout << display_vector.x << " " << display_vector.y << std::endl;
+-		// std::cout << res.x << " " << res.y << std::endl;
++	static PixelVector to_pixel(const ClipPoint &point, int16_t width, int16_t height)
++	{
++		// Only finite, clipped [0,1] coordinates reach this conversion.
++		return {static_cast<int16_t>(point.x * (width - 1)),
++		        static_cast<int16_t>((Compute(1) - point.y) * (height - 1))};
++	}
++
++	void emit_triangle(const ClipPoint &a, const ClipPoint &b, const ClipPoint &c,
++	                   R5G6B5 color, int16_t width, int16_t height) const
++	{
++		const auto pa = to_pixel(a, width, height), pb = to_pixel(b, width, height), pc = to_pixel(c, width, height);
++		_driver->fillTriangle(pa.x, pa.y, pb.x, pb.y, pc.x, pc.y, color);
++	}
++
++	void fill_clipped_triangle(const ClipPoint &a, const ClipPoint &b, const ClipPoint &c,
++	                           R5G6B5 color, int16_t width, int16_t height) const
++	{
++		ClipPoint polygon[7];
++		const unsigned count = grafici_detail::clip_triangle(a, b, c, polygon);
++		for (unsigned i = 1; i + 1 < count; ++i)
++			emit_triangle(polygon[0], polygon[i], polygon[i + 1], color, width, height);
++	}
+ 
+-		return res;
+-	};
+ };
+ 
+ using DisplayDriver = DisplayDriverT<float>;
+diff --git a/src/display/PixelVector.h b/src/display/PixelVector.h
+index 41ca7bec898c906ff954e4654dbd0e1c15a8ae98..cc6b4883e2b146b3d5f039871e3f4df6b11aeaa8 100644
+--- a/src/display/PixelVector.h
++++ b/src/display/PixelVector.h
+@@ -19,13 +19,14 @@
+ 
+ /*! Importation of librairies*/
+ #include "../Vector.h"
++#include <stdint.h>
+ 
+ /**
+  * @brief Bi-dimensional xy Vector object representing cartesian coordinates
+  * 
+  */
+ 
+-using PixelVector = Vector<size_t>;
++using PixelVector = Vector<int16_t>;
+ 
+ #endif /* GRAFICI_DISPLAY_PIXEL_VECTOR_H */
+ 
+diff --git a/src/display/PolarWindow.h b/src/display/PolarWindow.h
+index 6ba408f046fc98e68581de1f24c2146e3c4f86bc..523c809d4d8a77276b889a01d102c1a1f24d2523 100644
+--- a/src/display/PolarWindow.h
++++ b/src/display/PolarWindow.h
+@@ -61,8 +61,8 @@ class PolarWindowT : public WindowT<Scalar>
+ 	{
+ 		if (!valid() || !grafici::is_finite(data_x) || !grafici::is_finite(data_y))
+ 			return {static_cast<Scalar>(NAN), static_cast<Scalar>(NAN)};
+-		Compute angle = x.norm_to_value(data_x);
+-		Compute radius = y.norm_to_value(data_y);
++		Compute angle = Window::map_coordinate(x, data_x);
++		Compute radius = Window::map_coordinate(y, data_y);
+ 		Compute display_x = Compute(0.5) + (radius * Compute(0.5)) * grafici::cosine(angle * Compute(6.2831853071795864769));
+ 		Compute display_y = Compute(0.5) + (radius * Compute(0.5)) * grafici::sine(angle * Compute(6.2831853071795864769));
+ 		return m_parent_window.data_to_display_vector(display_x, display_y);
+diff --git a/src/display/Window.h b/src/display/Window.h
+index 1a4d6c24ed3ce0372dde9f0a6c046bec66b69084..f9a9cb651a2e0aa128e25d4e3ffd5c4086471e75 100644
+--- a/src/display/Window.h
++++ b/src/display/Window.h
+@@ -121,23 +121,23 @@ class WindowT : public Vector<Range<Scalar>>
+ 		switch (_transform)
+ 		{
+ 		case WindowTransform::h_flip:
+-			return DisplayVector{ x.norm_to_value(1 - data_x), y.norm_to_value(data_y) };
++			return DisplayVector{ map_coordinate(x, 1 - data_x), map_coordinate(y, data_y) };
+ 
+ 		case WindowTransform::v_flip:
+-			return DisplayVector{ x.norm_to_value(data_x), y.norm_to_value(1 - data_y) };
++			return DisplayVector{ map_coordinate(x, data_x), map_coordinate(y, 1 - data_y) };
+ 
+ 		case WindowTransform::both_flip:
+-			return DisplayVector{ x.norm_to_value(1 - data_x), y.norm_to_value(1 - data_y) };
++			return DisplayVector{ map_coordinate(x, 1 - data_x), map_coordinate(y, 1 - data_y) };
+ 
+ 		case WindowTransform::cw_90_rotation:
+-			return DisplayVector{ x.norm_to_value(data_y), y.norm_to_value(1 - data_x) };
++			return DisplayVector{ map_coordinate(x, data_y), map_coordinate(y, 1 - data_x) };
+ 
+ 		case WindowTransform::ccw_90_rotation:
+-			return DisplayVector{ x.norm_to_value(1 - data_y), y.norm_to_value(data_x) };
++			return DisplayVector{ map_coordinate(x, 1 - data_y), map_coordinate(y, data_x) };
+ 
+ 		case WindowTransform::none:
+ 		default:
+-			return DisplayVector{ x.norm_to_value(data_x), y.norm_to_value(data_y) };
++			return DisplayVector{ map_coordinate(x, data_x), map_coordinate(y, data_y) };
+ 		}
+ 	};
+ 
+@@ -161,6 +161,12 @@ class WindowT : public Vector<Range<Scalar>>
+ 	};
+ 
+   protected:
++	static Compute map_coordinate(const Range<Scalar> &range, Compute value)
++	{
++		return static_cast<Compute>(range.low) * (Compute(1) - value) +
++		       static_cast<Compute>(range.high) * value;
++	}
++
+ 	WindowTransform _transform{ WindowTransform::none };
+ };
+ 
+diff --git a/tests/display_clipping.cpp b/tests/display_clipping.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..c507fca7b315e32b15122452f4fbdd5a9c9f5399
+--- /dev/null
++++ b/tests/display_clipping.cpp
+@@ -0,0 +1,119 @@
++#include "Adafruit_GFX.h"
++#include "Grafici.h"
++#include <cassert>
++#include <cmath>
++#include <cstdio>
++#include <limits>
++#include <type_traits>
++
++template <typename Real>
++void check_rendering()
++{
++    Adafruit_GFX target;
++    DisplayDriverT<Real> driver(target);
++    WindowT<Real> window;
++    driver.draw_line({-1, 0.25f}, {2, 0.75f}, white, white);
++    assert(target.lines.size() == 1);
++    auto line = target.lines.back();
++    assert(line.x0 == 0 && line.y0 == 36 && line.x1 == 127 && line.y1 == 26);
++    driver.draw_line({-2, 0.25f}, {-1, 0.75f}, white, white);
++    assert(target.lines.size() == 1); // Entirely outside: do not clamp to an edge.
++
++    const float huge = sizeof(Real) == 2 ? 65504 : std::numeric_limits<float>::max();
++    driver.draw_line({-huge, 0.5f}, {huge, 0.5f}, white, white);
++    line = target.lines.back();
++    assert(line.x0 == 0 && line.x1 == 127 && line.y0 == 31 && line.y1 == 31);
++    driver.draw_line({0.5f, huge}, {0.5f, -huge}, white, white);
++    line = target.lines.back();
++    assert(line.x0 == 63 && line.x1 == 63 && line.y0 == 0 && line.y1 == 63);
++    const auto before = target.lines.size();
++    const float nan = std::numeric_limits<float>::quiet_NaN();
++    const float inf = std::numeric_limits<float>::infinity();
++    driver.draw_line({nan, 0}, {1, 1}, white, white);
++    driver.draw_line({0, 0}, {inf, 1}, white, white);
++    assert(target.lines.size() == before);
++
++    driver.fill_triangle({-10, -10}, {10, -10}, {0, 10}, white);
++    assert(target.triangles == 2);
++    long twice_area = 0;
++    for (const auto &t : target.triangle_log)
++    {
++        assert(t.x0 >= 0 && t.x0 < 128 && t.x1 >= 0 && t.x1 < 128 && t.x2 >= 0 && t.x2 < 128);
++        assert(t.y0 >= 0 && t.y0 < 64 && t.y1 >= 0 && t.y1 < 64 && t.y2 >= 0 && t.y2 < 64);
++        twice_area += std::labs(long(t.x1 - t.x0) * (t.y2 - t.y0) - long(t.x2 - t.x0) * (t.y1 - t.y0));
++    }
++    assert(twice_area == 2 * 127 * 63);
++    driver.fill_triangle({-3, 0}, {-2, 0.5f}, {-1, 1}, white);
++    driver.fill_triangle({nan, 0}, {1, 0}, {0, 1}, white);
++    assert(target.triangles == 2);
++    driver.fill_polygon({-1, 0.5f}, {0, 0}, 3, 0, white);
++    assert(target.pixels == 0);
++    driver.fill_polygon({0.5f, 0.5f}, {0, 0}, 3, 0, white);
++    assert(target.pixels == 1 && target.pixel_log[0].x == 63 && target.pixel_log[0].y == 31);
++
++    WindowT<Real> rotated({-1, 2}, {0, 1}, WindowTransform::cw_90_rotation);
++    driver.draw_line({0, 0.5f}, {1, 0.5f}, white, white, rotated);
++    line = target.lines.back();
++    assert(line.x0 == 63 && line.x1 == 63 && line.y0 == 0 && line.y1 == 63);
++    PolarWindowT<Real> polar({0, 1}, {0, 1}, window);
++    driver.draw_line({0, 1}, {0.5f, 1}, white, white, polar, 16);
++    for (const auto &l : target.lines)
++        assert(l.x0 >= 0 && l.x0 < 128 && l.y0 >= 0 && l.y0 < 64 &&
++               l.x1 >= 0 && l.x1 < 128 && l.y1 >= 0 && l.y1 < 64);
++
++    Adafruit_GFX cleared;
++    GraficiT<Real> plot(cleared);
++    plot.clear_screen();
++    assert(cleared.screens == 1 && cleared.triangles == 0);
++    plot.clear_screen(window);
++    assert(cleared.screens == 1 && cleared.triangles == 2);
++
++    Adafruit_GFX empty(0, 0);
++    DisplayDriverT<Real> no_pixels(empty);
++    no_pixels.draw_line({0, 0}, {1, 1}, white, white);
++    no_pixels.fill_triangle({0, 0}, {1, 0}, {0, 1}, white);
++    no_pixels.fill_polygon({0, 0}, {0, 0}, 3, 0, white);
++    assert(empty.lines.empty() && empty.triangles == 0 && empty.pixels == 0);
++    Adafruit_GFX maximum(32767, 32767);
++    DisplayDriverT<Real> wide(maximum);
++    wide.draw_line({-1, -1}, {2, 2}, white, white);
++    assert(maximum.lines.size() == 1 && maximum.lines[0].x1 == 32766);
++}
++
++float cross(Vector<float> a, Vector<float> b, Vector<float> p)
++{
++    return (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x);
++}
++void check_polygon_workspace()
++{
++    // Guard the exact seven-slot output buffer and verify polygon containment.
++    struct Guarded { uint32_t before; Vector<float> vertices[7]; uint32_t after; };
++    uint32_t state = 12345;
++    auto coordinate = [&state]() { state = state * 1664525u + 1013904223u; return float(state >> 8) / 16777216.0f * 5 - 2; };
++    for (unsigned i = 0; i < 2000; ++i)
++    {
++        const Vector<float> a{coordinate(), coordinate()}, b{coordinate(), coordinate()}, c{coordinate(), coordinate()};
++        Guarded out{0x12345678, {}, 0x87654321};
++        const unsigned count = grafici_detail::clip_triangle(a, b, c, out.vertices);
++        assert(out.before == 0x12345678 && out.after == 0x87654321 && count <= 7);
++        float area = 0;
++        const float orientation = cross(a, b, c);
++        for (unsigned j = 0; j < count; ++j)
++        {
++            const auto p = out.vertices[j], q = out.vertices[(j + 1) % count];
++            assert(grafici_detail::on_screen(p));
++            const float sign = orientation >= 0 ? 1.0f : -1.0f;
++            assert(sign * cross(a, b, p) >= -0.0001f && sign * cross(b, c, p) >= -0.0001f && sign * cross(c, a, p) >= -0.0001f);
++            area += p.x * q.y - q.x * p.y;
++        }
++        assert(std::fabs(area) <= 2.0001f);
++    }
++}
++
++int main()
++{
++    static_assert(std::is_same<decltype(PixelVector{}.x), int16_t>::value, "GFX signed coordinates");
++    check_rendering<float>(); check_rendering<grafici::Float16>();
++    check_polygon_workspace();
++    std::puts("Signed pixel conversion, line/triangle clipping and bounded polygon workspace passed.");
++}
+diff --git a/tests/support/Adafruit_GFX.h b/tests/support/Adafruit_GFX.h
+index 7dfee9e8a673d4c4b331bef455f3bb827d5f6f9d..32a3df0b3e3404c1499409ba8495110618cab3cb 100644
+--- a/tests/support/Adafruit_GFX.h
++++ b/tests/support/Adafruit_GFX.h
+@@ -28,20 +28,32 @@ class Adafruit_GFX
+ {
+ public:
+     struct Line { int16_t x0, y0, x1, y1; uint16_t color; };
++    struct Triangle { int16_t x0, y0, x1, y1, x2, y2; uint16_t color; };
++    struct Pixel { int16_t x, y; uint16_t color; };
++    explicit Adafruit_GFX(int16_t w = 128, int16_t h = 64) : w(w), h(h) {}
+     std::vector<Line> lines;
++    std::vector<Triangle> triangle_log;
++    std::vector<Pixel> pixel_log;
+     size_t triangles = 0, pixels = 0, screens = 0;
+-    int16_t width() const { return 128; }
+-    int16_t height() const { return 64; }
++    int16_t width() const { return w; }
++    int16_t height() const { return h; }
+     void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color)
+     {
+         lines.push_back({x0, y0, x1, y1, color});
+     }
+-    void fillTriangle(int16_t, int16_t, int16_t, int16_t, int16_t, int16_t, uint16_t)
++    void fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color)
+     {
+         ++triangles;
++        triangle_log.push_back({x0, y0, x1, y1, x2, y2, color});
++    }
++    void drawPixel(int16_t x, int16_t y, uint16_t color)
++    {
++        ++pixels;
++        pixel_log.push_back({x, y, color});
+     }
+-    void drawPixel(int16_t, int16_t, uint16_t) { ++pixels; }
+     void fillScreen(uint16_t) { ++screens; }
++private:
++    int16_t w, h;
+ };
+ 
+ #endif

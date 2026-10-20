@@ -31,18 +31,25 @@ enum class VectorComponents
  * @brief Data source generated from selecting a component from a vector data source
  * 
  */
-class DataSelect : public DataSourceNorm
+template <typename Scalar = float>
+class DataSelectT : public DataSourceNormT<Scalar>
 {
   public:
-	DataSelect(const DataSource<DataVector> &source, VectorComponents selection)
+    using Compute = typename grafici::ComputationType<Scalar>::type;
+    using DataNorm = DataNormT<Scalar>;
+    using DataVector = DataVectorT<Scalar>;
+    using DataSourceNorm = DataSourceNormT<Scalar>;
+    using DataSelect = DataSelectT<Scalar>;
+	DataSelectT(const DataSource<DataVector> &source, VectorComponents selection)
 	    : DataSourceNorm{ source.size() }
 	    , _source{ source }
 	    , _selection{ selection }
 	{
 	}
 
-	const Range<float> range() const override
+	const Range<Scalar> range() const override
 	{
+		if (this->size() == 0) return Range<Scalar>::invalid();
 		auto data_vector = _source[0];
 		switch (_selection)
 		{
@@ -64,6 +71,7 @@ class DataSelect : public DataSourceNorm
 
 	const DataNorm operator[](const unsigned long idx) const override
 	{
+		if (idx >= this->size()) return INVALID_DATA_NORM;
 		auto data_vector = _source[idx];
 		switch (_selection)
 		{
@@ -86,6 +94,8 @@ class DataSelect : public DataSourceNorm
 	const DataSource<DataVector> &_source;
 	VectorComponents _selection;
 };
+
+using DataSelect = DataSelectT<float>;
 
 #endif /* GRAFICI_DATA_SELECT_H */
 

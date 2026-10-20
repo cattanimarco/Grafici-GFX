@@ -24,8 +24,17 @@
  * @brief Data source returning a constant value
  * 
  */
-class DataConstant : public DataParametric
+template <typename Scalar = float>
+class DataConstantT : public DataParametricT<Scalar>
 {
+  public:
+    using Compute = typename grafici::ComputationType<Scalar>::type;
+    using DataNorm = DataNormT<Scalar>;
+    using DataParametric = DataParametricT<Scalar>;
+    using DataParametric::size;
+    using DataConstant = DataConstantT<Scalar>;
+protected:
+    using DataParametric::_range;
   public:
 	/**
 	* @brief Construct a new data source from a normalized data point
@@ -33,21 +42,23 @@ class DataConstant : public DataParametric
 	* @param size size of the data source
 	* @param val value of the normalized data source that will be returned
 	*/
-	DataConstant(size_t size, DataNorm val)
+	DataConstantT(size_t size, DataNorm val)
 	    : DataParametric{ size, val.range() }
 	{
 		_value = val.raw();
 	}
 
   protected:
-	float at(size_t idx __attribute__((unused))) const override
+	Compute at(size_t idx __attribute__((unused))) const override
 	{
 		return _value;
 	}
 
   private:
-	float _value;
+	Scalar _value;
 };
+
+using DataConstant = DataConstantT<float>;
 
 #endif /* GRAFICI_DATA_CONSTANT_H */
 

@@ -1,0 +1,106 @@
+From c4396a34a1e5f4cfbcae5bcf4002d9915bb1316b Mon Sep 17 00:00:00 2001
+From: Grafici patch export <patch-export@localhost>
+Date: Sun, 18 Oct 2026 10:34:36 +0100
+Subject: [PATCH] Respect marker-size source length for scatter markers
+
+Radius-dependent markers now stop at the minimum x/y/color/size length.
+Dots consume no radius and still use all matching x/y/color samples; mixed
+styles preserve those dots when only the sized marker runs out of radii.
+No source is read past its declared size, including an empty radius source.
+
+Read the marker-style string once per draw, removing repeated temporary
+copies while retaining the existing style API and constant-size state.
+
+Validation: scatter_lengths uses sources that assert on out-of-bounds reads
+and verifies dots, circles, composite styles and short colors for float/FP16.
+The complete plotting regression also passes with UBSan.
+---
+ src/plotter/PlotScatter.h | 10 ++++++--
+ tests/scatter_lengths.cpp | 53 +++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 61 insertions(+), 2 deletions(-)
+ create mode 100644 tests/scatter_lengths.cpp
+
+diff --git a/src/plotter/PlotScatter.h b/src/plotter/PlotScatter.h
+index fedb7fd2056508208c57061ffefe7e48fb75fab5..5871755499e7ef8599a4981476437ef0e81f19cb 100644
+--- a/src/plotter/PlotScatter.h
++++ b/src/plotter/PlotScatter.h
+@@ -13,12 +13,18 @@ inline void plot_scatter(const DisplayDriverT<Scalar> &display,
+ {
+ 	/* in case data sources have different sizes, use the smaller one */
+ 	auto source_size = DataSourceNormT<Scalar>::min_data_source_size(x, y, c);
++	const auto sized_count = DataSourceNormT<Scalar>::min_data_source_size(x, y, c, size);
++	const auto &styles = opts.get_scatter_style();
+ 
+ 	for (size_t idx = 0; idx < source_size; ++idx)
+ 	{
+-		for (size_t idx_style = 0; idx_style < opts.get_scatter_style().length(); ++idx_style)
++		for (size_t idx_style = 0; idx_style < styles.length(); ++idx_style)
+ 		{
+-			char s = opts.get_scatter_style()[idx_style];
++			char s = styles[idx_style];
++			// Dots do not consume a radius. Composite styles keep their dots
++			// when a shorter radius source has no corresponding sized marker.
++			if (s != '.' && idx >= sized_count)
++				continue;
+ 			if (s == '.')
+ 			{
+ 				// dot
+diff --git a/tests/scatter_lengths.cpp b/tests/scatter_lengths.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..a7af1067a90731a7fdbf88e550bf106d3e9bf958
+--- /dev/null
++++ b/tests/scatter_lengths.cpp
+@@ -0,0 +1,53 @@
++#include "Adafruit_GFX.h"
++#include "Grafici.h"
++#include <cassert>
++#include <cstdio>
++
++template <typename Real>
++class CheckedSource : public DataSourceNormT<Real>
++{
++public:
++    CheckedSource(size_t count, float value) : DataSourceNormT<Real>(count, {0, 1}), value(value) {}
++    const DataNormT<Real> operator[](unsigned long index) const override
++    {
++        assert(index < this->size());
++        ++reads;
++        return {value, {0, 1}};
++    }
++    mutable size_t reads = 0;
++private:
++    float value;
++};
++
++template <typename Real>
++void check_lengths()
++{
++    CheckedSource<Real> xy(3, 0.5f), colors(3, 1), radius(1, 0.05f), empty(0, 0);
++    Adafruit_GFX target;
++    GraficiT<Real> plot(target);
++    auto options = PlotOptionsT<Real>{}.scatter_style("o");
++    plot.scatter(xy, xy, colors, radius, full_screen_for<Real>(), options);
++    assert(target.lines.size() == 45);
++    target.lines.clear();
++    plot.scatter(xy, xy, colors, empty, full_screen_for<Real>(), options);
++    assert(target.lines.empty() && empty.reads == 0);
++
++    target.lines.clear();
++    plot.scatter(xy, xy, colors, empty, full_screen_for<Real>(), options.scatter_style("."));
++    assert(target.lines.size() == 3 * 45 && empty.reads == 0);
++    target.lines.clear();
++    plot.scatter(xy, xy, colors, radius, full_screen_for<Real>(), options.scatter_style(".o"));
++    assert(target.lines.size() == 4 * 45);
++
++    CheckedSource<Real> short_colors(1, 1);
++    target.lines.clear();
++    plot.scatter(xy, xy, short_colors, radius, full_screen_for<Real>(), options.scatter_style("."));
++    assert(target.lines.size() == 45);
++}
++
++int main()
++{
++    check_lengths<float>();
++    check_lengths<grafici::Float16>();
++    std::puts("Scatter bounds radius-dependent markers and preserves independent dots.");
++}

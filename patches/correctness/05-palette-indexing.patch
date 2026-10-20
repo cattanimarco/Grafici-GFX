@@ -1,0 +1,103 @@
+From c84591109a03c0820e87298c26c60ed99c31c304 Mon Sep 17 00:00:00 2001
+From: Grafici patch export <patch-export@localhost>
+Date: Sun, 18 Oct 2026 10:34:36 +0100
+Subject: [PATCH] Fix generated-palette indexing and reject empty color arrays
+
+Generated palette indices now use a floating-point fraction after wrapping
+idx modulo palette_size, matching ColorMapArray discrete index semantics.
+N entries sample [0,1); continuous normalized lookups retain their endpoints.
+Previously integer division returned the same color for all indices below N.
+
+A generated palette of size zero reports valid()==false and returns black
+from either lookup method without dividing. ColorMapArray<0> is rejected by
+a compile-time assertion. No additional retained data or allocation is needed.
+
+Validation: color_map_indices checks distinct entries, exact wrapped lookup
+semantics including SIZE_MAX, size-one arrays and zero generated palettes;
+compile_fail/colormap_zero.cpp verifies the static diagnostic. UBSan passes.
+---
+ src/color/ColorMap.h                 |  9 +++++++-
+ tests/color_map_indices.cpp          | 31 ++++++++++++++++++++++++++++
+ tests/compile_fail/colormap_zero.cpp |  2 ++
+ 3 files changed, 41 insertions(+), 1 deletion(-)
+ create mode 100644 tests/color_map_indices.cpp
+ create mode 100644 tests/compile_fail/colormap_zero.cpp
+
+diff --git a/src/color/ColorMap.h b/src/color/ColorMap.h
+index 182e729f7b2c4a31218cea0b659c7f823bea787e..4b138baa1bae34266ddd68afb6c5d2ad8b9db4f7 100644
+--- a/src/color/ColorMap.h
++++ b/src/color/ColorMap.h
+@@ -81,13 +81,19 @@ class GeneratedMapGenerated : public ColorMap
+ 	{
+ 	}
+ 
++	bool valid() const { return _palette_size != 0; }
++
+ 	Color index_to_color(size_t idx) const override
+ 	{
+-		return norm_to_color(idx/_palette_size);
++		if (!valid()) return {0, 0, 0};
++		// Discrete palettes wrap, matching ColorMapArray. N samples cover [0,1).
++		return norm_to_color(static_cast<float>(idx % _palette_size) /
++		                     static_cast<float>(_palette_size));
+ 	}
+ 
+ 	Color norm_to_color(DataNorm val) const override
+ 	{
++		if (!valid()) return {0, 0, 0};
+ 		// https://iquilezles.org/articles/palettes/
+ 		Color result;
+ 		result.red = 255 * ((_a.red / 255.0) + (_b.red / 255.0)*cos( 2 * M_PI *((_c.red / 255.0) * val.norm() + (_d.red / 255.0)) ));
+@@ -112,6 +118,7 @@ class GeneratedMapGenerated : public ColorMap
+ template <size_t N>
+ class ColorMapArray : public ColorMap
+ {
++    static_assert(N > 0, "ColorMapArray requires at least one color");
+   public:
+ 	/**
+ 	 * @brief Construct a new Color Map Array object
+diff --git a/tests/color_map_indices.cpp b/tests/color_map_indices.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..3f00e313dea2d7a37fb3d8c1f60c38092b474bce
+--- /dev/null
++++ b/tests/color_map_indices.cpp
+@@ -0,0 +1,31 @@
++#include "color/ColorMap.h"
++#include <cassert>
++#include <cstdio>
++#include <limits>
++
++bool equal(Color a, Color b)
++{
++    return a.red == b.red && a.green == b.green && a.blue == b.blue;
++}
++int main()
++{
++    const Color grey{127, 127, 127}, frequency{255, 255, 255}, phase{0, 85, 170};
++    GeneratedMapGenerated map(grey, grey, frequency, phase, 100);
++    assert(map.valid());
++    assert(!equal(map.index_to_color(0), map.index_to_color(50)));
++    const size_t indices[] = {0, 1, 50, 99, 100, std::numeric_limits<size_t>::max()};
++    for (size_t i : indices)
++        assert(equal(map.index_to_color(i), map.norm_to_color(float(i % 100) / 100)));
++    GeneratedMapGenerated zero(grey, grey, frequency, phase, 0);
++    assert(!zero.valid());
++    assert(equal(zero.index_to_color(123), Color{0, 0, 0}));
++    assert(equal(zero.norm_to_color(0.5f), Color{0, 0, 0}));
++    ColorMapArray<2> pair(Color{255, 0, 0}, Color{0, 0, 255});
++    assert(equal(pair.index_to_color(0), pair.index_to_color(2)));
++    assert(equal(pair.index_to_color(1), pair.index_to_color(3)));
++    assert(equal(pair.norm_to_color(0), Color{255, 0, 0}));
++    assert(equal(pair.norm_to_color(1), Color{0, 0, 255}));
++    ColorMapArray<1> single(Color{12, 34, 56});
++    assert(equal(single.index_to_color(100), single.norm_to_color(0.75f)));
++    std::puts("Generated palette fractions, wrapping and zero-size handling passed.");
++}
+diff --git a/tests/compile_fail/colormap_zero.cpp b/tests/compile_fail/colormap_zero.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..f9f9cc674594f04b8a1181337ffd023ff2addbf5
+--- /dev/null
++++ b/tests/compile_fail/colormap_zero.cpp
+@@ -0,0 +1,2 @@
++#include "color/ColorMap.h"
++ColorMapArray<0> invalid_palette;

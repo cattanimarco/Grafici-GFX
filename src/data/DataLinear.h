@@ -23,8 +23,17 @@
  * @brief Data source generated from a linear function
  * 
  */
-class DataLinear : public DataParametric
+template <typename Scalar = float>
+class DataLinearT : public DataParametricT<Scalar>
 {
+  public:
+    using Compute = typename grafici::ComputationType<Scalar>::type;
+    using DataNorm = DataNormT<Scalar>;
+    using DataParametric = DataParametricT<Scalar>;
+    using DataParametric::size;
+    using DataLinear = DataLinearT<Scalar>;
+protected:
+    using DataParametric::_range;
   public:
 	/**
      * @brief Construct a new Data Linear object
@@ -33,7 +42,7 @@ class DataLinear : public DataParametric
      * @param offset 
      * @param slope 
      */
-	DataLinear(size_t size, float offset = 0, float slope = 1)
+	DataLinearT(size_t size, Scalar offset = 0, Scalar slope = 1)
 	    : DataParametric{ size }
 	    , _offset{ offset }
 	    , _slope{ slope }
@@ -48,7 +57,7 @@ class DataLinear : public DataParametric
 	 * @param offset 
 	 * @param slope 
 	 */
-	DataLinear(size_t size, Range<float> range, float offset = 0, float slope = 1)
+	DataLinearT(size_t size, Range<Scalar> range, Scalar offset = 0, Scalar slope = 1)
 	    : DataParametric{ size, range }
 	    , _offset{ offset }
 	    , _slope{ slope }
@@ -56,7 +65,7 @@ class DataLinear : public DataParametric
 	}
 
   protected:
-	float at(size_t idx) const override
+	Compute at(size_t idx) const override
 	{
 		return idx * _slope + _offset;
 	}
@@ -64,12 +73,25 @@ class DataLinear : public DataParametric
   private:
 	void update_range() override
 	{
-		_range = { at(0), at(size() - 1) };
+		_range = Range<Scalar>::invalid();
+		if (size() == 0) return;
+		const Compute first = at(0), last = at(size() - 1);
+		const Scalar a = static_cast<Scalar>(first), b = static_cast<Scalar>(last);
+		if (!grafici::is_finite(first) || !grafici::is_finite(last) ||
+		    !grafici::is_finite(a) || !grafici::is_finite(b))
+		{
+			this->_size = 0;
+			return;
+		}
+		_range = {a, b};
+		_range.sort();
 	}
 
-	float _offset;
-	float _slope;
+	Scalar _offset;
+	Scalar _slope;
 };
+
+using DataLinear = DataLinearT<float>;
 
 #endif /* GRAFICI_DATA_LINEAR_H */
 

@@ -24,8 +24,16 @@
  * @brief Data source generated from resizing another data source
  * 
  */
-class DataResize : public DataSourceNorm
+template <typename Scalar = float>
+class DataResizeT : public DataSourceNormT<Scalar>
 {
+  public:
+    using Compute = typename grafici::ComputationType<Scalar>::type;
+    using DataNorm = DataNormT<Scalar>;
+    using DataSourceNorm = DataSourceNormT<Scalar>;
+    using DataResize = DataResizeT<Scalar>;
+protected:
+    using DataSourceNorm::_range;
   public:
 	/**
 	* @brief Construct a new Data Resize object
@@ -33,7 +41,7 @@ class DataResize : public DataSourceNorm
 	* @param source 
 	* @param range Normally a data source outputs values from 0 to 1. The output values of this data source will be dicated by parameter 'range'
 	*/
-	DataResize(const DataSourceNorm &source, Range<float> range)
+	DataResizeT(const DataSourceNorm &source, Range<Scalar> range)
 	    : DataSourceNorm{ source.size() }
 	    , _source{ source }
 
@@ -45,7 +53,9 @@ class DataResize : public DataSourceNorm
 	{
 		if (idx < DataSource<DataNorm>::size())
 		{
-			return { _range.norm_to_value(_source[idx].norm()), { 0, 1 } };
+			const auto value = _source[idx];
+			if (!value.valid() || !_range.valid()) return INVALID_DATA_NORM;
+			return { _range.norm_to_value(value.norm()), { 0, 1 } };
 		}
 		else
 		{
@@ -56,6 +66,8 @@ class DataResize : public DataSourceNorm
   private:
 	const DataSourceNorm &_source;
 };
+
+using DataResize = DataResizeT<float>;
 
 #endif /* GRAFICI_DATA_RESIZE_H */
 

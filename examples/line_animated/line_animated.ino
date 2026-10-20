@@ -6,11 +6,11 @@ Adafruit_ILI9341 gfx{ 10, 9 };
 Grafici plot{ gfx };
 
 static unsigned int offset = 0;
-const float x_resolution = gfx.width() / 10.0;
+const size_t x_resolution = static_cast<size_t>(gfx.width()) / 10;
 
 // define functions for x and y
 DataLinear   x { x_resolution };
-DataFunction y { x_resolution, [offset](size_t x) -> float { return sin((x + offset) / (x_resolution / 10.0)) + cos(sqrt(3) * (x + offset) / (x_resolution / 10.0)); } };
+DataFunction y { x_resolution, [](size_t x) -> float { return sin((x + offset) / (x_resolution / 10.0)) + cos(sqrt(3) * (x + offset) / (x_resolution / 10.0)); } };
 
 void setup(void) 
 {

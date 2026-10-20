@@ -1,0 +1,9 @@
+01-spline-fixes.patch
+../float16.patch
+03-interpolation-boundaries.patch
+04-scatter-size-bounds.patch
+05-palette-indexing.patch
+06-color-rounding.patch
+07-boundary-contracts.patch
+08-signed-geometric-clipping.patch
+09-cpp11-portability.patch

@@ -27,10 +27,17 @@
  * @tparam BINS Number of frequency bins to subdivide the data point space 
  *
  */
-template <size_t BINS>
-class DataHistogramXY : public DataSource<DataVector>
+template <size_t BINS, typename Scalar = float>
+class DataHistogramXY : public DataSource<DataVectorT<Scalar>>
 {
+    static_assert(BINS > 0, "DataHistogramXY requires at least one bin");
   public:
+    using Compute = typename grafici::ComputationType<Scalar>::type;
+    using DataNorm = DataNormT<Scalar>;
+    using DataVector = DataVectorT<Scalar>;
+    using DataSelect = DataSelectT<Scalar>;
+    using DataSourceNorm = DataSourceNormT<Scalar>;
+    using DataSource<DataVector>::size;
 	/* To plot multiple n bar plots, use num_classes = n and use n of this classes for the x axis.
 	 Each class with class_id [0, n-1] */
 	DataHistogramXY(const DataSourceNorm &source, bool normalized = false, size_t class_id = 0, size_t num_classes = 1)
@@ -43,25 +50,16 @@ class DataHistogramXY : public DataSource<DataVector>
 		compute_histogram();
 	}
 
-	const DataVector operator[](const unsigned long idx) const
+	const DataVector operator[](unsigned long idx) const override
 	{
-		if (idx < size())
-		{
-			if (_normalized)
-				return {
-					{ static_cast<float>(0.5 + idx * _num_classes + _class_id), { 0.0, static_cast<float>(size() * _num_classes) } },
-					{ static_cast<float>(_bins[idx]) / static_cast<float>(_total), { 0, 1 } },
-				};
-			else
-				return {
-					{ static_cast<float>(0.5 + idx * _num_classes + _class_id), { 0.0, static_cast<float>(size() * _num_classes) } },
-					{ static_cast<float>(_bins[idx]), _histogram_y_range },
-				};
-		}
-		else
-		{
-			return INVALID_DATA_VECTOR;
-		}
+		if (idx >= size()) return INVALID_DATA_VECTOR;
+		const Compute center = Compute(0.5) + static_cast<Compute>(idx) * _num_classes + _class_id;
+		const Compute extent = static_cast<Compute>(size()) * _num_classes;
+		if (_normalized)
+			return {{center, {0, static_cast<Scalar>(extent)}},
+			        {_total == 0 ? Compute(0) : static_cast<Compute>(_bins[idx]) / _total, {0, 1}}};
+		return {{center, {0, static_cast<Scalar>(extent)}},
+		        {static_cast<Compute>(_bins[idx]), _histogram_y_range}};
 	}
 
 	/* methods to get a datasource from the interpolated dataset */
@@ -79,19 +77,25 @@ class DataHistogramXY : public DataSource<DataVector>
 	void compute_histogram()
 	{
 		memset(_bins, 0, sizeof(_bins));
-		_histogram_y_range = { 0, 0 };
+		_histogram_y_range = {0, 0};
 		_total = 0;
+		if (_num_classes == 0 || _class_id >= _num_classes)
+		{
+			this->_size = 0;
+			return;
+		}
 		for (size_t idx = 0; idx < _source.size(); ++idx)
 		{
-			/* TODO add possiblity to define custom bucket range using a Range */
-			size_t bin_idx = floor(_source[idx].norm() * size());
-			if (bin_idx == size())
-			{
-				bin_idx--;
-			}
-			_bins[bin_idx]++;
-			_total++;
-			_histogram_y_range.update(_bins[bin_idx]);
+			const auto value = _source[idx];
+			if (!value.valid()) continue;
+			const Compute norm = value.norm();
+			if (!grafici::is_finite(norm)) continue;
+			const Compute scaled = norm * static_cast<Compute>(BINS);
+			const size_t bin = scaled >= static_cast<Compute>(BINS) ? BINS - 1
+			    : static_cast<size_t>(scaled);
+			++_bins[bin];
+			++_total;
+			_histogram_y_range.update(static_cast<Scalar>(_bins[bin]));
 		}
 	}
 
@@ -101,7 +105,7 @@ class DataHistogramXY : public DataSource<DataVector>
 	size_t _class_id;
 	size_t _num_classes;
 	size_t _bins[BINS]{ 0 };
-	Range<float> _histogram_y_range{ 0, 0 };
+	Range<Scalar> _histogram_y_range{ 0, 0 };
 };
 
 #endif //GRAFICI_DATA_HISTOGRAM_XY_H

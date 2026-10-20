@@ -1,0 +1,176 @@
+From aced63279bc49cce0390ed0d41974ea363251230 Mon Sep 17 00:00:00 2001
+From: Grafici patch export <patch-export@localhost>
+Date: Sun, 18 Oct 2026 10:34:36 +0100
+Subject: [PATCH] Preserve constant colors with widened, rounded interpolation
+
+Replace separately truncated half-colors with an integer midpoint:
+(a+b+1)/2 in uint16_t. Identical channels, including 255, stay identical through
+repeated subdivision. Half-way channel sums round upward consistently.
+
+Add Color::interpolate for linear palette blends, rounding to nearest with
+half-way cases upward and preserving endpoints and decreasing channels.
+Non-finite blend weights return black. RGB565 quantization retains its floor-scaled bins using widened integer
+arithmetic; all 256 channel values match former FP32 and FP64 scaling.
+
+Integer midpoint arithmetic avoids floating-point work without increasing
+object size or allocating scratch storage.
+
+Validation: all 65,536 channel pairs, blend endpoints/ties, descending palettes
+and a 16-segment constant-white line pass with UBSan.
+---
+ src/color/Color.h           | 35 ++++++++++++++++++++++++++---
+ src/color/ColorMap.h        |  8 +------
+ src/display/DisplayDriver.h |  2 +-
+ tests/color_blending.cpp    | 45 +++++++++++++++++++++++++++++++++++++
+ 4 files changed, 79 insertions(+), 11 deletions(-)
+ create mode 100644 tests/color_blending.cpp
+
+diff --git a/src/color/Color.h b/src/color/Color.h
+index 68edae0bd6f1fdf39497436752f6268fc20f13a0..8b697d41119b7187bc91d056bf09e82342961e10 100644
+--- a/src/color/Color.h
++++ b/src/color/Color.h
+@@ -17,6 +17,9 @@
+ #ifndef GRAFICI_color_H
+ #define GRAFICI_color_H
+ 
++#include <stdint.h>
++#include <math.h>
++
+ /**
+  * @brief 16-bit rgb color. 5-bit red, 6-bit green, 5-bit blue
+  * 
+@@ -46,6 +49,21 @@ class Color
+ 	{
+ 	}
+ 
++	// Round linear channel blends to nearest, with half-way cases upward.
++	Color midpoint(const Color &other) const
++	{
++		return {mean(red, other.red), mean(green, other.green), mean(blue, other.blue)};
++	}
++
++	Color interpolate(const Color &other, float weight) const
++	{
++		if (!isfinite(weight)) return {0, 0, 0};
++		if (weight <= 0) return *this;
++		if (weight >= 1) return other;
++		return {blend(red, other.red, weight), blend(green, other.green, weight),
++		        blend(blue, other.blue, weight)};
++	}
++
+ 	Color operator-(const Color &other) const
+ 	{
+ 		return { static_cast<uint8_t>(red - other.red), static_cast<uint8_t>(green - other.green), static_cast<uint8_t>(blue - other.blue) };
+@@ -68,15 +86,26 @@ class Color
+ 	 */
+ 	R5G6B5 to_R5G6B5() const
+ 	{
+-		R5G6B5 r = (red / 255.0) * 31;
+-		R5G6B5 g = (green / 255.0) * 63;
+-		R5G6B5 b = (blue / 255.0) * 31;
++		// Preserve the existing floor-scaled bins using widened integer math.
++		const R5G6B5 r = (uint16_t(red) * 31u) / 255u;
++		const R5G6B5 g = (uint16_t(green) * 63u) / 255u;
++		const R5G6B5 b = (uint16_t(blue) * 31u) / 255u;
+ 		return static_cast<R5G6B5>((r << 11) | (g << 5) | (b));
+ 	}
+ 
+ 	uint8_t red;
+ 	uint8_t green;
+ 	uint8_t blue;
++
++  private:
++	static uint8_t mean(uint8_t a, uint8_t b)
++	{
++		return static_cast<uint8_t>((uint16_t(a) + uint16_t(b) + 1u) / 2u);
++	}
++	static uint8_t blend(uint8_t a, uint8_t b, float weight)
++	{
++		return static_cast<uint8_t>(a * (1.0f - weight) + b * weight + 0.5f);
++	}
+ };
+ 
+ #endif /* GRAFICI_color_H */
+diff --git a/src/color/ColorMap.h b/src/color/ColorMap.h
+index 4b138baa1bae34266ddd68afb6c5d2ad8b9db4f7..4d33ad8ea75023dcaa18dfa06d6f8137f32e35d8 100644
+--- a/src/color/ColorMap.h
++++ b/src/color/ColorMap.h
+@@ -166,13 +166,7 @@ class ColorMapArray : public ColorMap
+ 			fract_between = val - float(idx1);
+ 		}
+ 
+-		Range<uint8_t> red_range{ _colors[idx1].red, _colors[idx2].red };
+-		Range<uint8_t> green_range{ _colors[idx1].green, _colors[idx2].green };
+-		Range<uint8_t> blue_range{ _colors[idx1].blue, _colors[idx2].blue };
+-
+-		return Color{ static_cast<uint8_t>(red_range.norm_to_value(fract_between)),
+-			                static_cast<uint8_t>(green_range.norm_to_value(fract_between)),
+-			                static_cast<uint8_t>(blue_range.norm_to_value(fract_between)) };
++		return _colors[idx1].interpolate(_colors[idx2], fract_between);
+ 	}
+ };
+ 
+diff --git a/src/display/DisplayDriver.h b/src/display/DisplayDriver.h
+index 894e2445c02e0643b4ce04f6338397d9434b0a75..bef2a186ca704fce50f392459f466a8e006feb44 100644
+--- a/src/display/DisplayDriver.h
++++ b/src/display/DisplayDriver.h
+@@ -45,7 +45,7 @@ class DisplayDriverT
+ 
+ 	void draw_line(const DisplayVector display_a, const DisplayVector display_b, const Color color_a, const Color color_b, const Window &window = full_screen_for<Scalar>(), size_t segments = 1) const
+ 	{
+-		const Color color_ab = color_a * Compute(0.5) + color_b * Compute(0.5);
++		const Color color_ab = color_a.midpoint(color_b);
+ 
+ 		if (segments == 1)
+ 		{
+diff --git a/tests/color_blending.cpp b/tests/color_blending.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..f41a9193edb9b00db0d41acd206a06b56f34ec57
+--- /dev/null
++++ b/tests/color_blending.cpp
+@@ -0,0 +1,45 @@
++#include "Adafruit_GFX.h"
++#include "Grafici.h"
++#include <cassert>
++#include <cstdio>
++#include <limits>
++
++int main()
++{
++    for (unsigned a = 0; a < 256; ++a)
++        for (unsigned b = 0; b < 256; ++b)
++        {
++            Color ca{uint8_t(a), uint8_t(a), uint8_t(a)}, cb{uint8_t(b), uint8_t(b), uint8_t(b)};
++            const auto mean = ca.midpoint(cb);
++            assert(mean.red == (a + b + 1) / 2 && mean.green == mean.red && mean.blue == mean.red);
++            assert(cb.midpoint(ca).red == mean.red);
++            assert(ca.interpolate(cb, 0.5f).red == mean.red);
++            assert(ca.midpoint(ca).red == a);
++        }
++    // Preserve the former RGB565 bins for every channel on both FP32/FP64 cores.
++    for (unsigned value = 0; value < 256; ++value)
++    {
++        const Color grey{uint8_t(value), uint8_t(value), uint8_t(value)};
++        const auto r = uint16_t((value / 255.0) * 31);
++        const auto g = uint16_t((value / 255.0) * 63);
++        const auto rf = uint16_t((value / 255.0f) * 31);
++        const auto gf = uint16_t((value / 255.0f) * 63);
++        assert(r == rf && g == gf);
++        assert(grey.to_R5G6B5() == ((r << 11) | (g << 5) | r));
++    }
++    const Color white{255, 255, 255}, black{0, 0, 0};
++    assert(white.interpolate(black, 0.25f).red == 191);
++    assert(black.interpolate(white, 0.5f).red == 128);
++    assert(white.interpolate(black, -1).red == 255);
++    assert(white.interpolate(black, 2).red == 0);
++    assert(white.interpolate(black, std::numeric_limits<float>::quiet_NaN()).red == 0);
++    ColorMapArray<2> fading(white, black);
++    assert(fading.norm_to_color(0.25f).red == 191);
++
++    Adafruit_GFX target;
++    DisplayDriver driver(target);
++    driver.draw_line({0, 0}, {1, 1}, white, white, full_screen, 16);
++    assert(target.lines.size() == 16);
++    for (const auto &line : target.lines) assert(line.color == 0xFFFF);
++    std::puts("All channel midpoint pairs, blend rounding and constant-color subdivision passed.");
++}

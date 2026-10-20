@@ -24,8 +24,18 @@
  * @brief Data source generated from a function
  * 
  */
-class DataFunction : public DataParametric
+template <typename Scalar = float>
+class DataFunctionT : public DataParametricT<Scalar>
 {
+  public:
+    using Compute = typename grafici::ComputationType<Scalar>::type;
+    using DataNorm = DataNormT<Scalar>;
+    using DataParametric = DataParametricT<Scalar>;
+    using DataParametric::size;
+    using DataFunction = DataFunctionT<Scalar>;
+protected:
+    using DataParametric::update_range;
+    using DataParametric::_range;
   public:
 	/**
 	 * @brief Construct a data source from a given function [f(0) .. f(size-1)]
@@ -33,10 +43,11 @@ class DataFunction : public DataParametric
 	 * @param size size of the data source
 	 * @param fn function to compute the value of each data point
 	 */
-	DataFunction(size_t size, float (*fn)(size_t))
+	DataFunctionT(size_t size, Compute (*fn)(size_t))
 	    : DataParametric{ size }
 	    , _fn{ fn }
 	{
+		if (!_fn) this->_size = 0;
 		update_range();
 	}
 
@@ -47,21 +58,24 @@ class DataFunction : public DataParametric
 	 * @param fn function to compute the value of each data point
 	 * @param range value range against which f() is normalized
 	 */
-	DataFunction(size_t size, float (*fn)(size_t), Range<float> range)
+	DataFunctionT(size_t size, Compute (*fn)(size_t), Range<Scalar> range)
 	    : DataParametric{ size, range }
 	    , _fn{ fn }
 	{
+		if (!_fn) this->_size = 0;
 	}
 
   protected:
-	float at(size_t idx) const override
+	Compute at(size_t idx) const override
 	{
 		return _fn(idx);
 	}
 
   private:
-	float (*_fn)(size_t);
+	Compute (*_fn)(size_t);
 };
+
+using DataFunction = DataFunctionT<float>;
 
 #endif /* GRAFICI_DATA_FUNCTION_H */
 

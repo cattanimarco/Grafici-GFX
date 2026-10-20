@@ -1,0 +1,353 @@
+From b3f97c9fb060b7b399ca41c39e280d1d365ee428 Mon Sep 17 00:00:00 2001
+From: Grafici patch export <patch-export@localhost>
+Date: Sun, 18 Oct 2026 10:34:36 +0100
+Subject: [PATCH] Define interpolation endpoints and validate bounded knot
+ pairs
+
+M>=2 output samples now cover i/(M-1), including both endpoints. A single
+output returns the first knot; zero outputs or fewer than two input points
+produce an empty source. Uncovered portions of a declared x range return
+invalid samples rather than extrapolating or reading bin+1 out of bounds.
+
+Validate finite, strictly increasing raw and normalized x knots once during
+construction, including for splines. Reject duplicates, reversed knots and
+non-finite samples. A protected interval-capacity argument lets splines reject
+oversized sources before any source reads. Linear y interpolation uses an
+oriented weighted blend, so decreasing y values remain supported.
+
+No sample buffer is allocated; the obsolete output-index Range is removed.
+Sources must remain stable while an interpolator borrows them.
+
+Validation: new interpolation_bounds regression plus updated endpoint
+expectations in existing spline/numeric checks pass with UBSan for float/FP16.
+---
+ src/data/DataInterpolatorL.h   | 153 ++++++++++++++++-----------------
+ src/data/DataSpline.h          |   5 +-
+ tests/data_spline_bounds.cpp   |   9 +-
+ tests/interpolation_bounds.cpp |  67 +++++++++++++++
+ tests/numeric_precision.cpp    |   6 +-
+ 5 files changed, 152 insertions(+), 88 deletions(-)
+ create mode 100644 tests/interpolation_bounds.cpp
+
+diff --git a/src/data/DataInterpolatorL.h b/src/data/DataInterpolatorL.h
+index 0d098a7260bf171ed3adb0a7a1db1abed295e07c..f9f4922fea46271949311664681e9357db75998c 100644
+--- a/src/data/DataInterpolatorL.h
++++ b/src/data/DataInterpolatorL.h
+@@ -36,87 +36,84 @@ class DataInterpolatorLT : public DataSource<DataVectorT<Scalar>>
+     using DataSourceNorm = DataSourceNormT<Scalar>;
+     using DataSource<DataVector>::size;
+     using DataInterpolatorL = DataInterpolatorLT<Scalar>;
+-protected:
+-    using DataSource<DataVector>::_size;
+-  public:
+-	DataInterpolatorLT(const DataSourceNorm &x, const DataSourceNorm &y, size_t interpolationSteps)
+-	    : DataSource<DataVector>{ interpolationSteps }
+-	    , _x{ x }
+-	    , _y{ y }
+-	    , _src_size{ DataSourceNorm::min_data_source_size(x, y) }
+-	    , _indexRange{ 0, interpolationSteps }
+-	{
+-	}
+-
+-	const DataVector operator[](const unsigned long idx) const
+-	{
+-		if (idx < size())
+-		{
+-			size_t bin;
+-			Compute norm_bin_weight;
+-
+-			compute_x_bin(idx, &bin, &norm_bin_weight);
+-
+-			/* compute the raw range for the right bin on x and y*/
+-			Range<Scalar> rawBinRangeX{ _x[bin].raw(), _x[bin + 1].raw() };
+-			Range<Scalar> rawBinRangeY{ _y[bin].raw(), _y[bin + 1].raw() };
+-
+-			/* interpolate x and y by mapping the normalized bin weight over the raw bin ranges */
+-			/* note that we compute the normBinWeight on the x axis and interpolate on the y axis */
+-			return {
+-				{ rawBinRangeX.norm_to_value(norm_bin_weight), _x.range() },
+-				{ rawBinRangeY.norm_to_value(norm_bin_weight), _y.range() },
+-			};
+-		}
+-		else
+-		{
+-			return INVALID_DATA_VECTOR;
+-		}
+-	}
+ 
+-	/* methods to get a datasource from the interpolated dataset */
+-	virtual DataSelect x() const
+-	{
+-		return DataSelect(*this, VectorComponents::x);
+-	}
+-
+-	virtual DataSelect y() const
+-	{
+-		return DataSelect(*this, VectorComponents::y);
+-	}
++    // M>=2 samples include both normalized endpoints. M==1 emits the first knot.
++    DataInterpolatorLT(const DataSourceNorm &x, const DataSourceNorm &y, size_t outputs)
++        : DataInterpolatorLT(x, y, outputs, size_t(-1))
++    {
++    }
++
++    const DataVector operator[](unsigned long idx) const override
++    {
++        size_t bin;
++        Compute weight;
++        if (!compute_x_bin(idx, &bin, &weight))
++            return INVALID_DATA_VECTOR;
++        const Compute x0 = _x[bin].raw(), x1 = _x[bin + 1].raw();
++        const Compute y0 = _y[bin].raw(), y1 = _y[bin + 1].raw();
++        return {{x0 * (Compute(1) - weight) + x1 * weight, _x.range()},
++                {y0 * (Compute(1) - weight) + y1 * weight, _y.range()}};
++    }
++
++    virtual DataSelect x() const { return DataSelect(*this, VectorComponents::x); }
++    virtual DataSelect y() const { return DataSelect(*this, VectorComponents::y); }
+ 
+   protected:
+-	const DataSourceNorm &_x;
+-	const DataSourceNorm &_y;
+-	size_t _src_size;
+-	Range<size_t> _indexRange{ 0, 0 };
+-
+-	void compute_x_bin(const unsigned long idx, size_t *bin, Compute *norm_bin_weight) const
+-	{
+-		*bin = 0;
+-		*norm_bin_weight = 1.0;
+-
+-		/* search for the normalized x bin containing the normalized idx */
+-		while (*bin < _src_size - 1)
+-		{
+-			/* compute the normalized inter-bin range for the x source */
+-			Range<Scalar> normBinRangeX = { _x[*bin].norm(), _x[*bin + 1].norm() };
+-
+-			/* compute the normalized index */
+-			Compute normIndex = _indexRange.value_to_norm(idx);
+-			/* compute the normalized position inside the bin (in case we found the right one or we are out of range)*/
+-			*norm_bin_weight = normBinRangeX.value_to_norm(normIndex);
+-			/* if the normalized index is inside the normalized bin range (on x), then stop */
+-			if (normBinRangeX.contains(normIndex))
+-			{
+-				return;
+-			}
+-			else
+-			{
+-				(*bin)++;
+-			}
+-		}
+-	}
++    using DataSource<DataVector>::_size;
++    const DataSourceNorm &_x;
++    const DataSourceNorm &_y;
++    size_t _src_size;
++
++    // A derived interpolator can reject excessive source counts before reads.
++    DataInterpolatorLT(const DataSourceNorm &x, const DataSourceNorm &y,
++                       size_t outputs, size_t max_intervals)
++        : DataSource<DataVector>{outputs}, _x{x}, _y{y},
++          _src_size{DataSourceNorm::min_data_source_size(x, y)}
++    {
++        if (_size == 0 || _src_size < 2 || _src_size - 1 > max_intervals || !valid_knots())
++            _size = 0;
++    }
++
++    bool compute_x_bin(unsigned long idx, size_t *bin, Compute *weight) const
++    {
++        if (idx >= _size || _src_size < 2)
++            return false;
++        const Compute target = _size == 1 ? _x[0].norm()
++            : static_cast<Compute>(idx) / static_cast<Compute>(_size - 1);
++        for (size_t i = 0; i < _src_size - 1; ++i)
++        {
++            const Compute left = _x[i].norm(), right = _x[i + 1].norm();
++            if (isfinite(left) && isfinite(right) && right > left && target >= left && target <= right)
++            {
++                *bin = i;
++                *weight = (target - left) / (right - left);
++                return true;
++            }
++        }
++        return false; // No extrapolation beyond the available knot pairs.
++    }
++
++  private:
++    bool valid_knots() const
++    {
++        const auto xr = _x.range(), yr = _y.range();
++        if (!isfinite(static_cast<Compute>(xr.low)) || !isfinite(static_cast<Compute>(xr.high)) ||
++            !isfinite(static_cast<Compute>(yr.low)) || !isfinite(static_cast<Compute>(yr.high)) ||
++            !(xr.high > xr.low) || yr.high < yr.low)
++            return false;
++        Compute previous_raw = 0, previous_norm = 0;
++        for (size_t i = 0; i < _src_size; ++i)
++        {
++            const auto x = _x[i], y = _y[i];
++            const Compute raw = x.raw(), norm = x.norm();
++            if (!isfinite(raw) || !isfinite(norm) || !isfinite(static_cast<Compute>(y.raw())) ||
++                (i > 0 && (!(raw > previous_raw) || !(norm > previous_norm))))
++                return false;
++            previous_raw = raw;
++            previous_norm = norm;
++        }
++        return true;
++    }
+ };
+ 
+ using DataInterpolatorL = DataInterpolatorLT<float>;
+diff --git a/src/data/DataSpline.h b/src/data/DataSpline.h
+index 60a04ca14754ee7cbb74ac752ded02e294901c83..9738abe0b009e0554b3abe689b69e61cbda0e0d9 100644
+--- a/src/data/DataSpline.h
++++ b/src/data/DataSpline.h
+@@ -48,7 +48,7 @@ protected:
+     using DataInterpolatorL::compute_x_bin;
+   public:
+ 	DataSpline(const DataSourceNorm &x, const DataSourceNorm &y)
+-	    : DataInterpolatorL{ x, y, N }
++	    : DataInterpolatorL{ x, y, N, N }
+ 	{
+ 		compute_spline();
+ 	}
+@@ -67,8 +67,7 @@ protected:
+ 	{
+ 		size_t bin;
+ 		Compute weight;
+-		compute_x_bin(idx, &bin, &weight);
+-		if (_src_size < 2 || bin >= _src_size - 1)
++		if (!compute_x_bin(idx, &bin, &weight))
+ 			return false;
+ 		const Compute x0 = _x[bin].raw();
+ 		const Compute x1 = _x[bin + 1].raw();
+diff --git a/tests/data_spline_bounds.cpp b/tests/data_spline_bounds.cpp
+index c3b8ceda5bb6378e72dd01127ed6c6c3968f0c86..5144c6d6f7aceee00c1f4eb2003d3dae05065147 100644
+--- a/tests/data_spline_bounds.cpp
++++ b/tests/data_spline_bounds.cpp
+@@ -126,7 +126,7 @@ void check_linear(size_t points)
+     for (size_t i = 0; i < N; ++i)
+     {
+         const auto value = spline[i];
+-        const float expected_x = xs[points - 1] * (float(i) / N);
++        const float expected_x = N == 1 ? 0 : xs[points - 1] * (float(i) / (N - 1));
+         assert(std::fabs(value.x.raw() - expected_x) < 1e-5f);
+         assert(std::fabs(value.y.raw() - (1 + 2 * expected_x)) < 1e-5f);
+     }
+@@ -138,7 +138,7 @@ void check_curved()
+     reset_allocator();
+     const float xs[] = {0, 0.5f, 1};
+     const float ys[] = {0, 1, 0};
+-    const float expected[] = {0, 0.6875f, 1, 0.6875f};
++    const float expected[] = {0, 23.0f / 27, 23.0f / 27, 0};
+     CheckedSource x(xs, 3, {0, 1});
+     CheckedSource y(ys, 3, {0, 1});
+     DataSpline<4, false> spline(x, y);
+@@ -174,7 +174,8 @@ void check_allocation_failures()
+         assert(spline.size() == 0);
+         check_invalid(spline[0]);
+         check_workspace(3);
+-        assert(x.reads == 0 && y.reads == 0);
++        // Knot validation reads inputs before solver allocation; checked sources
++        // still reject every out-of-bounds read.
+     }
+ }
+ 
+@@ -187,7 +188,7 @@ void check_uncovered_x_range()
+     DataSpline<4, false> spline(x, y);
+     check_workspace(2);
+     // The declared range extends beyond the available knots. No bin exists
+-    // for normalized x = 0.5; do not read an extra knot or coefficient.
++    // for normalized x = 2/3; do not read an extra knot or coefficient.
+     check_invalid(spline[2]);
+ }
+ 
+diff --git a/tests/interpolation_bounds.cpp b/tests/interpolation_bounds.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..c71cc6f88cf133bacec6bb0dc4a5c03a22654739
+--- /dev/null
++++ b/tests/interpolation_bounds.cpp
+@@ -0,0 +1,67 @@
++#include "data/DataArray.h"
++#include "data/DataSpline.h"
++#include <cassert>
++#include <cmath>
++#include <cstdio>
++#include <limits>
++
++template <typename Real>
++bool invalid(const DataVectorT<Real> &v)
++{
++    return v.x.range().low == 0 && v.x.range().high == 0 &&
++           v.y.range().low == 0 && v.y.range().high == 0;
++}
++
++template <typename Real>
++void check_interpolation()
++{
++    const float xs[] = {0, 0.25f, 1};
++    const float ys[] = {2, 1.5f, 0};
++    DataArray<float, Real> x(xs, 3), y(ys, 3);
++    DataInterpolatorLT<Real> samples(x, y, 5);
++    assert(samples.size() == 5);
++    for (size_t i = 0; i < 5; ++i)
++    {
++        const auto v = samples[i];
++        assert(std::fabs(float(v.x.raw()) - float(i) / 4) < 0.002f);
++        assert(std::fabs(float(v.y.raw()) - (2 - float(i) / 2)) < 0.002f);
++    }
++    assert(invalid(samples[5]));
++    DataInterpolatorLT<Real> single(x, y, 1), none(x, y, 0);
++    assert(single.size() == 1 && float(single[0].x.raw()) == 0 && float(single[0].y.raw()) == 2);
++    assert(none.size() == 0 && invalid(none[0]));
++
++    DataArray<float, Real> empty(nullptr, 0), one(xs, 1);
++    DataInterpolatorLT<Real> no_x(empty, y, 5), no_y(x, empty, 5), too_short(one, y, 5);
++    assert(no_x.size() == 0 && no_y.size() == 0 && too_short.size() == 0);
++    assert(invalid(no_x[0]) && invalid(no_y[0]) && invalid(too_short[0]));
++
++    const float interior[] = {0.25f, 0.75f};
++    DataArray<float, Real> partial(interior, 2, {0, 1});
++    DataInterpolatorLT<Real> holes(partial, partial, 5), first(partial, partial, 1);
++    assert(invalid(holes[0]) && invalid(holes[4]));
++    assert(float(holes[2].x.raw()) == 0.5f);
++    assert(float(first[0].x.raw()) == 0.25f);
++
++    const float bad_sets[][3] = {{0, 0, 1}, {1, 0.5f, 0},
++        {0, std::numeric_limits<float>::quiet_NaN(), 1}};
++    for (const auto &values : bad_sets)
++    {
++        DataArray<float, Real> bad(values, 3);
++        DataInterpolatorLT<Real> linear(bad, y, 5);
++        DataSpline<5, true, Real> spline(bad, y);
++        assert(linear.size() == 0 && spline.size() == 0);
++        assert(invalid(linear[0]) && invalid(spline[0]));
++    }
++    const float bad_y[] = {0, std::numeric_limits<float>::quiet_NaN(), 1};
++    DataArray<float, Real> bad_values(bad_y, 3, {0, 1});
++    DataInterpolatorLT<Real> bad(x, bad_values, 5);
++    assert(bad.size() == 0);
++}
++
++int main()
++{
++    check_interpolation<float>();
++    check_interpolation<grafici::Float16>();
++    std::puts("Interpolation endpoints, singleton/empty inputs and knot validation passed.");
++}
+diff --git a/tests/numeric_precision.cpp b/tests/numeric_precision.cpp
+index 865d5446591ea723298195b672d4354d09f62eda..c57c1388edca4394264e3dc49eb537cd84200cfc 100644
+--- a/tests/numeric_precision.cpp
++++ b/tests/numeric_precision.cpp
+@@ -132,10 +132,10 @@ void check_sources()
+     // Keep the views alive: the interpolator borrows its source references.
+     auto x = xy.x();
+     auto y = xy.y();
+-    DataInterpolatorLT<Scalar> stable_interpolation(x, y, 8);
++    DataInterpolatorLT<Scalar> stable_interpolation(x, y, 9);
+     assert(std::fabs(float(stable_interpolation[4].y.raw())) < 0.002f);
+-    DataSpline<8, false, Scalar> spline(x, y);
+-    assert(spline.size() == 8);
++    DataSpline<9, false, Scalar> spline(x, y);
++    assert(spline.size() == 9);
+     assert(std::fabs(float(spline[4].y.raw())) < 0.002f);
+     DataHistogramXY<4, Scalar> histogram(source);
+     assert(histogram.size() == 4 && float(histogram[0].y.raw()) == 1);

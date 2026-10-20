@@ -19,12 +19,16 @@
 
 /*! Importation of librairies*/
 #include "DataVector.h"
+#include "DataSource.h"
 
 /**
  * @brief Data source with multi component (normalized) data points
  * 
  */
-using DataSourceVector = DataSource<DataVector>;
+template <typename Scalar = float>
+using DataSourceVectorT = DataSource<DataVectorT<Scalar>>;
+
+using DataSourceVector = DataSourceVectorT<float>;
 
 #endif /* GRAFICI_DATA_SOURCE_VECTOR_H */
 

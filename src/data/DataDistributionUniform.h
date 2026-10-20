@@ -4,19 +4,21 @@
 #include "DataParametric.h"
 
 
-template<size_t N>
-class DataDistributionUniform : public DataParametric
+template<size_t N, typename Scalar = float>
+class DataDistributionUniform : public DataParametricT<Scalar>
 {
   public:
+    using Compute = typename grafici::ComputationType<Scalar>::type;
+    using DataParametric = DataParametricT<Scalar>;
     /* approximate normal distribution using Box-Muller transform */
-	DataDistributionUniform(unsigned long seed, Range<float> range = {0,1})
+	DataDistributionUniform(unsigned long seed, Range<Scalar> range = {0,1})
 	    : DataParametric{ N, range }
 	{
 		init_distribution(seed);
 	}
 
   protected:
-	float at(size_t idx) const override
+	Compute at(size_t idx) const override
 	{
 		return uniform_data[idx];
 	}
@@ -34,7 +36,7 @@ class DataDistributionUniform : public DataParametric
 		}
 	}
 	
-	float uniform_data[N];
+	Scalar uniform_data[N];
 };
 
 #endif /* GRAFICI_DATA_DIST_UNIFORM_H */

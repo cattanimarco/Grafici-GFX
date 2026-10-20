@@ -28,20 +28,24 @@
  * 
  * @note This type of data source is used as input for all Grafici's plotting functions 
  */
-class DataSourceNorm : public DataSource<DataNorm>
+template <typename Scalar = float>
+class DataSourceNormT : public DataSource<DataNormT<Scalar>>
 {
   public:
+    using Compute = typename grafici::ComputationType<Scalar>::type;
+    using DataNorm = DataNormT<Scalar>;
+    using DataSourceNorm = DataSourceNormT<Scalar>;
 	/**
 	 * @brief Create a data source with n DataNorm data points
 	 * 
 	 * @param n size of the data source
 	 */
-	DataSourceNorm(size_t n)
+	DataSourceNormT(size_t n)
 	    : DataSource<DataNorm>{ n }
 	{
 	}
 
-	DataSourceNorm(size_t n, Range<float> range)
+	DataSourceNormT(size_t n, Range<Scalar> range)
 	    : DataSource<DataNorm>{ n },
 		_range{range}
 	{
@@ -50,14 +54,16 @@ class DataSourceNorm : public DataSource<DataNorm>
 	/**
 	 * @brief Return the range of the DataNorm data point 
 	 * 
-	 * @return const Range<float> 
+	 * @return const Range<Scalar>
 	 * 
 	 * @note All DataNorm data points in a DataSourceNorm share the same range. This is in order to make the the normalized value of data points comparable.
 	 */
-	virtual const Range<float> range() const
+	virtual const Range<Scalar> range() const
 	{
 		return { _range.low, _range.high };
 	}
+
+	bool valid() const { return this->size() > 0 && range().valid(); }
 
 	/**
      * @brief Utility funtion to return the minimum size among a list of DataNorm data sources
@@ -85,13 +91,15 @@ class DataSourceNorm : public DataSource<DataNorm>
      * @param val value to encapsulate in the DataNorm
      * @return const DataNorm 
      */
-	const DataNorm float_to_data_norm(float val) const
+	const DataNorm float_to_data_norm(Compute val) const
 	{
 		return { val, range() };
 	}
 
-	Range<float> _range{ static_cast<float>(0), static_cast<float>(0) };
+	Range<Scalar> _range{ static_cast<Scalar>(0), static_cast<Scalar>(0) };
 };
+
+using DataSourceNorm = DataSourceNormT<float>;
 
 #endif //GRAFICI_DATA_SOURCE_NORM_H
 

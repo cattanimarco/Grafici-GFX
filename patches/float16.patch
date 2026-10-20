@@ -1,0 +1,2524 @@
+From 400eb9f2d8666938ad69079ec50d126b4f22dd92 Mon Sep 17 00:00:00 2001
+From: Grafici patch export <patch-export@localhost>
+Date: Sun, 18 Oct 2026 10:49:23 +0100
+Subject: [PATCH] Add selectable Float16 storage and typed plotting families
+
+Prerequisite: apply patches/correctness/01-spline-fixes.patch to original
+575ef29 first. Spline bounds and autoscaling are consolidated there; this
+precision patch builds on both fixes and preserves their implementation.
+
+Add portable IEEE 754 binary16 storage with round-to-nearest/ties-to-even,
+FP32 computation and explicit storage-rounding boundaries. Keep float as
+the default API while exposing typed source, window, display and plotter
+families. DataCast bridges source families without a copied sample buffer.
+Signed values and results above one remain supported; FP16 is not UNORM16.
+
+Document compact-array and full-pipeline selection, provide an FP16 sketch,
+and extend regression coverage to binary16 encodings, rounding intervals,
+typed plotting and the existing spline bounds/autoscale checks. Solver
+workspace remains FP32; retained samples and coefficients can use FP16.
+---
+ PRECISION.md                       | 118 ++++++++++++++++++++
+ README.md                          |  43 ++++++++
+ examples/fp16_line/fp16_line.ino   |  26 +++++
+ src/Grafici.h                      |  34 ++++--
+ src/Range.h                        |  17 ++-
+ src/Vector.h                       |   5 +-
+ src/data/DataArray.h               |  15 ++-
+ src/data/DataArrayXY.h             |  18 ++-
+ src/data/DataCast.h                |  32 ++++++
+ src/data/DataConstant.h            |  19 +++-
+ src/data/DataDistributionNormal.h  |  14 ++-
+ src/data/DataDistributionUniform.h |  12 +-
+ src/data/DataFunction.h            |  22 +++-
+ src/data/DataHistogramXY.h         |  20 ++--
+ src/data/DataInterpolatorL.h       |  29 +++--
+ src/data/DataLinear.h              |  23 +++-
+ src/data/DataNorm.h                |  31 ++++--
+ src/data/DataParametric.h          |  19 +++-
+ src/data/DataResize.h              |  14 ++-
+ src/data/DataSelect.h              |  14 ++-
+ src/data/DataSourceNorm.h          |  20 ++--
+ src/data/DataSourceVector.h        |   6 +-
+ src/data/DataSpline.h              |  53 +++++----
+ src/data/DataVector.h              |   5 +-
+ src/display/DisplayDriver.h        |  67 ++++++-----
+ src/display/DisplayVector.h        |   5 +-
+ src/display/PolarWindow.h          |  33 ++++--
+ src/display/Window.h               |  53 ++++++---
+ src/numeric/Float16.h              | 116 +++++++++++++++++++
+ src/numeric/Precision.h            |  44 ++++++++
+ src/plotter/PlotArea.h             |  15 +--
+ src/plotter/PlotAxis.h             |   7 +-
+ src/plotter/PlotBar.h              |  15 +--
+ src/plotter/PlotLine.h             |  15 +--
+ src/plotter/PlotOptions.h          |  16 ++-
+ src/plotter/PlotScatter.h          |  17 +--
+ tests/README.md                    |  20 ++++
+ tests/numeric_precision.cpp        | 171 +++++++++++++++++++++++++++++
+ tests/precision_plotting.cpp       |  55 ++++++++++
+ tests/spline_autoscale.cpp         |  13 ++-
+ tests/support/Adafruit_GFX.h       |  47 ++++++++
+ 41 files changed, 1102 insertions(+), 216 deletions(-)
+ create mode 100644 PRECISION.md
+ create mode 100644 examples/fp16_line/fp16_line.ino
+ create mode 100644 src/data/DataCast.h
+ create mode 100644 src/numeric/Float16.h
+ create mode 100644 src/numeric/Precision.h
+ create mode 100644 tests/README.md
+ create mode 100644 tests/numeric_precision.cpp
+ create mode 100644 tests/precision_plotting.cpp
+ create mode 100644 tests/support/Adafruit_GFX.h
+
+diff --git a/PRECISION.md b/PRECISION.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..6aa14d77dc0065cfdd5c333df14be30178cde56e
+--- /dev/null
++++ b/PRECISION.md
+@@ -0,0 +1,118 @@
++# Selectable floating-point precision
++
++Grafici defaults to `float`. A portable two-byte IEEE 754 binary16 implementation is available as `grafici::Float16`, with typed sources, adapters, windows and plotters. Normalization is an interface convention; the scalar itself supports negative values and values above 1.
++
++```cpp
++using Real = grafici::Float16;  // Use float for the default precision.
++
++Real samples[] = {-2.0f, 0.5f, 1.5f, 3.0f};
++DataArrayXY<Real, Real> data(samples, 4, {-4, 4});
++GraficiT<Real> plot(display);
++
++auto x = data.x();
++auto y = data.y();
++plot.line(x, y, white);
++```
++
++The display is still an `Adafruit_GFX` target. No global build macro is required, and both precision families can coexist in a program. Existing names such as `Grafici`, `Window`, `DataNorm` and `DataFunction` are aliases for their float variants, preserving their ordinary C++11 usage.
++
++## Floating-point headroom is part of the contract
++
++`Float16` stores a sign, a five-bit exponent and a ten-bit fraction. It represents signed finite values up to 65,504, signed zero, infinities, NaNs and subnormals. It rounds to nearest with ties to even. This implementation uses integer bit conversion and ordinary FP32, so it does not require a compiler-provided `_Float16` type. Language and hardware support for native half precision vary independently. [GCC half-precision documentation](https://gcc.gnu.org/onlinedocs/gcc/Half-Precision.html)
++
++```cpp
++using Half = grafici::Float16;
++Half a = 0.75f;
++Half b = 0.75f;
++auto intermediate = a + b;  // float, approximately 1.5
++Half retained = intermediate;  // binary16, exactly 1.5
++Half negative = Half(0.25f) - Half(0.75f);  // -0.5
++```
++
++**Crossing 1 is not floating-point overflow.** It is an ordinary result. FP16 overflow occurs near its finite range limit: 65,520 rounds to positive infinity. Arithmetic promotes to float; assigning to a `Float16` field or array rounds the result to binary16. Compound assignments also compute in float and round on assignment. This is a storage-and-computation model with explicit rounding boundaries, not a guarantee of rounding after every arithmetic operator.
++
++UNORM16 represents only `[0,1]`. Saturating or wrapping a sum like `0.75 + 0.75`, a negative difference, a slope or a spline coefficient would change the algorithm. It is therefore unsuitable as the general scalar for this API. A future UNORM16 option belongs in an explicitly normalized sample/grid-storage adapter, decoded to a floating-point computation type before arithmetic. BF16 would preserve more exponent range at the cost of fewer fraction bits; it is not implemented here.
++
++The existing explicit clipping semantics remain: `DataNormT` trims a raw value to its supplied range, and range mapping clamps at its endpoints. A raw value of 2 in `[-4,4]` is valid and normalizes to 0.75. Selecting FP16 does not introduce a universal `[0,1]` clamp or remove the library's existing clipping operations. Screen clipping is a rendering concern; arbitrary off-screen coordinates are not made safe merely by choosing a floating-point format.
++
++## Choose how much to narrow
++
++The least invasive choice is to compress a retained array while keeping the normal float source interface and rendering pipeline:
++
++```cpp
++grafici::Float16 samples[] = {-2, 0, 2};
++DataArray<grafici::Float16> source(samples, 3);  // Scalar defaults to float.
++Grafici plot(display);
++plot.line(source, source, white);
++```
++
++This retains FP32 range metadata, normalization results, geometry and spline types. Quantization of the samples still happens before range discovery; widening cannot recover discarded distinctions.
++
++For smaller value objects, ranges and retained coefficients as well, use the same scalar throughout a typed pipeline:
++
++| Existing float API | Explicit precision |
++| --- | --- |
++| `Grafici`, `Window`, `PolarWindow` | `GraficiT<Real>`, `WindowT<Real>`, `PolarWindowT<Real>` |
++| `DataNorm`, `DataVector`, `DisplayVector` | `DataNormT<Real>`, `DataVectorT<Real>`, `DisplayVectorT<Real>` |
++| `DataSourceNorm`, `DataParametric`, `DataSelect` | Corresponding `...T<Real>` types. Custom sources derive from this family's interface. |
++| `DataFunction`, `DataConstant`, `DataLinear`, `DataResize`, `DataInterpolatorL` | Corresponding `...T<Real>` types. |
++| `DataArray<T>`, `DataArrayXY<T>` | `DataArray<T, Real>`, `DataArrayXY<T, Real>`; `T` is the borrowed array's element type. |
++| `DataDistributionUniform<N>`, `DataDistributionNormal<N>`, `DataHistogramXY<BINS>` | Add `Real` as the final template argument. Histogram counters remain integers. |
++| `DataSpline<N, AUTOSCALE>` | `DataSpline<N, AUTOSCALE, Real>`. |
++| `PlotOptions`, `plot_options`, `full_screen` | `PlotOptionsT<Real>{}` and `full_screen_for<Real>()` for the selected family. |
++
++`Range<Real>` and `Vector<Real>` were already templates. Range normalization uses `grafici::ComputationType<Real>::type`; for float and `Float16` that is float. `DataFunctionT<Float16>` consequently accepts a callback returning float, allowing the calculation to finish before the result is stored. Pixel coordinates, sizes, source indices and counts remain integer types. RGB colors/palettes keep their existing representation and float color-map interface; normalized values are widened at that boundary.
++
++Sources and plotters remain independently replaceable within a precision family. To cross families, borrow a converting view:
++
++```cpp
++DataDistributionUniform<128, grafici::Float16> compact(123);
++DataCast<float, grafici::Float16> source(compact);
++// source now implements the ordinary float DataSourceNorm interface.
++```
++
++`DataCast<To, From>` converts values and range metadata on access without a second sample buffer. The original source must outlive the view. The same borrowing rule applies to x/y selector views used by interpolation: keep those views in named variables for the lifetime of the interpolator.
++
++```mermaid
++flowchart LR
++    Storage[User-selected scalar storage] --> Source[Matching normalized source interface]
++    Source --> Plot[Matching plotter and window family]
++    Source --> Cast[Optional borrowed precision conversion]
++    Cast --> Other[Another normalized source interface]
++    Other --> OtherPlot[Another precision family]
++    Plot --> Output[Integer pixels and RGB565]
++    OtherPlot --> Output
++```
++
++## SRAM and numerical limits
++
++| Payload | Float | FP16 |
++| --- | ---: | ---: |
++| 128 retained samples | 512 bytes | 256 bytes |
++| Raw value plus two range bounds (`DataNormT`) | 12 bytes | 6 bytes |
++| Coordinate pair | 8 bytes | 4 bytes |
++| Three spline coefficient arrays of `N+1` elements | `12*(N+1)` bytes | `6*(N+1)` bytes |
++
++Object metadata, alignment, stack, display buffers and heap overhead are additional. Spline temporary solver arrays use the computation type and remain FP32 in FP16 mode; their peak payload is still `20*n+12` bytes, where `n=source_count-1`. A smaller retained spline does not imply that a large spline construction fits a small Arduino. No per-sample decoding buffer is allocated.
++
++FP16 does not promise faster arithmetic. Decoding, rounding and additional template instantiations can cost CPU time and flash; using both families can retain both implementations. Projection uses the matching computation type and float trigonometry for float/FP16. Memory savings and runtime need to be assessed together on the intended MCU.
++
++Narrowing the entire pipeline also narrows raw range bounds, index-derived coordinates, window parameters and coefficients. Integers stop being consecutive above 2,048, and a small variation on a large raw offset can disappear. Two rounded range endpoints or spline knots can coincide. Keep the float interface/computation and compress only sample buffers when these distinctions matter. FP16 splines remain inappropriate for ill-conditioned knots or coefficients outside the format's finite range; the bounds patch does not validate all numerical preconditions.
++
++For one FP16 conversion of a normalized coordinate, nearest-even rounding has absolute error at most `1/4096`. FP32 pixel scaling turns this into about 0.078 pixels on a 320-pixel axis. Repeated rounding, raw quantization and polar projection have additional error; this bound is not an end-to-end guarantee.
++
++## Verification
++
++The host checks cover all 65,536 binary16 patterns, independent decoding, round trips, all adjacent positive finite rounding intervals and ties, negative values, subnormals, signed zero, NaNs, infinity and finite overflow. They also exercise both source families, borrowed casts, interpolation, splines, histogram/distribution storage, subwindows, polar projection and every plotter. Float and FP16 pipelines also drew into the installed actual Adafruit GFX canvas in a separate host integration check. The spline overflow regression remains included. See [test commands](tests/README.md).
++
++The FP16 example and the existing float `bars_from_c_array` example also build for Arduino Uno R3. A matched 128-sample line sketch gives these linked sizes with Arduino AVR core 1.8.8, AVR GCC 7.3.0, the default `-Os`/LTO settings, Adafruit GFX 1.11.10 and ILI9341 1.6.1:
++
++| Samples / pipeline | Flash | Static SRAM (`.data + .bss`) |
++| --- | ---: | ---: |
++| Float / float | 23,906 bytes | 952 bytes |
++| FP16 / float | 24,502 bytes | 696 bytes |
++| FP16 / FP16 | 26,178 bytes | 732 bytes |
++
++Each sketch owns the same 128-element sample array, initializes it with signed values in `[-2,2]`, uses a fixed `[-3,3]` y range and draws the same line and axes. Only the sample and pipeline scalar aliases change. The compact-array option saves 256 bytes of static SRAM at a cost of 596 flash bytes. The full FP16 family saves 220 bytes and costs 2,272 flash bytes. Retaining another family also retains default objects and interface metadata, so reducing individual payloads does not guarantee the smallest linked program.
++
++These are compiler/linker results, not hardware measurements. They exclude runtime heap/stack peaks and do not establish physical display frame rate. The comparison favors FP16 sample storage with a float pipeline as the initial choice when retained arrays dominate SRAM; measure the actual application before narrowing every object.
+diff --git a/README.md b/README.md
+index a898922a62058c2de0a1873ae3f4a2a02178d36e..b7f898ab8db3b6f2b16230b011cff5bb00f3a7a7 100644
+--- a/README.md
++++ b/README.md
+@@ -197,6 +197,49 @@ Visit our [Wiki](https://github.com/cattanimarco/Grafici-GFX/wiki) for detailed
+ ### Memory Requirements
+ Some examples may exceed available memory on older Arduino boards. The library is optimized for modern Arduino boards with adequate RAM.
+ 
++## Choosing float or Float16
++
++Keep `float` (the default) when RAM is sufficient, you need more numerical precision or a wider range, or CPU time and flash matter more than sample storage. Existing sketches need no changes to keep using float.
++
++Use `grafici::Float16` when sample arrays take too much RAM and lower precision is acceptable. Each stored value takes **2 bytes instead of 4**, with roughly three significant decimal digits and a maximum finite magnitude of 65,504. It supports negative values and values above 1; arithmetic is not clamped to `[0,1]`. Calculations use float and round when stored as Float16. Conversion can add CPU work and flash usage, so this is a RAM-saving choice, not a promise of faster drawing.
++
++### Start by changing the sample storage
++
++Change your array's element type and the first template argument of `DataArray` or `DataArrayXY`. Keep `Grafici`, windows and options unchanged. Assuming `display` is your configured Adafruit GFX display:
++
++```cpp
++#include "Grafici.h"
++
++using Sample = grafici::Float16; // Change to float to restore FP32 storage.
++Sample values[] = {-2.0f, 0.5f, 1.5f, 3.0f};
++DataArrayXY<Sample> data(values, 4, {-4, 4});
++Grafici plot(display);
++
++void draw_graph()
++{
++    auto x = data.x();
++    auto y = data.y();
++    plot.line(x, y, white);
++}
++```
++
++This halves the sample buffer while keeping range metadata, normalization and rendering in float. In a matched Uno R3 build with 128 samples, this saved 256 bytes of static RAM and added 596 bytes of flash. Keep integer sample buffers as integers if they already use less space.
++
++### Select Float16 throughout the pipeline
++
++To also narrow value/range objects, window parameters and retained spline coefficients, select the same scalar for sources and plotters:
++
++```cpp
++using Real = grafici::Float16; // Change this alias to float to switch back.
++Real values[] = {-2.0f, 0.5f, 1.5f, 3.0f};
++DataArrayXY<Real, Real> data(values, 4, {-4, 4});
++GraficiT<Real> plot(display);
++```
++
++Drawing calls stay the same. Explicit windows and options become `WindowT<Real>` and `PlotOptionsT<Real>`; use `full_screen_for<Real>()` where you previously passed `full_screen`. Existing template classes accept the scalar as their final argument, for example `DataSpline<32, true, Real>`. Custom sources use `DataSourceNormT<Real>`.
++
++Narrowing every object does not always give the smallest program. Keep float for closely spaced values on a large offset, sensitive interpolation, or values outside FP16's finite range. Spline solver scratch arrays remain float. See the [precision guide](PRECISION.md) for limits, measured sizes and the full type mapping, or the [complete FP16 sketch](examples/fp16_line/fp16_line.ino).
++
+ ## Testing
+ 
+ ### Unit Tests
+diff --git a/examples/fp16_line/fp16_line.ino b/examples/fp16_line/fp16_line.ino
+new file mode 100644
+index 0000000000000000000000000000000000000000..edf93e59ce00c5cc4ac9e9e45cf993266dab4966
+--- /dev/null
++++ b/examples/fp16_line/fp16_line.ino
+@@ -0,0 +1,26 @@
++#include "Adafruit_GFX.h"
++#include "Adafruit_ILI9341.h"
++#include "Grafici.h"
++
++using Real = grafici::Float16; // Change to float to use the default precision.
++
++Adafruit_ILI9341 gfx(10, 9);
++GraficiT<Real> plot(gfx);
++
++// Signed raw samples include values above 1; the explicit range handles units.
++Real samples[] = {-2, -1, 0.5f, 1.5f, 2, 1, -0.5f, -1.5f};
++DataArrayXY<Real, Real> data(samples, 8, {-3, 3});
++
++void setup()
++{
++    gfx.begin();
++    gfx.setRotation(3);
++    plot.clear_screen();
++
++    auto x = data.x();
++    auto y = data.y();
++    auto options = PlotOptionsT<Real>{}.set_axis(6, 8, gunpowder);
++    plot.line(x, y, y, full_screen_for<Real>(), options);
++}
++
++void loop() {}
+diff --git a/src/Grafici.h b/src/Grafici.h
+index ea24bdc7e644ec43386a5ab77c18db52972b7cda..7298c24e40621bd81e4e09ece100a2b1e4be1113 100644
+--- a/src/Grafici.h
++++ b/src/Grafici.h
+@@ -22,6 +22,7 @@
+ #include "data/DataNorm.h"
+ 
+ #include "data/DataArray.h"
++#include "data/DataCast.h"
+ #include "data/DataArrayXY.h"
+ #include "data/DataConstant.h"
+ #include "data/DataFunction.h"
+@@ -53,20 +54,27 @@
+  * @brief Object representing the Grafici plotting library
+  *
+  */
+-class Grafici
++template <typename Scalar = float>
++class GraficiT
+ {
+   public:
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DisplayDriver = DisplayDriverT<Scalar>;
++    using Window = WindowT<Scalar>;
++    using DataSourceNorm = DataSourceNormT<Scalar>;
++    using PlotOptions = PlotOptionsT<Scalar>;
++    using Grafici = GraficiT<Scalar>;
+ 	/**
+ 	 * @brief Construct a new Grafici object
+ 	 *
+ 	 * @param hal reference to the Adafruit_GFX display driver
+ 	 */
+-	Grafici(Adafruit_GFX &hal)
++	GraficiT(Adafruit_GFX &hal)
+ 	    : _display_driver{ hal }
+ 	{
+ 	}
+ 
+-	void clear_screen(const Window &window = full_screen, const PlotOptions opts = {})
++	void clear_screen(const Window &window = full_screen_for<Scalar>(), const PlotOptions opts = {})
+ 	{
+ 		_display_driver.fill_rect({0,0}, {1,1}, black, window, opts.get_segments());
+ 	}
+@@ -93,7 +101,7 @@ class Grafici
+ 	void line(const DataSourceNorm &x,
+ 	          const DataSourceNorm &y,
+ 	          const DataSourceNorm &c,
+-	          const Window &window = full_screen,
++	          const Window &window = full_screen_for<Scalar>(),
+ 	          const PlotOptions opts = {})
+ 	{
+ 		plot_axis(_display_driver, window, opts);
+@@ -103,7 +111,7 @@ class Grafici
+ 	void line(const DataSourceNorm &x,
+ 	          const DataSourceNorm &y,
+ 	          const Color &color,
+-	          const Window &window = full_screen,
++	          const Window &window = full_screen_for<Scalar>(),
+ 	          const PlotOptions opts = {})
+ 	{
+ 		const ColorMapConstant color_map{color};
+@@ -123,7 +131,7 @@ class Grafici
+ 	void area(const DataSourceNorm &x,
+ 	          const DataSourceNorm &y,
+ 	          const DataSourceNorm &c,
+-	          const Window &window = full_screen,
++	          const Window &window = full_screen_for<Scalar>(),
+ 	          const PlotOptions opts = {})
+ 	{
+ 		plot_area(_display_driver, window, *_color_map, x, y, c, opts);
+@@ -133,7 +141,7 @@ class Grafici
+ 	void area(const DataSourceNorm &x,
+ 	          const DataSourceNorm &y,
+ 	          const Color &color,
+-	          const Window &window = full_screen,
++	          const Window &window = full_screen_for<Scalar>(),
+ 	          const PlotOptions opts = {})
+ 	{
+ 		const ColorMapConstant color_map{color};
+@@ -153,7 +161,7 @@ class Grafici
+ 	void bar(const DataSourceNorm &x,
+ 	         const DataSourceNorm &y,
+ 	         const DataSourceNorm &c,
+-	         const Window &window = full_screen,
++	         const Window &window = full_screen_for<Scalar>(),
+ 	         const PlotOptions opts = {})
+ 	{
+ 		plot_bar(_display_driver, window, *_color_map, x, y, c, opts);
+@@ -163,7 +171,7 @@ class Grafici
+ 	void bar(const DataSourceNorm &x,
+ 	         const DataSourceNorm &y,
+ 	         const Color &color,
+-	         const Window &window = full_screen,
++	         const Window &window = full_screen_for<Scalar>(),
+ 	         const PlotOptions opts = {})
+ 	{
+ 		const ColorMapConstant color_map{color};
+@@ -185,7 +193,7 @@ class Grafici
+ 	             const DataSourceNorm &y,
+ 	             const DataSourceNorm &c,
+ 	             const DataSourceNorm &s,
+-	             const Window &window = full_screen,
++	             const Window &window = full_screen_for<Scalar>(),
+ 	             const PlotOptions opts = {})
+ 	{
+ 		plot_axis(_display_driver, window, opts);
+@@ -196,7 +204,7 @@ class Grafici
+ 	             const DataSourceNorm &y,
+ 	             const Color &color,
+ 	             const DataSourceNorm &s,
+-	             const Window &window = full_screen,
++	             const Window &window = full_screen_for<Scalar>(),
+ 	             const PlotOptions opts = {})
+ 	{
+ 		const ColorMapConstant color_map{color};
+@@ -209,6 +217,8 @@ class Grafici
+ 	const ColorMap *_color_map{ &parula };
+ };
+ 
++using Grafici = GraficiT<float>;
++
+ #endif // GRAFICI_GRAFICI_H
+ 
+-/** @}*/
+\ No newline at end of file
++/** @}*/
+diff --git a/src/Range.h b/src/Range.h
+index 714c5a23eaa7c8591598786d83e6b581db028194..dd51a2b07e8a61b83c9be3f4018e6a0f6cde2182 100644
+--- a/src/Range.h
++++ b/src/Range.h
+@@ -17,6 +17,8 @@
+ #ifndef GRAFICI_RANGE_H
+ #define GRAFICI_RANGE_H
+ 
++#include "numeric/Precision.h"
++
+ /*!
+ * \def INVALID_RANGE_FLOAT
+ * Value for an invalid range object
+@@ -35,6 +37,13 @@ template <typename T>
+ class Range
+ {
+   public:
++    using Compute = typename grafici::ComputationType<T>::type;
++
++    template <typename Other>
++    Range(const Range<Other> &other) : low{static_cast<T>(other.low)}, high{static_cast<T>(other.high)}
++    {
++    }
++
+ 	Range() = default;
+ 
+ 	/**
+@@ -84,7 +93,7 @@ class Range
+ 	 * @param value Value to be mapped. In case this value is outside of the range limits it will be clipped before being mapped.
+ 	 * @return float Normalized mapped value in the range [0,1].
+ 	 */
+-	float value_to_norm(const T value) const
++	Compute value_to_norm(const T value) const
+ 	{
+ 		if (value <= low)
+ 		{
+@@ -96,7 +105,7 @@ class Range
+ 		}
+ 		else
+ 		{
+-			return static_cast<float>(value - low) / static_cast<float>(delta());
++			return static_cast<Compute>(value - low) / static_cast<Compute>(high - low);
+ 		}
+ 	}
+ 
+@@ -106,7 +115,7 @@ class Range
+ 	 * @param value normalized number. In case this value is outside of the [0,1] range, it will be clipped before being mapped.
+ 	 * @return T value within the range limits coreesponding to the given normalized value
+ 	 */
+-	T norm_to_value(const float value) const
++	T norm_to_value(const Compute value) const
+ 	{
+ 		if (value <= 0.0)
+ 		{
+@@ -118,7 +127,7 @@ class Range
+ 		}
+ 		else
+ 		{
+-			return static_cast<T>(high * value + low * (1.0 - value));
++			return static_cast<T>(static_cast<Compute>(high) * value + static_cast<Compute>(low) * (Compute(1) - value));
+ 		}
+ 	}
+ 
+diff --git a/src/Vector.h b/src/Vector.h
+index 679e2251f88f64bc65b3321bff517ff2678357b5..8f96b7a6133eea1c392ad725aa0ef9f47a84290b 100644
+--- a/src/Vector.h
++++ b/src/Vector.h
+@@ -48,9 +48,10 @@ class Vector
+ 		return { x + other.x, y + other.y };
+ 	};
+ 
+-	Vector<T> operator*(const float &other) const
++	template <typename Factor>
++	Vector<T> operator*(const Factor &other) const
+ 	{
+-		return { x * other, y * other };
++		return { static_cast<T>(x * other), static_cast<T>(y * other) };
+ 	};
+ 
+ 	bool operator<(const Vector<T> &other) const
+diff --git a/src/data/DataArray.h b/src/data/DataArray.h
+index b729be3f857c3473db6ad8a9c00db57644970281..7d7ccb19f29c8ea6e9a50a9544264b631ac02288 100644
+--- a/src/data/DataArray.h
++++ b/src/data/DataArray.h
+@@ -25,10 +25,13 @@
+  * 
+  * @tparam T type of the array
+  */
+-template <typename T>
+-class DataArray : public DataSourceNorm
++template <typename T, typename Scalar = float>
++class DataArray : public DataSourceNormT<Scalar>
+ {
+   public:
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DataNorm = DataNormT<Scalar>;
++    using DataSourceNorm = DataSourceNormT<Scalar>;
+ 	/**
+      * @brief Construct a new data source from a C array
+      * 
+@@ -43,7 +46,7 @@ class DataArray : public DataSourceNorm
+ 		update_range();
+ 	}
+ 
+-	DataArray(const T *data, size_t size, Range<float> range)
++	DataArray(const T *data, size_t size, Range<Scalar> range)
+ 	    : DataSourceNorm{ size , range}
+ 	    , _arrayPtr{ data }
+ 
+@@ -60,7 +63,7 @@ class DataArray : public DataSourceNorm
+ 	{
+ 		if ((_arrayPtr != nullptr) && (idx < DataSource<DataNorm>::size()))
+ 		{
+-			return DataSourceNorm::float_to_data_norm(static_cast<float>(_arrayPtr[idx]));
++			return DataSourceNorm::float_to_data_norm(static_cast<Scalar>(_arrayPtr[idx]));
+ 		}
+ 		else
+ 		{
+@@ -73,10 +76,10 @@ class DataArray : public DataSourceNorm
+ 	{
+ 		if ((_arrayPtr != nullptr) && (DataSource<DataNorm>::size() > 0))
+ 		{
+-			DataSourceNorm::_range = { static_cast<float>(_arrayPtr[0]), static_cast<float>(_arrayPtr[0]) };
++			DataSourceNorm::_range = { static_cast<Scalar>(_arrayPtr[0]), static_cast<Scalar>(_arrayPtr[0]) };
+ 			for (size_t idx = 1; idx < DataSource<DataNorm>::size(); ++idx)
+ 			{
+-				DataSourceNorm::_range.update(static_cast<float>(_arrayPtr[idx]));
++				DataSourceNorm::_range.update(static_cast<Scalar>(_arrayPtr[idx]));
+ 			}
+ 		}
+ 	}
+diff --git a/src/data/DataArrayXY.h b/src/data/DataArrayXY.h
+index 52fb55e7f2726029b79a2ddfaa9e2e933a32a8c1..11325466b8cfcce9aaa5024ba8d9304dd9f45d28 100644
+--- a/src/data/DataArrayXY.h
++++ b/src/data/DataArrayXY.h
+@@ -27,9 +27,17 @@
+  * 
+  * @tparam T type of the array
+  */
+-template <typename T>
+-class DataArrayXY : public DataSource<DataVector>
++template <typename T, typename Scalar = float>
++class DataArrayXY : public DataSource<DataVectorT<Scalar>>
+ {
++  public:
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DataNorm = DataNormT<Scalar>;
++    using DataVector = DataVectorT<Scalar>;
++    using DataSelect = DataSelectT<Scalar>;
++    using DataSource<DataVector>::size;
++protected:
++    using DataSource<DataVector>::_size;
+   public:
+ 	/**
+      * @brief Construct a new data source from a C array
+@@ -43,7 +51,7 @@ class DataArrayXY : public DataSource<DataVector>
+ 	{
+ 	}
+ 
+-	DataArrayXY(const T *data, size_t size, Range<float> range)
++	DataArrayXY(const T *data, size_t size, Range<Scalar> range)
+ 	    : DataSource<DataVector>{ size }
+ 	    , _y_data{ data, size, range }
+ 	{
+@@ -54,7 +62,7 @@ class DataArrayXY : public DataSource<DataVector>
+ 		if (idx < size())
+ 		{
+ 			return {
+-				{ static_cast<float>(idx), { 0, static_cast<float>(_size-1) } },
++				{ static_cast<Scalar>(idx), { 0, static_cast<Scalar>(_size-1) } },
+ 				_y_data[idx],
+ 			};
+ 		}
+@@ -76,7 +84,7 @@ class DataArrayXY : public DataSource<DataVector>
+ 	}
+ 
+   private:
+-	DataArray<T> _y_data;
++	DataArray<T, Scalar> _y_data;
+ };
+ 
+ #endif /* GRAFICI_DATA_ARRAY_XY_H */
+diff --git a/src/data/DataCast.h b/src/data/DataCast.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..be6c21e1f07b8240442caf2631134b818897d997
+--- /dev/null
++++ b/src/data/DataCast.h
+@@ -0,0 +1,32 @@
++#ifndef GRAFICI_DATA_CAST_H
++#define GRAFICI_DATA_CAST_H
++
++#include "DataSourceNorm.h"
++
++// Borrow a source in another precision family without copying its samples.
++template <typename To, typename From = float>
++class DataCast : public DataSourceNormT<To>
++{
++public:
++    explicit DataCast(const DataSourceNormT<From> &source)
++        : DataSourceNormT<To>(source.size()), _source(source)
++    {
++    }
++
++    const DataNormT<To> operator[](unsigned long index) const override
++    {
++        if (index < this->size())
++            return DataNormT<To>(_source[index]);
++        return INVALID_DATA_NORM;
++    }
++
++    const Range<To> range() const override
++    {
++        return Range<To>(_source.range());
++    }
++
++private:
++    const DataSourceNormT<From> &_source;
++};
++
++#endif
+diff --git a/src/data/DataConstant.h b/src/data/DataConstant.h
+index 9770a92dce8decdcd3243b140c1cae38d8e51afa..7fa940a8b85badfc18c23b0109d9d809bc73e530 100644
+--- a/src/data/DataConstant.h
++++ b/src/data/DataConstant.h
+@@ -24,8 +24,17 @@
+  * @brief Data source returning a constant value
+  * 
+  */
+-class DataConstant : public DataParametric
++template <typename Scalar = float>
++class DataConstantT : public DataParametricT<Scalar>
+ {
++  public:
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DataNorm = DataNormT<Scalar>;
++    using DataParametric = DataParametricT<Scalar>;
++    using DataParametric::size;
++    using DataConstant = DataConstantT<Scalar>;
++protected:
++    using DataParametric::_range;
+   public:
+ 	/**
+ 	* @brief Construct a new data source from a normalized data point
+@@ -33,22 +42,24 @@ class DataConstant : public DataParametric
+ 	* @param size size of the data source
+ 	* @param val value of the normalized data source that will be returned
+ 	*/
+-	DataConstant(size_t size, DataNorm val)
++	DataConstantT(size_t size, DataNorm val)
+ 	    : DataParametric{ size, val.range() }
+ 	{
+ 		_value = val.raw();
+ 	}
+ 
+   protected:
+-	float at(size_t idx __attribute__((unused))) const override
++	Compute at(size_t idx __attribute__((unused))) const override
+ 	{
+ 		return _value;
+ 	}
+ 
+   private:
+-	float _value;
++	Scalar _value;
+ };
+ 
++using DataConstant = DataConstantT<float>;
++
+ #endif /* GRAFICI_DATA_CONSTANT_H */
+ 
+ /** @}*/
+\ No newline at end of file
+diff --git a/src/data/DataDistributionNormal.h b/src/data/DataDistributionNormal.h
+index a9ac1868a9c57b96d5b79b278ad1ab2dabdffdbc..96681e887feaf7b39b6b57f9d48986f294bb5c2a 100644
+--- a/src/data/DataDistributionNormal.h
++++ b/src/data/DataDistributionNormal.h
+@@ -3,7 +3,7 @@
+ 
+ #include "DataParametric.h"
+ 
+-static float generateGaussian(float mean, float stdDev) {
++static inline float generateGaussian(float mean, float stdDev) {
+     static float spare;
+     static bool hasSpare = false;
+ 	static const long precision = 1000;
+@@ -25,19 +25,21 @@ static float generateGaussian(float mean, float stdDev) {
+     }
+ }
+ 
+-template<size_t N>
+-class DataDistributionNormal : public DataParametric
++template<size_t N, typename Scalar = float>
++class DataDistributionNormal : public DataParametricT<Scalar>
+ {
+   public:
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DataParametric = DataParametricT<Scalar>;
+     /* approximate normal distribution using Box-Muller transform */
+-	DataDistributionNormal(unsigned long seed, Range<float> range = {0,1})
++	DataDistributionNormal(unsigned long seed, Range<Scalar> range = {0,1})
+ 	    : DataParametric{ N, range }
+ 	{
+ 		init_distribution(seed);
+ 	}
+ 
+   protected:
+-	float at(size_t idx) const override
++	Compute at(size_t idx) const override
+ 	{
+ 		return normal_data[idx];
+ 	}
+@@ -56,7 +58,7 @@ class DataDistributionNormal : public DataParametric
+ 		}
+ 	}
+ 
+-	float normal_data[N];
++	Scalar normal_data[N];
+ };
+ 
+ #endif /* GRAFICI_DATA_DIST_NORMAL_H */
+diff --git a/src/data/DataDistributionUniform.h b/src/data/DataDistributionUniform.h
+index 1cea1bc41d9f529d305eef8f0c56b1feb421cf8d..daba15d220ace2f1af463bb77d9de82a45977f54 100644
+--- a/src/data/DataDistributionUniform.h
++++ b/src/data/DataDistributionUniform.h
+@@ -4,19 +4,21 @@
+ #include "DataParametric.h"
+ 
+ 
+-template<size_t N>
+-class DataDistributionUniform : public DataParametric
++template<size_t N, typename Scalar = float>
++class DataDistributionUniform : public DataParametricT<Scalar>
+ {
+   public:
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DataParametric = DataParametricT<Scalar>;
+     /* approximate normal distribution using Box-Muller transform */
+-	DataDistributionUniform(unsigned long seed, Range<float> range = {0,1})
++	DataDistributionUniform(unsigned long seed, Range<Scalar> range = {0,1})
+ 	    : DataParametric{ N, range }
+ 	{
+ 		init_distribution(seed);
+ 	}
+ 
+   protected:
+-	float at(size_t idx) const override
++	Compute at(size_t idx) const override
+ 	{
+ 		return uniform_data[idx];
+ 	}
+@@ -34,7 +36,7 @@ class DataDistributionUniform : public DataParametric
+ 		}
+ 	}
+ 	
+-	float uniform_data[N];
++	Scalar uniform_data[N];
+ };
+ 
+ #endif /* GRAFICI_DATA_DIST_UNIFORM_H */
+diff --git a/src/data/DataFunction.h b/src/data/DataFunction.h
+index 09d51ad7aad938280c3269c23a37513c732e39be..5733927b33a22e7761382aa42530f38355c121c6 100644
+--- a/src/data/DataFunction.h
++++ b/src/data/DataFunction.h
+@@ -24,8 +24,18 @@
+  * @brief Data source generated from a function
+  * 
+  */
+-class DataFunction : public DataParametric
++template <typename Scalar = float>
++class DataFunctionT : public DataParametricT<Scalar>
+ {
++  public:
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DataNorm = DataNormT<Scalar>;
++    using DataParametric = DataParametricT<Scalar>;
++    using DataParametric::size;
++    using DataFunction = DataFunctionT<Scalar>;
++protected:
++    using DataParametric::update_range;
++    using DataParametric::_range;
+   public:
+ 	/**
+ 	 * @brief Construct a data source from a given function [f(0) .. f(size-1)]
+@@ -33,7 +43,7 @@ class DataFunction : public DataParametric
+ 	 * @param size size of the data source
+ 	 * @param fn function to compute the value of each data point
+ 	 */
+-	DataFunction(size_t size, float (*fn)(size_t))
++	DataFunctionT(size_t size, Compute (*fn)(size_t))
+ 	    : DataParametric{ size }
+ 	    , _fn{ fn }
+ 	{
+@@ -47,22 +57,24 @@ class DataFunction : public DataParametric
+ 	 * @param fn function to compute the value of each data point
+ 	 * @param range value range against which f() is normalized
+ 	 */
+-	DataFunction(size_t size, float (*fn)(size_t), Range<float> range)
++	DataFunctionT(size_t size, Compute (*fn)(size_t), Range<Scalar> range)
+ 	    : DataParametric{ size, range }
+ 	    , _fn{ fn }
+ 	{
+ 	}
+ 
+   protected:
+-	float at(size_t idx) const override
++	Compute at(size_t idx) const override
+ 	{
+ 		return _fn(idx);
+ 	}
+ 
+   private:
+-	float (*_fn)(size_t);
++	Compute (*_fn)(size_t);
+ };
+ 
++using DataFunction = DataFunctionT<float>;
++
+ #endif /* GRAFICI_DATA_FUNCTION_H */
+ 
+ /** @}*/
+\ No newline at end of file
+diff --git a/src/data/DataHistogramXY.h b/src/data/DataHistogramXY.h
+index 351f58fe0225e6abba3937ed97b35c263c9fb922..0aa869a573115dfd8ea40eacc79c00fd51245321 100644
+--- a/src/data/DataHistogramXY.h
++++ b/src/data/DataHistogramXY.h
+@@ -27,10 +27,16 @@
+  * @tparam BINS Number of frequency bins to subdivide the data point space 
+  *
+  */
+-template <size_t BINS>
+-class DataHistogramXY : public DataSource<DataVector>
++template <size_t BINS, typename Scalar = float>
++class DataHistogramXY : public DataSource<DataVectorT<Scalar>>
+ {
+   public:
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DataNorm = DataNormT<Scalar>;
++    using DataVector = DataVectorT<Scalar>;
++    using DataSelect = DataSelectT<Scalar>;
++    using DataSourceNorm = DataSourceNormT<Scalar>;
++    using DataSource<DataVector>::size;
+ 	/* To plot multiple n bar plots, use num_classes = n and use n of this classes for the x axis.
+ 	 Each class with class_id [0, n-1] */
+ 	DataHistogramXY(const DataSourceNorm &source, bool normalized = false, size_t class_id = 0, size_t num_classes = 1)
+@@ -49,13 +55,13 @@ class DataHistogramXY : public DataSource<DataVector>
+ 		{
+ 			if (_normalized)
+ 				return {
+-					{ static_cast<float>(0.5 + idx * _num_classes + _class_id), { 0.0, static_cast<float>(size() * _num_classes) } },
+-					{ static_cast<float>(_bins[idx]) / static_cast<float>(_total), { 0, 1 } },
++					{ static_cast<Scalar>(0.5 + idx * _num_classes + _class_id), { 0.0, static_cast<Scalar>(size() * _num_classes) } },
++					{ static_cast<Compute>(_bins[idx]) / static_cast<Compute>(_total), { 0, 1 } },
+ 				};
+ 			else
+ 				return {
+-					{ static_cast<float>(0.5 + idx * _num_classes + _class_id), { 0.0, static_cast<float>(size() * _num_classes) } },
+-					{ static_cast<float>(_bins[idx]), _histogram_y_range },
++					{ static_cast<Scalar>(0.5 + idx * _num_classes + _class_id), { 0.0, static_cast<Scalar>(size() * _num_classes) } },
++					{ static_cast<Scalar>(_bins[idx]), _histogram_y_range },
+ 				};
+ 		}
+ 		else
+@@ -101,7 +107,7 @@ class DataHistogramXY : public DataSource<DataVector>
+ 	size_t _class_id;
+ 	size_t _num_classes;
+ 	size_t _bins[BINS]{ 0 };
+-	Range<float> _histogram_y_range{ 0, 0 };
++	Range<Scalar> _histogram_y_range{ 0, 0 };
+ };
+ 
+ #endif //GRAFICI_DATA_HISTOGRAM_XY_H
+diff --git a/src/data/DataInterpolatorL.h b/src/data/DataInterpolatorL.h
+index 43fec77f5931152fb02b1f40bdcc22c82336cb49..0d098a7260bf171ed3adb0a7a1db1abed295e07c 100644
+--- a/src/data/DataInterpolatorL.h
++++ b/src/data/DataInterpolatorL.h
+@@ -25,10 +25,21 @@
+  * @brief Vector data source vector generated by interpolating the data point of a give data source
+  * 
+  */
+-class DataInterpolatorL : public DataSource<DataVector>
++template <typename Scalar = float>
++class DataInterpolatorLT : public DataSource<DataVectorT<Scalar>>
+ {
+   public:
+-	DataInterpolatorL(const DataSourceNorm &x, const DataSourceNorm &y, size_t interpolationSteps)
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DataNorm = DataNormT<Scalar>;
++    using DataVector = DataVectorT<Scalar>;
++    using DataSelect = DataSelectT<Scalar>;
++    using DataSourceNorm = DataSourceNormT<Scalar>;
++    using DataSource<DataVector>::size;
++    using DataInterpolatorL = DataInterpolatorLT<Scalar>;
++protected:
++    using DataSource<DataVector>::_size;
++  public:
++	DataInterpolatorLT(const DataSourceNorm &x, const DataSourceNorm &y, size_t interpolationSteps)
+ 	    : DataSource<DataVector>{ interpolationSteps }
+ 	    , _x{ x }
+ 	    , _y{ y }
+@@ -42,13 +53,13 @@ class DataInterpolatorL : public DataSource<DataVector>
+ 		if (idx < size())
+ 		{
+ 			size_t bin;
+-			float norm_bin_weight;
++			Compute norm_bin_weight;
+ 
+ 			compute_x_bin(idx, &bin, &norm_bin_weight);
+ 
+ 			/* compute the raw range for the right bin on x and y*/
+-			Range<float> rawBinRangeX{ _x[bin].raw(), _x[bin + 1].raw() };
+-			Range<float> rawBinRangeY{ _y[bin].raw(), _y[bin + 1].raw() };
++			Range<Scalar> rawBinRangeX{ _x[bin].raw(), _x[bin + 1].raw() };
++			Range<Scalar> rawBinRangeY{ _y[bin].raw(), _y[bin + 1].raw() };
+ 
+ 			/* interpolate x and y by mapping the normalized bin weight over the raw bin ranges */
+ 			/* note that we compute the normBinWeight on the x axis and interpolate on the y axis */
+@@ -80,7 +91,7 @@ class DataInterpolatorL : public DataSource<DataVector>
+ 	size_t _src_size;
+ 	Range<size_t> _indexRange{ 0, 0 };
+ 
+-	void compute_x_bin(const unsigned long idx, size_t *bin, float *norm_bin_weight) const
++	void compute_x_bin(const unsigned long idx, size_t *bin, Compute *norm_bin_weight) const
+ 	{
+ 		*bin = 0;
+ 		*norm_bin_weight = 1.0;
+@@ -89,10 +100,10 @@ class DataInterpolatorL : public DataSource<DataVector>
+ 		while (*bin < _src_size - 1)
+ 		{
+ 			/* compute the normalized inter-bin range for the x source */
+-			Range<float> normBinRangeX = { _x[*bin].norm(), _x[*bin + 1].norm() };
++			Range<Scalar> normBinRangeX = { _x[*bin].norm(), _x[*bin + 1].norm() };
+ 
+ 			/* compute the normalized index */
+-			float normIndex = _indexRange.value_to_norm(idx);
++			Compute normIndex = _indexRange.value_to_norm(idx);
+ 			/* compute the normalized position inside the bin (in case we found the right one or we are out of range)*/
+ 			*norm_bin_weight = normBinRangeX.value_to_norm(normIndex);
+ 			/* if the normalized index is inside the normalized bin range (on x), then stop */
+@@ -108,6 +119,8 @@ class DataInterpolatorL : public DataSource<DataVector>
+ 	}
+ };
+ 
++using DataInterpolatorL = DataInterpolatorLT<float>;
++
+ #endif /* GRAFICI_DATA_LINEAR_INTERPOLATOR_H */
+ 
+ /** @}*/
+\ No newline at end of file
+diff --git a/src/data/DataLinear.h b/src/data/DataLinear.h
+index a10d3f0825d87f42ff90cf120d8aa9d71d771bc8..627dfaa6994355a12a3f26bd0e119a8691def946 100644
+--- a/src/data/DataLinear.h
++++ b/src/data/DataLinear.h
+@@ -23,8 +23,17 @@
+  * @brief Data source generated from a linear function
+  * 
+  */
+-class DataLinear : public DataParametric
++template <typename Scalar = float>
++class DataLinearT : public DataParametricT<Scalar>
+ {
++  public:
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DataNorm = DataNormT<Scalar>;
++    using DataParametric = DataParametricT<Scalar>;
++    using DataParametric::size;
++    using DataLinear = DataLinearT<Scalar>;
++protected:
++    using DataParametric::_range;
+   public:
+ 	/**
+      * @brief Construct a new Data Linear object
+@@ -33,7 +42,7 @@ class DataLinear : public DataParametric
+      * @param offset 
+      * @param slope 
+      */
+-	DataLinear(size_t size, float offset = 0, float slope = 1)
++	DataLinearT(size_t size, Scalar offset = 0, Scalar slope = 1)
+ 	    : DataParametric{ size }
+ 	    , _offset{ offset }
+ 	    , _slope{ slope }
+@@ -48,7 +57,7 @@ class DataLinear : public DataParametric
+ 	 * @param offset 
+ 	 * @param slope 
+ 	 */
+-	DataLinear(size_t size, Range<float> range, float offset = 0, float slope = 1)
++	DataLinearT(size_t size, Range<Scalar> range, Scalar offset = 0, Scalar slope = 1)
+ 	    : DataParametric{ size, range }
+ 	    , _offset{ offset }
+ 	    , _slope{ slope }
+@@ -56,7 +65,7 @@ class DataLinear : public DataParametric
+ 	}
+ 
+   protected:
+-	float at(size_t idx) const override
++	Compute at(size_t idx) const override
+ 	{
+ 		return idx * _slope + _offset;
+ 	}
+@@ -67,10 +76,12 @@ class DataLinear : public DataParametric
+ 		_range = { at(0), at(size() - 1) };
+ 	}
+ 
+-	float _offset;
+-	float _slope;
++	Scalar _offset;
++	Scalar _slope;
+ };
+ 
++using DataLinear = DataLinearT<float>;
++
+ #endif /* GRAFICI_DATA_LINEAR_H */
+ 
+ /** @}*/
+\ No newline at end of file
+diff --git a/src/data/DataNorm.h b/src/data/DataNorm.h
+index 9d26d60cbf5d50c11e6f25bf0c6759172cf521d1..3d6535c61489fbccae421c7348c5f7f780430aa4 100644
+--- a/src/data/DataNorm.h
++++ b/src/data/DataNorm.h
+@@ -35,37 +35,46 @@
+  * @brief Normalized data point
+  * 
+  */
+-class DataNorm
++template <typename Scalar = float>
++class DataNormT
+ {
+   public:
+-	DataNorm()
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DataNorm = DataNormT<Scalar>;
++	DataNormT()
+ 	    : _raw{ 0 }
+ 	    , _range{ 0, 0 }
+ 	{
+ 	}
+ 
+-	DataNorm(const float value, const Range<float> range = { 0, 1 })
+-	    : _raw{ range.trim(value) }
++    template <typename Other>
++    DataNormT(const DataNormT<Other> &other)
++        : _raw{static_cast<Scalar>(other.raw())}, _range{other.range()}
++    {
++    }
++
++	DataNormT(const Compute value, const Range<Scalar> range = { 0, 1 })
++	    : _raw{ range.trim(static_cast<Scalar>(value)) }
+ 	    , _range{ range }
+ 	{
+ 	}
+ 
+-	float norm() const
++	Compute norm() const
+ 	{
+ 		return _range.value_to_norm(_raw);
+ 	}
+ 
+-	float raw() const
++	Scalar raw() const
+ 	{
+ 		return _raw;
+ 	}
+ 
+-	void norm(float val)
++	void norm(Compute val)
+ 	{
+ 		_raw = _range.norm_to_value(val);
+ 	}
+ 
+-	Range<float> range() const
++	Range<Scalar> range() const
+ 	{
+ 		return _range;
+ 	}
+@@ -81,10 +90,12 @@ class DataNorm
+ 	}
+ 
+   private:
+-	float _raw;
+-	Range<float> _range;
++	Scalar _raw;
++	Range<Scalar> _range;
+ };
+ 
++using DataNorm = DataNormT<float>;
++
+ #endif //#ifndef GRAFICI_DATA_NORM_H
+ 
+ /** @}*/
+\ No newline at end of file
+diff --git a/src/data/DataParametric.h b/src/data/DataParametric.h
+index b766afd0aba6fe034e1119f6934682be76501ce1..80714048bfebf8ff9814650f809907ec75e9c25e 100644
+--- a/src/data/DataParametric.h
++++ b/src/data/DataParametric.h
+@@ -24,15 +24,24 @@
+  * @brief Interface for generated data sources
+  * 
+  */
+-class DataParametric : public DataSourceNorm
++template <typename Scalar = float>
++class DataParametricT : public DataSourceNormT<Scalar>
+ {
+   public:
+-	DataParametric(size_t size)
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DataNorm = DataNormT<Scalar>;
++    using DataSourceNorm = DataSourceNormT<Scalar>;
++    using DataSourceNorm::size;
++    using DataParametric = DataParametricT<Scalar>;
++protected:
++    using DataSourceNorm::_range;
++  public:
++	DataParametricT(size_t size)
+ 	    : DataSourceNorm{ size }
+ 	{
+ 	}
+ 
+-	DataParametric(size_t size, Range<float> range)
++	DataParametricT(size_t size, Range<Scalar> range)
+ 	    : DataSourceNorm{ size , range}
+ 	{
+ 	}
+@@ -56,7 +65,7 @@ class DataParametric : public DataSourceNorm
+ 	}
+ 
+   protected:
+-	virtual float at(size_t idx) const = 0;
++	virtual Compute at(size_t idx) const = 0;
+ 
+ 	virtual void update_range()
+ 	{
+@@ -71,6 +80,8 @@ class DataParametric : public DataSourceNorm
+ 	}
+ };
+ 
++using DataParametric = DataParametricT<float>;
++
+ #endif /* GRAFICI_DATA_PARAMETRIC_H */
+ 
+ /** @}*/
+\ No newline at end of file
+diff --git a/src/data/DataResize.h b/src/data/DataResize.h
+index 5718640331e9b878e152f3bd9d7b8be54b4c214e..9e476e7141490111fd03255b4e26693310ef5c7d 100644
+--- a/src/data/DataResize.h
++++ b/src/data/DataResize.h
+@@ -24,8 +24,16 @@
+  * @brief Data source generated from resizing another data source
+  * 
+  */
+-class DataResize : public DataSourceNorm
++template <typename Scalar = float>
++class DataResizeT : public DataSourceNormT<Scalar>
+ {
++  public:
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DataNorm = DataNormT<Scalar>;
++    using DataSourceNorm = DataSourceNormT<Scalar>;
++    using DataResize = DataResizeT<Scalar>;
++protected:
++    using DataSourceNorm::_range;
+   public:
+ 	/**
+ 	* @brief Construct a new Data Resize object
+@@ -33,7 +41,7 @@ class DataResize : public DataSourceNorm
+ 	* @param source 
+ 	* @param range Normally a data source outputs values from 0 to 1. The output values of this data source will be dicated by parameter 'range'
+ 	*/
+-	DataResize(const DataSourceNorm &source, Range<float> range)
++	DataResizeT(const DataSourceNorm &source, Range<Scalar> range)
+ 	    : DataSourceNorm{ source.size() }
+ 	    , _source{ source }
+ 
+@@ -57,6 +65,8 @@ class DataResize : public DataSourceNorm
+ 	const DataSourceNorm &_source;
+ };
+ 
++using DataResize = DataResizeT<float>;
++
+ #endif /* GRAFICI_DATA_RESIZE_H */
+ 
+ /** @}*/
+\ No newline at end of file
+diff --git a/src/data/DataSelect.h b/src/data/DataSelect.h
+index afd6f88d80501db3277ace0790f7906ba5df3ec2..5f7d656f5054274188a2e59904d3509423d30515 100644
+--- a/src/data/DataSelect.h
++++ b/src/data/DataSelect.h
+@@ -31,17 +31,23 @@ enum class VectorComponents
+  * @brief Data source generated from selecting a component from a vector data source
+  * 
+  */
+-class DataSelect : public DataSourceNorm
++template <typename Scalar = float>
++class DataSelectT : public DataSourceNormT<Scalar>
+ {
+   public:
+-	DataSelect(const DataSource<DataVector> &source, VectorComponents selection)
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DataNorm = DataNormT<Scalar>;
++    using DataVector = DataVectorT<Scalar>;
++    using DataSourceNorm = DataSourceNormT<Scalar>;
++    using DataSelect = DataSelectT<Scalar>;
++	DataSelectT(const DataSource<DataVector> &source, VectorComponents selection)
+ 	    : DataSourceNorm{ source.size() }
+ 	    , _source{ source }
+ 	    , _selection{ selection }
+ 	{
+ 	}
+ 
+-	const Range<float> range() const override
++	const Range<Scalar> range() const override
+ 	{
+ 		auto data_vector = _source[0];
+ 		switch (_selection)
+@@ -87,6 +93,8 @@ class DataSelect : public DataSourceNorm
+ 	VectorComponents _selection;
+ };
+ 
++using DataSelect = DataSelectT<float>;
++
+ #endif /* GRAFICI_DATA_SELECT_H */
+ 
+ /** @}*/
+\ No newline at end of file
+diff --git a/src/data/DataSourceNorm.h b/src/data/DataSourceNorm.h
+index d80813db039fe2303b31f486bfe27cd5b05ad8ef..b5667fe10b8ecf7352b9f016b148c6d8fcb02aa5 100644
+--- a/src/data/DataSourceNorm.h
++++ b/src/data/DataSourceNorm.h
+@@ -28,20 +28,24 @@
+  * 
+  * @note This type of data source is used as input for all Grafici's plotting functions 
+  */
+-class DataSourceNorm : public DataSource<DataNorm>
++template <typename Scalar = float>
++class DataSourceNormT : public DataSource<DataNormT<Scalar>>
+ {
+   public:
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DataNorm = DataNormT<Scalar>;
++    using DataSourceNorm = DataSourceNormT<Scalar>;
+ 	/**
+ 	 * @brief Create a data source with n DataNorm data points
+ 	 * 
+ 	 * @param n size of the data source
+ 	 */
+-	DataSourceNorm(size_t n)
++	DataSourceNormT(size_t n)
+ 	    : DataSource<DataNorm>{ n }
+ 	{
+ 	}
+ 
+-	DataSourceNorm(size_t n, Range<float> range)
++	DataSourceNormT(size_t n, Range<Scalar> range)
+ 	    : DataSource<DataNorm>{ n },
+ 		_range{range}
+ 	{
+@@ -50,11 +54,11 @@ class DataSourceNorm : public DataSource<DataNorm>
+ 	/**
+ 	 * @brief Return the range of the DataNorm data point 
+ 	 * 
+-	 * @return const Range<float> 
++	 * @return const Range<Scalar>
+ 	 * 
+ 	 * @note All DataNorm data points in a DataSourceNorm share the same range. This is in order to make the the normalized value of data points comparable.
+ 	 */
+-	virtual const Range<float> range() const
++	virtual const Range<Scalar> range() const
+ 	{
+ 		return { _range.low, _range.high };
+ 	}
+@@ -85,14 +89,16 @@ class DataSourceNorm : public DataSource<DataNorm>
+      * @param val value to encapsulate in the DataNorm
+      * @return const DataNorm 
+      */
+-	const DataNorm float_to_data_norm(float val) const
++	const DataNorm float_to_data_norm(Compute val) const
+ 	{
+ 		return { val, range() };
+ 	}
+ 
+-	Range<float> _range{ static_cast<float>(0), static_cast<float>(0) };
++	Range<Scalar> _range{ static_cast<Scalar>(0), static_cast<Scalar>(0) };
+ };
+ 
++using DataSourceNorm = DataSourceNormT<float>;
++
+ #endif //GRAFICI_DATA_SOURCE_NORM_H
+ 
+ /** @}*/
+\ No newline at end of file
+diff --git a/src/data/DataSourceVector.h b/src/data/DataSourceVector.h
+index e2b123565701ba9320ee21757381b7242af61f43..492f299c4ca6f096cd941735c75d4e66ef677da2 100644
+--- a/src/data/DataSourceVector.h
++++ b/src/data/DataSourceVector.h
+@@ -19,12 +19,16 @@
+ 
+ /*! Importation of librairies*/
+ #include "DataVector.h"
++#include "DataSource.h"
+ 
+ /**
+  * @brief Data source with multi component (normalized) data points
+  * 
+  */
+-using DataSourceVector = DataSource<DataVector>;
++template <typename Scalar = float>
++using DataSourceVectorT = DataSource<DataVectorT<Scalar>>;
++
++using DataSourceVector = DataSourceVectorT<float>;
+ 
+ #endif /* GRAFICI_DATA_SOURCE_VECTOR_H */
+ 
+diff --git a/src/data/DataSpline.h b/src/data/DataSpline.h
+index f94a3c78906186d56216bee9eed77771521175c1..60a04ca14754ee7cbb74ac752ded02e294901c83 100644
+--- a/src/data/DataSpline.h
++++ b/src/data/DataSpline.h
+@@ -30,9 +30,22 @@
+  * @tparam AUTOSCALE 
+  * @note Invalid source counts or workspace allocation failure produce an empty source.
+  */
+-template <size_t N, bool AUTOSCALE = true>
+-class DataSpline : public DataInterpolatorL
++template <size_t N, bool AUTOSCALE = true, typename Scalar = float>
++class DataSpline : public DataInterpolatorLT<Scalar>
+ {
++  public:
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DataNorm = DataNormT<Scalar>;
++    using DataVector = DataVectorT<Scalar>;
++    using DataSourceNorm = DataSourceNormT<Scalar>;
++    using DataInterpolatorL = DataInterpolatorLT<Scalar>;
++    using DataInterpolatorL::size;
++protected:
++    using DataInterpolatorL::_size;
++    using DataInterpolatorL::_src_size;
++    using DataInterpolatorL::_x;
++    using DataInterpolatorL::_y;
++    using DataInterpolatorL::compute_x_bin;
+   public:
+ 	DataSpline(const DataSourceNorm &x, const DataSourceNorm &y)
+ 	    : DataInterpolatorL{ x, y, N }
+@@ -42,7 +55,7 @@ class DataSpline : public DataInterpolatorL
+ 
+ 	const DataVector operator[](const unsigned long idx) const
+ 	{
+-		float raw_x, raw_y;
++		Compute raw_x, raw_y;
+ 		if (idx >= size() || !evaluate_raw(idx, &raw_x, &raw_y))
+ 			return INVALID_DATA_VECTOR;
+ 		return {{raw_x, _x.range()}, {raw_y, _interpolated_y_range}};
+@@ -50,17 +63,17 @@ class DataSpline : public DataInterpolatorL
+ 
+   private:
+ 	// Evaluate before DataNorm applies range clipping. Reused by range discovery.
+-	bool evaluate_raw(unsigned long idx, float *raw_x, float *raw_y) const
++	bool evaluate_raw(unsigned long idx, Compute *raw_x, Compute *raw_y) const
+ 	{
+ 		size_t bin;
+-		float weight;
++		Compute weight;
+ 		compute_x_bin(idx, &bin, &weight);
+ 		if (_src_size < 2 || bin >= _src_size - 1)
+ 			return false;
+-		const float x0 = _x[bin].raw();
+-		const float x1 = _x[bin + 1].raw();
+-		*raw_x = x0 * (float(1) - weight) + x1 * weight;
+-		const float dx = *raw_x - x0;
++		const Compute x0 = _x[bin].raw();
++		const Compute x1 = _x[bin + 1].raw();
++		*raw_x = x0 * (Compute(1) - weight) + x1 * weight;
++		const Compute dx = *raw_x - x0;
+ 		*raw_y = ((_d[bin] * dx + _c[bin]) * dx + _b[bin]) * dx + _y[bin].raw();
+ 		return true;
+ 	}
+@@ -68,11 +81,11 @@ class DataSpline : public DataInterpolatorL
+ 	bool spline_data()
+ 	{
+ 		const size_t n = _src_size - 1;
+-		float *h = static_cast<float *>(malloc(sizeof(float) * n));
+-		float *A = static_cast<float *>(malloc(sizeof(float) * n));
+-		float *l = static_cast<float *>(malloc(sizeof(float) * (n + 1)));
+-		float *u = static_cast<float *>(malloc(sizeof(float) * (n + 1)));
+-		float *z = static_cast<float *>(malloc(sizeof(float) * (n + 1)));
++		Compute *h = static_cast<Compute *>(malloc(sizeof(Compute) * n));
++		Compute *A = static_cast<Compute *>(malloc(sizeof(Compute) * n));
++		Compute *l = static_cast<Compute *>(malloc(sizeof(Compute) * (n + 1)));
++		Compute *u = static_cast<Compute *>(malloc(sizeof(Compute) * (n + 1)));
++		Compute *z = static_cast<Compute *>(malloc(sizeof(Compute) * (n + 1)));
+ 		if (!h || !A || !l || !u || !z)
+ 		{
+ 			free(h);
+@@ -137,17 +150,17 @@ class DataSpline : public DataInterpolatorL
+ 			/* use iteration over []?s */
+ 			for (size_t idx = 0; idx < _size; ++idx)
+ 			{
+-				float raw_x, raw_y;
++				Compute raw_x, raw_y;
+ 				if (evaluate_raw(idx, &raw_x, &raw_y))
+-					_interpolated_y_range.update(raw_y);
++					_interpolated_y_range.update(static_cast<Scalar>(raw_y));
+ 			}
+ 		}
+ 	}
+ 
+-	float _b[N + 1];
+-	float _c[N + 1];
+-	float _d[N + 1];
+-	Range<float> _interpolated_y_range{ 0, 0 };
++	Scalar _b[N + 1];
++	Scalar _c[N + 1];
++	Scalar _d[N + 1];
++	Range<Scalar> _interpolated_y_range{ 0, 0 };
+ };
+ 
+ #endif //GRAFICI_DATA_SPLINE_INTERPOLATOR_H
+diff --git a/src/data/DataVector.h b/src/data/DataVector.h
+index 8ba6b12dbc000b842df0dbecf8f4c08b574db78e..bac9b3ac95e44d42a8f4ba39b637231dca2cf0b8 100644
+--- a/src/data/DataVector.h
++++ b/src/data/DataVector.h
+@@ -20,7 +20,10 @@
+  * @brief Multi component (normalized) data point
+  * 
+  */
+-using DataVector = Vector<DataNorm>;
++template <typename Scalar = float>
++using DataVectorT = Vector<DataNormT<Scalar>>;
++
++using DataVector = DataVectorT<float>;
+ 
+ #endif /* GRAFICI_DATA_VECTOR_H */
+ 
+diff --git a/src/display/DisplayDriver.h b/src/display/DisplayDriver.h
+index b174e13f40692dc3cbf3777fcc047844da35580a..894e2445c02e0643b4ce04f6338397d9434b0a75 100644
+--- a/src/display/DisplayDriver.h
++++ b/src/display/DisplayDriver.h
+@@ -30,17 +30,22 @@
+ // Color color;
+ // }
+ 
+-class DisplayDriver
++template <typename Scalar = float>
++class DisplayDriverT
+ {
+   public:
+-	DisplayDriver(Adafruit_GFX &driver)
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DisplayVector = DisplayVectorT<Scalar>;
++    using Window = WindowT<Scalar>;
++    using DisplayDriver = DisplayDriverT<Scalar>;
++	DisplayDriverT(Adafruit_GFX &driver)
+ 	    : _driver{ &driver }
+ 	{
+ 	}
+ 
+-	void draw_line(const DisplayVector display_a, const DisplayVector display_b, const Color color_a, const Color color_b, const Window &window = full_screen, size_t segments = 1) const
++	void draw_line(const DisplayVector display_a, const DisplayVector display_b, const Color color_a, const Color color_b, const Window &window = full_screen_for<Scalar>(), size_t segments = 1) const
+ 	{
+-		const Color color_ab = color_a * 0.5 + color_b * 0.5;
++		const Color color_ab = color_a * Compute(0.5) + color_b * Compute(0.5);
+ 
+ 		if (segments == 1)
+ 		{
+@@ -58,13 +63,13 @@ class DisplayDriver
+ 		}
+ 		else if (segments > 1)
+ 		{
+-			const DisplayVector display_ab = display_a * 0.5 + display_b * 0.5;
++			const DisplayVector display_ab = display_a * Compute(0.5) + display_b * Compute(0.5);
+ 			draw_line(display_a, display_ab, color_a, color_ab, window, segments / 2);
+ 			draw_line(display_ab, display_b, color_ab, color_b, window, segments / 2);
+ 		}
+ 	}
+ 
+-	void fill_triangle(DisplayVector display_a, DisplayVector display_b, DisplayVector display_c, Color color, const Window &window = full_screen, size_t segments = 1) const
++	void fill_triangle(DisplayVector display_a, DisplayVector display_b, DisplayVector display_c, Color color, const Window &window = full_screen_for<Scalar>(), size_t segments = 1) const
+ 	{
+ 		if (segments == 1)
+ 		{
+@@ -84,9 +89,9 @@ class DisplayDriver
+ 		}
+ 		else if (segments > 1)
+ 		{
+-			auto ab = display_a * 0.5 + display_b * 0.5;
+-			auto ac = display_a * 0.5 + display_c * 0.5;
+-			auto bc = display_b * 0.5 + display_c * 0.5;
++			auto ab = display_a * Compute(0.5) + display_b * Compute(0.5);
++			auto ac = display_a * Compute(0.5) + display_c * Compute(0.5);
++			auto bc = display_b * Compute(0.5) + display_c * Compute(0.5);
+ 			fill_triangle(display_a, ac, ab, color, window, segments / 2);
+ 			fill_triangle(ac, display_c, bc, color, window, segments / 2);
+ 			fill_triangle(ab, bc, display_b, color, window, segments / 2);
+@@ -94,26 +99,26 @@ class DisplayDriver
+ 		}
+ 	}
+ 
+-	void draw_circle(DisplayVector display_center, DisplayVector display_radius, Color color, const Window &window = full_screen, size_t segments = 1) const
++	void draw_circle(DisplayVector display_center, DisplayVector display_radius, Color color, const Window &window = full_screen_for<Scalar>(), size_t segments = 1) const
+ 	{
+ 		draw_polygon(display_center, display_radius, 45, 0, color, window, segments);
+ 	}
+ 
+-	void draw_polygon(DisplayVector display_center, DisplayVector display_radius, size_t sides, float rotation, Color color, const Window &window = full_screen, size_t segments = 1) const
++	void draw_polygon(DisplayVector display_center, DisplayVector display_radius, size_t sides, Compute rotation, Color color, const Window &window = full_screen_for<Scalar>(), size_t segments = 1) const
+ 	{
+ 		for (size_t idx = 0; idx < sides; ++idx)
+ 		{
+-			double start_angle_rad = ((static_cast<double>(idx) / static_cast<double>(sides)) - rotation) * 2 * M_PI;
+-			double end_angle_rad = ((static_cast<double>(idx + 1) / static_cast<double>(sides)) - rotation) * 2 * M_PI;
+-			DisplayVector display_a = { static_cast<float>(display_center.x + cos(start_angle_rad) * display_radius.x),
+-				                        static_cast<float>(display_center.y + sin(start_angle_rad) * display_radius.y) };
+-			DisplayVector display_b = { static_cast<float>(display_center.x + cos(end_angle_rad) * display_radius.x),
+-				                        static_cast<float>(display_center.y + sin(end_angle_rad) * display_radius.y) };
++			Compute start_angle_rad = ((static_cast<Compute>(idx) / static_cast<Compute>(sides)) - rotation) * Compute(6.2831853071795864769);
++			Compute end_angle_rad = ((static_cast<Compute>(idx + 1) / static_cast<Compute>(sides)) - rotation) * Compute(6.2831853071795864769);
++			DisplayVector display_a = { static_cast<Compute>(display_center.x + grafici::cosine(start_angle_rad) * display_radius.x),
++				                        static_cast<Compute>(display_center.y + grafici::sine(start_angle_rad) * display_radius.y) };
++			DisplayVector display_b = { static_cast<Compute>(display_center.x + grafici::cosine(end_angle_rad) * display_radius.x),
++				                        static_cast<Compute>(display_center.y + grafici::sine(end_angle_rad) * display_radius.y) };
+ 			draw_line(display_a, display_b, color, color, window, segments);
+ 		}
+ 	}
+ 
+-	void draw_rect(DisplayVector bottom_left, DisplayVector top_right, Color color, const Window &window = full_screen, size_t segments = 1) const
++	void draw_rect(DisplayVector bottom_left, DisplayVector top_right, Color color, const Window &window = full_screen_for<Scalar>(), size_t segments = 1) const
+ 	{
+ 		draw_line(bottom_left, { top_right.x, bottom_left.y }, color, color, window, segments);
+ 		draw_line({ top_right.x, bottom_left.y }, top_right, color, color, window, segments);
+@@ -121,7 +126,7 @@ class DisplayDriver
+ 		draw_line({ bottom_left.x, top_right.y }, bottom_left, color, color, window, segments);
+ 	}
+ 
+-	void draw_rect(DisplayVector bottom_left, DisplayVector bottom_right, DisplayVector top_left, DisplayVector top_right, Color color, const Window &window = full_screen) const
++	void draw_rect(DisplayVector bottom_left, DisplayVector bottom_right, DisplayVector top_left, DisplayVector top_right, Color color, const Window &window = full_screen_for<Scalar>()) const
+ 	{
+ 		draw_line(bottom_left, bottom_right, color, color, window);
+ 		draw_line(bottom_left, top_left, color, color, window);
+@@ -129,7 +134,7 @@ class DisplayDriver
+ 		draw_line(top_left, top_right, color, color, window);
+ 	}
+ 
+-	void fill_rect(DisplayVector bottom_left, DisplayVector top_right, Color color, const Window &window = full_screen, size_t segments = 1) const
++	void fill_rect(DisplayVector bottom_left, DisplayVector top_right, Color color, const Window &window = full_screen_for<Scalar>(), size_t segments = 1) const
+ 	{
+ 		fill_rect(bottom_left,
+ 		          { top_right.x, bottom_left.y },
+@@ -140,7 +145,7 @@ class DisplayDriver
+ 		          segments);
+ 	}
+ 
+-	void fill_rect(DisplayVector bottom_left, DisplayVector bottom_right, DisplayVector top_left, DisplayVector top_right, Color color, const Window &window = full_screen, size_t segments = 1) const
++	void fill_rect(DisplayVector bottom_left, DisplayVector bottom_right, DisplayVector top_left, DisplayVector top_right, Color color, const Window &window = full_screen_for<Scalar>(), size_t segments = 1) const
+ 	{
+ 		// TODO add segment support
+ 		fill_triangle(bottom_left,
+@@ -158,7 +163,7 @@ class DisplayDriver
+ 		              segments);
+ 	}
+ 
+-	void fill_polygon(DisplayVector display_center, DisplayVector display_radius, unsigned int sides, float rotation, Color color, const Window &window = full_screen) const
++	void fill_polygon(DisplayVector display_center, DisplayVector display_radius, unsigned int sides, Compute rotation, Color color, const Window &window = full_screen_for<Scalar>()) const
+ 	{
+ 		/* try to avoid == as we are comparing floats */
+ 		if (display_radius < pixel_to_display_vector({1,1}))
+@@ -171,12 +176,12 @@ class DisplayDriver
+ 		{
+ 			for (size_t idx = 0; idx < sides; ++idx)
+ 			{
+-				double start_angle_rad = ((static_cast<double>(idx) / static_cast<double>(sides)) - rotation) * 2 * M_PI;
+-				double end_angle_rad = ((static_cast<double>(idx + 1) / static_cast<double>(sides)) - rotation) * 2 * M_PI;
+-				DisplayVector display_a = { static_cast<float>(display_center.x + cos(start_angle_rad) * display_radius.x),
+-					                        static_cast<float>(display_center.y + sin(start_angle_rad) * display_radius.y) };
+-				DisplayVector display_b = { static_cast<float>(display_center.x + cos(end_angle_rad) * display_radius.x),
+-					                        static_cast<float>(display_center.y + sin(end_angle_rad) * display_radius.y) };
++				Compute start_angle_rad = ((static_cast<Compute>(idx) / static_cast<Compute>(sides)) - rotation) * Compute(6.2831853071795864769);
++				Compute end_angle_rad = ((static_cast<Compute>(idx + 1) / static_cast<Compute>(sides)) - rotation) * Compute(6.2831853071795864769);
++				DisplayVector display_a = { static_cast<Compute>(display_center.x + grafici::cosine(start_angle_rad) * display_radius.x),
++					                        static_cast<Compute>(display_center.y + grafici::sine(start_angle_rad) * display_radius.y) };
++				DisplayVector display_b = { static_cast<Compute>(display_center.x + grafici::cosine(end_angle_rad) * display_radius.x),
++					                        static_cast<Compute>(display_center.y + grafici::sine(end_angle_rad) * display_radius.y) };
+ 
+ 				fill_triangle(display_center,
+ 				              display_a,
+@@ -234,8 +239,8 @@ class DisplayDriver
+ 	DisplayVector pixel_to_display_vector(PixelVector pixel_vector) const
+ 	{
+ 		return {
+-			static_cast<float>(static_cast<float>(pixel_vector.x) / _driver->width()),
+-			static_cast<float>(static_cast<float>(pixel_vector.y) / _driver->height())
++			static_cast<Compute>(static_cast<Compute>(pixel_vector.x) / _driver->width()),
++			static_cast<Compute>(static_cast<Compute>(pixel_vector.y) / _driver->height())
+ 		};
+ 	}
+ 
+@@ -252,6 +257,8 @@ class DisplayDriver
+ 	};
+ };
+ 
++using DisplayDriver = DisplayDriverT<float>;
++
+ #endif /* GRAFICI_DISPLAY_DRIVER_H */
+ 
+ /** @}*/
+\ No newline at end of file
+diff --git a/src/display/DisplayVector.h b/src/display/DisplayVector.h
+index 438b0b77ccca133553d12b02173e28d07dd7b669..a00e39d9db8288b6c82658a8fef7b413bd155835 100644
+--- a/src/display/DisplayVector.h
++++ b/src/display/DisplayVector.h
+@@ -25,7 +25,10 @@
+  * 
+  */
+ 
+-using DisplayVector = Vector<float>;
++template <typename Scalar = float>
++using DisplayVectorT = Vector<Scalar>;
++
++using DisplayVector = DisplayVectorT<float>;
+ 
+ #endif /* GRAFICI_DISPLAY_DISPLAY_VECTOR_H */
+ 
+diff --git a/src/display/PolarWindow.h b/src/display/PolarWindow.h
+index 6882798c5184fdfad91831d3ac11a4f1a036a47a..20dee46611a44be130f6db011166bcf502998885 100644
+--- a/src/display/PolarWindow.h
++++ b/src/display/PolarWindow.h
+@@ -20,17 +20,24 @@
+ /*! Importation of librairies*/
+ #include "Window.h"
+ 
+-class PolarWindow : public Window
++template <typename Scalar = float>
++class PolarWindowT : public WindowT<Scalar>
+ {
+   public:
+-	PolarWindow()
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using Window = WindowT<Scalar>;
++    using DisplayVector = DisplayVectorT<Scalar>;
++    using Window::x;
++    using Window::y;
++    using PolarWindow = PolarWindowT<Scalar>;
++	PolarWindowT()
+ 	    : Window()
+-	    , m_parent_window{ full_screen }
++	    , m_parent_window{ full_screen_for<Scalar>() }
+ 
+ 	{
+ 	}
+ 
+-	PolarWindow(const Range<float> &x_range, const Range<float> &y_range, const Window &parent_window = full_screen)
++	PolarWindowT(const Range<Scalar> &x_range, const Range<Scalar> &y_range, const Window &parent_window = full_screen_for<Scalar>())
+ 	    : Window(x_range, y_range)
+ 	    , m_parent_window{ parent_window }
+ 	{
+@@ -40,12 +47,12 @@ class PolarWindow : public Window
+ 	{
+ 		auto x_delta_subwindow = x.delta() / x_slices;
+ 		auto y_delta_subwindow = y.delta() / y_slices;
+-		Range<float> new_range_x = { x.low + x_delta_subwindow * x_slice_idx, x.low + x_delta_subwindow * (x_slice_idx + 1) };
+-		Range<float> new_range_y = { y.low + y_delta_subwindow * y_slice_idx, y.low + y_delta_subwindow * (y_slice_idx + 1) };
++		Range<Scalar> new_range_x = { x.low + x_delta_subwindow * x_slice_idx, x.low + x_delta_subwindow * (x_slice_idx + 1) };
++		Range<Scalar> new_range_y = { y.low + y_delta_subwindow * y_slice_idx, y.low + y_delta_subwindow * (y_slice_idx + 1) };
+ 		return { new_range_x, new_range_y };
+ 	}
+ 
+-	PolarWindow sub_polar_window(Range<float> new_range_x, Range<float> new_range_y) const
++	PolarWindow sub_polar_window(Range<Scalar> new_range_x, Range<Scalar> new_range_y) const
+ 	{
+ 		return { { x.low + x.delta() * new_range_x.low,
+ 			       x.low + x.delta() * new_range_x.high },
+@@ -53,12 +60,12 @@ class PolarWindow : public Window
+ 			       y.low + y.delta() * new_range_y.high } };
+ 	}
+ 
+-	DisplayVector data_to_display_vector(float data_x, float data_y) const override
++	DisplayVector data_to_display_vector(Compute data_x, Compute data_y) const override
+ 	{
+-		float angle = x.norm_to_value(data_x);
+-		float radius = y.norm_to_value(data_y);
+-		float display_x = 0.5 + (radius * 0.5) * cos(angle * 2 * M_PI);
+-		float display_y = 0.5 + (radius * 0.5) * sin(angle * 2 * M_PI);
++		Compute angle = x.norm_to_value(data_x);
++		Compute radius = y.norm_to_value(data_y);
++		Compute display_x = Compute(0.5) + (radius * Compute(0.5)) * grafici::cosine(angle * Compute(6.2831853071795864769));
++		Compute display_y = Compute(0.5) + (radius * Compute(0.5)) * grafici::sine(angle * Compute(6.2831853071795864769));
+ 		return m_parent_window.data_to_display_vector(display_x, display_y);
+ 	};
+ 
+@@ -66,6 +73,8 @@ class PolarWindow : public Window
+ 	const Window m_parent_window;
+ };
+ 
++using PolarWindow = PolarWindowT<float>;
++
+ #endif /* GRAFICI_DISPLAY_WINDOW_POLAR_H */
+ 
+ /** @}*/
+\ No newline at end of file
+diff --git a/src/display/Window.h b/src/display/Window.h
+index a7dc1cde2cfe79a2c83534405172f20a8cdf4515..58fbe8020b2e9448956fd597fa063a2c7d616d24 100644
+--- a/src/display/Window.h
++++ b/src/display/Window.h
+@@ -39,23 +39,31 @@ enum class WindowTransform
+  * the min and max coordinates on the window.
+  * 
+  */
+-class Window : public Vector<Range<float>>
++template <typename Scalar = float>
++class WindowT : public Vector<Range<Scalar>>
+ {
+   public:
+-	Window()
+-	    : Vector<Range<float>>{ { 0, 1 }, { 0, 1 } }
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using DataNorm = DataNormT<Scalar>;
++    using DataVector = DataVectorT<Scalar>;
++    using DisplayVector = DisplayVectorT<Scalar>;
++    using Vector<Range<Scalar>>::x;
++    using Vector<Range<Scalar>>::y;
++    using Window = WindowT<Scalar>;
++	WindowT()
++	    : Vector<Range<Scalar>>{ { 0, 1 }, { 0, 1 } }
+ 	    , _transform{ WindowTransform::none }
+ 	{
+ 	}
+ 
+-	Window(const Range<float> &x_range, const Range<float> &y_range, WindowTransform rotation = WindowTransform::none)
+-	    : Vector<Range<float>>{ x_range, y_range }
++	WindowT(const Range<Scalar> &x_range, const Range<Scalar> &y_range, WindowTransform rotation = WindowTransform::none)
++	    : Vector<Range<Scalar>>{ x_range, y_range }
+ 	    , _transform{ rotation }
+ 	{
+ 	}
+ 
+-	Window(const DisplayVector &origin, float width, float height, WindowTransform rotation = WindowTransform::none)
+-	    : Vector<Range<float>>{ { origin.x, origin.x + width }, { origin.y, origin.y + height } }
++	WindowT(const DisplayVector &origin, Scalar width, Scalar height, WindowTransform rotation = WindowTransform::none)
++	    : Vector<Range<Scalar>>{ { origin.x, origin.x + width }, { origin.y, origin.y + height } }
+ 	    , _transform{ rotation }
+ 	{
+ 	}
+@@ -68,7 +76,7 @@ class Window : public Vector<Range<float>>
+ 		return *this;
+ 	};
+ 
+-	Window &set_boundaries(const Range<float> &x_range, const Range<float> &y_range)
++	Window &set_boundaries(const Range<Scalar> &x_range, const Range<Scalar> &y_range)
+ 	{
+ 		x = x_range;
+ 		y = y_range;
+@@ -79,12 +87,12 @@ class Window : public Vector<Range<float>>
+ 	{
+ 		auto x_delta_subwindow = x.delta() / x_slices;
+ 		auto y_delta_subwindow = y.delta() / y_slices;
+-		Range<float> new_range_x = { x.low + x_delta_subwindow * x_slice_idx, x.low + x_delta_subwindow * (x_slice_idx + 1) };
+-		Range<float> new_range_y = { y.low + y_delta_subwindow * y_slice_idx, y.low + y_delta_subwindow * (y_slice_idx + 1) };
++		Range<Scalar> new_range_x = { x.low + x_delta_subwindow * x_slice_idx, x.low + x_delta_subwindow * (x_slice_idx + 1) };
++		Range<Scalar> new_range_y = { y.low + y_delta_subwindow * y_slice_idx, y.low + y_delta_subwindow * (y_slice_idx + 1) };
+ 		return { new_range_x, new_range_y };
+ 	};
+ 
+-	Window sub_window(Range<float> new_range_x, Range<float> new_range_y) const
++	Window sub_window(Range<Scalar> new_range_x, Range<Scalar> new_range_y) const
+ 	{
+ 		return { { x.low + x.delta() * new_range_x.low,
+ 			       x.low + x.delta() * new_range_x.high },
+@@ -98,7 +106,7 @@ class Window : public Vector<Range<float>>
+ 	};
+ 
+ 	/* from normalized data vector to normalized display vector */
+-	virtual DisplayVector data_to_display_vector(float data_x, float data_y) const
++	virtual DisplayVector data_to_display_vector(Compute data_x, Compute data_y) const
+ 	{
+ 		/* handle rotation and transformations here */
+ 		switch (_transform)
+@@ -145,7 +153,26 @@ class Window : public Vector<Range<float>>
+ 	WindowTransform _transform{ WindowTransform::none };
+ };
+ 
+-const Window full_screen;
++using Window = WindowT<float>;
++
++namespace grafici_detail {
++template <typename Scalar>
++struct DefaultWindow
++{
++    static const WindowT<Scalar> value;
++};
++
++template <typename Scalar>
++const WindowT<Scalar> DefaultWindow<Scalar>::value;
++} // namespace grafici_detail
++
++template <typename Scalar>
++inline const WindowT<Scalar> &full_screen_for()
++{
++    return grafici_detail::DefaultWindow<Scalar>::value;
++}
++
++static const Window &full_screen = grafici_detail::DefaultWindow<float>::value;
+ 
+ #endif /* GRAFICI_RECTANGULAR_WINDOW_H */
+ 
+diff --git a/src/numeric/Float16.h b/src/numeric/Float16.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..6a21f3370d2b50ee86e738a7360703a2201276cd
+--- /dev/null
++++ b/src/numeric/Float16.h
+@@ -0,0 +1,116 @@
++#ifndef GRAFICI_NUMERIC_FLOAT16_H
++#define GRAFICI_NUMERIC_FLOAT16_H
++
++#include <float.h>
++#include <stdint.h>
++#include <string.h>
++
++namespace grafici {
++
++// IEEE 754 binary16 storage. Arithmetic promotes to float; assignment rounds
++// to nearest, ties to even. This is a signed floating-point format, not UNORM.
++class Float16
++{
++    struct RawBits {};
++    constexpr Float16(uint16_t bits, RawBits) : _bits(bits) {}
++
++public:
++    Float16() = default;
++    Float16(float value) : _bits(encode(value)) {}
++
++    operator float() const { return decode(_bits); }
++
++    Float16 &operator+=(float value) { return *this = float(*this) + value; }
++    Float16 &operator-=(float value) { return *this = float(*this) - value; }
++    Float16 &operator*=(float value) { return *this = float(*this) * value; }
++    Float16 &operator/=(float value) { return *this = float(*this) / value; }
++
++    constexpr uint16_t bits() const { return _bits; }
++
++    static constexpr Float16 from_bits(uint16_t bits)
++    {
++        return Float16(bits, RawBits{});
++    }
++
++private:
++    static_assert(sizeof(float) == 4 && FLT_RADIX == 2 &&
++                  FLT_MANT_DIG == 24 && FLT_MAX_EXP == 128,
++                  "Float16 requires IEEE binary32 float");
++
++    static uint32_t round_shift(uint32_t value, unsigned shift)
++    {
++        const uint32_t result = value >> shift;
++        const uint32_t remainder = value & ((uint32_t(1) << shift) - 1);
++        const uint32_t halfway = uint32_t(1) << (shift - 1);
++        return result + (remainder > halfway ||
++                         (remainder == halfway && (result & 1)));
++    }
++
++    static uint16_t encode(float value)
++    {
++        uint32_t bits;
++        memcpy(&bits, &value, sizeof(bits));
++        const uint16_t sign = (bits >> 16) & 0x8000;
++        const unsigned exponent = (bits >> 23) & 0xFF;
++        const uint32_t fraction = bits & 0x7FFFFF;
++        if (exponent == 0xFF)
++        {
++            // Preserve NaN sign/payload where possible and quiet all NaNs.
++            return sign | 0x7C00 | (fraction ? ((fraction >> 13) | 0x0200) : 0);
++        }
++
++        const int half_exponent = int(exponent) - 112;
++        if (half_exponent >= 31)
++            return sign | 0x7C00;
++        if (half_exponent <= 0)
++        {
++            if (half_exponent < -10)
++                return sign;
++            return sign | round_shift(fraction | 0x800000, unsigned(14 - half_exponent));
++        }
++
++        // A rounded fraction of 0x400 carries into the exponent, including
++        // finite overflow at 65520, which rounds to infinity.
++        return sign | uint16_t((unsigned(half_exponent) << 10) + round_shift(fraction, 13));
++    }
++
++    static float decode(uint16_t bits)
++    {
++        const uint32_t sign = uint32_t(bits & 0x8000) << 16;
++        const unsigned exponent = (bits >> 10) & 0x1F;
++        uint32_t fraction = bits & 0x03FF;
++        uint32_t result;
++        if (exponent == 0)
++        {
++            if (fraction == 0)
++                result = sign;
++            else
++            {
++                unsigned normalized_exponent = 113;
++                while (!(fraction & 0x0400))
++                {
++                    fraction <<= 1;
++                    --normalized_exponent;
++                }
++                result = sign | (uint32_t(normalized_exponent) << 23) |
++                         ((fraction & 0x03FF) << 13);
++            }
++        }
++        else
++        {
++            const unsigned expanded_exponent = exponent == 31 ? 255 : exponent + 112;
++            result = sign | (uint32_t(expanded_exponent) << 23) | (fraction << 13);
++        }
++        float value;
++        memcpy(&value, &result, sizeof(value));
++        return value;
++    }
++
++    uint16_t _bits;
++};
++
++static_assert(sizeof(Float16) == 2, "Float16 must occupy two bytes");
++
++} // namespace grafici
++
++#endif
+diff --git a/src/numeric/Precision.h b/src/numeric/Precision.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..3f9724895b146588ee700c0c32cc99ccaadf210b
+--- /dev/null
++++ b/src/numeric/Precision.h
+@@ -0,0 +1,44 @@
++#ifndef GRAFICI_NUMERIC_PRECISION_H
++#define GRAFICI_NUMERIC_PRECISION_H
++
++#include "Float16.h"
++#include <math.h>
++
++namespace grafici {
++
++// Integer ranges and Float16 use float for normalized arithmetic. Applications
++// may specialize this trait for another real type with suitable arithmetic.
++template <typename Scalar>
++struct ComputationType
++{
++    using type = float;
++};
++
++template <>
++struct ComputationType<double>
++{
++    using type = double;
++};
++
++template <>
++struct ComputationType<long double>
++{
++    using type = long double;
++};
++
++inline float cosine(float value) { return cosf(value); }
++inline double cosine(double value) { return cos(value); }
++inline float sine(float value) { return sinf(value); }
++inline double sine(double value) { return sin(value); }
++#if defined(__AVR__)
++// The Arduino AVR math library has no separate long-double entry points.
++inline long double cosine(long double value) { return cos(static_cast<double>(value)); }
++inline long double sine(long double value) { return sin(static_cast<double>(value)); }
++#else
++inline long double cosine(long double value) { return cosl(value); }
++inline long double sine(long double value) { return sinl(value); }
++#endif
++
++} // namespace grafici
++
++#endif
+diff --git a/src/plotter/PlotArea.h b/src/plotter/PlotArea.h
+index 8ecee18e143a76bebe6b4785247b6d7e8d26c3f8..d388620f9b047a3ad2a161ce81f5432c3f8a0962 100644
+--- a/src/plotter/PlotArea.h
++++ b/src/plotter/PlotArea.h
+@@ -3,16 +3,17 @@
+ 
+ #include "PlotOptions.h"
+ 
+-inline void plot_area(const DisplayDriver &display,
+-               const Window &window,
++template <typename Scalar>
++inline void plot_area(const DisplayDriverT<Scalar> &display,
++               const WindowT<Scalar> &window,
+                const ColorMap &colorMap,
+-               const DataSourceNorm &x,
+-               const DataSourceNorm &y,
+-               const DataSourceNorm &c,
+-               const PlotOptions opts = {})
++               const DataSourceNormT<Scalar> &x,
++               const DataSourceNormT<Scalar> &y,
++               const DataSourceNormT<Scalar> &c,
++               const PlotOptionsT<Scalar> opts = {})
+ {
+ 	/* in case data sources have different sizes, use the smaller one */
+-	auto source_size = DataSourceNorm::min_data_source_size(x, y, c);
++	auto source_size = DataSourceNormT<Scalar>::min_data_source_size(x, y, c);
+ 
+ 	for (size_t idx = 1; idx < source_size; ++idx)
+ 	{
+diff --git a/src/plotter/PlotAxis.h b/src/plotter/PlotAxis.h
+index 3174d4e89c70efb996c5f95c84a89e5b52dad711..8261c362296044d46aacf64ff00639c11765d859 100644
+--- a/src/plotter/PlotAxis.h
++++ b/src/plotter/PlotAxis.h
+@@ -19,9 +19,10 @@
+ 
+ #include "PlotOptions.h"
+ 
+-inline void plot_axis(const DisplayDriver &display,
+-               const Window &window,
+-               const PlotOptions &opts)
++template <typename Scalar>
++inline void plot_axis(const DisplayDriverT<Scalar> &display,
++               const WindowT<Scalar> &window,
++               const PlotOptionsT<Scalar> &opts)
+ {
+ 	if (opts.get_h_axis() > 0 || opts.get_v_axis() > 0)
+ 	{
+diff --git a/src/plotter/PlotBar.h b/src/plotter/PlotBar.h
+index b309de075a31502c170909aa5a28c7afef2dc74b..22d8305d4ee719d4d649382212aa6ba7f06c9eed 100644
+--- a/src/plotter/PlotBar.h
++++ b/src/plotter/PlotBar.h
+@@ -19,16 +19,17 @@
+ 
+ #include "PlotOptions.h"
+ 
+-inline void plot_bar(const DisplayDriver &display,
+-              const Window &window,
++template <typename Scalar>
++inline void plot_bar(const DisplayDriverT<Scalar> &display,
++              const WindowT<Scalar> &window,
+               const ColorMap &colorMap,
+-              const DataSourceNorm &x,
+-              const DataSourceNorm &y,
+-              const DataSourceNorm &c,
+-              const PlotOptions opts = {})
++              const DataSourceNormT<Scalar> &x,
++              const DataSourceNormT<Scalar> &y,
++              const DataSourceNormT<Scalar> &c,
++              const PlotOptionsT<Scalar> opts = {})
+ {
+ 	/* in case data sources have different sizes, use the smaller one */
+-	auto source_size = DataSourceNorm::min_data_source_size(x, y, c);
++	auto source_size = DataSourceNormT<Scalar>::min_data_source_size(x, y, c);
+ 
+ 	for (size_t idx = 0; idx < source_size; ++idx)
+ 	{
+diff --git a/src/plotter/PlotLine.h b/src/plotter/PlotLine.h
+index ef60d99a7d1a5796b115a61ec3c018c65d417f0b..676d656aca87151c9c6a0b9d5b1529888e541032 100644
+--- a/src/plotter/PlotLine.h
++++ b/src/plotter/PlotLine.h
+@@ -3,16 +3,17 @@
+ 
+ #include "PlotOptions.h"
+ 
+-inline void plot_line(const DisplayDriver &display,
+-               const Window &window,
++template <typename Scalar>
++inline void plot_line(const DisplayDriverT<Scalar> &display,
++               const WindowT<Scalar> &window,
+                const ColorMap &colorMap,
+-               const DataSourceNorm &x,
+-               const DataSourceNorm &y,
+-               const DataSourceNorm &c,
+-               const PlotOptions opts = {})
++               const DataSourceNormT<Scalar> &x,
++               const DataSourceNormT<Scalar> &y,
++               const DataSourceNormT<Scalar> &c,
++               const PlotOptionsT<Scalar> opts = {})
+ {
+ 	/* in case data sources have different sizes, use the smaller one */
+-	auto source_size = DataSourceNorm::min_data_source_size(x, y, c);
++	auto source_size = DataSourceNormT<Scalar>::min_data_source_size(x, y, c);
+ 
+ 	for (size_t idx = 1; idx < source_size; ++idx)
+ 	{
+diff --git a/src/plotter/PlotOptions.h b/src/plotter/PlotOptions.h
+index 2e4bc1a008ce643ec9d3eb35e03b5041ae545b9f..bdbdfd22027061ddf3c9a07aeecb9656f27b9266 100644
+--- a/src/plotter/PlotOptions.h
++++ b/src/plotter/PlotOptions.h
+@@ -17,8 +17,14 @@
+ #ifndef GRAFICI_GFX_PLOT_OPTIONS_H
+ #define GRAFICI_GFX_PLOT_OPTIONS_H
+ 
+-struct PlotOptions
++#include "../numeric/Precision.h"
++
++template <typename Scalar = float>
++struct PlotOptionsT
+ {
++  public:
++    using Compute = typename grafici::ComputationType<Scalar>::type;
++    using PlotOptions = PlotOptionsT<Scalar>;
+ public:
+ 
+     // break line into multiple segments. useful for color gradients and polar plots. set num_segments > 45 for polar plots
+@@ -30,7 +36,7 @@ public:
+     }
+ 
+     // relative thickness of the bar. A thickness of 1.0 will produce a bar that is 1/length(x) wide. A thickness of 0.0 will produce a bar that is 1-pixel wide 
+-	PlotOptions thickness(float thickness) const
++	PlotOptions thickness(Scalar thickness) const
+     {
+         auto result = *this;
+         result.m_thickness = thickness;
+@@ -61,7 +67,7 @@ public:
+         return result;
+     }
+ 
+-	float get_thickness() const
++	Scalar get_thickness() const
+ 	{
+ 		return m_thickness;
+ 	}
+@@ -106,7 +112,7 @@ protected:
+     Color m_axis_color{white};
+ 
+     // bar plot specific
+-    float m_thickness{ 0.8 }; 
++    Scalar m_thickness{ 0.8f };
+ 	bool m_bar_filled{ false };  
+ 
+     // scatter specific
+@@ -114,6 +120,8 @@ protected:
+ 
+ };
+ 
++using PlotOptions = PlotOptionsT<float>;
++
+ const PlotOptions plot_options;
+ 
+ #endif /* GRAFICI_GFX_PLOT_OPTIONS_H */
+diff --git a/src/plotter/PlotScatter.h b/src/plotter/PlotScatter.h
+index 0657d194e5f0503395a8518b931ae9a732fa860b..fedb7fd2056508208c57061ffefe7e48fb75fab5 100644
+--- a/src/plotter/PlotScatter.h
++++ b/src/plotter/PlotScatter.h
+@@ -1,17 +1,18 @@
+ #ifndef GRAFICI_GFX_PLOT_SCATTER_H
+ #define GRAFICI_GFX_PLOT_SCATTER_H
+ 
+-inline void plot_scatter(const DisplayDriver &display,
+-                  const Window &window,
++template <typename Scalar>
++inline void plot_scatter(const DisplayDriverT<Scalar> &display,
++                  const WindowT<Scalar> &window,
+                   const ColorMap &colorMap,
+-                  const DataSourceNorm &x,
+-                  const DataSourceNorm &y,
+-                  const DataSourceNorm &c,
+-                  const DataSourceNorm &size,
+-                  const PlotOptions opts = {})
++                  const DataSourceNormT<Scalar> &x,
++                  const DataSourceNormT<Scalar> &y,
++                  const DataSourceNormT<Scalar> &c,
++                  const DataSourceNormT<Scalar> &size,
++                  const PlotOptionsT<Scalar> opts = {})
+ {
+ 	/* in case data sources have different sizes, use the smaller one */
+-	auto source_size = DataSourceNorm::min_data_source_size(x, y, c);
++	auto source_size = DataSourceNormT<Scalar>::min_data_source_size(x, y, c);
+ 
+ 	for (size_t idx = 0; idx < source_size; ++idx)
+ 	{
+diff --git a/tests/README.md b/tests/README.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..d3af756d85d086976897dca923ac9c39c0a62b5a
+--- /dev/null
++++ b/tests/README.md
+@@ -0,0 +1,20 @@
++# Host regression checks
++
++These checks need a C++11 host compiler. The plotting check supplies its own small display stub; no Arduino installation is required. Run from the repository root:
++
++```sh
++c++ -std=c++11 -Wall -Wextra -pedantic -I src tests/data_spline_bounds.cpp -o /tmp/grafici-spline-bounds
++/tmp/grafici-spline-bounds
++c++ -std=c++11 -Wall -Wextra -pedantic -I src tests/numeric_precision.cpp -o /tmp/grafici-numeric-precision
++/tmp/grafici-numeric-precision
++c++ -std=c++11 -Wall -Wextra -pedantic -I tests/support -I src tests/precision_plotting.cpp -o /tmp/grafici-precision-plotting
++/tmp/grafici-precision-plotting
++```
++
++It guards every spline workspace allocation, checks interpolation including the maximum supported source count, injects failure into each allocation, and exercises empty, single-point, zero-output and oversized inputs. Unsupported inputs or allocation failure produce an empty spline (`size() == 0`), whose reads return `INVALID_DATA_VECTOR`. Source count is the minimum of x/y counts and must be between 2 and `N + 1` for the current fixed coefficient arrays.
++
++It also checks that a declared x range extending beyond the supplied knots returns invalid data for an uncovered sample without reading past the source. This does not change interpolation endpoint sampling or validate every numerical precondition, such as strictly increasing knots.
++
++The numeric check validates every binary16 encoding and finite rounding interval, then exercises float/FP16 sources, borrowed casts, ranges, interpolation, splines and projection. The plotting check uses a host drawing-call recorder to instantiate both complete pipelines and check representative pixel endpoints. The recorder does not emulate hardware or rasterization.
++
++For additional host diagnostics, add `-fsanitize=address,undefined -fno-omit-frame-pointer` to the compile command when supported. Keep assertions enabled. Board SRAM/stack measurements remain separate from these host checks.
+diff --git a/tests/numeric_precision.cpp b/tests/numeric_precision.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..865d5446591ea723298195b672d4354d09f62eda
+--- /dev/null
++++ b/tests/numeric_precision.cpp
+@@ -0,0 +1,171 @@
++#include <cassert>
++#include <cmath>
++#include <cstddef>
++#include <cstdint>
++#include <cstdio>
++#include <cstdlib>
++#include <limits>
++#include <type_traits>
++
++// Arduino random API used by the distribution sources.
++void randomSeed(unsigned long seed) { std::srand(seed); }
++long random(long low, long high) { return low + std::rand() % (high - low); }
++long random(long high) { return high > 0 ? random(0, high) : 0; }
++
++#include "numeric/Float16.h"
++#include "data/DataArrayXY.h"
++#include "data/DataCast.h"
++#include "data/DataConstant.h"
++#include "data/DataDistributionNormal.h"
++#include "data/DataDistributionUniform.h"
++#include "data/DataFunction.h"
++#include "data/DataHistogramXY.h"
++#include "data/DataResize.h"
++#include "data/DataSourceVector.h"
++#include "data/DataSpline.h"
++#include "display/DisplayVector.h"
++#include "display/PolarWindow.h"
++
++using Half = grafici::Float16;
++
++void check_binary16()
++{
++    static_assert(sizeof(Half) == 2, "Two-byte sample storage");
++    static_assert(std::is_trivially_default_constructible<Half>::value,
++                  "Sample arrays need no default-construction loop");
++    constexpr Half one = Half::from_bits(0x3C00);
++    static_assert(one.bits() == 0x3C00, "Raw-bit tables support constant initialization");
++    Half zero{};
++    assert(zero.bits() == 0);
++    static_assert(sizeof(DataNormT<Half>) == 6, "Compact value and range");
++    static_assert(sizeof(DisplayVectorT<Half>) == 4, "Compact coordinates");
++    static_assert(std::is_same<DataNorm, DataNormT<float>>::value, "Float API default");
++    static_assert(std::is_same<decltype(Half(1) + Half(1)), float>::value,
++                  "Half arithmetic widens to float");
++
++    for (uint32_t bits = 0; bits < 65536; ++bits)
++    {
++        const unsigned exponent = (bits >> 10) & 31;
++        const unsigned fraction = bits & 1023;
++        const float decoded = Half::from_bits(uint16_t(bits));
++        if (exponent == 31 && fraction != 0)
++        {
++            assert(std::isnan(decoded));
++            assert(Half(decoded).bits() == (bits | 0x0200));
++        }
++        else
++        {
++            float expected = exponent == 31 ? std::numeric_limits<float>::infinity()
++                : exponent == 0 ? std::ldexp(float(fraction), -24)
++                : std::ldexp(float(1024 + fraction), int(exponent) - 25);
++            if (bits & 0x8000) expected = -expected;
++            assert(decoded == expected && std::signbit(decoded) == std::signbit(expected));
++            assert(Half(decoded).bits() == bits);
++        }
++    }
++
++    // Exercise every positive finite rounding interval, including ties and
++    // values immediately beside each tie. Negative rounding is symmetric.
++    for (uint16_t bits = 0; bits < 0x7BFF; ++bits)
++    {
++        const float lo = Half::from_bits(bits);
++        const float hi = Half::from_bits(bits + 1);
++        const float midpoint = (lo + hi) * 0.5f;
++        const uint16_t even = bits + (bits & 1);
++        assert(Half(midpoint).bits() == even);
++        assert(Half(-midpoint).bits() == (even | 0x8000));
++        assert(Half(std::nextafter(midpoint, lo)).bits() == bits);
++        assert(Half(std::nextafter(midpoint, hi)).bits() == bits + 1);
++    }
++    assert(Half(65504).bits() == 0x7BFF);
++    assert(Half(65519).bits() == 0x7BFF);
++    assert(Half(65520).bits() == 0x7C00);
++    assert(Half(-65520).bits() == 0xFC00);
++
++    Half sum = Half(0.75f) + Half(0.75f);
++    Half difference = Half(0.25f) - Half(0.75f);
++    assert(float(sum) == 1.5f && float(difference) == -0.5f);
++    sum *= 2;
++    sum /= 2;
++    sum -= 0.5f;
++    sum += 0.5f;
++    assert(float(sum) == 1.5f);
++    DisplayVectorT<Half> vector{1.5f, -0.5f};
++    const auto scaled = vector * 2;
++    assert(float(scaled.x) == 3 && float(scaled.y) == -1);
++    DataNormT<Half> raw(2, {-4, 4});
++    assert(float(raw.raw()) == 2 && raw.norm() == 0.75f);
++    const DataNorm widened = raw;
++    assert(widened.raw() == 2 && widened.range().low == -4);
++    Range<Half> wide_range{-65504, 65504};
++    assert(wide_range.value_to_norm(Half(0)) == 0.5f);
++    Range<uint32_t> integer_range{1000000000, 1000000010};
++    assert(integer_range.value_to_norm(1000000005) == 0.5f);
++}
++
++float sample_function(size_t i) { return float(i) - 2; }
++
++template <typename Scalar>
++void check_sources()
++{
++    const Scalar values[] = {-2, -1, 0, 1, 2};
++    DataArray<Scalar, Scalar> source(values, 5);
++    assert(float(source.range().low) == -2 && float(source.range().high) == 2);
++    assert(source[2].norm() == 0.5f);
++    DataCast<float, Scalar> widened(source);
++    assert(widened[4].raw() == 2 && widened.range().low == -2);
++    DataCast<Scalar, float> narrowed(widened);
++    assert(float(narrowed[0].raw()) == -2);
++    assert(narrowed[5].range().high == 0);
++    DataArrayXY<Scalar, Scalar> xy(values, 5);
++    DataSourceVectorT<Scalar> &vector_source = xy;
++    assert(float(vector_source[4].x.raw()) == 4);
++    assert(xy.y()[4].norm() == 1);
++    DataConstantT<Scalar> constant(5, {2, {-4, 4}});
++    assert(float(constant[0].raw()) == 2);
++    DataFunctionT<Scalar> function(5, sample_function);
++    assert(float(function[0].raw()) == -2 && function[4].norm() == 1);
++    DataLinearT<Scalar> linear(5, -2, 1);
++    assert(float(linear[4].raw()) == 2);
++    DataResizeT<Scalar> resized(source, {0.25f, 0.75f});
++    assert(resized[0].norm() == 0.25f && resized[4].norm() == 0.75f);
++    // Keep the views alive: the interpolator borrows its source references.
++    auto x = xy.x();
++    auto y = xy.y();
++    DataInterpolatorLT<Scalar> stable_interpolation(x, y, 8);
++    assert(std::fabs(float(stable_interpolation[4].y.raw())) < 0.002f);
++    DataSpline<8, false, Scalar> spline(x, y);
++    assert(spline.size() == 8);
++    assert(std::fabs(float(spline[4].y.raw())) < 0.002f);
++    DataHistogramXY<4, Scalar> histogram(source);
++    assert(histogram.size() == 4 && float(histogram[0].y.raw()) == 1);
++    DataDistributionUniform<32, Scalar> uniform(1);
++    DataDistributionNormal<32, Scalar> normal(1);
++    assert(uniform.size() == 32 && normal.size() == 32);
++    assert(uniform[0].norm() >= 0 && uniform[0].norm() <= 1);
++
++    WindowT<Scalar> window({0.25f, 0.75f}, {0.25f, 0.75f});
++    const auto projected = window.data_to_display_vector(0.5f, 0.5f);
++    assert(float(projected.x) == 0.5f && float(projected.y) == 0.5f);
++    auto sub = window.sub_window(2, 2, 0, 0);
++    assert(float(sub.x.high) == 0.5f);
++    PolarWindowT<Scalar> polar;
++    const auto radial = polar.data_to_display_vector(0, 1);
++    assert(float(radial.x) == 1 && float(radial.y) == 0.5f);
++    assert(float(polar.sub_polar_window(2, 2, 0, 0).x.high) == 0.5f);
++}
++
++int main()
++{
++    check_binary16();
++    check_sources<float>();
++    check_sources<Half>();
++    Half samples[] = {-2, 0, 2};
++    DataArray<Half> compact_samples(samples, 3); // FP32 interface, FP16 buffer
++    assert(compact_samples[2].raw() == 2);
++    static_assert(sizeof(DataSpline<32, false, Half>) < sizeof(DataSpline<32, false>),
++                  "FP16 reduces retained spline storage");
++    static_assert(sizeof(DataDistributionUniform<128, Half>) < sizeof(DataDistributionUniform<128>),
++                  "FP16 reduces retained sample storage");
++    std::puts("All binary16 patterns, rounding intervals, signed/unbounded values and typed sources passed.");
++}
+diff --git a/tests/precision_plotting.cpp b/tests/precision_plotting.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..91dabf1c7539a07ead86c493ab8abfd18e409534
+--- /dev/null
++++ b/tests/precision_plotting.cpp
+@@ -0,0 +1,55 @@
++#include "Adafruit_GFX.h"
++#include "Grafici.h"
++#include <cassert>
++#include <cstdio>
++
++template <typename Scalar>
++void check_plotting()
++{
++    Adafruit_GFX target;
++    GraficiT<Scalar> plot(target);
++    const Scalar samples[] = {0, 0.5f, 1};
++    DataArray<Scalar, Scalar> source(samples, 3);
++    plot.line(source, source, white);
++    assert(target.lines.size() == 2);
++    assert(target.lines.front().x0 == 0 && target.lines.front().y0 == 63);
++    assert(target.lines.back().x1 == 127 && target.lines.back().y1 == 0);
++
++    WindowT<Scalar> window({0.25f, 0.75f}, {0.25f, 0.75f}, WindowTransform::cw_90_rotation);
++    const PlotOptionsT<Scalar> options;
++    auto axis_options = options.set_axis(2, 2, white);
++    plot.line(source, source, source, window, axis_options);
++    plot.area(source, source, source, window);
++    plot.area(source, source, white, window);
++    plot.bar(source, source, source, window, options.bar_filled(true));
++    plot.bar(source, source, white, window, options.thickness(0));
++    DataConstantT<Scalar> radius(3, 0.02f);
++    plot.scatter(source, source, source, radius, window, options.scatter_style(".o+*xv"));
++    plot.scatter(source, source, white, radius, window);
++    plot.clear_screen(window);
++
++    PolarWindowT<Scalar> polar;
++    plot.line(source, source, white, polar, options.segments(4));
++    plot.bar(source, source, white, polar, options.bar_filled(true).segments(2));
++    DisplayDriverT<Scalar> driver(target);
++    driver.fill_polygon({0.5f, 0.5f}, {0.1f, 0.1f}, 3, 0, white);
++    driver.fill_screen(black);
++    assert(target.triangles > 0 && target.screens == 1);
++}
++
++int main()
++{
++    check_plotting<float>();
++    check_plotting<grafici::Float16>();
++    Adafruit_GFX target;
++    Grafici legacy(target);
++    grafici::Float16 samples[] = {0, 1};
++    DataArray<grafici::Float16> source(samples, 2);
++    legacy.line(source, source, white); // Compact input, default float pipeline.
++    assert(target.lines.size() == 1);
++    DataArray<grafici::Float16, grafici::Float16> half_source(samples, 2);
++    DataCast<float, grafici::Float16> widened(half_source);
++    legacy.line(widened, widened, white);
++    assert(target.lines.size() == 2);
++    std::puts("Float and FP16 plotters, projections, options and legacy aliases passed.");
++}
+diff --git a/tests/spline_autoscale.cpp b/tests/spline_autoscale.cpp
+index 3643b3c1a1241c45d9416ff397bf8c69ec6605b2..73b9d11e12ea969e97146e4087b33c08896e9fbb 100644
+--- a/tests/spline_autoscale.cpp
++++ b/tests/spline_autoscale.cpp
+@@ -1,17 +1,17 @@
+-#include <stddef.h>
+ #include "data/DataArray.h"
+ #include "data/DataSpline.h"
+ #include <cassert>
+ #include <cmath>
+ #include <cstdio>
+ 
++template <typename Real>
+ void check_overshoot()
+ {
+     const float xs[] = {0, 1, 2, 3};
+     const float ys[] = {0, 1, 1, 0};
+-    DataArray<float> x(xs, 4), y(ys, 4);
+-    DataSpline<13, true> scaled(x, y);
+-    DataSpline<13, false> clipped(x, y);
++    DataArray<float, Real> x(xs, 4), y(ys, 4);
++    DataSpline<13, true, Real> scaled(x, y);
++    DataSpline<13, false, Real> clipped(x, y);
+     float peak = 0;
+     for (size_t i = 0; i < scaled.size(); ++i)
+     {
+@@ -28,6 +28,7 @@ void check_overshoot()
+ 
+ int main()
+ {
+-    check_overshoot();
+-    std::puts("Spline autoscale preserves unclipped overshoot for float.");
++    check_overshoot<float>();
++    check_overshoot<grafici::Float16>();
++    std::puts("Spline autoscale preserves unclipped overshoot for float and FP16.");
+ }
+diff --git a/tests/support/Adafruit_GFX.h b/tests/support/Adafruit_GFX.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..7dfee9e8a673d4c4b331bef455f3bb827d5f6f9d
+--- /dev/null
++++ b/tests/support/Adafruit_GFX.h
+@@ -0,0 +1,47 @@
++#ifndef GRAFICI_TEST_GFX_H
++#define GRAFICI_TEST_GFX_H
++
++// Host drawing-call recorder; this does not emulate display rasterization.
++#include <cstddef>
++#include <cstdint>
++#include <cstdlib>
++#include <cstring>
++#include <cmath>
++#include <string>
++#include <vector>
++
++class String
++{
++public:
++    String(const char *text = "") : value(text) {}
++    size_t length() const { return value.length(); }
++    char operator[](size_t i) const { return value[i]; }
++private:
++    std::string value;
++};
++
++inline void randomSeed(unsigned long seed) { std::srand(seed); }
++inline long random(long low, long high) { return low + std::rand() % (high - low); }
++inline long random(long high) { return high > 0 ? random(0, high) : 0; }
++
++class Adafruit_GFX
++{
++public:
++    struct Line { int16_t x0, y0, x1, y1; uint16_t color; };
++    std::vector<Line> lines;
++    size_t triangles = 0, pixels = 0, screens = 0;
++    int16_t width() const { return 128; }
++    int16_t height() const { return 64; }
++    void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color)
++    {
++        lines.push_back({x0, y0, x1, y1, color});
++    }
++    void fillTriangle(int16_t, int16_t, int16_t, int16_t, int16_t, int16_t, uint16_t)
++    {
++        ++triangles;
++    }
++    void drawPixel(int16_t, int16_t, uint16_t) { ++pixels; }
++    void fillScreen(uint16_t) { ++screens; }
++};
++
++#endif
