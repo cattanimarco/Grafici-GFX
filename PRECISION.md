@@ -103,7 +103,7 @@ For one FP16 conversion of a normalized coordinate, nearest-even rounding has ab
 
 ## Verification
 
-The host checks cover all 65,536 binary16 patterns, independent decoding, round trips, all adjacent positive finite rounding intervals and ties, negative values, subnormals, signed zero, NaNs, infinity and finite overflow. They also exercise both source families, borrowed casts, interpolation, splines, histogram/distribution storage, subwindows, polar projection and every plotter. Float and FP16 pipelines also drew into the installed actual Adafruit GFX canvas in a separate host integration check. The spline overflow regression remains included. See [test commands](tests/README.md).
+The host checks cover all 65,536 binary16 patterns, independent decoding, round trips, all adjacent positive finite rounding intervals and ties, negative values, subnormals, signed zero, NaNs, infinity and finite overflow. They also exercise both source families, borrowed casts, interpolation, splines, histogram/distribution storage, subwindows, polar projection and every plotter. Float and FP16 pipelines also drew into the installed actual Adafruit GFX canvas in a separate host integration check. The spline overflow regression is covered in Grafici-Test. See [test commands](https://github.com/cattanimarco/Grafici-Test/blob/f922bc61317a4e84718346f90e9042bf436b04b5/tests/README.md).
 
 The FP16 example and the existing float `bars_from_c_array` example also build for Arduino Uno R3. A matched 128-sample line sketch gives these linked sizes with Arduino AVR core 1.8.8, AVR GCC 7.3.0, the default `-Os`/LTO settings, Adafruit GFX 1.11.10 and ILI9341 1.6.1:
 

@@ -1,6 +1,6 @@
-From 728e0b3a3f99bc47ff052c82ef0ef1886a56f57c Mon Sep 17 00:00:00 2001
+From 889f180721db7486b27aca84b243aff1786242e0 Mon Sep 17 00:00:00 2001
 From: Grafici patch export <patch-export@localhost>
-Date: Sun, 18 Oct 2026 10:34:37 +0100
+Date: Tue, 20 Oct 2026 23:04:58 +0100
 Subject: [PATCH] Define finite range, missing-sample and empty-input contracts
 
 Add explicit valid() queries for Range, DataNorm, normalized sources and
@@ -27,44 +27,41 @@ Validation: data_contracts covers float/FP16, full-width signed/unsigned
 ranges, NaN/infinity gaps, empty sources/histograms and invalid windows.
 Existing checks and the zero-bin compile-failure fixture pass under UBSan
 plus float-cast-overflow. The full FP16 sketch also builds for Uno R3.
+
+Regression sources and the configurable host runner live in Grafici-Test:
+https://github.com/cattanimarco/Grafici-Test/blob/f922bc61317a4e84718346f90e9042bf436b04b5/tests/README.md
+No test sources are bundled in this library patch.
 ---
- CONTRACTS.md                          |  33 ++++
- src/Range.h                           | 239 ++++++++------------------
- src/color/ColorMap.h                  |  15 +-
- src/data/DataArray.h                  |  12 +-
- src/data/DataArrayXY.h                |   2 +
- src/data/DataFunction.h               |   2 +
- src/data/DataHistogramXY.h            |  54 +++---
- src/data/DataInterpolatorL.h          |   2 +-
- src/data/DataLinear.h                 |  13 +-
- src/data/DataNorm.h                   |  75 ++++----
- src/data/DataParametric.h             |  12 +-
- src/data/DataResize.h                 |   4 +-
- src/data/DataSelect.h                 |   2 +
- src/data/DataSourceNorm.h             |   2 +
- src/data/DataSpline.h                 |  13 +-
- src/data/DataVector.h                 |   4 +-
- src/display/DisplayDriver.h           |   3 +
- src/display/PolarWindow.h             |  17 +-
- src/display/Window.h                  |  11 ++
- src/numeric/Precision.h               |  11 ++
- src/plotter/PlotArea.h                |   7 +-
- src/plotter/PlotBar.h                 |  12 +-
- src/plotter/PlotLine.h                |   7 +-
- src/plotter/PlotScatter.h             |  36 ++--
- tests/compile_fail/histogram_zero.cpp |   4 +
- tests/data_contracts.cpp              | 127 ++++++++++++++
- tests/data_spline_bounds.cpp          |   3 +-
- tests/interpolation_bounds.cpp        |   3 +-
- tests/numeric_precision.cpp           |   2 +-
- 29 files changed, 428 insertions(+), 299 deletions(-)
+ CONTRACTS.md                 |  33 +++++
+ src/Range.h                  | 239 +++++++++++------------------------
+ src/color/ColorMap.h         |  15 ++-
+ src/data/DataArray.h         |  12 +-
+ src/data/DataArrayXY.h       |   2 +
+ src/data/DataFunction.h      |   2 +
+ src/data/DataHistogramXY.h   |  54 ++++----
+ src/data/DataInterpolatorL.h |   2 +-
+ src/data/DataLinear.h        |  13 +-
+ src/data/DataNorm.h          |  75 +++++------
+ src/data/DataParametric.h    |  12 +-
+ src/data/DataResize.h        |   4 +-
+ src/data/DataSelect.h        |   2 +
+ src/data/DataSourceNorm.h    |   2 +
+ src/data/DataSpline.h        |  13 +-
+ src/data/DataVector.h        |   4 +-
+ src/display/DisplayDriver.h  |   3 +
+ src/display/PolarWindow.h    |  17 ++-
+ src/display/Window.h         |  11 ++
+ src/numeric/Precision.h      |  11 ++
+ src/plotter/PlotArea.h       |   7 +-
+ src/plotter/PlotBar.h        |  12 +-
+ src/plotter/PlotLine.h       |   7 +-
+ src/plotter/PlotScatter.h    |  36 +++---
+ 24 files changed, 294 insertions(+), 294 deletions(-)
  create mode 100644 CONTRACTS.md
- create mode 100644 tests/compile_fail/histogram_zero.cpp
- create mode 100644 tests/data_contracts.cpp
 
 diff --git a/CONTRACTS.md b/CONTRACTS.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..a12606126c6ca30bf806ee1479363e8dfccf1b0f
+index 0000000..a126061
 --- /dev/null
 +++ b/CONTRACTS.md
 @@ -0,0 +1,33 @@
@@ -102,7 +99,7 @@ index 0000000000000000000000000000000000000000..a12606126c6ca30bf806ee1479363e8d
 +
 +FP16's finite range and quantization still apply to raw counts, range metadata and coefficients. Use the float pipeline when those values are not representable. Histograms with FP16 samples and a float interface can retain large integer counters without narrowing raw count metadata. Spline construction retains its bounded heap workspace; these contracts do not remove it.
 diff --git a/src/Range.h b/src/Range.h
-index dd51a2b07e8a61b83c9be3f4018e6a0f6cde2182..d889ba67811392d94de565f3d7edc9d249a1aa7d 100644
+index dd51a2b..d889ba6 100644
 --- a/src/Range.h
 +++ b/src/Range.h
 @@ -25,7 +25,7 @@
@@ -366,7 +363,7 @@ index dd51a2b07e8a61b83c9be3f4018e6a0f6cde2182..d889ba67811392d94de565f3d7edc9d2
  
  #endif /* GRAFICI_RANGE_H */
 diff --git a/src/color/ColorMap.h b/src/color/ColorMap.h
-index 4d33ad8ea75023dcaa18dfa06d6f8137f32e35d8..f395f7b7b4c23c7919131802272a681ad2bc29f5 100644
+index 4d33ad8..f395f7b 100644
 --- a/src/color/ColorMap.h
 +++ b/src/color/ColorMap.h
 @@ -93,16 +93,22 @@ class GeneratedMapGenerated : public ColorMap
@@ -405,7 +402,7 @@ index 4d33ad8ea75023dcaa18dfa06d6f8137f32e35d8..f395f7b7b4c23c7919131802272a681a
  	}
  
 diff --git a/src/data/DataArray.h b/src/data/DataArray.h
-index 7d7ccb19f29c8ea6e9a50a9544264b631ac02288..30989cbf0225e6ddabed70e615f878d83eed25ba 100644
+index 7d7ccb1..30989cb 100644
 --- a/src/data/DataArray.h
 +++ b/src/data/DataArray.h
 @@ -43,6 +43,7 @@ class DataArray : public DataSourceNormT<Scalar>
@@ -443,7 +440,7 @@ index 7d7ccb19f29c8ea6e9a50a9544264b631ac02288..30989cbf0225e6ddabed70e615f878d8
  
  	const T *_arrayPtr{ nullptr };
 diff --git a/src/data/DataArrayXY.h b/src/data/DataArrayXY.h
-index 11325466b8cfcce9aaa5024ba8d9304dd9f45d28..8dc2e60d1f05d00651cd114fed17664bb3693945 100644
+index 1132546..8dc2e60 100644
 --- a/src/data/DataArrayXY.h
 +++ b/src/data/DataArrayXY.h
 @@ -49,12 +49,14 @@ protected:
@@ -462,7 +459,7 @@ index 11325466b8cfcce9aaa5024ba8d9304dd9f45d28..8dc2e60d1f05d00651cd114fed17664b
  
  	const DataVector operator[](const unsigned long idx) const
 diff --git a/src/data/DataFunction.h b/src/data/DataFunction.h
-index 5733927b33a22e7761382aa42530f38355c121c6..5e0b7f68d878c3c2dbdb5cef8a4687d03588f9bb 100644
+index 5733927..5e0b7f6 100644
 --- a/src/data/DataFunction.h
 +++ b/src/data/DataFunction.h
 @@ -47,6 +47,7 @@ protected:
@@ -482,7 +479,7 @@ index 5733927b33a22e7761382aa42530f38355c121c6..5e0b7f68d878c3c2dbdb5cef8a4687d0
  
    protected:
 diff --git a/src/data/DataHistogramXY.h b/src/data/DataHistogramXY.h
-index 0aa869a573115dfd8ea40eacc79c00fd51245321..2ba1d3222615c2e870c56f4f41a84152d26fe669 100644
+index 0aa869a..2ba1d32 100644
 --- a/src/data/DataHistogramXY.h
 +++ b/src/data/DataHistogramXY.h
 @@ -30,6 +30,7 @@
@@ -565,7 +562,7 @@ index 0aa869a573115dfd8ea40eacc79c00fd51245321..2ba1d3222615c2e870c56f4f41a84152
  	}
  
 diff --git a/src/data/DataInterpolatorL.h b/src/data/DataInterpolatorL.h
-index f9f4922fea46271949311664681e9357db75998c..a0bf556af39db06bf5bbe174d141c35292ab1c8b 100644
+index f9f4922..a0bf556 100644
 --- a/src/data/DataInterpolatorL.h
 +++ b/src/data/DataInterpolatorL.h
 @@ -106,7 +106,7 @@ class DataInterpolatorLT : public DataSource<DataVectorT<Scalar>>
@@ -578,7 +575,7 @@ index f9f4922fea46271949311664681e9357db75998c..a0bf556af39db06bf5bbe174d141c352
                  return false;
              previous_raw = raw;
 diff --git a/src/data/DataLinear.h b/src/data/DataLinear.h
-index 627dfaa6994355a12a3f26bd0e119a8691def946..e03074932e9a40454af4a6363aec9e2cd1ff7782 100644
+index 627dfaa..e030749 100644
 --- a/src/data/DataLinear.h
 +++ b/src/data/DataLinear.h
 @@ -73,7 +73,18 @@ protected:
@@ -602,7 +599,7 @@ index 627dfaa6994355a12a3f26bd0e119a8691def946..e03074932e9a40454af4a6363aec9e2c
  
  	Scalar _offset;
 diff --git a/src/data/DataNorm.h b/src/data/DataNorm.h
-index 3d6535c61489fbccae421c7348c5f7f780430aa4..c49fbe7ab570e5a636c174969674b3a50118d987 100644
+index 3d6535c..c49fbe7 100644
 --- a/src/data/DataNorm.h
 +++ b/src/data/DataNorm.h
 @@ -27,7 +27,7 @@
@@ -701,7 +698,7 @@ index 3d6535c61489fbccae421c7348c5f7f780430aa4..c49fbe7ab570e5a636c174969674b3a5
  
  using DataNorm = DataNormT<float>;
 diff --git a/src/data/DataParametric.h b/src/data/DataParametric.h
-index 80714048bfebf8ff9814650f809907ec75e9c25e..72cf094a1b3c4f55db1a05363cb2d02c5ebc9a31 100644
+index 8071404..72cf094 100644
 --- a/src/data/DataParametric.h
 +++ b/src/data/DataParametric.h
 @@ -69,15 +69,11 @@ protected:
@@ -725,7 +722,7 @@ index 80714048bfebf8ff9814650f809907ec75e9c25e..72cf094a1b3c4f55db1a05363cb2d02c
  
  using DataParametric = DataParametricT<float>;
 diff --git a/src/data/DataResize.h b/src/data/DataResize.h
-index 9e476e7141490111fd03255b4e26693310ef5c7d..7a987e36199e2dfd83694e0946b8e9ff1c8ae93e 100644
+index 9e476e7..7a987e3 100644
 --- a/src/data/DataResize.h
 +++ b/src/data/DataResize.h
 @@ -53,7 +53,9 @@ protected:
@@ -740,7 +737,7 @@ index 9e476e7141490111fd03255b4e26693310ef5c7d..7a987e36199e2dfd83694e0946b8e9ff
  		else
  		{
 diff --git a/src/data/DataSelect.h b/src/data/DataSelect.h
-index 5f7d656f5054274188a2e59904d3509423d30515..f4a3b72f4da3fed79c27cf89f09721a0c525ae2e 100644
+index 5f7d656..f4a3b72 100644
 --- a/src/data/DataSelect.h
 +++ b/src/data/DataSelect.h
 @@ -49,6 +49,7 @@ class DataSelectT : public DataSourceNormT<Scalar>
@@ -760,7 +757,7 @@ index 5f7d656f5054274188a2e59904d3509423d30515..f4a3b72f4da3fed79c27cf89f09721a0
  		switch (_selection)
  		{
 diff --git a/src/data/DataSourceNorm.h b/src/data/DataSourceNorm.h
-index b5667fe10b8ecf7352b9f016b148c6d8fcb02aa5..69030762e034fb56a60fef2e94bf7bf0660c8ec3 100644
+index b5667fe..6903076 100644
 --- a/src/data/DataSourceNorm.h
 +++ b/src/data/DataSourceNorm.h
 @@ -63,6 +63,8 @@ class DataSourceNormT : public DataSource<DataNormT<Scalar>>
@@ -773,7 +770,7 @@ index b5667fe10b8ecf7352b9f016b148c6d8fcb02aa5..69030762e034fb56a60fef2e94bf7bf0
       * @brief Utility funtion to return the minimum size among a list of DataNorm data sources
       * 
 diff --git a/src/data/DataSpline.h b/src/data/DataSpline.h
-index 9738abe0b009e0554b3abe689b69e61cbda0e0d9..5cd73f5ee8ad8a4dc792eca350f4f7386ae35586 100644
+index 9738abe..5cd73f5 100644
 --- a/src/data/DataSpline.h
 +++ b/src/data/DataSpline.h
 @@ -74,7 +74,8 @@ protected:
@@ -824,7 +821,7 @@ index 9738abe0b009e0554b3abe689b69e61cbda0e0d9..5cd73f5ee8ad8a4dc792eca350f4f738
  
  	void compute_spline()
 diff --git a/src/data/DataVector.h b/src/data/DataVector.h
-index bac9b3ac95e44d42a8f4ba39b637231dca2cf0b8..99b84bc9d687b1eef9996631179319902d36dbdf 100644
+index bac9b3a..99b84bc 100644
 --- a/src/data/DataVector.h
 +++ b/src/data/DataVector.h
 @@ -11,8 +11,8 @@
@@ -839,7 +836,7 @@ index bac9b3ac95e44d42a8f4ba39b637231dca2cf0b8..99b84bc9d687b1eef999663117931990
  // clang-format on
  
 diff --git a/src/display/DisplayDriver.h b/src/display/DisplayDriver.h
-index bef2a186ca704fce50f392459f466a8e006feb44..65dabf8469fc0c52a89a94f7396ed2abfd0c7093 100644
+index bef2a18..65dabf8 100644
 --- a/src/display/DisplayDriver.h
 +++ b/src/display/DisplayDriver.h
 @@ -45,6 +45,7 @@ class DisplayDriverT
@@ -867,7 +864,7 @@ index bef2a186ca704fce50f392459f466a8e006feb44..65dabf8469fc0c52a89a94f7396ed2ab
  		if (display_radius < pixel_to_display_vector({1,1}))
  		{
 diff --git a/src/display/PolarWindow.h b/src/display/PolarWindow.h
-index 20dee46611a44be130f6db011166bcf502998885..6ba408f046fc98e68581de1f24c2146e3c4f86bc 100644
+index 20dee46..6ba408f 100644
 --- a/src/display/PolarWindow.h
 +++ b/src/display/PolarWindow.h
 @@ -43,25 +43,24 @@ class PolarWindowT : public WindowT<Scalar>
@@ -905,7 +902,7 @@ index 20dee46611a44be130f6db011166bcf502998885..6ba408f046fc98e68581de1f24c2146e
  		Compute radius = y.norm_to_value(data_y);
  		Compute display_x = Compute(0.5) + (radius * Compute(0.5)) * grafici::cosine(angle * Compute(6.2831853071795864769));
 diff --git a/src/display/Window.h b/src/display/Window.h
-index 58fbe8020b2e9448956fd597fa063a2c7d616d24..1a4d6c24ed3ce0372dde9f0a6c046bec66b69084 100644
+index 58fbe80..1a4d6c2 100644
 --- a/src/display/Window.h
 +++ b/src/display/Window.h
 @@ -68,6 +68,8 @@ class WindowT : public Vector<Range<Scalar>>
@@ -955,7 +952,7 @@ index 58fbe8020b2e9448956fd597fa063a2c7d616d24..1a4d6c24ed3ce0372dde9f0a6c046bec
  	};
  
 diff --git a/src/numeric/Precision.h b/src/numeric/Precision.h
-index 3f9724895b146588ee700c0c32cc99ccaadf210b..eddd1b787e48d1485909d1b63bdce758bf25371a 100644
+index 3f97248..eddd1b7 100644
 --- a/src/numeric/Precision.h
 +++ b/src/numeric/Precision.h
 @@ -26,6 +26,17 @@ struct ComputationType<long double>
@@ -977,7 +974,7 @@ index 3f9724895b146588ee700c0c32cc99ccaadf210b..eddd1b787e48d1485909d1b63bdce758
  inline double cosine(double value) { return cos(value); }
  inline float sine(float value) { return sinf(value); }
 diff --git a/src/plotter/PlotArea.h b/src/plotter/PlotArea.h
-index d388620f9b047a3ad2a161ce81f5432c3f8a0962..d89c202b0859b60c5552cbf62d2e53cc4402e62a 100644
+index d388620..d89c202 100644
 --- a/src/plotter/PlotArea.h
 +++ b/src/plotter/PlotArea.h
 @@ -17,7 +17,12 @@ inline void plot_area(const DisplayDriverT<Scalar> &display,
@@ -995,7 +992,7 @@ index d388620f9b047a3ad2a161ce81f5432c3f8a0962..d89c202b0859b60c5552cbf62d2e53cc
  }
  
 diff --git a/src/plotter/PlotBar.h b/src/plotter/PlotBar.h
-index 22d8305d4ee719d4d649382212aa6ba7f06c9eed..24be0184fa4d46c0957f8438b7b1e69fb20c5ca1 100644
+index 22d8305..24be018 100644
 --- a/src/plotter/PlotBar.h
 +++ b/src/plotter/PlotBar.h
 @@ -30,20 +30,26 @@ inline void plot_bar(const DisplayDriverT<Scalar> &display,
@@ -1029,7 +1026,7 @@ index 22d8305d4ee719d4d649382212aa6ba7f06c9eed..24be0184fa4d46c0957f8438b7b1e69f
  	}
  }
 diff --git a/src/plotter/PlotLine.h b/src/plotter/PlotLine.h
-index 676d656aca87151c9c6a0b9d5b1529888e541032..abd5902ea1f17bf43a38697fb56d8277eeb6d595 100644
+index 676d656..abd5902 100644
 --- a/src/plotter/PlotLine.h
 +++ b/src/plotter/PlotLine.h
 @@ -17,7 +17,12 @@ inline void plot_line(const DisplayDriverT<Scalar> &display,
@@ -1047,7 +1044,7 @@ index 676d656aca87151c9c6a0b9d5b1529888e541032..abd5902ea1f17bf43a38697fb56d8277
  }
  
 diff --git a/src/plotter/PlotScatter.h b/src/plotter/PlotScatter.h
-index 5871755499e7ef8599a4981476437ef0e81f19cb..c682202f3dc095f2a1e0ad01856960aa5c3e3fa9 100644
+index 5871755..c682202 100644
 --- a/src/plotter/PlotScatter.h
 +++ b/src/plotter/PlotScatter.h
 @@ -18,6 +18,8 @@ inline void plot_scatter(const DisplayDriverT<Scalar> &display,
@@ -1159,187 +1156,3 @@ index 5871755499e7ef8599a4981476437ef0e81f19cb..c682202f3dc095f2a1e0ad01856960aa
  			}
  		}
  	}
-diff --git a/tests/compile_fail/histogram_zero.cpp b/tests/compile_fail/histogram_zero.cpp
-new file mode 100644
-index 0000000000000000000000000000000000000000..94cde6801d2abe7c4adeecb7fbbcf7a739868afb
---- /dev/null
-+++ b/tests/compile_fail/histogram_zero.cpp
-@@ -0,0 +1,4 @@
-+#include "data/DataArray.h"
-+#include "data/DataHistogramXY.h"
-+DataArray<float> empty(nullptr, 0);
-+DataHistogramXY<0> invalid_histogram(empty);
-diff --git a/tests/data_contracts.cpp b/tests/data_contracts.cpp
-new file mode 100644
-index 0000000000000000000000000000000000000000..07caf662d7b7f639a0d5d24c71a58f09ec5c763c
---- /dev/null
-+++ b/tests/data_contracts.cpp
-@@ -0,0 +1,127 @@
-+#include "Adafruit_GFX.h"
-+#include "Grafici.h"
-+#include <cassert>
-+#include <cmath>
-+#include <cstdint>
-+#include <cstdio>
-+#include <limits>
-+
-+float sometimes_missing(size_t i)
-+{
-+    return i == 0 ? std::numeric_limits<float>::quiet_NaN() : float(i);
-+}
-+
-+template <typename Real>
-+void check_contracts()
-+{
-+    using Value = DataNormT<Real>;
-+    const float nan = std::numeric_limits<float>::quiet_NaN();
-+    const float inf = std::numeric_limits<float>::infinity();
-+    Value missing;
-+    Value zero(0, {0, 0}), constant(10, {5, 5});
-+    assert(!missing.valid() && zero.valid() && zero.norm() == 0);
-+    assert(constant.valid() && float(constant.raw()) == 5 && constant.norm() == 0);
-+    assert(!Value(nan).valid() && !Value(inf).valid() && !Value(-inf).valid());
-+    assert(!Value(1, {2, 1}).valid());
-+    assert(Value(2, {-4, 4}).valid() && Value(2, {-4, 4}).norm() == 0.75f);
-+    zero.norm(nan); assert(!zero.valid());
-+    missing.norm(0); assert(!missing.valid());
-+    DataNorm widened = missing;
-+    assert(!widened.valid());
-+
-+    Range<Real> reversed{2, 1};
-+    assert(!reversed.valid() && !reversed.contains(1.5f));
-+    assert(reversed.value_to_norm(1.5f) == 0);
-+    reversed.sort(); assert(reversed.valid() && reversed.value_to_norm(1.5f) == 0.5f);
-+    Range<Real> point{3, 3};
-+    assert(point.value_to_norm(4) == 0 && float(point.norm_to_value(0.5f)) == 3);
-+    auto accumulator = Range<Real>::invalid();
-+    accumulator.update(nan); assert(!accumulator.valid());
-+    accumulator.update(-2); accumulator.update(2);
-+    assert(accumulator.valid() && float(accumulator.low) == -2 && float(accumulator.high) == 2);
-+
-+    DataLinearT<Real> empty_linear(0), descending(4, 3, -1), flat(4, 3, 0);
-+    assert(empty_linear.size() == 0 && !empty_linear.range().valid() && !empty_linear[0].valid());
-+    assert(float(descending.range().low) == 0 && float(descending.range().high) == 3);
-+    assert(descending[0].norm() == 1 && descending[3].norm() == 0);
-+    assert(flat[0].valid() && flat[0].norm() == 0);
-+    DataArray<float, Real> empty(nullptr, 7);
-+    DataArrayXY<float, Real> empty_xy(nullptr, 7);
-+    assert(empty.size() == 0 && !empty.valid() && !empty[0].valid());
-+    assert(empty_xy.size() == 0 && !empty_xy.x().range().valid());
-+
-+    const float values[] = {nan, 0, 1, inf, -inf};
-+    DataArray<float, Real> finite(values, 5);
-+    assert(finite.valid() && float(finite.range().low) == 0 && float(finite.range().high) == 1);
-+    assert(!finite[0].valid() && finite[1].valid() && !finite[3].valid() && !finite[4].valid());
-+    DataFunctionT<Real> function(3, sometimes_missing), no_function(3, nullptr);
-+    assert(!function[0].valid() && function[1].valid() && function[2].norm() == 1);
-+    assert(no_function.size() == 0 && !no_function[0].valid());
-+    DataResizeT<Real> resized(finite, {0.25f, 0.75f}), bad_resize(finite, {1, 0});
-+    assert(!resized[0].valid() && !bad_resize[1].valid());
-+
-+    DataHistogramXY<4, Real> normalized_empty(empty, true), counts_empty(empty);
-+    for (size_t i = 0; i < 4; ++i)
-+    {
-+        assert(normalized_empty[i].y.valid() && normalized_empty[i].y.norm() == 0);
-+        assert(counts_empty[i].y.valid() && float(counts_empty[i].y.raw()) == 0);
-+    }
-+    DataHistogramXY<4, Real> hist(finite, true), zero_classes(finite, false, 0, 0), bad_class(finite, false, 2, 2);
-+    assert(float(hist[0].y.raw()) == 0.5f && float(hist[3].y.raw()) == 0.5f);
-+    assert(zero_classes.size() == 0 && bad_class.size() == 0);
-+
-+    WindowT<Real> window;
-+    assert(!window.sub_window(0, 2, 0, 0).valid());
-+    assert(!window.sub_window(2, 0, 0, 0).valid());
-+    assert(!window.sub_window(2, 2, 2, 0).valid());
-+    assert(!window.sub_window({1, 0}, {0, 1}).valid());
-+    assert(!grafici::is_finite(window.data_to_display_vector(nan, 0).x));
-+    WindowT<Real> parent({0.25f, 0.75f}, {0.25f, 0.75f});
-+    PolarWindowT<Real> polar({0, 1}, {0, 1}, parent);
-+    assert(!polar.sub_polar_window(0, 2, 0, 0).valid());
-+    auto sub = polar.sub_polar_window(2, 2, 1, 1);
-+    assert(std::fabs(float(sub.data_to_display_vector(0, 1).x) - 0.25f) < 0.002f);
-+
-+    const float xs[] = {0, 0.25f, 0.5f, 0.75f, 1}, ys[] = {0, 0.5f, nan, 0.5f, 1};
-+    DataArray<float, Real> x(xs, 5), y(ys, 5);
-+    Adafruit_GFX target;
-+    GraficiT<Real> plot(target);
-+    plot.line(x, y, white); assert(target.lines.size() == 2);
-+    plot.area(x, y, white); assert(target.triangles == 4);
-+    target.lines.clear();
-+    plot.bar(x, y, white, window, PlotOptionsT<Real>{}.thickness(0));
-+    assert(target.lines.size() == 4);
-+    target.lines.clear();
-+    DataConstantT<Real> radius(5, 0.05f);
-+    plot.scatter(x, y, white, radius, window, PlotOptionsT<Real>{}.scatter_style("."));
-+    assert(target.lines.size() == 4 * 45);
-+    target.lines.clear();
-+    const auto invalid_window = window.sub_window(0, 1, 0, 0);
-+    plot.line(x, y, white, invalid_window);
-+    assert(target.lines.empty());
-+}
-+
-+int main()
-+{
-+    static_assert(sizeof(DataNorm) == 12, "Validity adds no per-sample storage");
-+    static_assert(sizeof(DataNormT<grafici::Float16>) == 6, "FP16 payload stays compact");
-+    const float max = std::numeric_limits<float>::max();
-+    Range<float> extremes{-max, max};
-+    assert(extremes.valid() && extremes.value_to_norm(0) == 0.5f);
-+    Range<int32_t> signed_span{std::numeric_limits<int32_t>::min(), 0};
-+    assert(signed_span.delta() > 0 && signed_span.value_to_norm(-1073741824) == 0.5f);
-+    Range<uint32_t> offset{1000000000, 1000000010};
-+    assert(offset.value_to_norm(1000000005) == 0.5f);
-+    Range<uint64_t> unsigned_span{0, std::numeric_limits<uint64_t>::max()};
-+    assert(unsigned_span.norm_to_value(std::nextafter(1.0f, 0.0f)) > 0);
-+    Range<grafici::Float16> half_span{-65504, 65504};
-+    assert(half_span.delta() == 131008);
-+    check_contracts<float>(); check_contracts<grafici::Float16>();
-+    ColorMapArray<2> colors(Color{255, 0, 0}, Color{0, 0, 255});
-+    assert(colors.norm_to_color(DataNorm{}).red == 0);
-+    GeneratedMapGenerated high(Color{255, 255, 255}, Color{255, 255, 255}, Color{255, 255, 255}, Color{0, 0, 0});
-+    assert(high.norm_to_color(0).red == 255);
-+    GeneratedMapGenerated low(Color{0, 0, 0}, Color{255, 255, 255}, Color{255, 255, 255}, Color{0, 0, 0});
-+    assert(low.norm_to_color(0.5f).red == 0);
-+    std::puts("Range, validity, non-finite samples, empty sources, histograms and windows passed.");
-+}
-diff --git a/tests/data_spline_bounds.cpp b/tests/data_spline_bounds.cpp
-index 5144c6d6f7aceee00c1f4eb2003d3dae05065147..6224b156eef4d49523d8d2059bc0730e6897ef46 100644
---- a/tests/data_spline_bounds.cpp
-+++ b/tests/data_spline_bounds.cpp
-@@ -108,8 +108,7 @@ private:
- void check_invalid(const DataVector &value)
- {
-     assert(value.x.raw() == 0 && value.y.raw() == 0);
--    assert(value.x.range().low == 0 && value.x.range().high == 0);
--    assert(value.y.range().low == 0 && value.y.range().high == 0);
-+    assert(!value.x.valid() && !value.y.valid());
- }
- 
- template <size_t N>
-diff --git a/tests/interpolation_bounds.cpp b/tests/interpolation_bounds.cpp
-index c71cc6f88cf133bacec6bb0dc4a5c03a22654739..c7c013cf838d287167b1874eaaf01b5db4415e97 100644
---- a/tests/interpolation_bounds.cpp
-+++ b/tests/interpolation_bounds.cpp
-@@ -8,8 +8,7 @@
- template <typename Real>
- bool invalid(const DataVectorT<Real> &v)
- {
--    return v.x.range().low == 0 && v.x.range().high == 0 &&
--           v.y.range().low == 0 && v.y.range().high == 0;
-+    return !v.x.valid() && !v.y.valid();
- }
- 
- template <typename Real>
-diff --git a/tests/numeric_precision.cpp b/tests/numeric_precision.cpp
-index c57c1388edca4394264e3dc49eb537cd84200cfc..8bb44e58967199fb9d1d5c4962d41060b7cd191b 100644
---- a/tests/numeric_precision.cpp
-+++ b/tests/numeric_precision.cpp
-@@ -116,7 +116,7 @@ void check_sources()
-     assert(widened[4].raw() == 2 && widened.range().low == -2);
-     DataCast<Scalar, float> narrowed(widened);
-     assert(float(narrowed[0].raw()) == -2);
--    assert(narrowed[5].range().high == 0);
-+    assert(!narrowed[5].valid());
-     DataArrayXY<Scalar, Scalar> xy(values, 5);
-     DataSourceVectorT<Scalar> &vector_source = xy;
-     assert(float(vector_source[4].x.raw()) == 4);

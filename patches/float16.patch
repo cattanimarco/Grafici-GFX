@@ -1,6 +1,6 @@
-From 400eb9f2d8666938ad69079ec50d126b4f22dd92 Mon Sep 17 00:00:00 2001
+From 11c8966d5f0eb21e2cce5a320f8528979e0bfd62 Mon Sep 17 00:00:00 2001
 From: Grafici patch export <patch-export@localhost>
-Date: Sun, 18 Oct 2026 10:49:23 +0100
+Date: Tue, 20 Oct 2026 23:04:58 +0100
 Subject: [PATCH] Add selectable Float16 storage and typed plotting families
 
 Prerequisite: apply patches/correctness/01-spline-fixes.patch to original
@@ -17,62 +17,57 @@ Document compact-array and full-pipeline selection, provide an FP16 sketch,
 and extend regression coverage to binary16 encodings, rounding intervals,
 typed plotting and the existing spline bounds/autoscale checks. Solver
 workspace remains FP32; retained samples and coefficients can use FP16.
+
+Regression sources and the configurable host runner live in Grafici-Test:
+https://github.com/cattanimarco/Grafici-Test/blob/f922bc61317a4e84718346f90e9042bf436b04b5/tests/README.md
+No test sources are bundled in this library patch.
 ---
- PRECISION.md                       | 118 ++++++++++++++++++++
- README.md                          |  43 ++++++++
- examples/fp16_line/fp16_line.ino   |  26 +++++
- src/Grafici.h                      |  34 ++++--
- src/Range.h                        |  17 ++-
+ PRECISION.md                       | 118 +++++++++++++++++++++++++++++
+ README.md                          |  43 +++++++++++
+ examples/fp16_line/fp16_line.ino   |  26 +++++++
+ src/Grafici.h                      |  34 ++++++---
+ src/Range.h                        |  17 ++++-
  src/Vector.h                       |   5 +-
- src/data/DataArray.h               |  15 ++-
- src/data/DataArrayXY.h             |  18 ++-
- src/data/DataCast.h                |  32 ++++++
- src/data/DataConstant.h            |  19 +++-
- src/data/DataDistributionNormal.h  |  14 ++-
- src/data/DataDistributionUniform.h |  12 +-
- src/data/DataFunction.h            |  22 +++-
- src/data/DataHistogramXY.h         |  20 ++--
- src/data/DataInterpolatorL.h       |  29 +++--
- src/data/DataLinear.h              |  23 +++-
- src/data/DataNorm.h                |  31 ++++--
- src/data/DataParametric.h          |  19 +++-
- src/data/DataResize.h              |  14 ++-
- src/data/DataSelect.h              |  14 ++-
- src/data/DataSourceNorm.h          |  20 ++--
+ src/data/DataArray.h               |  15 ++--
+ src/data/DataArrayXY.h             |  18 +++--
+ src/data/DataCast.h                |  32 ++++++++
+ src/data/DataConstant.h            |  19 ++++-
+ src/data/DataDistributionNormal.h  |  14 ++--
+ src/data/DataDistributionUniform.h |  12 +--
+ src/data/DataFunction.h            |  22 ++++--
+ src/data/DataHistogramXY.h         |  20 +++--
+ src/data/DataInterpolatorL.h       |  29 +++++--
+ src/data/DataLinear.h              |  23 ++++--
+ src/data/DataNorm.h                |  31 +++++---
+ src/data/DataParametric.h          |  19 ++++-
+ src/data/DataResize.h              |  14 +++-
+ src/data/DataSelect.h              |  14 +++-
+ src/data/DataSourceNorm.h          |  20 +++--
  src/data/DataSourceVector.h        |   6 +-
- src/data/DataSpline.h              |  53 +++++----
+ src/data/DataSpline.h              |  53 ++++++++-----
  src/data/DataVector.h              |   5 +-
- src/display/DisplayDriver.h        |  67 ++++++-----
+ src/display/DisplayDriver.h        |  67 ++++++++--------
  src/display/DisplayVector.h        |   5 +-
- src/display/PolarWindow.h          |  33 ++++--
- src/display/Window.h               |  53 ++++++---
- src/numeric/Float16.h              | 116 +++++++++++++++++++
- src/numeric/Precision.h            |  44 ++++++++
- src/plotter/PlotArea.h             |  15 +--
+ src/display/PolarWindow.h          |  33 +++++---
+ src/display/Window.h               |  53 +++++++++----
+ src/numeric/Float16.h              | 116 ++++++++++++++++++++++++++++
+ src/numeric/Precision.h            |  44 +++++++++++
+ src/plotter/PlotArea.h             |  15 ++--
  src/plotter/PlotAxis.h             |   7 +-
- src/plotter/PlotBar.h              |  15 +--
- src/plotter/PlotLine.h             |  15 +--
- src/plotter/PlotOptions.h          |  16 ++-
- src/plotter/PlotScatter.h          |  17 +--
- tests/README.md                    |  20 ++++
- tests/numeric_precision.cpp        | 171 +++++++++++++++++++++++++++++
- tests/precision_plotting.cpp       |  55 ++++++++++
- tests/spline_autoscale.cpp         |  13 ++-
- tests/support/Adafruit_GFX.h       |  47 ++++++++
- 41 files changed, 1102 insertions(+), 216 deletions(-)
+ src/plotter/PlotBar.h              |  15 ++--
+ src/plotter/PlotLine.h             |  15 ++--
+ src/plotter/PlotOptions.h          |  16 +++-
+ src/plotter/PlotScatter.h          |  17 +++--
+ 36 files changed, 802 insertions(+), 210 deletions(-)
  create mode 100644 PRECISION.md
  create mode 100644 examples/fp16_line/fp16_line.ino
  create mode 100644 src/data/DataCast.h
  create mode 100644 src/numeric/Float16.h
  create mode 100644 src/numeric/Precision.h
- create mode 100644 tests/README.md
- create mode 100644 tests/numeric_precision.cpp
- create mode 100644 tests/precision_plotting.cpp
- create mode 100644 tests/support/Adafruit_GFX.h
 
 diff --git a/PRECISION.md b/PRECISION.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..6aa14d77dc0065cfdd5c333df14be30178cde56e
+index 0000000..99716d3
 --- /dev/null
 +++ b/PRECISION.md
 @@ -0,0 +1,118 @@
@@ -181,7 +176,7 @@ index 0000000000000000000000000000000000000000..6aa14d77dc0065cfdd5c333df14be301
 +
 +## Verification
 +
-+The host checks cover all 65,536 binary16 patterns, independent decoding, round trips, all adjacent positive finite rounding intervals and ties, negative values, subnormals, signed zero, NaNs, infinity and finite overflow. They also exercise both source families, borrowed casts, interpolation, splines, histogram/distribution storage, subwindows, polar projection and every plotter. Float and FP16 pipelines also drew into the installed actual Adafruit GFX canvas in a separate host integration check. The spline overflow regression remains included. See [test commands](tests/README.md).
++The host checks cover all 65,536 binary16 patterns, independent decoding, round trips, all adjacent positive finite rounding intervals and ties, negative values, subnormals, signed zero, NaNs, infinity and finite overflow. They also exercise both source families, borrowed casts, interpolation, splines, histogram/distribution storage, subwindows, polar projection and every plotter. Float and FP16 pipelines also drew into the installed actual Adafruit GFX canvas in a separate host integration check. The spline overflow regression remains included. See [test commands](https://github.com/cattanimarco/Grafici-Test/blob/f922bc61317a4e84718346f90e9042bf436b04b5/tests/README.md).
 +
 +The FP16 example and the existing float `bars_from_c_array` example also build for Arduino Uno R3. A matched 128-sample line sketch gives these linked sizes with Arduino AVR core 1.8.8, AVR GCC 7.3.0, the default `-Os`/LTO settings, Adafruit GFX 1.11.10 and ILI9341 1.6.1:
 +
@@ -195,7 +190,7 @@ index 0000000000000000000000000000000000000000..6aa14d77dc0065cfdd5c333df14be301
 +
 +These are compiler/linker results, not hardware measurements. They exclude runtime heap/stack peaks and do not establish physical display frame rate. The comparison favors FP16 sample storage with a float pipeline as the initial choice when retained arrays dominate SRAM; measure the actual application before narrowing every object.
 diff --git a/README.md b/README.md
-index a898922a62058c2de0a1873ae3f4a2a02178d36e..b7f898ab8db3b6f2b16230b011cff5bb00f3a7a7 100644
+index a898922..b7f898a 100644
 --- a/README.md
 +++ b/README.md
 @@ -197,6 +197,49 @@ Visit our [Wiki](https://github.com/cattanimarco/Grafici-GFX/wiki) for detailed
@@ -250,7 +245,7 @@ index a898922a62058c2de0a1873ae3f4a2a02178d36e..b7f898ab8db3b6f2b16230b011cff5bb
  ### Unit Tests
 diff --git a/examples/fp16_line/fp16_line.ino b/examples/fp16_line/fp16_line.ino
 new file mode 100644
-index 0000000000000000000000000000000000000000..edf93e59ce00c5cc4ac9e9e45cf993266dab4966
+index 0000000..edf93e5
 --- /dev/null
 +++ b/examples/fp16_line/fp16_line.ino
 @@ -0,0 +1,26 @@
@@ -281,7 +276,7 @@ index 0000000000000000000000000000000000000000..edf93e59ce00c5cc4ac9e9e45cf99326
 +
 +void loop() {}
 diff --git a/src/Grafici.h b/src/Grafici.h
-index ea24bdc7e644ec43386a5ab77c18db52972b7cda..7298c24e40621bd81e4e09ece100a2b1e4be1113 100644
+index ea24bdc..7298c24 100644
 --- a/src/Grafici.h
 +++ b/src/Grafici.h
 @@ -22,6 +22,7 @@
@@ -407,7 +402,7 @@ index ea24bdc7e644ec43386a5ab77c18db52972b7cda..7298c24e40621bd81e4e09ece100a2b1
 \ No newline at end of file
 +/** @}*/
 diff --git a/src/Range.h b/src/Range.h
-index 714c5a23eaa7c8591598786d83e6b581db028194..dd51a2b07e8a61b83c9be3f4018e6a0f6cde2182 100644
+index 714c5a2..dd51a2b 100644
 --- a/src/Range.h
 +++ b/src/Range.h
 @@ -17,6 +17,8 @@
@@ -470,7 +465,7 @@ index 714c5a23eaa7c8591598786d83e6b581db028194..dd51a2b07e8a61b83c9be3f4018e6a0f
  	}
  
 diff --git a/src/Vector.h b/src/Vector.h
-index 679e2251f88f64bc65b3321bff517ff2678357b5..8f96b7a6133eea1c392ad725aa0ef9f47a84290b 100644
+index 679e225..8f96b7a 100644
 --- a/src/Vector.h
 +++ b/src/Vector.h
 @@ -48,9 +48,10 @@ class Vector
@@ -487,7 +482,7 @@ index 679e2251f88f64bc65b3321bff517ff2678357b5..8f96b7a6133eea1c392ad725aa0ef9f4
  
  	bool operator<(const Vector<T> &other) const
 diff --git a/src/data/DataArray.h b/src/data/DataArray.h
-index b729be3f857c3473db6ad8a9c00db57644970281..7d7ccb19f29c8ea6e9a50a9544264b631ac02288 100644
+index b729be3..7d7ccb1 100644
 --- a/src/data/DataArray.h
 +++ b/src/data/DataArray.h
 @@ -25,10 +25,13 @@
@@ -538,7 +533,7 @@ index b729be3f857c3473db6ad8a9c00db57644970281..7d7ccb19f29c8ea6e9a50a9544264b63
  		}
  	}
 diff --git a/src/data/DataArrayXY.h b/src/data/DataArrayXY.h
-index 52fb55e7f2726029b79a2ddfaa9e2e933a32a8c1..11325466b8cfcce9aaa5024ba8d9304dd9f45d28 100644
+index 52fb55e..1132546 100644
 --- a/src/data/DataArrayXY.h
 +++ b/src/data/DataArrayXY.h
 @@ -27,9 +27,17 @@
@@ -590,7 +585,7 @@ index 52fb55e7f2726029b79a2ddfaa9e2e933a32a8c1..11325466b8cfcce9aaa5024ba8d9304d
  #endif /* GRAFICI_DATA_ARRAY_XY_H */
 diff --git a/src/data/DataCast.h b/src/data/DataCast.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..be6c21e1f07b8240442caf2631134b818897d997
+index 0000000..be6c21e
 --- /dev/null
 +++ b/src/data/DataCast.h
 @@ -0,0 +1,32 @@
@@ -627,7 +622,7 @@ index 0000000000000000000000000000000000000000..be6c21e1f07b8240442caf2631134b81
 +
 +#endif
 diff --git a/src/data/DataConstant.h b/src/data/DataConstant.h
-index 9770a92dce8decdcd3243b140c1cae38d8e51afa..7fa940a8b85badfc18c23b0109d9d809bc73e530 100644
+index 9770a92..7fa940a 100644
 --- a/src/data/DataConstant.h
 +++ b/src/data/DataConstant.h
 @@ -24,8 +24,17 @@
@@ -679,7 +674,7 @@ index 9770a92dce8decdcd3243b140c1cae38d8e51afa..7fa940a8b85badfc18c23b0109d9d809
  /** @}*/
 \ No newline at end of file
 diff --git a/src/data/DataDistributionNormal.h b/src/data/DataDistributionNormal.h
-index a9ac1868a9c57b96d5b79b278ad1ab2dabdffdbc..96681e887feaf7b39b6b57f9d48986f294bb5c2a 100644
+index a9ac186..96681e8 100644
 --- a/src/data/DataDistributionNormal.h
 +++ b/src/data/DataDistributionNormal.h
 @@ -3,7 +3,7 @@
@@ -727,7 +722,7 @@ index a9ac1868a9c57b96d5b79b278ad1ab2dabdffdbc..96681e887feaf7b39b6b57f9d48986f2
  
  #endif /* GRAFICI_DATA_DIST_NORMAL_H */
 diff --git a/src/data/DataDistributionUniform.h b/src/data/DataDistributionUniform.h
-index 1cea1bc41d9f529d305eef8f0c56b1feb421cf8d..daba15d220ace2f1af463bb77d9de82a45977f54 100644
+index 1cea1bc..daba15d 100644
 --- a/src/data/DataDistributionUniform.h
 +++ b/src/data/DataDistributionUniform.h
 @@ -4,19 +4,21 @@
@@ -766,7 +761,7 @@ index 1cea1bc41d9f529d305eef8f0c56b1feb421cf8d..daba15d220ace2f1af463bb77d9de82a
  
  #endif /* GRAFICI_DATA_DIST_UNIFORM_H */
 diff --git a/src/data/DataFunction.h b/src/data/DataFunction.h
-index 09d51ad7aad938280c3269c23a37513c732e39be..5733927b33a22e7761382aa42530f38355c121c6 100644
+index 09d51ad..5733927 100644
 --- a/src/data/DataFunction.h
 +++ b/src/data/DataFunction.h
 @@ -24,8 +24,18 @@
@@ -828,7 +823,7 @@ index 09d51ad7aad938280c3269c23a37513c732e39be..5733927b33a22e7761382aa42530f383
  /** @}*/
 \ No newline at end of file
 diff --git a/src/data/DataHistogramXY.h b/src/data/DataHistogramXY.h
-index 351f58fe0225e6abba3937ed97b35c263c9fb922..0aa869a573115dfd8ea40eacc79c00fd51245321 100644
+index 351f58f..0aa869a 100644
 --- a/src/data/DataHistogramXY.h
 +++ b/src/data/DataHistogramXY.h
 @@ -27,10 +27,16 @@
@@ -878,7 +873,7 @@ index 351f58fe0225e6abba3937ed97b35c263c9fb922..0aa869a573115dfd8ea40eacc79c00fd
  
  #endif //GRAFICI_DATA_HISTOGRAM_XY_H
 diff --git a/src/data/DataInterpolatorL.h b/src/data/DataInterpolatorL.h
-index 43fec77f5931152fb02b1f40bdcc22c82336cb49..0d098a7260bf171ed3adb0a7a1db1abed295e07c 100644
+index 43fec77..0d098a7 100644
 --- a/src/data/DataInterpolatorL.h
 +++ b/src/data/DataInterpolatorL.h
 @@ -25,10 +25,21 @@
@@ -955,7 +950,7 @@ index 43fec77f5931152fb02b1f40bdcc22c82336cb49..0d098a7260bf171ed3adb0a7a1db1abe
  /** @}*/
 \ No newline at end of file
 diff --git a/src/data/DataLinear.h b/src/data/DataLinear.h
-index a10d3f0825d87f42ff90cf120d8aa9d71d771bc8..627dfaa6994355a12a3f26bd0e119a8691def946 100644
+index a10d3f0..627dfaa 100644
 --- a/src/data/DataLinear.h
 +++ b/src/data/DataLinear.h
 @@ -23,8 +23,17 @@
@@ -1021,7 +1016,7 @@ index a10d3f0825d87f42ff90cf120d8aa9d71d771bc8..627dfaa6994355a12a3f26bd0e119a86
  /** @}*/
 \ No newline at end of file
 diff --git a/src/data/DataNorm.h b/src/data/DataNorm.h
-index 9d26d60cbf5d50c11e6f25bf0c6759172cf521d1..3d6535c61489fbccae421c7348c5f7f780430aa4 100644
+index 9d26d60..3d6535c 100644
 --- a/src/data/DataNorm.h
 +++ b/src/data/DataNorm.h
 @@ -35,37 +35,46 @@
@@ -1096,7 +1091,7 @@ index 9d26d60cbf5d50c11e6f25bf0c6759172cf521d1..3d6535c61489fbccae421c7348c5f7f7
  /** @}*/
 \ No newline at end of file
 diff --git a/src/data/DataParametric.h b/src/data/DataParametric.h
-index b766afd0aba6fe034e1119f6934682be76501ce1..80714048bfebf8ff9814650f809907ec75e9c25e 100644
+index b766afd..8071404 100644
 --- a/src/data/DataParametric.h
 +++ b/src/data/DataParametric.h
 @@ -24,15 +24,24 @@
@@ -1147,7 +1142,7 @@ index b766afd0aba6fe034e1119f6934682be76501ce1..80714048bfebf8ff9814650f809907ec
  /** @}*/
 \ No newline at end of file
 diff --git a/src/data/DataResize.h b/src/data/DataResize.h
-index 5718640331e9b878e152f3bd9d7b8be54b4c214e..9e476e7141490111fd03255b4e26693310ef5c7d 100644
+index 5718640..9e476e7 100644
 --- a/src/data/DataResize.h
 +++ b/src/data/DataResize.h
 @@ -24,8 +24,16 @@
@@ -1188,7 +1183,7 @@ index 5718640331e9b878e152f3bd9d7b8be54b4c214e..9e476e7141490111fd03255b4e266933
  /** @}*/
 \ No newline at end of file
 diff --git a/src/data/DataSelect.h b/src/data/DataSelect.h
-index afd6f88d80501db3277ace0790f7906ba5df3ec2..5f7d656f5054274188a2e59904d3509423d30515 100644
+index afd6f88..5f7d656 100644
 --- a/src/data/DataSelect.h
 +++ b/src/data/DataSelect.h
 @@ -31,17 +31,23 @@ enum class VectorComponents
@@ -1229,7 +1224,7 @@ index afd6f88d80501db3277ace0790f7906ba5df3ec2..5f7d656f5054274188a2e59904d35094
  /** @}*/
 \ No newline at end of file
 diff --git a/src/data/DataSourceNorm.h b/src/data/DataSourceNorm.h
-index d80813db039fe2303b31f486bfe27cd5b05ad8ef..b5667fe10b8ecf7352b9f016b148c6d8fcb02aa5 100644
+index d80813d..b5667fe 100644
 --- a/src/data/DataSourceNorm.h
 +++ b/src/data/DataSourceNorm.h
 @@ -28,20 +28,24 @@
@@ -1295,7 +1290,7 @@ index d80813db039fe2303b31f486bfe27cd5b05ad8ef..b5667fe10b8ecf7352b9f016b148c6d8
  /** @}*/
 \ No newline at end of file
 diff --git a/src/data/DataSourceVector.h b/src/data/DataSourceVector.h
-index e2b123565701ba9320ee21757381b7242af61f43..492f299c4ca6f096cd941735c75d4e66ef677da2 100644
+index e2b1235..492f299 100644
 --- a/src/data/DataSourceVector.h
 +++ b/src/data/DataSourceVector.h
 @@ -19,12 +19,16 @@
@@ -1317,7 +1312,7 @@ index e2b123565701ba9320ee21757381b7242af61f43..492f299c4ca6f096cd941735c75d4e66
  #endif /* GRAFICI_DATA_SOURCE_VECTOR_H */
  
 diff --git a/src/data/DataSpline.h b/src/data/DataSpline.h
-index f94a3c78906186d56216bee9eed77771521175c1..60a04ca14754ee7cbb74ac752ded02e294901c83 100644
+index f94a3c7..60a04ca 100644
 --- a/src/data/DataSpline.h
 +++ b/src/data/DataSpline.h
 @@ -30,9 +30,22 @@
@@ -1420,7 +1415,7 @@ index f94a3c78906186d56216bee9eed77771521175c1..60a04ca14754ee7cbb74ac752ded02e2
  
  #endif //GRAFICI_DATA_SPLINE_INTERPOLATOR_H
 diff --git a/src/data/DataVector.h b/src/data/DataVector.h
-index 8ba6b12dbc000b842df0dbecf8f4c08b574db78e..bac9b3ac95e44d42a8f4ba39b637231dca2cf0b8 100644
+index 8ba6b12..bac9b3a 100644
 --- a/src/data/DataVector.h
 +++ b/src/data/DataVector.h
 @@ -20,7 +20,10 @@
@@ -1436,7 +1431,7 @@ index 8ba6b12dbc000b842df0dbecf8f4c08b574db78e..bac9b3ac95e44d42a8f4ba39b637231d
  #endif /* GRAFICI_DATA_VECTOR_H */
  
 diff --git a/src/display/DisplayDriver.h b/src/display/DisplayDriver.h
-index b174e13f40692dc3cbf3777fcc047844da35580a..894e2445c02e0643b4ce04f6338397d9434b0a75 100644
+index b174e13..894e244 100644
 --- a/src/display/DisplayDriver.h
 +++ b/src/display/DisplayDriver.h
 @@ -30,17 +30,22 @@
@@ -1608,7 +1603,7 @@ index b174e13f40692dc3cbf3777fcc047844da35580a..894e2445c02e0643b4ce04f6338397d9
  /** @}*/
 \ No newline at end of file
 diff --git a/src/display/DisplayVector.h b/src/display/DisplayVector.h
-index 438b0b77ccca133553d12b02173e28d07dd7b669..a00e39d9db8288b6c82658a8fef7b413bd155835 100644
+index 438b0b7..a00e39d 100644
 --- a/src/display/DisplayVector.h
 +++ b/src/display/DisplayVector.h
 @@ -25,7 +25,10 @@
@@ -1624,7 +1619,7 @@ index 438b0b77ccca133553d12b02173e28d07dd7b669..a00e39d9db8288b6c82658a8fef7b413
  #endif /* GRAFICI_DISPLAY_DISPLAY_VECTOR_H */
  
 diff --git a/src/display/PolarWindow.h b/src/display/PolarWindow.h
-index 6882798c5184fdfad91831d3ac11a4f1a036a47a..20dee46611a44be130f6db011166bcf502998885 100644
+index 6882798..20dee46 100644
 --- a/src/display/PolarWindow.h
 +++ b/src/display/PolarWindow.h
 @@ -20,17 +20,24 @@
@@ -1701,7 +1696,7 @@ index 6882798c5184fdfad91831d3ac11a4f1a036a47a..20dee46611a44be130f6db011166bcf5
  /** @}*/
 \ No newline at end of file
 diff --git a/src/display/Window.h b/src/display/Window.h
-index a7dc1cde2cfe79a2c83534405172f20a8cdf4515..58fbe8020b2e9448956fd597fa063a2c7d616d24 100644
+index a7dc1cd..58fbe80 100644
 --- a/src/display/Window.h
 +++ b/src/display/Window.h
 @@ -39,23 +39,31 @@ enum class WindowTransform
@@ -1807,7 +1802,7 @@ index a7dc1cde2cfe79a2c83534405172f20a8cdf4515..58fbe8020b2e9448956fd597fa063a2c
  
 diff --git a/src/numeric/Float16.h b/src/numeric/Float16.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..6a21f3370d2b50ee86e738a7360703a2201276cd
+index 0000000..6a21f33
 --- /dev/null
 +++ b/src/numeric/Float16.h
 @@ -0,0 +1,116 @@
@@ -1929,7 +1924,7 @@ index 0000000000000000000000000000000000000000..6a21f3370d2b50ee86e738a7360703a2
 +#endif
 diff --git a/src/numeric/Precision.h b/src/numeric/Precision.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..3f9724895b146588ee700c0c32cc99ccaadf210b
+index 0000000..3f97248
 --- /dev/null
 +++ b/src/numeric/Precision.h
 @@ -0,0 +1,44 @@
@@ -1978,7 +1973,7 @@ index 0000000000000000000000000000000000000000..3f9724895b146588ee700c0c32cc99cc
 +
 +#endif
 diff --git a/src/plotter/PlotArea.h b/src/plotter/PlotArea.h
-index 8ecee18e143a76bebe6b4785247b6d7e8d26c3f8..d388620f9b047a3ad2a161ce81f5432c3f8a0962 100644
+index 8ecee18..d388620 100644
 --- a/src/plotter/PlotArea.h
 +++ b/src/plotter/PlotArea.h
 @@ -3,16 +3,17 @@
@@ -2007,7 +2002,7 @@ index 8ecee18e143a76bebe6b4785247b6d7e8d26c3f8..d388620f9b047a3ad2a161ce81f5432c
  	for (size_t idx = 1; idx < source_size; ++idx)
  	{
 diff --git a/src/plotter/PlotAxis.h b/src/plotter/PlotAxis.h
-index 3174d4e89c70efb996c5f95c84a89e5b52dad711..8261c362296044d46aacf64ff00639c11765d859 100644
+index 3174d4e..8261c36 100644
 --- a/src/plotter/PlotAxis.h
 +++ b/src/plotter/PlotAxis.h
 @@ -19,9 +19,10 @@
@@ -2025,7 +2020,7 @@ index 3174d4e89c70efb996c5f95c84a89e5b52dad711..8261c362296044d46aacf64ff00639c1
  	if (opts.get_h_axis() > 0 || opts.get_v_axis() > 0)
  	{
 diff --git a/src/plotter/PlotBar.h b/src/plotter/PlotBar.h
-index b309de075a31502c170909aa5a28c7afef2dc74b..22d8305d4ee719d4d649382212aa6ba7f06c9eed 100644
+index b309de0..22d8305 100644
 --- a/src/plotter/PlotBar.h
 +++ b/src/plotter/PlotBar.h
 @@ -19,16 +19,17 @@
@@ -2054,7 +2049,7 @@ index b309de075a31502c170909aa5a28c7afef2dc74b..22d8305d4ee719d4d649382212aa6ba7
  	for (size_t idx = 0; idx < source_size; ++idx)
  	{
 diff --git a/src/plotter/PlotLine.h b/src/plotter/PlotLine.h
-index ef60d99a7d1a5796b115a61ec3c018c65d417f0b..676d656aca87151c9c6a0b9d5b1529888e541032 100644
+index ef60d99..676d656 100644
 --- a/src/plotter/PlotLine.h
 +++ b/src/plotter/PlotLine.h
 @@ -3,16 +3,17 @@
@@ -2083,7 +2078,7 @@ index ef60d99a7d1a5796b115a61ec3c018c65d417f0b..676d656aca87151c9c6a0b9d5b152988
  	for (size_t idx = 1; idx < source_size; ++idx)
  	{
 diff --git a/src/plotter/PlotOptions.h b/src/plotter/PlotOptions.h
-index 2e4bc1a008ce643ec9d3eb35e03b5041ae545b9f..bdbdfd22027061ddf3c9a07aeecb9656f27b9266 100644
+index 2e4bc1a..bdbdfd2 100644
 --- a/src/plotter/PlotOptions.h
 +++ b/src/plotter/PlotOptions.h
 @@ -17,8 +17,14 @@
@@ -2139,7 +2134,7 @@ index 2e4bc1a008ce643ec9d3eb35e03b5041ae545b9f..bdbdfd22027061ddf3c9a07aeecb9656
  
  #endif /* GRAFICI_GFX_PLOT_OPTIONS_H */
 diff --git a/src/plotter/PlotScatter.h b/src/plotter/PlotScatter.h
-index 0657d194e5f0503395a8518b931ae9a732fa860b..fedb7fd2056508208c57061ffefe7e48fb75fab5 100644
+index 0657d19..fedb7fd 100644
 --- a/src/plotter/PlotScatter.h
 +++ b/src/plotter/PlotScatter.h
 @@ -1,17 +1,18 @@
@@ -2169,356 +2164,3 @@ index 0657d194e5f0503395a8518b931ae9a732fa860b..fedb7fd2056508208c57061ffefe7e48
  
  	for (size_t idx = 0; idx < source_size; ++idx)
  	{
-diff --git a/tests/README.md b/tests/README.md
-new file mode 100644
-index 0000000000000000000000000000000000000000..d3af756d85d086976897dca923ac9c39c0a62b5a
---- /dev/null
-+++ b/tests/README.md
-@@ -0,0 +1,20 @@
-+# Host regression checks
-+
-+These checks need a C++11 host compiler. The plotting check supplies its own small display stub; no Arduino installation is required. Run from the repository root:
-+
-+```sh
-+c++ -std=c++11 -Wall -Wextra -pedantic -I src tests/data_spline_bounds.cpp -o /tmp/grafici-spline-bounds
-+/tmp/grafici-spline-bounds
-+c++ -std=c++11 -Wall -Wextra -pedantic -I src tests/numeric_precision.cpp -o /tmp/grafici-numeric-precision
-+/tmp/grafici-numeric-precision
-+c++ -std=c++11 -Wall -Wextra -pedantic -I tests/support -I src tests/precision_plotting.cpp -o /tmp/grafici-precision-plotting
-+/tmp/grafici-precision-plotting
-+```
-+
-+It guards every spline workspace allocation, checks interpolation including the maximum supported source count, injects failure into each allocation, and exercises empty, single-point, zero-output and oversized inputs. Unsupported inputs or allocation failure produce an empty spline (`size() == 0`), whose reads return `INVALID_DATA_VECTOR`. Source count is the minimum of x/y counts and must be between 2 and `N + 1` for the current fixed coefficient arrays.
-+
-+It also checks that a declared x range extending beyond the supplied knots returns invalid data for an uncovered sample without reading past the source. This does not change interpolation endpoint sampling or validate every numerical precondition, such as strictly increasing knots.
-+
-+The numeric check validates every binary16 encoding and finite rounding interval, then exercises float/FP16 sources, borrowed casts, ranges, interpolation, splines and projection. The plotting check uses a host drawing-call recorder to instantiate both complete pipelines and check representative pixel endpoints. The recorder does not emulate hardware or rasterization.
-+
-+For additional host diagnostics, add `-fsanitize=address,undefined -fno-omit-frame-pointer` to the compile command when supported. Keep assertions enabled. Board SRAM/stack measurements remain separate from these host checks.
-diff --git a/tests/numeric_precision.cpp b/tests/numeric_precision.cpp
-new file mode 100644
-index 0000000000000000000000000000000000000000..865d5446591ea723298195b672d4354d09f62eda
---- /dev/null
-+++ b/tests/numeric_precision.cpp
-@@ -0,0 +1,171 @@
-+#include <cassert>
-+#include <cmath>
-+#include <cstddef>
-+#include <cstdint>
-+#include <cstdio>
-+#include <cstdlib>
-+#include <limits>
-+#include <type_traits>
-+
-+// Arduino random API used by the distribution sources.
-+void randomSeed(unsigned long seed) { std::srand(seed); }
-+long random(long low, long high) { return low + std::rand() % (high - low); }
-+long random(long high) { return high > 0 ? random(0, high) : 0; }
-+
-+#include "numeric/Float16.h"
-+#include "data/DataArrayXY.h"
-+#include "data/DataCast.h"
-+#include "data/DataConstant.h"
-+#include "data/DataDistributionNormal.h"
-+#include "data/DataDistributionUniform.h"
-+#include "data/DataFunction.h"
-+#include "data/DataHistogramXY.h"
-+#include "data/DataResize.h"
-+#include "data/DataSourceVector.h"
-+#include "data/DataSpline.h"
-+#include "display/DisplayVector.h"
-+#include "display/PolarWindow.h"
-+
-+using Half = grafici::Float16;
-+
-+void check_binary16()
-+{
-+    static_assert(sizeof(Half) == 2, "Two-byte sample storage");
-+    static_assert(std::is_trivially_default_constructible<Half>::value,
-+                  "Sample arrays need no default-construction loop");
-+    constexpr Half one = Half::from_bits(0x3C00);
-+    static_assert(one.bits() == 0x3C00, "Raw-bit tables support constant initialization");
-+    Half zero{};
-+    assert(zero.bits() == 0);
-+    static_assert(sizeof(DataNormT<Half>) == 6, "Compact value and range");
-+    static_assert(sizeof(DisplayVectorT<Half>) == 4, "Compact coordinates");
-+    static_assert(std::is_same<DataNorm, DataNormT<float>>::value, "Float API default");
-+    static_assert(std::is_same<decltype(Half(1) + Half(1)), float>::value,
-+                  "Half arithmetic widens to float");
-+
-+    for (uint32_t bits = 0; bits < 65536; ++bits)
-+    {
-+        const unsigned exponent = (bits >> 10) & 31;
-+        const unsigned fraction = bits & 1023;
-+        const float decoded = Half::from_bits(uint16_t(bits));
-+        if (exponent == 31 && fraction != 0)
-+        {
-+            assert(std::isnan(decoded));
-+            assert(Half(decoded).bits() == (bits | 0x0200));
-+        }
-+        else
-+        {
-+            float expected = exponent == 31 ? std::numeric_limits<float>::infinity()
-+                : exponent == 0 ? std::ldexp(float(fraction), -24)
-+                : std::ldexp(float(1024 + fraction), int(exponent) - 25);
-+            if (bits & 0x8000) expected = -expected;
-+            assert(decoded == expected && std::signbit(decoded) == std::signbit(expected));
-+            assert(Half(decoded).bits() == bits);
-+        }
-+    }
-+
-+    // Exercise every positive finite rounding interval, including ties and
-+    // values immediately beside each tie. Negative rounding is symmetric.
-+    for (uint16_t bits = 0; bits < 0x7BFF; ++bits)
-+    {
-+        const float lo = Half::from_bits(bits);
-+        const float hi = Half::from_bits(bits + 1);
-+        const float midpoint = (lo + hi) * 0.5f;
-+        const uint16_t even = bits + (bits & 1);
-+        assert(Half(midpoint).bits() == even);
-+        assert(Half(-midpoint).bits() == (even | 0x8000));
-+        assert(Half(std::nextafter(midpoint, lo)).bits() == bits);
-+        assert(Half(std::nextafter(midpoint, hi)).bits() == bits + 1);
-+    }
-+    assert(Half(65504).bits() == 0x7BFF);
-+    assert(Half(65519).bits() == 0x7BFF);
-+    assert(Half(65520).bits() == 0x7C00);
-+    assert(Half(-65520).bits() == 0xFC00);
-+
-+    Half sum = Half(0.75f) + Half(0.75f);
-+    Half difference = Half(0.25f) - Half(0.75f);
-+    assert(float(sum) == 1.5f && float(difference) == -0.5f);
-+    sum *= 2;
-+    sum /= 2;
-+    sum -= 0.5f;
-+    sum += 0.5f;
-+    assert(float(sum) == 1.5f);
-+    DisplayVectorT<Half> vector{1.5f, -0.5f};
-+    const auto scaled = vector * 2;
-+    assert(float(scaled.x) == 3 && float(scaled.y) == -1);
-+    DataNormT<Half> raw(2, {-4, 4});
-+    assert(float(raw.raw()) == 2 && raw.norm() == 0.75f);
-+    const DataNorm widened = raw;
-+    assert(widened.raw() == 2 && widened.range().low == -4);
-+    Range<Half> wide_range{-65504, 65504};
-+    assert(wide_range.value_to_norm(Half(0)) == 0.5f);
-+    Range<uint32_t> integer_range{1000000000, 1000000010};
-+    assert(integer_range.value_to_norm(1000000005) == 0.5f);
-+}
-+
-+float sample_function(size_t i) { return float(i) - 2; }
-+
-+template <typename Scalar>
-+void check_sources()
-+{
-+    const Scalar values[] = {-2, -1, 0, 1, 2};
-+    DataArray<Scalar, Scalar> source(values, 5);
-+    assert(float(source.range().low) == -2 && float(source.range().high) == 2);
-+    assert(source[2].norm() == 0.5f);
-+    DataCast<float, Scalar> widened(source);
-+    assert(widened[4].raw() == 2 && widened.range().low == -2);
-+    DataCast<Scalar, float> narrowed(widened);
-+    assert(float(narrowed[0].raw()) == -2);
-+    assert(narrowed[5].range().high == 0);
-+    DataArrayXY<Scalar, Scalar> xy(values, 5);
-+    DataSourceVectorT<Scalar> &vector_source = xy;
-+    assert(float(vector_source[4].x.raw()) == 4);
-+    assert(xy.y()[4].norm() == 1);
-+    DataConstantT<Scalar> constant(5, {2, {-4, 4}});
-+    assert(float(constant[0].raw()) == 2);
-+    DataFunctionT<Scalar> function(5, sample_function);
-+    assert(float(function[0].raw()) == -2 && function[4].norm() == 1);
-+    DataLinearT<Scalar> linear(5, -2, 1);
-+    assert(float(linear[4].raw()) == 2);
-+    DataResizeT<Scalar> resized(source, {0.25f, 0.75f});
-+    assert(resized[0].norm() == 0.25f && resized[4].norm() == 0.75f);
-+    // Keep the views alive: the interpolator borrows its source references.
-+    auto x = xy.x();
-+    auto y = xy.y();
-+    DataInterpolatorLT<Scalar> stable_interpolation(x, y, 8);
-+    assert(std::fabs(float(stable_interpolation[4].y.raw())) < 0.002f);
-+    DataSpline<8, false, Scalar> spline(x, y);
-+    assert(spline.size() == 8);
-+    assert(std::fabs(float(spline[4].y.raw())) < 0.002f);
-+    DataHistogramXY<4, Scalar> histogram(source);
-+    assert(histogram.size() == 4 && float(histogram[0].y.raw()) == 1);
-+    DataDistributionUniform<32, Scalar> uniform(1);
-+    DataDistributionNormal<32, Scalar> normal(1);
-+    assert(uniform.size() == 32 && normal.size() == 32);
-+    assert(uniform[0].norm() >= 0 && uniform[0].norm() <= 1);
-+
-+    WindowT<Scalar> window({0.25f, 0.75f}, {0.25f, 0.75f});
-+    const auto projected = window.data_to_display_vector(0.5f, 0.5f);
-+    assert(float(projected.x) == 0.5f && float(projected.y) == 0.5f);
-+    auto sub = window.sub_window(2, 2, 0, 0);
-+    assert(float(sub.x.high) == 0.5f);
-+    PolarWindowT<Scalar> polar;
-+    const auto radial = polar.data_to_display_vector(0, 1);
-+    assert(float(radial.x) == 1 && float(radial.y) == 0.5f);
-+    assert(float(polar.sub_polar_window(2, 2, 0, 0).x.high) == 0.5f);
-+}
-+
-+int main()
-+{
-+    check_binary16();
-+    check_sources<float>();
-+    check_sources<Half>();
-+    Half samples[] = {-2, 0, 2};
-+    DataArray<Half> compact_samples(samples, 3); // FP32 interface, FP16 buffer
-+    assert(compact_samples[2].raw() == 2);
-+    static_assert(sizeof(DataSpline<32, false, Half>) < sizeof(DataSpline<32, false>),
-+                  "FP16 reduces retained spline storage");
-+    static_assert(sizeof(DataDistributionUniform<128, Half>) < sizeof(DataDistributionUniform<128>),
-+                  "FP16 reduces retained sample storage");
-+    std::puts("All binary16 patterns, rounding intervals, signed/unbounded values and typed sources passed.");
-+}
-diff --git a/tests/precision_plotting.cpp b/tests/precision_plotting.cpp
-new file mode 100644
-index 0000000000000000000000000000000000000000..91dabf1c7539a07ead86c493ab8abfd18e409534
---- /dev/null
-+++ b/tests/precision_plotting.cpp
-@@ -0,0 +1,55 @@
-+#include "Adafruit_GFX.h"
-+#include "Grafici.h"
-+#include <cassert>
-+#include <cstdio>
-+
-+template <typename Scalar>
-+void check_plotting()
-+{
-+    Adafruit_GFX target;
-+    GraficiT<Scalar> plot(target);
-+    const Scalar samples[] = {0, 0.5f, 1};
-+    DataArray<Scalar, Scalar> source(samples, 3);
-+    plot.line(source, source, white);
-+    assert(target.lines.size() == 2);
-+    assert(target.lines.front().x0 == 0 && target.lines.front().y0 == 63);
-+    assert(target.lines.back().x1 == 127 && target.lines.back().y1 == 0);
-+
-+    WindowT<Scalar> window({0.25f, 0.75f}, {0.25f, 0.75f}, WindowTransform::cw_90_rotation);
-+    const PlotOptionsT<Scalar> options;
-+    auto axis_options = options.set_axis(2, 2, white);
-+    plot.line(source, source, source, window, axis_options);
-+    plot.area(source, source, source, window);
-+    plot.area(source, source, white, window);
-+    plot.bar(source, source, source, window, options.bar_filled(true));
-+    plot.bar(source, source, white, window, options.thickness(0));
-+    DataConstantT<Scalar> radius(3, 0.02f);
-+    plot.scatter(source, source, source, radius, window, options.scatter_style(".o+*xv"));
-+    plot.scatter(source, source, white, radius, window);
-+    plot.clear_screen(window);
-+
-+    PolarWindowT<Scalar> polar;
-+    plot.line(source, source, white, polar, options.segments(4));
-+    plot.bar(source, source, white, polar, options.bar_filled(true).segments(2));
-+    DisplayDriverT<Scalar> driver(target);
-+    driver.fill_polygon({0.5f, 0.5f}, {0.1f, 0.1f}, 3, 0, white);
-+    driver.fill_screen(black);
-+    assert(target.triangles > 0 && target.screens == 1);
-+}
-+
-+int main()
-+{
-+    check_plotting<float>();
-+    check_plotting<grafici::Float16>();
-+    Adafruit_GFX target;
-+    Grafici legacy(target);
-+    grafici::Float16 samples[] = {0, 1};
-+    DataArray<grafici::Float16> source(samples, 2);
-+    legacy.line(source, source, white); // Compact input, default float pipeline.
-+    assert(target.lines.size() == 1);
-+    DataArray<grafici::Float16, grafici::Float16> half_source(samples, 2);
-+    DataCast<float, grafici::Float16> widened(half_source);
-+    legacy.line(widened, widened, white);
-+    assert(target.lines.size() == 2);
-+    std::puts("Float and FP16 plotters, projections, options and legacy aliases passed.");
-+}
-diff --git a/tests/spline_autoscale.cpp b/tests/spline_autoscale.cpp
-index 3643b3c1a1241c45d9416ff397bf8c69ec6605b2..73b9d11e12ea969e97146e4087b33c08896e9fbb 100644
---- a/tests/spline_autoscale.cpp
-+++ b/tests/spline_autoscale.cpp
-@@ -1,17 +1,17 @@
--#include <stddef.h>
- #include "data/DataArray.h"
- #include "data/DataSpline.h"
- #include <cassert>
- #include <cmath>
- #include <cstdio>
- 
-+template <typename Real>
- void check_overshoot()
- {
-     const float xs[] = {0, 1, 2, 3};
-     const float ys[] = {0, 1, 1, 0};
--    DataArray<float> x(xs, 4), y(ys, 4);
--    DataSpline<13, true> scaled(x, y);
--    DataSpline<13, false> clipped(x, y);
-+    DataArray<float, Real> x(xs, 4), y(ys, 4);
-+    DataSpline<13, true, Real> scaled(x, y);
-+    DataSpline<13, false, Real> clipped(x, y);
-     float peak = 0;
-     for (size_t i = 0; i < scaled.size(); ++i)
-     {
-@@ -28,6 +28,7 @@ void check_overshoot()
- 
- int main()
- {
--    check_overshoot();
--    std::puts("Spline autoscale preserves unclipped overshoot for float.");
-+    check_overshoot<float>();
-+    check_overshoot<grafici::Float16>();
-+    std::puts("Spline autoscale preserves unclipped overshoot for float and FP16.");
- }
-diff --git a/tests/support/Adafruit_GFX.h b/tests/support/Adafruit_GFX.h
-new file mode 100644
-index 0000000000000000000000000000000000000000..7dfee9e8a673d4c4b331bef455f3bb827d5f6f9d
---- /dev/null
-+++ b/tests/support/Adafruit_GFX.h
-@@ -0,0 +1,47 @@
-+#ifndef GRAFICI_TEST_GFX_H
-+#define GRAFICI_TEST_GFX_H
-+
-+// Host drawing-call recorder; this does not emulate display rasterization.
-+#include <cstddef>
-+#include <cstdint>
-+#include <cstdlib>
-+#include <cstring>
-+#include <cmath>
-+#include <string>
-+#include <vector>
-+
-+class String
-+{
-+public:
-+    String(const char *text = "") : value(text) {}
-+    size_t length() const { return value.length(); }
-+    char operator[](size_t i) const { return value[i]; }
-+private:
-+    std::string value;
-+};
-+
-+inline void randomSeed(unsigned long seed) { std::srand(seed); }
-+inline long random(long low, long high) { return low + std::rand() % (high - low); }
-+inline long random(long high) { return high > 0 ? random(0, high) : 0; }
-+
-+class Adafruit_GFX
-+{
-+public:
-+    struct Line { int16_t x0, y0, x1, y1; uint16_t color; };
-+    std::vector<Line> lines;
-+    size_t triangles = 0, pixels = 0, screens = 0;
-+    int16_t width() const { return 128; }
-+    int16_t height() const { return 64; }
-+    void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color)
-+    {
-+        lines.push_back({x0, y0, x1, y1, color});
-+    }
-+    void fillTriangle(int16_t, int16_t, int16_t, int16_t, int16_t, int16_t, uint16_t)
-+    {
-+        ++triangles;
-+    }
-+    void drawPixel(int16_t, int16_t, uint16_t) { ++pixels; }
-+    void fillScreen(uint16_t) { ++screens; }
-+};
-+
-+#endif

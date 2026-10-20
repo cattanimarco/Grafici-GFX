@@ -78,10 +78,10 @@ Budget for sample storage, spline workspace, rendering scratch and any display-d
 
 - [Architecture](ARCHITECTURE.md): Mermaid diagrams, the normalized pipeline and efficiency improvements.
 - [Boundary contracts](CONTRACTS.md): valid/missing data, empty inputs, interpolation and geometric clipping.
-- [Test instructions](tests/README.md): regression coverage, Arduino builds and library compliance/release checks. Run the included host checks with `python3 tests/run_checks.py --sanitize`.
+- [Test instructions](https://github.com/cattanimarco/Grafici-Test/blob/f922bc61317a4e84718346f90e9042bf436b04b5/tests/README.md): regression coverage, Arduino builds and library compliance/release checks in Grafici-Test.
 - [Correctness patches](patches/correctness/README.md): explanations, application order and Uno R3 build sizes.
 
-Additional tests are in [Grafici-Test](https://github.com/cattanimarco/Grafici-Test). Design notes and future ideas are available in the [project notes](https://cattanimarco.github.io/notes/Grafici).
+Host regressions, rendering checks and generated images live in [Grafici-Test](https://github.com/cattanimarco/Grafici-Test), which includes this library as a pinned submodule. To check another library checkout, run `python3 tests/run_checks.py --sanitize --library /path/to/Grafici-GFX` from Grafici-Test. Design notes and future ideas are available in the [project notes](https://cattanimarco.github.io/notes/Grafici).
 
 See the [Wiki](https://github.com/cattanimarco/Grafici-GFX/wiki) for API documentation. Contributions are welcome through pull requests; run the regression checks before submitting changes.
 
