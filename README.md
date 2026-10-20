@@ -78,7 +78,7 @@ Budget for sample storage, spline workspace, rendering scratch and any display-d
 
 - [Architecture](ARCHITECTURE.md): Mermaid diagrams, the normalized pipeline and efficiency improvements.
 - [Boundary contracts](CONTRACTS.md): valid/missing data, empty inputs, interpolation and geometric clipping.
-- [Test instructions](tests/README.md): regression coverage and Arduino builds. Run the included host checks with `python3 tests/run_checks.py --sanitize`.
+- [Test instructions](tests/README.md): regression coverage, Arduino builds and library compliance/release checks. Run the included host checks with `python3 tests/run_checks.py --sanitize`.
 - [Correctness patches](patches/correctness/README.md): explanations, application order and Uno R3 build sizes.
 
 Additional tests are in [Grafici-Test](https://github.com/cattanimarco/Grafici-Test). Design notes and future ideas are available in the [project notes](https://cattanimarco.github.io/notes/Grafici).

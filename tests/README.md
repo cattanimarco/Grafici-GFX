@@ -41,3 +41,19 @@ arduino-cli compile --fqbn arduino:avr:uno --library . examples/fp16_line
 `--library .` explicitly selects this checkout. The examples use explicit template arguments, integer sample counts, and capture-free function-pointer callbacks. All eight examples compile with AVR GNU C++11, including a check without `-fpermissive` and with narrowing errors enabled. Six fit Uno R3 flash; the area and scatter/histogram examples exceed it. See [the build audit](../patches/correctness/README.md#avr-build-audit) for sizes. These were originally display-tested on Uno R4 Minima.
 
 A separate host integration using the installed actual Adafruit GFX canvas confirmed full clipped-triangle coverage, horizontal-line rasterization and native clearing for float/FP16. Linked board sizes do not measure runtime stack/heap peaks or physical display timing. Clipping scratch and spline workspace must be included in an application's SRAM budget.
+
+## Arduino library compliance
+
+Use [Arduino Lint](https://arduino.github.io/arduino-lint/latest/) to check packaging, metadata and example structure separately from compilation:
+
+```sh
+arduino-lint --compliance strict --library-manager update --project-type library --recursive "$PWD"
+```
+
+Grafici-GFX is already in the [Library Manager registry](https://github.com/arduino/library-registry/blob/main/repositories.txt), so use `update` rather than `submit`. Pass the absolute library path: Arduino Lint 1.3.0 can incorrectly treat an explicit `.` as the library folder name.
+
+Reviewed against the current [library specification](https://docs.arduino.cc/arduino-cli/library-specification/), [registry requirements](https://github.com/arduino/library-registry/blob/main/FAQ.md) and [API style guide](https://github.com/arduino/docs-content/blob/main/content/learn/08.contributions/01.arduino-library-style-guide/arduino-library-style-guide.md) on 20 October 2026. Arduino Lint 1.3.0 reports no errors after removing unused `ldflags` and `precompiled` fields. The remaining `LS008` warning recommends a `Grafici-GFX.h` header; the established public header remains `Grafici.h`, explicitly selected by `includes=Grafici.h`. All eight example folders pass the structural checks; their build limits are documented above.
+
+The API style guide recommends approachable names, camelCase and simple examples. Existing underscore names remain compatible. Keep the default float examples straightforward and explain precision templates in the dedicated example and guide. Grafici's constructor stores the supplied display reference; initialize the display in `setup()` before plotting.
+
+Before publishing a release, update the version in both `library.properties` and `library.json`, then tag the compliant commit. Version `4.0.0` is already tagged and cannot be reused for an indexed release. Choose a new semantic version that accounts for the changed default missing-data behavior. Keep the registered library name unchanged. The [registry FAQ](https://github.com/arduino/library-registry/blob/main/FAQ.md#how-can-i-publish-a-new-release-once-my-library-is-in-the-list) describes automatic indexing of new tags; a new registry submission is unnecessary.
