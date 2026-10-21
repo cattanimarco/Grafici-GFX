@@ -54,7 +54,7 @@ The inferred range is `[-10,10]`. The values become:
 | 5 | 0.75 |
 | 10 | 1.00 |
 
-`Range::value_to_norm()` makes that conversion; `normalized_to_value()` maps a normalized position back to the range. Both clamp finite inputs at the boundaries. A constant valid range normalizes to zero.
+`Range::value_to_norm()` makes that conversion; `normalized_to_value()` maps a normalized position back to the range. Both clamp finite inputs at the boundaries. A constant valid range normalizes to zero. `norm_to_value()` remains a forwarding alias for existing sketches.
 
 The `int` in `DataArray<int>` describes the borrowed array. Samples become float-backed `DataNorm` values when read. Raw values, slopes and spline coefficients can be negative or exceed one. `DataNorm` clips a raw input to its supplied range; intermediate geometry remains unclamped until the display boundary.
 

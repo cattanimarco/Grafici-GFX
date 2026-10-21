@@ -120,6 +120,9 @@ class Range
 		return static_cast<T>(result);
 	}
 
+	// Compatibility alias; prefer normalized_to_value().
+	T norm_to_value(const float value) const { return normalized_to_value(value); }
+
 	/**
 	 * @brief Ensure the range limits are in the correcdt order, i.e. lower < higher
 	 * 
