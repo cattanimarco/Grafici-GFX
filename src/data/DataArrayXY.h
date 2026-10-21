@@ -27,9 +27,17 @@
  * 
  * @tparam T type of the array
  */
-template <typename T>
-class DataArrayXY : public DataSource<DataVector>
+template <typename T, typename Scalar = float>
+class DataArrayXY : public DataSource<DataVectorT<Scalar>>
 {
+  public:
+	using Compute = typename grafici::ComputationType<Scalar>::type;
+	using DataNorm = DataNormT<Scalar>;
+	using DataVector = DataVectorT<Scalar>;
+	using DataSelect = DataSelectT<Scalar>;
+	using DataSource<DataVector>::size;
+protected:
+	using DataSource<DataVector>::_size;
   public:
 	/**
      * @brief Construct a new data source from a C array
@@ -43,7 +51,7 @@ class DataArrayXY : public DataSource<DataVector>
 	{
 	}
 
-	DataArrayXY(const T *data, size_t size, Range<float> range)
+	DataArrayXY(const T *data, size_t size, Range<Scalar> range)
 	    : DataSource<DataVector>{ size }
 	    , _y_data{ data, size, range }
 	{
@@ -54,7 +62,7 @@ class DataArrayXY : public DataSource<DataVector>
 		if (idx < size())
 		{
 			return {
-				{ static_cast<float>(idx), { 0, static_cast<float>(_size-1) } },
+				{ static_cast<Scalar>(idx), { 0, static_cast<Scalar>(_size-1) } },
 				_y_data[idx],
 			};
 		}
@@ -76,7 +84,7 @@ class DataArrayXY : public DataSource<DataVector>
 	}
 
   private:
-	DataArray<T> _y_data;
+	DataArray<T, Scalar> _y_data;
 };
 
 #endif /* GRAFICI_DATA_ARRAY_XY_H */

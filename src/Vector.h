@@ -48,9 +48,10 @@ class Vector
 		return { x + other.x, y + other.y };
 	};
 
-	Vector<T> operator*(const float &other) const
+	template <typename Factor>
+	Vector<T> operator*(const Factor &other) const
 	{
-		return { x * other, y * other };
+		return { static_cast<T>(x * other), static_cast<T>(y * other) };
 	};
 
 	bool operator<(const Vector<T> &other) const

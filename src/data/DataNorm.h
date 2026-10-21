@@ -35,37 +35,46 @@
  * @brief Normalized data point
  * 
  */
-class DataNorm
+template <typename Scalar = float>
+class DataNormT
 {
   public:
-	DataNorm()
+	using Compute = typename grafici::ComputationType<Scalar>::type;
+	using DataNorm = DataNormT<Scalar>;
+	DataNormT()
 	    : _raw{ 0 }
 	    , _range{ 0, 0 }
 	{
 	}
 
-	DataNorm(const float value, const Range<float> range = { 0, 1 })
-	    : _raw{ range.trim(value) }
+	template <typename Other>
+	DataNormT(const DataNormT<Other> &other)
+		: _raw{static_cast<Scalar>(other.raw())}, _range{other.range()}
+	{
+	}
+
+	DataNormT(const Compute value, const Range<Scalar> range = { 0, 1 })
+	    : _raw{ range.trim(static_cast<Scalar>(value)) }
 	    , _range{ range }
 	{
 	}
 
-	float norm() const
+	Compute norm() const
 	{
 		return _range.value_to_norm(_raw);
 	}
 
-	float raw() const
+	Scalar raw() const
 	{
 		return _raw;
 	}
 
-	void norm(float val)
+	void norm(Compute val)
 	{
 		_raw = _range.norm_to_value(val);
 	}
 
-	Range<float> range() const
+	Range<Scalar> range() const
 	{
 		return _range;
 	}
@@ -81,9 +90,11 @@ class DataNorm
 	}
 
   private:
-	float _raw;
-	Range<float> _range;
+	Scalar _raw;
+	Range<Scalar> _range;
 };
+
+using DataNorm = DataNormT<float>;
 
 #endif //#ifndef GRAFICI_DATA_NORM_H
 

@@ -3,16 +3,17 @@
 
 #include "PlotOptions.h"
 
-inline void plot_line(const DisplayDriver &display,
-               const Window &window,
+template <typename Scalar>
+inline void plot_line(const DisplayDriverT<Scalar> &display,
+			   const WindowT<Scalar> &window,
                const ColorMap &colorMap,
-               const DataSourceNorm &x,
-               const DataSourceNorm &y,
-               const DataSourceNorm &c,
-               const PlotOptions opts = {})
+			   const DataSourceNormT<Scalar> &x,
+			   const DataSourceNormT<Scalar> &y,
+			   const DataSourceNormT<Scalar> &c,
+			   const PlotOptionsT<Scalar> opts = {})
 {
 	/* in case data sources have different sizes, use the smaller one */
-	auto source_size = DataSourceNorm::min_data_source_size(x, y, c);
+	auto source_size = DataSourceNormT<Scalar>::min_data_source_size(x, y, c);
 
 	for (size_t idx = 1; idx < source_size; ++idx)
 	{

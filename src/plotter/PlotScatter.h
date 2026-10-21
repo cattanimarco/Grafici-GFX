@@ -1,17 +1,18 @@
 #ifndef GRAFICI_GFX_PLOT_SCATTER_H
 #define GRAFICI_GFX_PLOT_SCATTER_H
 
-inline void plot_scatter(const DisplayDriver &display,
-                  const Window &window,
+template <typename Scalar>
+inline void plot_scatter(const DisplayDriverT<Scalar> &display,
+				  const WindowT<Scalar> &window,
                   const ColorMap &colorMap,
-                  const DataSourceNorm &x,
-                  const DataSourceNorm &y,
-                  const DataSourceNorm &c,
-                  const DataSourceNorm &size,
-                  const PlotOptions opts = {})
+				  const DataSourceNormT<Scalar> &x,
+				  const DataSourceNormT<Scalar> &y,
+				  const DataSourceNormT<Scalar> &c,
+				  const DataSourceNormT<Scalar> &size,
+				  const PlotOptionsT<Scalar> opts = {})
 {
 	/* in case data sources have different sizes, use the smaller one */
-	auto source_size = DataSourceNorm::min_data_source_size(x, y, c);
+	auto source_size = DataSourceNormT<Scalar>::min_data_source_size(x, y, c);
 
 	for (size_t idx = 0; idx < source_size; ++idx)
 	{

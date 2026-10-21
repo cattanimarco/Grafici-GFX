@@ -24,15 +24,24 @@
  * @brief Interface for generated data sources
  * 
  */
-class DataParametric : public DataSourceNorm
+template <typename Scalar = float>
+class DataParametricT : public DataSourceNormT<Scalar>
 {
   public:
-	DataParametric(size_t size)
+	using Compute = typename grafici::ComputationType<Scalar>::type;
+	using DataNorm = DataNormT<Scalar>;
+	using DataSourceNorm = DataSourceNormT<Scalar>;
+	using DataSourceNorm::size;
+	using DataParametric = DataParametricT<Scalar>;
+protected:
+	using DataSourceNorm::_range;
+  public:
+	DataParametricT(size_t size)
 	    : DataSourceNorm{ size }
 	{
 	}
 
-	DataParametric(size_t size, Range<float> range)
+	DataParametricT(size_t size, Range<Scalar> range)
 	    : DataSourceNorm{ size , range}
 	{
 	}
@@ -56,7 +65,7 @@ class DataParametric : public DataSourceNorm
 	}
 
   protected:
-	virtual float at(size_t idx) const = 0;
+	virtual Compute at(size_t idx) const = 0;
 
 	virtual void update_range()
 	{
@@ -70,6 +79,8 @@ class DataParametric : public DataSourceNorm
 		}
 	}
 };
+
+using DataParametric = DataParametricT<float>;
 
 #endif /* GRAFICI_DATA_PARAMETRIC_H */
 

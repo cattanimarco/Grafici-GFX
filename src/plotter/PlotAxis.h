@@ -19,9 +19,10 @@
 
 #include "PlotOptions.h"
 
-inline void plot_axis(const DisplayDriver &display,
-               const Window &window,
-               const PlotOptions &opts)
+template <typename Scalar>
+inline void plot_axis(const DisplayDriverT<Scalar> &display,
+			   const WindowT<Scalar> &window,
+			   const PlotOptionsT<Scalar> &opts)
 {
 	if (opts.get_h_axis() > 0 || opts.get_v_axis() > 0)
 	{

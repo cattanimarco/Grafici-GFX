@@ -39,23 +39,31 @@ enum class WindowTransform
  * the min and max coordinates on the window.
  * 
  */
-class Window : public Vector<Range<float>>
+template <typename Scalar = float>
+class WindowT : public Vector<Range<Scalar>>
 {
   public:
-	Window()
-	    : Vector<Range<float>>{ { 0, 1 }, { 0, 1 } }
+	using Compute = typename grafici::ComputationType<Scalar>::type;
+	using DataNorm = DataNormT<Scalar>;
+	using DataVector = DataVectorT<Scalar>;
+	using DisplayVector = DisplayVectorT<Scalar>;
+	using Vector<Range<Scalar>>::x;
+	using Vector<Range<Scalar>>::y;
+	using Window = WindowT<Scalar>;
+	WindowT()
+	    : Vector<Range<Scalar>>{ { 0, 1 }, { 0, 1 } }
 	    , _transform{ WindowTransform::none }
 	{
 	}
 
-	Window(const Range<float> &x_range, const Range<float> &y_range, WindowTransform rotation = WindowTransform::none)
-	    : Vector<Range<float>>{ x_range, y_range }
+	WindowT(const Range<Scalar> &x_range, const Range<Scalar> &y_range, WindowTransform rotation = WindowTransform::none)
+	    : Vector<Range<Scalar>>{ x_range, y_range }
 	    , _transform{ rotation }
 	{
 	}
 
-	Window(const DisplayVector &origin, float width, float height, WindowTransform rotation = WindowTransform::none)
-	    : Vector<Range<float>>{ { origin.x, origin.x + width }, { origin.y, origin.y + height } }
+	WindowT(const DisplayVector &origin, Scalar width, Scalar height, WindowTransform rotation = WindowTransform::none)
+	    : Vector<Range<Scalar>>{ { origin.x, origin.x + width }, { origin.y, origin.y + height } }
 	    , _transform{ rotation }
 	{
 	}
@@ -68,7 +76,7 @@ class Window : public Vector<Range<float>>
 		return *this;
 	};
 
-	Window &set_boundaries(const Range<float> &x_range, const Range<float> &y_range)
+	Window &set_boundaries(const Range<Scalar> &x_range, const Range<Scalar> &y_range)
 	{
 		x = x_range;
 		y = y_range;
@@ -79,12 +87,12 @@ class Window : public Vector<Range<float>>
 	{
 		auto x_delta_subwindow = x.delta() / x_slices;
 		auto y_delta_subwindow = y.delta() / y_slices;
-		Range<float> new_range_x = { x.low + x_delta_subwindow * x_slice_idx, x.low + x_delta_subwindow * (x_slice_idx + 1) };
-		Range<float> new_range_y = { y.low + y_delta_subwindow * y_slice_idx, y.low + y_delta_subwindow * (y_slice_idx + 1) };
+		Range<Scalar> new_range_x = { x.low + x_delta_subwindow * x_slice_idx, x.low + x_delta_subwindow * (x_slice_idx + 1) };
+		Range<Scalar> new_range_y = { y.low + y_delta_subwindow * y_slice_idx, y.low + y_delta_subwindow * (y_slice_idx + 1) };
 		return { new_range_x, new_range_y };
 	};
 
-	Window sub_window(Range<float> new_range_x, Range<float> new_range_y) const
+	Window sub_window(Range<Scalar> new_range_x, Range<Scalar> new_range_y) const
 	{
 		return { { x.low + x.delta() * new_range_x.low,
 			       x.low + x.delta() * new_range_x.high },
@@ -98,7 +106,7 @@ class Window : public Vector<Range<float>>
 	};
 
 	/* from normalized data vector to normalized display vector */
-	virtual DisplayVector data_to_display_vector(float data_x, float data_y) const
+	virtual DisplayVector data_to_display_vector(Compute data_x, Compute data_y) const
 	{
 		/* handle rotation and transformations here */
 		switch (_transform)
@@ -145,7 +153,26 @@ class Window : public Vector<Range<float>>
 	WindowTransform _transform{ WindowTransform::none };
 };
 
-const Window full_screen;
+using Window = WindowT<float>;
+
+namespace grafici_detail {
+template <typename Scalar>
+struct DefaultWindow
+{
+	static const WindowT<Scalar> value;
+};
+
+template <typename Scalar>
+const WindowT<Scalar> DefaultWindow<Scalar>::value;
+} // namespace grafici_detail
+
+template <typename Scalar>
+inline const WindowT<Scalar> &full_screen_for()
+{
+	return grafici_detail::DefaultWindow<Scalar>::value;
+}
+
+static const Window &full_screen = grafici_detail::DefaultWindow<float>::value;
 
 #endif /* GRAFICI_RECTANGULAR_WINDOW_H */
 

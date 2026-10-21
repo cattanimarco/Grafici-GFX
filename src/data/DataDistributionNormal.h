@@ -3,7 +3,7 @@
 
 #include "DataParametric.h"
 
-static float generateGaussian(float mean, float stdDev) {
+static inline float generateGaussian(float mean, float stdDev) {
     static float spare;
     static bool hasSpare = false;
 	static const long precision = 1000;
@@ -25,19 +25,21 @@ static float generateGaussian(float mean, float stdDev) {
     }
 }
 
-template<size_t N>
-class DataDistributionNormal : public DataParametric
+template<size_t N, typename Scalar = float>
+class DataDistributionNormal : public DataParametricT<Scalar>
 {
   public:
+	using Compute = typename grafici::ComputationType<Scalar>::type;
+	using DataParametric = DataParametricT<Scalar>;
     /* approximate normal distribution using Box-Muller transform */
-	DataDistributionNormal(unsigned long seed, Range<float> range = {0,1})
+	DataDistributionNormal(unsigned long seed, Range<Scalar> range = {0,1})
 	    : DataParametric{ N, range }
 	{
 		init_distribution(seed);
 	}
 
   protected:
-	float at(size_t idx) const override
+	Compute at(size_t idx) const override
 	{
 		return normal_data[idx];
 	}
@@ -56,7 +58,7 @@ class DataDistributionNormal : public DataParametric
 		}
 	}
 
-	float normal_data[N];
+	Scalar normal_data[N];
 };
 
 #endif /* GRAFICI_DATA_DIST_NORMAL_H */

@@ -20,7 +20,10 @@
  * @brief Multi component (normalized) data point
  * 
  */
-using DataVector = Vector<DataNorm>;
+template <typename Scalar = float>
+using DataVectorT = Vector<DataNormT<Scalar>>;
+
+using DataVector = DataVectorT<float>;
 
 #endif /* GRAFICI_DATA_VECTOR_H */
 

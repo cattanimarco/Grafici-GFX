@@ -180,6 +180,21 @@ void setup(void) {
 
 For more examples, check out the [examples](examples/) directory and our [Wiki](https://github.com/cattanimarco/Grafici-GFX/wiki).
 
+## Floating-point precision
+
+`float` remains the default. Use `grafici::Float16` when retained sample storage is the limit: each value uses 2 bytes instead of 4. It has lower precision and a maximum finite magnitude of 65,504. Conversions can cost CPU time and flash; arithmetic and spline solver scratch use float. Negative values and values above 1 remain supported.
+
+For a compact array, change its element type to `grafici::Float16` and use `DataArrayXY<grafici::Float16>`; keep `Grafici` unchanged. To use Float16 throughout the pipeline:
+
+```cpp
+using Real = grafici::Float16;
+GraficiT<Real> plot{gfx};
+Real samples[] = {0.0f, 0.5f, 1.0f};
+DataArrayXY<Real, Real> data{samples, 3};
+```
+
+Use the matching `T<Real>` source/window/options classes, and keep `float` when numerical range, precision or conversion cost matters more than storage. See [the complete Float16 example](examples/fp16_line/fp16_line.ino).
+
 ## Documentation
 
 Visit our [Wiki](https://github.com/cattanimarco/Grafici-GFX/wiki) for detailed documentation, including:

@@ -25,10 +25,13 @@
  * 
  * @tparam T type of the array
  */
-template <typename T>
-class DataArray : public DataSourceNorm
+template <typename T, typename Scalar = float>
+class DataArray : public DataSourceNormT<Scalar>
 {
   public:
+	using Compute = typename grafici::ComputationType<Scalar>::type;
+	using DataNorm = DataNormT<Scalar>;
+	using DataSourceNorm = DataSourceNormT<Scalar>;
 	/**
      * @brief Construct a new data source from a C array
      * 
@@ -43,7 +46,7 @@ class DataArray : public DataSourceNorm
 		update_range();
 	}
 
-	DataArray(const T *data, size_t size, Range<float> range)
+	DataArray(const T *data, size_t size, Range<Scalar> range)
 	    : DataSourceNorm{ size , range}
 	    , _arrayPtr{ data }
 
@@ -60,7 +63,7 @@ class DataArray : public DataSourceNorm
 	{
 		if ((_arrayPtr != nullptr) && (idx < DataSource<DataNorm>::size()))
 		{
-			return DataSourceNorm::float_to_data_norm(static_cast<float>(_arrayPtr[idx]));
+			return DataSourceNorm::float_to_data_norm(static_cast<Scalar>(_arrayPtr[idx]));
 		}
 		else
 		{
@@ -73,10 +76,10 @@ class DataArray : public DataSourceNorm
 	{
 		if ((_arrayPtr != nullptr) && (DataSource<DataNorm>::size() > 0))
 		{
-			DataSourceNorm::_range = { static_cast<float>(_arrayPtr[0]), static_cast<float>(_arrayPtr[0]) };
+			DataSourceNorm::_range = { static_cast<Scalar>(_arrayPtr[0]), static_cast<Scalar>(_arrayPtr[0]) };
 			for (size_t idx = 1; idx < DataSource<DataNorm>::size(); ++idx)
 			{
-				DataSourceNorm::_range.update(static_cast<float>(_arrayPtr[idx]));
+				DataSourceNorm::_range.update(static_cast<Scalar>(_arrayPtr[idx]));
 			}
 		}
 	}

@@ -25,7 +25,10 @@
  * 
  */
 
-using DisplayVector = Vector<float>;
+template <typename Scalar = float>
+using DisplayVectorT = Vector<Scalar>;
+
+using DisplayVector = DisplayVectorT<float>;
 
 #endif /* GRAFICI_DISPLAY_DISPLAY_VECTOR_H */
 

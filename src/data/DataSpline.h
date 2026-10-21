@@ -30,9 +30,22 @@
  * @tparam AUTOSCALE 
  * @note Invalid source counts or workspace allocation failure produce an empty source.
  */
-template <size_t N, bool AUTOSCALE = true>
-class DataSpline : public DataInterpolatorL
+template <size_t N, bool AUTOSCALE = true, typename Scalar = float>
+class DataSpline : public DataInterpolatorLT<Scalar>
 {
+  public:
+	using Compute = typename grafici::ComputationType<Scalar>::type;
+	using DataNorm = DataNormT<Scalar>;
+	using DataVector = DataVectorT<Scalar>;
+	using DataSourceNorm = DataSourceNormT<Scalar>;
+	using DataInterpolatorL = DataInterpolatorLT<Scalar>;
+	using DataInterpolatorL::size;
+protected:
+	using DataInterpolatorL::_size;
+	using DataInterpolatorL::_src_size;
+	using DataInterpolatorL::_x;
+	using DataInterpolatorL::_y;
+	using DataInterpolatorL::compute_x_bin;
   public:
 	DataSpline(const DataSourceNorm &x, const DataSourceNorm &y)
 	    : DataInterpolatorL{ x, y, N }
@@ -42,7 +55,7 @@ class DataSpline : public DataInterpolatorL
 
 	const DataVector operator[](const unsigned long idx) const
 	{
-		float raw_x, raw_y;
+		Compute raw_x, raw_y;
 		if (idx >= size() || !evaluate_raw(idx, &raw_x, &raw_y))
 			return INVALID_DATA_VECTOR;
 		return {{raw_x, _x.range()}, {raw_y, _interpolated_y_range}};
@@ -50,17 +63,17 @@ class DataSpline : public DataInterpolatorL
 
   private:
 	// Evaluate before DataNorm applies range clipping. Reused by range discovery.
-	bool evaluate_raw(unsigned long idx, float *raw_x, float *raw_y) const
+	bool evaluate_raw(unsigned long idx, Compute *raw_x, Compute *raw_y) const
 	{
 		size_t bin;
-		float weight;
+		Compute weight;
 		compute_x_bin(idx, &bin, &weight);
 		if (_src_size < 2 || bin >= _src_size - 1)
 			return false;
-		const float x0 = _x[bin].raw();
-		const float x1 = _x[bin + 1].raw();
-		*raw_x = x0 * (float(1) - weight) + x1 * weight;
-		const float dx = *raw_x - x0;
+		const Compute x0 = _x[bin].raw();
+		const Compute x1 = _x[bin + 1].raw();
+		*raw_x = x0 * (Compute(1) - weight) + x1 * weight;
+		const Compute dx = *raw_x - x0;
 		*raw_y = ((_d[bin] * dx + _c[bin]) * dx + _b[bin]) * dx + _y[bin].raw();
 		return true;
 	}
@@ -68,11 +81,11 @@ class DataSpline : public DataInterpolatorL
 	bool spline_data()
 	{
 		const size_t n = _src_size - 1;
-		float *h = static_cast<float *>(malloc(sizeof(float) * n));
-		float *A = static_cast<float *>(malloc(sizeof(float) * n));
-		float *l = static_cast<float *>(malloc(sizeof(float) * (n + 1)));
-		float *u = static_cast<float *>(malloc(sizeof(float) * (n + 1)));
-		float *z = static_cast<float *>(malloc(sizeof(float) * (n + 1)));
+		Compute *h = static_cast<Compute *>(malloc(sizeof(Compute) * n));
+		Compute *A = static_cast<Compute *>(malloc(sizeof(Compute) * n));
+		Compute *l = static_cast<Compute *>(malloc(sizeof(Compute) * (n + 1)));
+		Compute *u = static_cast<Compute *>(malloc(sizeof(Compute) * (n + 1)));
+		Compute *z = static_cast<Compute *>(malloc(sizeof(Compute) * (n + 1)));
 		if (!h || !A || !l || !u || !z)
 		{
 			free(h);
@@ -137,17 +150,17 @@ class DataSpline : public DataInterpolatorL
 			/* use iteration over []?s */
 			for (size_t idx = 0; idx < _size; ++idx)
 			{
-				float raw_x, raw_y;
+				Compute raw_x, raw_y;
 				if (evaluate_raw(idx, &raw_x, &raw_y))
-					_interpolated_y_range.update(raw_y);
+					_interpolated_y_range.update(static_cast<Scalar>(raw_y));
 			}
 		}
 	}
 
-	float _b[N + 1];
-	float _c[N + 1];
-	float _d[N + 1];
-	Range<float> _interpolated_y_range{ 0, 0 };
+	Scalar _b[N + 1];
+	Scalar _c[N + 1];
+	Scalar _d[N + 1];
+	Range<Scalar> _interpolated_y_range{ 0, 0 };
 };
 
 #endif //GRAFICI_DATA_SPLINE_INTERPOLATOR_H

@@ -27,10 +27,16 @@
  * @tparam BINS Number of frequency bins to subdivide the data point space 
  *
  */
-template <size_t BINS>
-class DataHistogramXY : public DataSource<DataVector>
+template <size_t BINS, typename Scalar = float>
+class DataHistogramXY : public DataSource<DataVectorT<Scalar>>
 {
   public:
+	using Compute = typename grafici::ComputationType<Scalar>::type;
+	using DataNorm = DataNormT<Scalar>;
+	using DataVector = DataVectorT<Scalar>;
+	using DataSelect = DataSelectT<Scalar>;
+	using DataSourceNorm = DataSourceNormT<Scalar>;
+	using DataSource<DataVector>::size;
 	/* To plot multiple n bar plots, use num_classes = n and use n of this classes for the x axis.
 	 Each class with class_id [0, n-1] */
 	DataHistogramXY(const DataSourceNorm &source, bool normalized = false, size_t class_id = 0, size_t num_classes = 1)
@@ -49,13 +55,13 @@ class DataHistogramXY : public DataSource<DataVector>
 		{
 			if (_normalized)
 				return {
-					{ static_cast<float>(0.5 + idx * _num_classes + _class_id), { 0.0, static_cast<float>(size() * _num_classes) } },
-					{ static_cast<float>(_bins[idx]) / static_cast<float>(_total), { 0, 1 } },
+					{ static_cast<Scalar>(0.5 + idx * _num_classes + _class_id), { 0.0, static_cast<Scalar>(size() * _num_classes) } },
+					{ static_cast<Compute>(_bins[idx]) / static_cast<Compute>(_total), { 0, 1 } },
 				};
 			else
 				return {
-					{ static_cast<float>(0.5 + idx * _num_classes + _class_id), { 0.0, static_cast<float>(size() * _num_classes) } },
-					{ static_cast<float>(_bins[idx]), _histogram_y_range },
+					{ static_cast<Scalar>(0.5 + idx * _num_classes + _class_id), { 0.0, static_cast<Scalar>(size() * _num_classes) } },
+					{ static_cast<Scalar>(_bins[idx]), _histogram_y_range },
 				};
 		}
 		else
@@ -101,7 +107,7 @@ class DataHistogramXY : public DataSource<DataVector>
 	size_t _class_id;
 	size_t _num_classes;
 	size_t _bins[BINS]{ 0 };
-	Range<float> _histogram_y_range{ 0, 0 };
+	Range<Scalar> _histogram_y_range{ 0, 0 };
 };
 
 #endif //GRAFICI_DATA_HISTOGRAM_XY_H

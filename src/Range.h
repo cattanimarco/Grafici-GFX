@@ -17,6 +17,8 @@
 #ifndef GRAFICI_RANGE_H
 #define GRAFICI_RANGE_H
 
+#include "numeric/Precision.h"
+
 /*!
 * \def INVALID_RANGE_FLOAT
 * Value for an invalid range object
@@ -35,6 +37,13 @@ template <typename T>
 class Range
 {
   public:
+	using Compute = typename grafici::ComputationType<T>::type;
+
+	template <typename Other>
+	Range(const Range<Other> &other) : low{static_cast<T>(other.low)}, high{static_cast<T>(other.high)}
+	{
+	}
+
 	Range() = default;
 
 	/**
@@ -84,7 +93,7 @@ class Range
 	 * @param value Value to be mapped. In case this value is outside of the range limits it will be clipped before being mapped.
 	 * @return float Normalized mapped value in the range [0,1].
 	 */
-	float value_to_norm(const T value) const
+	Compute value_to_norm(const T value) const
 	{
 		if (value <= low)
 		{
@@ -96,7 +105,7 @@ class Range
 		}
 		else
 		{
-			return static_cast<float>(value - low) / static_cast<float>(delta());
+			return static_cast<Compute>(value - low) / static_cast<Compute>(high - low);
 		}
 	}
 
@@ -106,7 +115,7 @@ class Range
 	 * @param value normalized number. In case this value is outside of the [0,1] range, it will be clipped before being mapped.
 	 * @return T value within the range limits coreesponding to the given normalized value
 	 */
-	T norm_to_value(const float value) const
+	T norm_to_value(const Compute value) const
 	{
 		if (value <= 0.0)
 		{
@@ -118,7 +127,7 @@ class Range
 		}
 		else
 		{
-			return static_cast<T>(high * value + low * (1.0 - value));
+			return static_cast<T>(static_cast<Compute>(high) * value + static_cast<Compute>(low) * (Compute(1) - value));
 		}
 	}
 

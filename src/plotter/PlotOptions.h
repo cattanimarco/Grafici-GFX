@@ -17,8 +17,13 @@
 #ifndef GRAFICI_GFX_PLOT_OPTIONS_H
 #define GRAFICI_GFX_PLOT_OPTIONS_H
 
-struct PlotOptions
+#include "../numeric/Precision.h"
+
+template <typename Scalar = float>
+struct PlotOptionsT
 {
+  public:
+	using PlotOptions = PlotOptionsT<Scalar>;
 public:
 
     // break line into multiple segments. useful for color gradients and polar plots. set num_segments > 45 for polar plots
@@ -30,7 +35,7 @@ public:
     }
 
     // relative thickness of the bar. A thickness of 1.0 will produce a bar that is 1/length(x) wide. A thickness of 0.0 will produce a bar that is 1-pixel wide 
-	PlotOptions thickness(float thickness) const
+	PlotOptions thickness(Scalar thickness) const
     {
         auto result = *this;
         result.m_thickness = thickness;
@@ -61,7 +66,7 @@ public:
         return result;
     }
 
-	float get_thickness() const
+	Scalar get_thickness() const
 	{
 		return m_thickness;
 	}
@@ -106,13 +111,15 @@ protected:
     Color m_axis_color{white};
 
     // bar plot specific
-    float m_thickness{ 0.8 }; 
+	Scalar m_thickness{ 0.8f };
 	bool m_bar_filled{ false };  
 
     // scatter specific
     String m_scatter_style{"o"}; 
 
 };
+
+using PlotOptions = PlotOptionsT<float>;
 
 const PlotOptions plot_options;
 
