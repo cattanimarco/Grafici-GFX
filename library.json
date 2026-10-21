@@ -1,6 +1,6 @@
 {
     "name": "Grafici-GFX",
-    "version": "4.0.0",
+    "version": "4.1.0",
     "description": "Data visualization library for Arduino driven displays. Plot lines, bars, scatters, and more on both squared and round displays.",
     "keywords": "display, graphics, visualization, plotting, charts, data",
     "repository": {
