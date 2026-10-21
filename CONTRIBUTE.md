@@ -1,10 +1,21 @@
 # Contributing to Grafici-GFX
 
-This guide explains how the modules fit together and the contracts to preserve when extending them. It builds on the wiki's [Library Concepts](https://github.com/cattanimarco/Grafici-GFX/wiki#library-concepts), with implementation details checked against this branch. Installation and display setup are covered in the [README](README.md).
+This guide follows the [wiki's Library Concepts](https://github.com/cattanimarco/Grafici-GFX/wiki#library-concepts): start with a plot, then look at the objects that make it work. The [README](README.md) covers installation and the first drawing examples.
+
+For agent-assisted changes, use [grafici-contribute](.agents/skills/grafici-contribute/SKILL.md). [AGENTS.md](AGENTS.md) routes library work and sketch debugging to the relevant skills; this guide remains the reference for design contracts and documentation style.
 
 ## Architecture
 
-Sources, plotters and projections are independent. The same source can drive a line, bars, colors or marker sizes; the same plotter works with Cartesian and polar windows. Normalization provides the common interface between them, leaving display resolution to the final drawing stage.
+We can start with the same two lines we use in a sketch:
+
+```cpp
+Grafici plot{gfx};
+plot.line(x, y, color, full_screen);
+```
+
+`Grafici` connects the display driver to a plotter. `x`, `y` and `color` are data sources, and `full_screen` is a window. We can replace any of those sources, choose another plotter, or use a polar window while keeping the other pieces.
+
+The common interface is normalization. Sources describe positions within their ranges, plotters build geometry from those positions, and windows project it onto the display. Pixel dimensions enter at the end.
 
 ```mermaid
 flowchart LR
@@ -19,36 +30,70 @@ flowchart LR
     K --> G[DisplayDriver: pixels to Adafruit GFX]
 ```
 
-The arrows after the plotters show the path of geometry. `DisplayDriver` calls the supplied window and clipping helpers before sending pixel primitives to the backend.
-
-| Module | Responsibility and boundary |
-| --- | --- |
-| [Grafici](src/Grafici.h) | Public facade. Selects the configured or constant palette, invokes plotters and arranges axis drawing. Holds a `DisplayDriver` and a pointer to the selected color map. |
-| [Data sources](src/data/) | Expose indexed values, sizes and normalization metadata. Sources know nothing about display dimensions or plot styles. Adapters let existing sources be composed without changing plotters. |
-| [Plotters](src/plotter/) | Free functions that turn normalized samples into lines, rectangles and markers. They check sample validity and pass geometry to `DisplayDriver`. |
-| [Windows](src/display/Window.h) | Map geometry into a display region or another projection. They operate on floating-point coordinates, independently of pixel dimensions. |
-| [DisplayDriver](src/display/DisplayDriver.h) and [clipping](src/display/Clipping.h) | Build/subdivide primitives, apply the window, clip projected geometry and convert to signed pixels before calling Adafruit GFX. |
-| [Colors and palettes](src/color/) | Map an independent data channel to RGB colors. `Color` holds 8-bit channels; RGB565 conversion happens when emitting backend drawing calls. |
+The arrows after the plotters show the path of geometry. `DisplayDriver` calls the window and clipping helpers, then sends pixel primitives to the Adafruit GFX backend. Sources know nothing about the display's resolution or plot style.
 
 ### Normalized interfaces
 
-`Range<T>` describes the bounds used for normalization. `DataNorm` carries a float raw value and a range; `raw()` retrieves the stored value and `norm()` retrieves its normalized position. For ordinary array and parametric sources, all samples use the source's common range, making their normalized positions comparable.
+A source behaves like a small indexed sequence: we can ask for its `size()` and read a sample with `operator[]`. A scalar sample is a `DataNorm`, which contains a raw float value and a `Range<float>`.
+
+For example, five signed measurements can occupy the whole height of a plot:
 
 ```cpp
-const int readings[] = {20, 30, 60};
-DataArray<int> source(readings, 3); // Inferred range [20,60].
-// source[1].raw() == 30; source[1].norm() == 0.25f
+const int readings[] = {-10, -5, 0, 5, 10};
+DataArray<int> source(readings, 5);
+// source[1].raw() == -5; source[1].norm() == 0.25f
 ```
 
-`value_to_norm()` maps a value into `[0,1]`; `normalized_to_value()` maps a normalized position back onto the range. Both clamp finite inputs at the range boundaries. Supplying an explicit range fixes the scale across redraws or multiple sources. Bounds inferred by `DataArray` and `DataFunction` are discovered during construction and are not automatically refreshed when the underlying array or callback state changes.
+The inferred range is `[-10,10]`. The values become:
 
-The `T` in `DataArray<T>` describes the borrowed array's storage type; samples are converted into float-backed `DataNorm` values when read. Normalization does not restrict the floating-point format itself: raw measurements can be signed, and intermediate geometry, slopes and spline coefficients can exceed one. `DataNorm` clips finite raw input to its supplied valid range, while geometry must remain unclamped until it is intersected with the display.
+| Raw value | Normalized position |
+| --- | --- |
+| -10 | 0.00 |
+| -5 | 0.25 |
+| 0 | 0.50 |
+| 5 | 0.75 |
+| 10 | 1.00 |
+
+`Range::value_to_norm()` makes that conversion; `normalized_to_value()` maps a normalized position back to the range. Both clamp finite inputs at the boundaries. A constant valid range normalizes to zero.
+
+The `int` in `DataArray<int>` describes the borrowed array. Samples become float-backed `DataNorm` values when read. Raw values, slopes and spline coefficients can be negative or exceed one. `DataNorm` clips a raw input to its supplied range; intermediate geometry remains unclamped until the display boundary.
+
+> Inferred bounds are found during construction. Changing an array or callback state does not refresh them. Supply an explicit range when the scale must stay fixed across redraws or several sources.
 
 ### Sources and composition
 
-[DataSource<T>](src/data/DataSource.h) is an abstract indexed sequence: `size()` reports its length and `operator[]` returns a sample by value. It does not require a sample buffer. `DataSourceNorm` specializes it for `DataNorm`, adds range metadata and supplies the conversion helper used by ordinary scalar sources. `DataSource<DataVector>` represents paired x/y data; `DataVector` is `Vector<DataNorm>`.
+[DataSource<T>](src/data/DataSource.h) supplies the indexed interface. `DataSourceNorm` derives from `DataSource<DataNorm>` and adds range metadata. Paired sources implement `DataSource<DataVector>`, where `DataVector` is `Vector<DataNorm>`.
 
-This diagram shows the interfaces and representative implementations. Triangles mark inheritance, the diamond marks an owned adapter, and arrows labelled "borrows" require their targets to remain alive.
+We can see why this split helps by drawing a hype cycle: a peak of enthusiasm, a trough, and a gradual recovery. Six milestones are enough to describe it. `DataArrayXY` pairs their indices with the values, and `DataSpline` fills in the curve between them.
+
+<!-- grafici-example: hype-cycle -->
+```cpp
+void draw_hype_cycle(Grafici &plot) {
+  const int milestones[] = {0, 100, 20, 50, 60, 60};
+  DataArrayXY<int> samples(milestones, 6);
+  const auto sample_x = samples.x();
+  const auto sample_y = samples.y();
+  DataSpline<48> curve(sample_x, sample_y);
+  const auto x = curve.x();
+  const auto y = curve.y();
+
+  plot.clear_screen();
+  plot.set_color_map(parula);
+  auto left = full_screen.sub_window({0.04f, 0.48f}, {0.08f, 0.92f});
+  auto right = full_screen.sub_window({0.54f, 0.98f}, {0.08f, 0.92f});
+  auto opts = plot_options.set_axis(2, 5, gunpowder);
+  plot.line(sample_x, sample_y, sample_y, left, opts);
+  plot.line(x, y, y, right, opts);
+}
+```
+
+![Six hype-cycle milestones joined directly on the left and interpolated into 48 spline samples on the right](https://raw.githubusercontent.com/cattanimarco/Grafici-Test/d46495439394908570d4ca1df2ae1316bee40c09/imgs/guides/hype_cycle.png)
+
+The left plot joins the six milestones; the right plot reads 48 spline samples. The spline discovers its own output range, including sampled overshoot, so each panel uses its source's scale.
+
+The named x/y views matter. `DataSelect` borrows its vector source, and the spline borrows its scalar knot sources. Passing `samples.x()` and `samples.y()` directly to a stored spline would leave it referring to temporary views after construction. Here, the array, sources and views all remain alive until drawing finishes. Keep the knots stable as well, and rebuild a spline when they change.
+
+The class diagram shows these relationships. Triangles mark inheritance, the diamond marks an owned adapter, and the labelled arrows show borrowed references.
 
 ```mermaid
 classDiagram
@@ -88,25 +133,23 @@ classDiagram
     DataInterpolatorL ..> DataSourceNorm : borrows x and y
 ```
 
-| Source family | How it produces or adapts samples |
+`DataArrayXY` owns its y adapter; that adapter still borrows the original array. `x()` and `y()` return views by value, without copying a sample buffer. Reading both views can evaluate the same vector sample twice, so indexed reads should be repeatable and reasonably cheap.
+
+Other source families follow the same interfaces:
+
+| Source | What changes |
 | --- | --- |
-| `DataArray<T>`, `DataArrayXY<T>` | Borrow a C array. `DataArrayXY` combines array values with index-based x coordinates; it does not copy the array. |
-| `DataParametric`, `DataFunction`, `DataLinear`, `DataConstant` | `DataParametric::operator[]` checks bounds and wraps the raw float returned by `at()`. Function callbacks run when read; linear and constant sources compute values without retaining a sample array. |
-| `DataDistributionUniform<N>`, `DataDistributionNormal<N>` | Fill an owned `float[N]` during construction and reuse those samples on subsequent reads, despite deriving from `DataParametric`. |
-| `DataSelect` | Borrows a vector source and exposes its x or y component as a scalar source. The `x()` and `y()` methods on vector sources return these views by value. |
-| `DataResize` | Borrows a scalar source and maps its normalized values into a configured interval. Returned samples use the unit range, preserving the remapped amplitude when plotted. It does not change sample count. |
-| `DataInterpolatorL`, `DataSpline<N, AUTOSCALE>` | Borrow x/y sources and emit a new sample sequence. Linear interpolation locates a knot interval on each read. Splines retain cubic coefficients computed during construction; autoscaling scans emitted raw y values before wrapping them in `DataNorm`. |
-| `DataHistogramXY<BINS>` | Counts valid normalized samples into fixed bins during construction. It exposes bin positions and either counts or frequencies through x/y views. Rebuild it when the input distribution changes. |
-
-Composition borrows references. Keep arrays, sources and intermediate views alive until their consumers finish. Keep interpolation inputs stable while an interpolator uses them; rebuild the spline if knots change. Reading x and y views separately can evaluate the same vector source twice, and line plotters revisit neighboring indices, so an indexed read should be repeatable and reasonably cheap.
-
-`DataFunction` with inferred bounds calls every callback index during construction, then calls it again when samples are read. Use an explicit range to avoid that discovery pass when the bounds are known or callback state changes. Raw function pointers are the default; optional `GRAFICI_USE_STD_FUNCTION` support stores capturing callbacks by value and can allocate. References captured by a callback must remain alive.
+| `DataParametric`, `DataFunction`, `DataLinear`, `DataConstant` | Compute a raw value through `at()` and wrap it in the source range. Inferred function bounds require a construction-time scan; explicit bounds avoid it. |
+| `DataResize` | Maps a scalar source's normalized values into another interval. It keeps the sample count and returns unit-range samples, preserving the new amplitude. |
+| `DataInterpolatorL` | Locates the surrounding knots and computes each requested output. `DataSpline` adds stored cubic coefficients. |
+| `DataDistributionUniform<N>`, `DataDistributionNormal<N>` | Generate and retain `N` float samples during construction. |
+| `DataHistogramXY<BINS>` | Counts valid samples into fixed bins during construction, then exposes positions and counts or frequencies. Rebuild it when the input changes. |
 
 ### Plotters, colors and options
 
-For `plot.line(x, y, c, window, opts)`, the facade passes the selected palette and the sources to `plot_line`. The plotter uses the shortest input length, reads adjacent samples, skips segments touching invalid samples and calls `DisplayDriver::draw_line` with normalized positions and mapped endpoint colors. The color source `c` can be unrelated to x or y; using y for color is just one possible encoding.
+A plotter decides what geometry the samples mean. A line joins neighbors; an area fills down to normalized zero; a bar starts at the same baseline; scatter uses another source for marker radius. Raw zero is not necessarily the baseline: normalized zero represents the range's lower bound.
 
-With axes disabled, source reads and drawing follow this sequence. `plot_line` is a free function; reads dispatch through the source interfaces.
+`Grafici::line()` passes sources, a palette, a window and options to the free function `plot_line`. With axes disabled, the calls look like this:
 
 ```mermaid
 sequenceDiagram
@@ -132,23 +175,27 @@ sequenceDiagram
     end
 ```
 
-Area plots fill between adjacent samples and normalized `y=0`; bars also start at normalized zero, which represents the source range's lower bound rather than necessarily raw zero. Scatter interprets an additional source as normalized marker radii. Dots need no radius sample; sized markers must respect that source's available length. Plotters define these geometric rules, while windows define where the resulting geometry appears.
+The plotter checks both endpoints before drawing. A missing coordinate or color leaves a gap. Dots need no radius sample, while sized scatter markers require one. Source reads are virtual, so an array, callback or adapter can supply the same plotting call.
 
-`ColorMapArray<N>` owns a fixed palette and interpolates between entries for normalized input. `GeneratedMapGenerated` computes a cosine palette without retaining a color table; `ColorMapConstant` returns one color. Index-based palette access wraps through the discrete palette. `Grafici::set_color_map()` borrows the palette, so it must outlive subsequent drawing calls. The fixed-color drawing overloads create a local constant map for that call.
+A [ColorMap](src/color/ColorMap.h) maps the independent color channel to RGB. `ColorMapArray<N>` owns palette entries, `GeneratedMapGenerated` computes a cosine palette, and `ColorMapConstant` supplies one color. `Color` stores 8-bit channels; the driver converts to RGB565 for the backend.
 
-`PlotOptions` contains subdivision, axis, bar and scatter settings. Its fluent methods return modified copies: assign or pass the returned value, for example `plot_options.segments(8).bar_filled(true)`. Options include an Arduino `String` for marker styles, so copying options is not guaranteed to be allocation-free.
+`Grafici::set_color_map()` borrows the palette. Keep it alive for subsequent calls. Fixed-color overloads create a local constant map for that call. Array/generated palettes wrap discrete indices, and invalid normalized input maps to black.
+
+`PlotOptions` returns modified copies, which makes chains such as `plot_options.segments(4).bar_filled(true)` convenient to pass directly. Assign the result when saving options. Its marker style uses Arduino `String`, so copying options can allocate.
 
 ### Windows and coordinate flow
 
-A Cartesian window maps local `(0,0)` to its lower bounds and `(1,1)` to its upper bounds. For example, `Window inset{{0.1f, 0.9f}, {0.2f, 0.8f}}` maps the same plot into an inset rectangle at any display resolution. `sub_window()` partitions that rectangle using normalized subranges or slice indices. Rotation and flip settings act on local coordinates before they are mapped into the window's ranges.
+The [README's polar example](README.md#wrap-the-wave-around-a-circle) changes the window while keeping the data and plotter. This is the boundary a new projection should preserve:
 
-[PolarWindow](src/display/PolarWindow.h) interprets x as an angle in turns and y as radius, applies its angle/radius ranges, computes Cartesian coordinates around `(0.5,0.5)` and maps those through its stored parent window. Before the parent mapping, radius one reaches the edges of the unit display square. Changing the projection therefore does not require changing a data source or plotter.
+![One source and plotter producing Cartesian and polar versions of the beat](https://raw.githubusercontent.com/cattanimarco/Grafici-Test/d46495439394908570d4ca1df2ae1316bee40c09/imgs/guides/polar_beats.png)
 
-`DisplayVector` is `Vector<float>` and uses normalized display coordinates with a bottom-left origin. `PixelVector` uses signed `int16_t` coordinates; the final conversion reverses y for Adafruit GFX's top-left origin and scales to `width-1` and `height-1`. Invalid projections return `DisplayVector::invalid()`; finite coordinates outside `[0,1]` remain available for clipping.
+A [Window](src/display/Window.h) maps local `(0,0)` to its lower bounds and `(1,1)` to its upper bounds. For example, `Window inset{{0.1f, 0.9f}, {0.2f, 0.8f}}` leaves a margin around the same plot at any resolution. `sub_window()` selects a smaller region; rotation and flips act on local coordinates before the range mapping.
 
-The driver subdivides lines and filled triangles before projection, which lets straight logical segments approximate curves in polar or custom windows. Subdivision also interpolates line colors. The current recursion halves the requested segment count, so powers of two give predictable subdivision counts. More subdivision increases backend calls and stack use; it does not add source samples. Projected lines use Cohen-Sutherland clipping; triangles use Sutherland-Hodgman clipping followed by triangulation of the clipped polygon. Clipping uses physical screen bounds, so a marker can extend beyond a subwindow while remaining on screen.
+[PolarWindow](src/display/PolarWindow.h) treats x as an angle in turns and y as radius. It computes Cartesian coordinates around `(0.5,0.5)`, then maps them through its stored parent window. Radius one reaches the unit square's edges before that parent mapping.
 
-The sequence below expands line drawing for `segments == 1`, a valid window, finite logical endpoints and positive display dimensions. Each subdivided segment reaches this same boundary. `grafici_clipping` is a namespace of helper functions.
+`DisplayVector` contains float coordinates with a bottom-left origin. The driver subdivides geometry before projection so long segments can follow curved windows and interpolate colors. Recursion halves the requested segment count; powers of two give predictable counts. More segments cost backend calls and stack space, without adding source samples.
+
+For a valid line with `segments == 1` and positive display dimensions, the final path is:
 
 ```mermaid
 sequenceDiagram
@@ -172,70 +219,96 @@ sequenceDiagram
     end
 ```
 
-### Example: composing a curve
+[grafici_clipping](src/display/Clipping.h) is a namespace of helper functions. It clips projected lines with Cohen-Sutherland and triangles with Sutherland-Hodgman. Finite points outside `[0,1]` remain available for intersection; non-finite projections are rejected. Clipping uses the physical display rectangle, so markers can extend beyond a subwindow.
 
-This follows the wiki's array-to-spline design, with named views to keep borrowed references alive:
-
-```cpp
-#include <Grafici.h>
-
-void draw_curve(Grafici &plot)
-{
-    const int readings[] = {12, 35, 18, 44};
-    DataArrayXY<int> samples(readings, 4);
-    const auto sample_x = samples.x();
-    const auto sample_y = samples.y();
-    DataSpline<24> curve(sample_x, sample_y);
-    const auto x = curve.x();
-    const auto y = curve.y();
-    plot.line(x, y, y);
-}
-```
-
-The array supplies raw y values, `DataArrayXY` supplies index-based x values, the spline evaluates 24 output samples, and `DataSelect` exposes each coordinate to the plotter. The final y argument also drives the palette. Passing `samples.x()` and `samples.y()` directly to a stored interpolator would leave it borrowing temporaries after construction; the named views avoid that lifetime error. A different plotter or window can reuse the same source interfaces.
+Only then does the driver convert to signed `int16_t` pixels: x scales by `width-1`, and y is reversed and scaled by `height-1` for Adafruit GFX's top-left origin. Invalid windows or projections draw nothing. The default `clear_screen()` uses the backend's native fill; an explicit window uses projected rectangle rendering.
 
 ## Extending a module
 
-Choose the layer that owns the new behavior. Keep data generation independent of pixels and keep hardware-specific drawing behind Adafruit GFX.
+To add a computed scalar source, derive from `DataParametric` and implement `at()`. As an example, a chirp squeezes more oscillations into the end of the plot by making phase grow quadratically:
 
-| Change | Extension point |
+<!-- grafici-example: chirp -->
+```cpp
+class Chirp : public DataParametric {
+public:
+  explicit Chirp(size_t count) : DataParametric(count, {-1.0f, 1.0f}) {}
+
+protected:
+  float at(size_t i) const override {
+    const float t = size() > 1 ? float(i) / float(size() - 1) : 0.0f;
+    return sinf(24.0f * t * t);
+  }
+};
+
+void draw_chirp(Grafici &plot) {
+  DataLinear x(96);
+  Chirp y(96);
+  plot.clear_screen();
+  plot.set_color_map(parula);
+  plot.line(x, y, y);
+}
+```
+
+![A chirp whose oscillations get closer together from left to right](https://raw.githubusercontent.com/cattanimarco/Grafici-Test/d46495439394908570d4ca1df2ae1316bee40c09/imgs/guides/chirp.png)
+
+The base class checks indices and wraps each raw result in the supplied range. The explicit bounds avoid a discovery pass. For an inferred range, call `update_range()` after the derived members are initialized. Derive directly from `DataSourceNorm` when adapting another source needs different indexing or metadata.
+
+Choose the corresponding boundary for other additions:
+
+| Addition | Extension point |
 | --- | --- |
-| New scalar source | Derive from `DataParametric`, implement `float at(size_t) const` and supply a valid range. If bounds must be inferred, call `update_range()` after the derived members are initialized. Derive directly from `DataSourceNorm` when an adapter needs different indexing or metadata behavior. |
-| New paired source | Implement `DataSource<DataVector>` and expose coordinates through `DataSelect`, following `DataArrayXY` or `DataHistogramXY`. Return invalid samples for unavailable indices. |
-| New plot type | Add a `plot_*` function accepting existing source interfaces, `Window`, `ColorMap`, `PlotOptions` and `DisplayDriver`. Bound every consumed source, check sample validity and emit normalized primitives. Add the public facade overloads and decide axis draw order in `Grafici`. |
-| New projection | Derive from `Window` and override the float-coordinate projection. Preserve parent-window behavior where applicable, reject invalid inputs and leave finite off-screen geometry for clipping. |
-| New palette | Implement both `ColorMap::index_to_color()` and `norm_to_color()`. Keep color-channel conversion bounded and make any storage or computation cost explicit. |
-| New display target | Supply an Adafruit GFX-compatible backend. The [file backend in Grafici-Test](https://github.com/cattanimarco/Grafici-Test/blob/master/File_GFX.h) demonstrates rendering without a physical screen. Plotters and data sources can remain unchanged. |
+| Paired source | Implement `DataSource<DataVector>` and expose coordinates through `DataSelect`. Return invalid samples for unavailable indices. |
+| Plot type | Add a `plot_*` free function and facade overloads. Bound all consumed sources, check validity and emit normalized primitives; decide axis draw order in `Grafici`. |
+| Projection | Derive from `Window` and override its float-coordinate projection. Preserve parent behavior where applicable and leave finite off-screen points for clipping. |
+| Palette | Implement `index_to_color()` and `norm_to_color()`. Keep channel conversion bounded and make storage/computation costs clear. |
+| Display backend | Implement the Adafruit GFX interface. [File_GFX](https://github.com/cattanimarco/Grafici-Test/blob/d46495439394908570d4ca1df2ae1316bee40c09/File_GFX.h) shows how to render into image files. |
 
-Maintain C++11 compatibility and make ownership explicit. Runtime interfaces let new source, window and palette implementations work with existing callers; templates select array element types and fixed capacities. Avoid adding a retained cache or allocation to every source just to support one implementation. Keep invalid-value representation in the existing `invalid()` factories and validate samples before using their normalized values.
+Keep C++11 compatibility. Templates select element types and fixed capacities; runtime interfaces let those implementations work with existing callers. Make ownership explicit, reuse the `invalid()` factories, and avoid adding a cache or allocation to every source to support one implementation.
 
 ## Rendering and memory
 
-Grafici draws primitives without retaining a framebuffer. Budget retained storage, construction-time workspace and drawing-time stack separately; object metadata, allocator overhead and the display backend add to the payloads below.
+The spline above computes samples on demand but still retains coefficients. With 48 outputs, its three `float[49]` arrays occupy 588 bytes. For six knots, construction also needs 112 bytes of solver arrays, excluding allocator overhead. This is why output count is a memory choice as well as a visual one.
 
-| Component | Storage and computation cost |
+Budget retained storage, construction-time workspace and drawing-time stack separately. Object metadata, allocator overhead and the display backend add to these payloads:
+
+| Component | Payload and computation |
 | --- | --- |
-| Array and computed sources | Borrowed arrays retain their existing storage. Function/linear/constant sources avoid a second sample array; inferred array/function ranges require a construction-time scan. |
-| Distribution and histogram sources | Distribution objects retain `4*N` bytes of float sample payload. Histograms retain `BINS*sizeof(size_t)` bytes of counts and scan the input at construction. |
-| Spline | Three retained coefficient arrays use `12*(N+1)` bytes. With `n = source_count-1`, construction temporarily allocates `20*n+12` bytes of solver arrays, excluding allocator overhead. Capacity and allocation failures produce an empty source and release partial allocations. |
+| Arrays and computed sources | Arrays are borrowed. Function/linear/constant sources avoid a second sample array; inferred array/function bounds require a scan at construction. |
+| Distributions and histograms | Distributions retain `4*N` bytes of float samples. Histograms retain `BINS*sizeof(size_t)` bytes of counts and scan input at construction. |
+| Spline | Coefficients use `12*(N+1)` bytes. With `n = source_count-1`, temporary solver arrays use `20*n+12` bytes. Capacity/allocation failure leaves an empty source and releases partial workspace. |
 | Triangle clipping | Two seven-point buffers use 112 bytes of float coordinate payload, plus locals and backend stack. Fully visible triangles are emitted directly. |
-| Options and callbacks | Arduino `String` copies and opt-in `std::function` callbacks may allocate. Keep these costs separate from sample buffers. |
+| Options and callbacks | Arduino `String` copies and opt-in `std::function` callbacks may allocate. Captured references must remain alive; set `GRAFICI_USE_STD_FUNCTION` consistently across translation units. |
 
-Prefer borrowed arrays and computed sources when a second sample buffer is unnecessary. Use explicit ranges when they avoid repeated discovery or keep the scale stable. Measure repeated source evaluation before adding a bounded cache.
+Use known ranges when they avoid discovery work, keep subdivision modest, and measure repeated reads before adding a bounded cache. Display transfers can dominate arithmetic, so measure them separately from source evaluation.
 
-Keep subdivision and redraw regions small. Display transfers can dominate arithmetic; measure them separately on the target board and bus. The default `clear_screen()` uses the backend's native fill; passing a window uses projected rectangle drawing.
+Grafici does not retain a framebuffer. A 128-by-64 frame would need 1,024 bytes in monochrome or 16,384 bytes in RGB565, in addition to the display driver's buffers. Scanline or tile rendering can be a better fit for small boards; a heatmap only needs a retained scalar grid when its algorithm requires one. Measure flash and peak SRAM on the target hardware before choosing that storage.
 
-Consider display-specific batching or scanline/tile rendering before a full framebuffer. A 128-by-64 monochrome frame needs 1,024 bytes; RGB565 needs 16,384 bytes. A heatmap can stream rows or tiles, retaining a separate bounded scalar grid only when its algorithm needs one. Measure flash, retained SRAM and peak stack/heap together before choosing that storage.
+## Documentation guidelines
+
+Use the wiki's practical walkthrough style when changing these guides:
+
+- Start with a small public API example, identify its objects, then explain how they work together.
+- Explain what a module represents and why it is useful before describing its methods. Assume basic C++ knowledge and use familiar comparisons when they help.
+- Write as a shared walkthrough: we create a source, change a plotter, then inspect the result. Keep paragraphs direct and conversational.
+- Introduce one idea at a time through short code snippets and explain their visible or numeric output nearby. Reuse an example as it grows.
+- Choose interesting functions and recognizable shapes: beats, chirps, polar patterns or a hype cycle. Keep their computation and memory cost suitable for small Arduinos.
+- Generate every plot image in Grafici-Test from the documented example. Regenerate it when the code changes and use its published URL in Markdown. Preserve the example markers used by the renderer.
+- Keep the README focused on getting a plot running and discovering the main features. Put internals, contracts and resource accounting here.
+- Use class or sequence diagrams where relationships or call order need explaining. Reserve tables for values, comparisons and reference contracts; notes should clarify a specific assumption.
+
+Correct spelling, grammar and outdated API usage while preserving the teaching sequence and the author's voice. Keep measured results distinct from estimates, and keep examples consistent with the current code.
 
 ## Verification
 
-Regression and rendering checks live in [Grafici-Test](https://github.com/cattanimarco/Grafici-Test). From that checkout, select the library being changed:
+The rendering gallery and image generator live in [Grafici-Test](https://github.com/cattanimarco/Grafici-Test/tree/d46495439394908570d4ca1df2ae1316bee40c09). From its `codex/documentation-images` branch, generate these pictures against the library checkout being documented:
 
 ```sh
-python3 tests/run_checks.py --sanitize --library /path/to/Grafici-GFX
+python3 docs/render.py --library /path/to/Grafici-GFX --sanitize
 ```
 
-Host checks cover spline allocation guards, interpolation, missing-data contracts, palette/color behavior and clipping. For a new source, exercise empty/invalid inputs and the first and last available indices. For plotters and projections, check emitted geometry and invalid-data gaps. Compile representative examples with the target board's toolchain; board compilation is separate from physical timing and runtime SRAM measurements.
+The renderer extracts the marked C++ examples from these Markdown files, compiles them against Grafici and the file display backend, and writes PNGs and a provenance manifest to `imgs/guides/`. Hardware initialization is replaced with the file backend. Review the pictures before publishing, and link to the image commit so a later regeneration cannot silently change this guide.
+
+For library changes, exercise empty/invalid inputs and the first/last indices for new sources. Check emitted geometry and gaps for plotters and projections; pictures alone cannot establish those contracts. Compile representative examples with the target board's toolchain as well. Host checks and board builds do not measure physical display timing or peak SRAM.
 
 ## Boundary and invalid-data contracts
 

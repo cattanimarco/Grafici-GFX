@@ -3,39 +3,13 @@
 [![Arduino Library](https://www.ardu-badge.com/badge/Grafici-GFX.svg)](https://www.ardu-badge.com/Grafici-GFX)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-A powerful data visualization library for Arduino displays supporting the Adafruit GFX interface. Create beautiful plots, charts, and visualizations with minimal code.
-
-![Example Plot](https://raw.githubusercontent.com/cattanimarco/Grafici-Test/master/imgs/examples/line_from_array.jpg)
-
-## Features
-
-- 📊 Multiple plot types:
-  - Line plots
-  - Scatter plots
-  - Bar charts
-  - Area plots
-  - Histograms
-  - Polar plots
-- 🎨 Customizable color schemes
-- 📐 Support for both rectangular and round displays
-- 📏 Normalized coordinate system
-- 🔄 Data processing and transformation
-- 🎯 Window-based plotting regions
+Grafici-GFX plots data on Arduino displays supporting Adafruit GFX. We can take an array or a function, choose a plotter, and draw the result in a Cartesian or polar window. The same data sources work with lines, areas, bars and scatter plots.
 
 ## Installation
 
-### Arduino IDE
+In Arduino IDE, open `Sketch` > `Include Library` > `Manage Libraries`, search for `Grafici`, and install `Grafici-GFX` with its dependencies. Install the driver for your display as well; the examples below use [Adafruit ILI9341](https://github.com/adafruit/Adafruit_ILI9341).
 
-1. Open Arduino IDE
-2. Go to `Sketch` > `Include Library` > `Manage Libraries` (`SHIFT + CMD + I`)
-3. Search for `Grafici`
-4. Select `Grafici-GFX` and click `Install`
-
-Accept the Adafruit GFX dependency installation, then install the library for your display controller. The examples use [Adafruit ILI9341](https://github.com/adafruit/Adafruit_ILI9341).
-
-### PlatformIO
-
-Add this [Git dependency](https://docs.platformio.org/en/latest/projectconf/sections/env/options/library/lib_deps.html) to your environment's `platformio.ini` section, along with your display driver:
+For PlatformIO, add the library and your display driver to your environment's `platformio.ini` section:
 
 ```ini
 lib_deps =
@@ -43,242 +17,146 @@ lib_deps =
   adafruit/Adafruit ILI9341
 ```
 
-## Quick Start
+## Make two waves beat
 
-This sketch uses an ILI9341 display with chip-select pin 10 and data/command pin 9. Adapt the driver, pins and initialization to your hardware. Drivers with buffered output also need their display-update call after plotting.
+Two waves with nearby frequencies sometimes reinforce each other and sometimes cancel. We can see this by adding two sine functions and plotting the result.
 
+This sketch uses chip-select pin 10 and data/command pin 9. Change the driver, pins and initialization to match your display.
+
+<!-- grafici-example: beats -->
 ```cpp
 #include <math.h>
-#include "Adafruit_GFX.h"
-#include "Adafruit_ILI9341.h"
-#include "Grafici.h"
+#include <Adafruit_GFX.h>
+#include <Adafruit_ILI9341.h>
+#include <Grafici.h>
 
-Adafruit_ILI9341 gfx = Adafruit_ILI9341(10, 9);
-Grafici plot{ gfx };
+Adafruit_ILI9341 gfx{10, 9};
+Grafici plot{gfx};
 
-// Create data source from function
-float my_function(size_t x) {
-  return sinf(x / 10.0f) + cosf(sqrtf(3.0f) * x / 10.0f);
+constexpr size_t samples = 96;
+
+float beat(size_t i) {
+  const float t = i * (6.2831853f / (samples - 1));
+  return 0.5f * (sinf(7.0f * t) + sinf(8.0f * t));
 }
 
-DataLinear x = DataLinear(100);
-DataFunction y = DataFunction(100, my_function);
+DataLinear x(samples);
+DataFunction y(samples, beat, {-1.0f, 1.0f});
 
-void setup(void) {
+void setup() {
   gfx.begin();
   gfx.setRotation(3);
-
   plot.clear_screen();
   plot.set_color_map(parula);
-  plot.line(x, y, y);  // Plot data as a line, color by y value
+  auto opts = plot_options.set_axis(2, 8, gunpowder).segments(4);
+  plot.line(x, y, y, full_screen, opts);
 }
 
-void loop(void) {}
+void loop() {}
 ```
 
-## Working with Data
+![Two sine waves creating a quiet region between stronger oscillations](https://raw.githubusercontent.com/cattanimarco/Grafici-Test/d46495439394908570d4ca1df2ae1316bee40c09/imgs/guides/beats.png)
 
-`DataArray<T>` borrows an existing array; `DataFunction` computes values when read. Both expose raw values through `DataNorm::raw()` and normalized values through `norm()`. Sources can be reused across plot types, with separate channels for position, color and marker size. Windows use normalized coordinates with `(0,0)` at the bottom-left. Raw values can be negative or exceed one; samples use `float` values and range bounds.
+The oscillations become smaller towards the middle, where the waves cancel. The last `y` in `plot.line(x, y, y)` also chooses the color, so height and color tell the same story. We could use a separate source for color, or pass a fixed color such as `white`.
 
-Keep arrays, borrowed sources and palettes alive while they are used. Inferred ranges are fixed at construction; supply explicit ranges for a stable scale when data changes. Plot options return modified copies, so assign or pass the result of a fluent chain.
+`DataLinear` supplies the sample positions. `DataFunction` evaluates the wave when a plotter reads it; it does not store 96 float samples. Its explicit `[-1,1]` range keeps the scale fixed and avoids scanning the function to discover its bounds.
 
-## Examples
+> Buffered display drivers also need their display-update call after drawing. Adafruit GFX supplies the graphics interface; your display driver handles initialization and transfers.
 
-These snippets reuse the includes and `gfx`/`plot` declarations from Quick Start. Replace its data declarations, `setup()` and `loop()` with the selected example.
+## Change the plotter
 
-### Statistical Visualization
+We can reuse `x` and `y` to see the same wave in four different ways. Add this function to the sketch and call `draw_plot_types(plot)` at the end of `setup()`.
 
-Create a scatter plot with histogram using normal distribution data:
-
+<!-- grafici-example: plot-types -->
 ```cpp
-constexpr size_t data_size = 64;
-constexpr size_t histogram_bins = 20;
-
-// Generate random data with normal distribution
-DataLinear x(data_size);
-DataDistributionNormal<data_size> y(84);
-DataConstant marker_size(data_size, 0.01f);
-
-void setup(void) {
-  gfx.begin();
-  gfx.setRotation(3);
+void draw_plot_types(Grafici &plot) {
   plot.clear_screen();
-  plot.set_color_map(cmy);
+  auto line_window = full_screen.sub_window({0.04f, 0.48f}, {0.54f, 0.96f});
+  auto area_window = full_screen.sub_window({0.54f, 0.98f}, {0.54f, 0.96f});
+  auto bar_window = full_screen.sub_window({0.04f, 0.48f}, {0.04f, 0.46f});
+  auto scatter_window = full_screen.sub_window({0.54f, 0.98f}, {0.04f, 0.46f});
+  auto opts = plot_options.set_axis(2, 4, gunpowder);
+  DataConstant radius(samples, 0.012f);
 
-  // Left window: Scatter plot (0-74% width)
-  auto left_window = full_screen.sub_window({ 0, .74 }, { 0, 1 });
-  auto left_opts = plot_options.set_axis(histogram_bins, 1, silver)
-                              .segments(8)
-                              .scatter_style("x");
-  plot.scatter(x, y, y, marker_size, left_window, left_opts);
-
-  // Right window: Histogram (76-100% width)
-  auto right_window = full_screen.sub_window({ .76, 1 }, { 0, 1 })
-                                .transform(WindowTransform::ccw_90_rotation);
-  auto right_opts = plot_options.set_axis(5, histogram_bins, silver)
-                               .bar_filled(true)
-                               .thickness(0.5f);
-
-  // Plot histogram
-  DataHistogramXY<histogram_bins> data_hist{ y };
-  plot.bar(data_hist.x(), data_hist.y(), data_hist.x(),
-          right_window, right_opts);
+  plot.line(x, y, y, line_window, opts);
+  plot.area(x, y, y, area_window, opts);
+  plot.bar(x, y, y, bar_window, opts.bar_filled(true));
+  plot.scatter(x, y, y, radius, scatter_window, opts.scatter_style("o"));
 }
-
-void loop(void) {}
 ```
 
-### Polar Plots
+![The same beat as a line and area above, with bars and scatter markers below](https://raw.githubusercontent.com/cattanimarco/Grafici-Test/d46495439394908570d4ca1df2ae1316bee40c09/imgs/guides/plot_types.png)
 
-Create a polar plot with multiple functions:
+The top row shows a line and a filled area; the bottom row shows bars and scatter markers. The sources have not changed. Each window maps the plot into its own part of the screen, independently of display resolution.
 
+Area plots and bars start at normalized zero. For this wave that is raw `-1`, the lower bound of its range. The scatter plot takes one more source for marker radius.
+
+## Wrap the wave around a circle
+
+A window can also change the projection. In a `PolarWindow`, normalized x becomes an angle in turns and normalized y becomes a radius. Our beat now draws a flower-like outline.
+
+Keep the same sources and call `draw_polar_comparison(plot)` at the end of `setup()`:
+
+<!-- grafici-example: polar -->
 ```cpp
-DataLinear angle(100);  // Normalized x spans one turn.
-DataFunction radius1(100, [](size_t x) -> float {
-  return sinf(x / 10.0f);
-});
-DataFunction radius2(100, [](size_t x) -> float {
-  return cosf(x / 8.0f);
-});
-
-void setup(void) {
-  gfx.begin();
+void draw_polar_comparison(Grafici &plot) {
   plot.clear_screen();
-  plot.set_color_map(heat);
-
-  // Create polar window
-  PolarWindow polar;
-  auto opts = plot_options.set_axis(10, 10, white).segments(8);
-
-  // Plot multiple functions
-  plot.line(angle, radius1, radius1, polar, opts);
-  plot.line(angle, radius2, radius2, polar, opts);
-}
-
-void loop(void) {}
-```
-
-### Animated Line Plot
-
-Create an animated line plot:
-
-```cpp
-DataLinear x(100);
-float phase = 0.0f;
-
-void setup(void) {
-  gfx.begin();
-  plot.set_color_map(rainbow);
-}
-
-void loop(void) {
-  plot.clear_screen();
-
-  // A known range keeps the scale fixed and avoids a bounds scan each frame.
-  DataFunction y(100, [](size_t x) -> float {
-    return sinf(x / 10.0f + phase);
-  }, {-1.0f, 1.0f});
-
-  plot.line(x, y, y);
-  phase += 0.1f;
-  delay(50);
+  auto left = full_screen.sub_window({0.04f, 0.48f}, {0.08f, 0.92f});
+  auto right = full_screen.sub_window({0.54f, 0.98f}, {0.08f, 0.92f});
+  PolarWindow polar({0, 1}, {0, 1}, right);
+  auto opts = plot_options.segments(4);
+  plot.line(x, y, y, left, opts);
+  plot.line(x, y, y, polar, opts);
 }
 ```
 
-### Area Plot from Array
+![The beat in a Cartesian window on the left and a polar window on the right](https://raw.githubusercontent.com/cattanimarco/Grafici-Test/d46495439394908570d4ca1df2ae1316bee40c09/imgs/guides/polar_beats.png)
 
-Create an area plot from a C array:
+Both pictures use the same samples and colors. Subdivision adds intermediate geometry before projection, helping lines follow curved windows. Increase it when the result needs it; extra segments also mean extra drawing work. A rectangular parent window stretches the polar result to fit that rectangle.
 
-```cpp
-const float data[] = {0, 1, 2, 1, 0, -1, -2, -1};
-DataArray<float> y(data, 8);
-DataLinear x(8);
+## Working with data
 
-void setup(void) {
-  gfx.begin();
-  plot.clear_screen();
-  plot.set_color_map(temperature);
+`DataArray<T>` borrows an existing C array. `DataFunction` computes values, while distributions retain generated samples. Interpolators and histograms build new sources that can feed the same plotters. The [examples](examples/) include arrays, animation, distributions and histograms; the [contributor guide](CONTRIBUTE.md#sources-and-composition) walks through a spline.
 
-  auto opts = plot_options.set_axis(8, 4, white);
-  plot.area(x, y, y, full_screen, opts);
-}
+Each `DataNorm` sample exposes a raw value through `raw()` and a normalized position through `norm()`. Raw measurements can be signed or larger than one. The normalized interface lets sources, colors and windows work together; samples store float values and range bounds.
 
-void loop(void) {}
-```
+Keep borrowed arrays, sources and palettes alive while they are used. Inferred bounds are calculated during construction and do not automatically follow later changes. Supply an explicit range when a scale must remain stable. Plot options return modified copies, so assign or pass the result of a fluent chain.
 
-Area plots and bars start at normalized zero, corresponding to the lower bound of the source range.
+Default `DataNorm` values and `DataNorm::invalid()` mean missing data; `DataNorm(0.0f)` is a valid zero. Missing line and area samples leave gaps. See the [boundary contracts](CONTRIBUTE.md#boundary-and-invalid-data-contracts) for the remaining rules.
 
-For more examples, check out the [examples](examples/) directory and our [Wiki](https://github.com/cattanimarco/Grafici-GFX/wiki).
+### Callbacks with captured state
 
-## Callbacks with captured state
-
-`DataFunction` uses raw function pointers by default, keeping the existing memory footprint and AVR support. On cores that provide `<functional>` (such as ESP32 and RP2040), enable capturing lambdas and callable objects before including Grafici:
+`DataFunction` uses function pointers by default. On a core providing `<functional>`, enable capturing lambdas before including Grafici:
 
 ```cpp
 #define GRAFICI_USE_STD_FUNCTION 1
 #include <Grafici.h>
-
-void draw_with_offset(Grafici &plot, float offset) {
-  DataLinear x(100);
-  DataFunction y(100, [offset](size_t i) -> float {
-    return sinf(i / 10.0f) + offset;
-  });
-  plot.line(x, y, y);
-}
 ```
 
-Use `[this]` to call member functions. The callback is stored by value; referenced objects must outlive the source. Set the option consistently across translation units. `std::function` uses more storage and may allocate heap memory. Both constructors support it; supply an explicit range when captured state can change the output bounds. Empty callbacks produce zero samples.
+We can then capture a local value, for example `[offset](size_t i) -> float { return sinf(i / 10.0f) + offset; }`. Use `[this]` to call a member function. Callbacks are stored by value; referenced objects must remain alive. Set the option consistently across translation units. `std::function` costs more storage and may allocate, so enable it when those callbacks are needed.
 
-## Data validity
+## Small boards and displays
 
-Default `DataNorm` values and `DataNorm::invalid()` represent missing samples; `DataNorm(0.0f)` is a legitimate zero. Use `valid()` to distinguish them. Missing line/area samples leave gaps. Interpolation with two or more outputs includes both endpoints, and projected geometry is clipped to the physical display before pixel conversion. See [boundary contracts](CONTRIBUTE.md#boundary-and-invalid-data-contracts).
+Grafici draws primitives without retaining a framebuffer; the display driver may use one. Borrowed arrays and computed sources avoid an extra sample buffer. Distributions, histograms and splines retain data or coefficients, and spline construction needs temporary workspace. The [memory guide](CONTRIBUTE.md#rendering-and-memory) gives the costs.
 
-## Documentation
+Start with modest sample counts and subdivision. Check flash usage for your chosen board and measure peak SRAM and display timing with the actual hardware. The original examples were display-tested on Uno R4 Minima with an Adafruit 2.8-inch TFT Touch Shield. Host regressions and AVR builds provide additional checks; some bundled examples exceed Uno R3 flash without reducing their complexity.
 
-See [the contributor guide](CONTRIBUTE.md) for module diagrams, source composition, boundary contracts, extension points and memory costs. The [Wiki](https://github.com/cattanimarco/Grafici-GFX/wiki) provides background concepts and additional plotting walkthroughs.
+## Documentation and tests
 
-## Hardware Compatibility
+The [contributor guide](CONTRIBUTE.md) explains the modules, includes class and sequence diagrams, and describes how to extend the library. The [wiki](https://github.com/cattanimarco/Grafici-GFX/wiki#library-concepts) provides further walkthroughs.
 
-### Tested Hardware
+The plot pictures in these guides are generated from their marked code examples by [Grafici-Test](https://github.com/cattanimarco/Grafici-Test/tree/d46495439394908570d4ca1df2ae1316bee40c09). That repository owns the image renderer and generated files. See [verification](CONTRIBUTE.md#verification) to regenerate pictures and choose checks for library changes.
 
-- Arduino UNO R4 Minima
-- Adafruit 2.8" TFT Touch Shield
+## Agent assistance
 
-### Memory Requirements
+[AGENTS.md](AGENTS.md) points to repository-local skills for [library contributions](.agents/skills/grafici-contribute/SKILL.md) and [Arduino use and debugging](.agents/skills/grafici-arduino/SKILL.md). They cover the project conventions, normalized interfaces, source lifetimes, build diagnosis and small-board resource limits.
 
-Grafici draws primitives without retaining a framebuffer; your display driver may use one. Borrowed arrays and computed sources avoid an extra sample buffer, while distributions, histograms and splines retain their own data or coefficients. On small boards, keep sample counts and subdivision low, and budget for temporary workspace and stack as well as retained storage. See [rendering and memory](CONTRIBUTE.md#rendering-and-memory).
-
-The bundled area and scatter/histogram examples exceed Uno R3 flash in the build audit and need more flash or reduced complexity. Compile the chosen sketch for your board before selecting its sample count and plot options.
-
-## Testing
-
-### Unit Tests
-
-Tests live separately in [Grafici-Test](https://github.com/cattanimarco/Grafici-Test), which includes Grafici-GFX as a submodule. Its [build instructions](https://github.com/cattanimarco/Grafici-Test#building-and-running-tests) cover rendering to image files without display hardware. See [verification](CONTRIBUTE.md#verification) for focused regressions and board checks.
-
-### System Tests
-
-Host regressions and AVR builds complement the original Uno R4 Minima display tests. Measure display timing and peak SRAM with your board, driver and plot configuration.
+When working in a separate sketch project, give your agent the path to `Grafici-GFX/.agents/skills/grafici-arduino/SKILL.md` in the installed library and ask it to read that file. Skills inside dependencies may not be discovered automatically; they are plain Markdown and can be read directly.
 
 ## Contributing
 
-See [the contributor guide](CONTRIBUTE.md) for architecture, boundary contracts and memory constraints.
+Start with the [contributor guide](CONTRIBUTE.md), including its [documentation guidelines](CONTRIBUTE.md#documentation-guidelines). Submit changes with the corresponding checks and regenerated pictures when behavior changes. [Open issues](https://github.com/cattanimarco/Grafici-GFX/issues) are the place to discuss features and report problems.
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run the test suite
-5. Submit a pull request
+## License and dependencies
 
-## Future Development
-
-See [open issues](https://github.com/cattanimarco/Grafici-GFX/issues) for feature discussions and reported problems.
-
-## License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-
-## Dependencies
-
-- [Adafruit GFX Library](https://github.com/adafruit/Adafruit-GFX-Library)
-- A display-specific driver implementing Adafruit GFX, such as [Adafruit ILI9341](https://github.com/adafruit/Adafruit_ILI9341).
+Grafici-GFX uses the [Apache License 2.0](LICENSE). It depends on [Adafruit GFX](https://github.com/adafruit/Adafruit-GFX-Library) and a display-specific driver such as [Adafruit ILI9341](https://github.com/adafruit/Adafruit_ILI9341).
