@@ -9,7 +9,7 @@ constexpr size_t num_stars = 100;
 
 const float cambridge_daylight[] = { 7.49, 9.07, 10.54, 13.00, 14.56, 16.27, 16.41, 15.29, 13.36, 11.36, 9.35, 8.04 };
 
-auto daylight_data = DataArrayXY(cambridge_daylight, 12, { 0, 24 });
+DataArrayXY<float> daylight_data(cambridge_daylight, 12, { 0, 24 });
 auto star_positions_x = DataDistributionUniform<num_stars>(84);
 auto star_positions_y = DataDistributionUniform<num_stars>(48);
 auto star_sizes = DataConstant(num_stars, 0.01);

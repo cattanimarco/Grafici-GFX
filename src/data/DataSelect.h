@@ -43,6 +43,7 @@ class DataSelect : public DataSourceNorm
 
 	const Range<float> range() const override
 	{
+		if (size() == 0) return Range<float>::invalid();
 		auto data_vector = _source[0];
 		switch (_selection)
 		{
@@ -56,7 +57,7 @@ class DataSelect : public DataSourceNorm
 		}
 		default:
 		{
-			return INVALID_RANGE_FLOAT;
+			return Range<float>::invalid();
 		}
 		}
 		//get range using [], this is the only way to get back a vector
@@ -64,6 +65,7 @@ class DataSelect : public DataSourceNorm
 
 	const DataNorm operator[](const unsigned long idx) const override
 	{
+		if (idx >= size()) return DataNorm::invalid();
 		auto data_vector = _source[idx];
 		switch (_selection)
 		{
@@ -77,7 +79,7 @@ class DataSelect : public DataSourceNorm
 		}
 		default:
 		{
-			return INVALID_DATA_NORM;
+			return DataNorm::invalid();
 		}
 		}
 	};

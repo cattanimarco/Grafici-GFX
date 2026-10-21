@@ -3,7 +3,7 @@
 
 #include "DataParametric.h"
 
-static float generateGaussian(float mean, float stdDev) {
+static inline float generateGaussian(float mean, float stdDev) {
     static float spare;
     static bool hasSpare = false;
 	static const long precision = 1000;

@@ -30,19 +30,25 @@ inline void plot_bar(const DisplayDriver &display,
 	/* in case data sources have different sizes, use the smaller one */
 	auto source_size = DataSourceNorm::min_data_source_size(x, y, c);
 
+	const float thickness = opts.get_thickness();
+	if (!isfinite(thickness) || thickness < 0 || source_size == 0) return;
+	const float half_width = thickness / (static_cast<float>(source_size) * 2.0f);
+
 	for (size_t idx = 0; idx < source_size; ++idx)
 	{
+		const auto vx = x[idx], vy = y[idx], vc = c[idx];
+		if (!vx.valid() || !vy.valid() || !vc.valid()) continue;
 		if (opts.get_thickness() == 0)
 		{
-			display.draw_line({ x[idx].norm(), 0 }, { x[idx].norm(), y[idx].norm() }, colorMap.norm_to_color(c[idx]), colorMap.norm_to_color(c[idx]), window, opts.get_segments());
+			display.draw_line({ vx.norm(), 0 }, { vx.norm(), vy.norm() }, colorMap.norm_to_color(vc), colorMap.norm_to_color(vc), window, opts.get_segments());
 		}
 		else if (opts.is_bar_filled())
 		{
-			display.fill_rect({ x[idx].norm() - (opts.get_thickness() / (source_size * 2)), 0 }, { x[idx].norm() + (opts.get_thickness() / (source_size * 2)), y[idx].norm() }, colorMap.norm_to_color(c[idx]), window, opts.get_segments());
+			display.fill_rect({ vx.norm() - half_width, 0 }, { vx.norm() + half_width, vy.norm() }, colorMap.norm_to_color(vc), window, opts.get_segments());
 		}
 		else
 		{
-			display.draw_rect({ x[idx].norm() - (opts.get_thickness() / (source_size * 2)), 0 }, { x[idx].norm() + (opts.get_thickness() / (source_size * 2)), y[idx].norm() }, colorMap.norm_to_color(c[idx]), window, opts.get_segments());
+			display.draw_rect({ vx.norm() - half_width, 0 }, { vx.norm() + half_width, vy.norm() }, colorMap.norm_to_color(vc), window, opts.get_segments());
 		}
 	}
 }

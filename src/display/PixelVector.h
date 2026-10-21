@@ -19,13 +19,14 @@
 
 /*! Importation of librairies*/
 #include "../Vector.h"
+#include <stdint.h>
 
 /**
  * @brief Bi-dimensional xy Vector object representing cartesian coordinates
  * 
  */
 
-using PixelVector = Vector<size_t>;
+using PixelVector = Vector<int16_t>;
 
 #endif /* GRAFICI_DISPLAY_PIXEL_VECTOR_H */
 

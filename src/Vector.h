@@ -17,6 +17,8 @@
 #ifndef GRAFICI_VECTOR_H
 #define GRAFICI_VECTOR_H
 
+#include <math.h>
+
 /**
  * @brief Vector with x and y components
  * 
@@ -27,6 +29,12 @@ class Vector
 {
   public:
 	Vector() = default;
+
+	// Construct a vector from invalid components.
+	static Vector<T> invalid()
+	{
+		return { T::invalid(), T::invalid() };
+	}
 
 	/**
 	 * @brief Construct a new Vector object
@@ -61,6 +69,13 @@ class Vector
 	T x{};
 	T y{};
 };
+
+// Floating-point coordinates use NaN to represent invalidity.
+template <>
+inline Vector<float> Vector<float>::invalid()
+{
+	return {NAN, NAN};
+}
 
 #endif /* GRAFICI_VECTOR_H */
 

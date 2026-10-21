@@ -23,6 +23,7 @@
 #include "DisplayVector.h"
 #include "PixelVector.h"
 #include "Window.h"
+#include "Clipping.h"
 
 // struct DisplayVertex
 // {
@@ -33,6 +34,8 @@
 class DisplayDriver
 {
   public:
+	using ClipPoint = Vector<float>;
+
 	DisplayDriver(Adafruit_GFX &driver)
 	    : _driver{ &driver }
 	{
@@ -40,21 +43,18 @@ class DisplayDriver
 
 	void draw_line(const DisplayVector display_a, const DisplayVector display_b, const Color color_a, const Color color_b, const Window &window = full_screen, size_t segments = 1) const
 	{
-		const Color color_ab = color_a * 0.5 + color_b * 0.5;
+		if (!window.valid() || !grafici_clipping::finite_point(display_a) ||
+		    !grafici_clipping::finite_point(display_b)) return;
+		const Color color_ab = color_a.midpoint(color_b);
 
 		if (segments == 1)
 		{
-			/* project window display vector to full screen display vector to full screen pixel vector */
-			auto pixel_a = display_to_pixel_vector(window.display_to_display_vector(display_a));
-			auto pixel_b = display_to_pixel_vector(window.display_to_display_vector(display_b));
-			auto pixel_color = color_ab.to_R5G6B5();
-
-			/* call base driver */
-			_driver->drawLine(pixel_a.x,
-			                  pixel_a.y,
-			                  pixel_b.x,
-			                  pixel_b.y,
-			                  pixel_color);
+			const int16_t width = _driver->width(), height = _driver->height();
+			if (width <= 0 || height <= 0) return;
+			auto a = projected(display_a, window), b = projected(display_b, window);
+			if (!grafici_clipping::clip_line(&a, &b)) return;
+			const auto pa = to_pixel(a, width, height), pb = to_pixel(b, width, height);
+			_driver->drawLine(pa.x, pa.y, pb.x, pb.y, color_ab.to_R5G6B5());
 		}
 		else if (segments > 1)
 		{
@@ -66,21 +66,20 @@ class DisplayDriver
 
 	void fill_triangle(DisplayVector display_a, DisplayVector display_b, DisplayVector display_c, Color color, const Window &window = full_screen, size_t segments = 1) const
 	{
+		if (!window.valid() || !grafici_clipping::finite_point(display_a) ||
+		    !grafici_clipping::finite_point(display_b) || !grafici_clipping::finite_point(display_c)) return;
 		if (segments == 1)
 		{
 
-			auto pixel_a = display_to_pixel_vector(window.display_to_display_vector(display_a));
-			auto pixel_b = display_to_pixel_vector(window.display_to_display_vector(display_b));
-			auto pixel_c = display_to_pixel_vector(window.display_to_display_vector(display_c));
-			auto pixel_color = color.to_R5G6B5();
-
-			_driver->fillTriangle(pixel_a.x,
-			                      pixel_a.y,
-			                      pixel_b.x,
-			                      pixel_b.y,
-			                      pixel_c.x,
-			                      pixel_c.y,
-			                      pixel_color);
+			const int16_t width = _driver->width(), height = _driver->height();
+			if (width <= 0 || height <= 0) return;
+			const auto a = projected(display_a, window), b = projected(display_b, window), c = projected(display_c, window);
+			if (!grafici_clipping::finite_point(a) || !grafici_clipping::finite_point(b) || !grafici_clipping::finite_point(c)) return;
+			const auto rgb = color.to_R5G6B5();
+			if (grafici_clipping::on_screen(a) && grafici_clipping::on_screen(b) && grafici_clipping::on_screen(c))
+				emit_triangle(a, b, c, rgb, width, height);
+			else
+				fill_clipped_triangle(a, b, c, rgb, width, height);
 		}
 		else if (segments > 1)
 		{
@@ -160,12 +159,16 @@ class DisplayDriver
 
 	void fill_polygon(DisplayVector display_center, DisplayVector display_radius, unsigned int sides, float rotation, Color color, const Window &window = full_screen) const
 	{
+		const int16_t width = _driver->width(), height = _driver->height();
+		if (!window.valid() || width <= 0 || height <= 0 ||
+		    !grafici_clipping::finite_point(display_center) || !grafici_clipping::finite_point(display_radius)) return;
 		/* try to avoid == as we are comparing floats */
 		if (display_radius < pixel_to_display_vector({1,1}))
 		{
-			auto pixel_center = display_to_pixel_vector(window.display_to_display_vector(display_center));
-			auto pixel_color = color.to_R5G6B5();
-			_driver->drawPixel(pixel_center.x, pixel_center.y, pixel_color);
+			const auto center = projected(display_center, window);
+			if (!grafici_clipping::on_screen(center)) return;
+			const auto pixel = to_pixel(center, width, height);
+			_driver->drawPixel(pixel.x, pixel.y, color.to_R5G6B5());
 		}
 		else
 		{
@@ -239,17 +242,35 @@ class DisplayDriver
 		};
 	}
 
-	/* from normalized display vector to absolute pixel vector */
-	PixelVector display_to_pixel_vector(DisplayVector display_vector) const
+	ClipPoint projected(DisplayVector point, const Window &window) const
 	{
-		PixelVector res{ static_cast<size_t>(display_vector.x * (_driver->width() - 1)),
-			             static_cast<size_t>((1 - display_vector.y) * (_driver->height() - 1)) };
+		const auto p = window.display_to_display_vector(point);
+		return {static_cast<float>(p.x), static_cast<float>(p.y)};
+	}
 
-		// std::cout << display_vector.x << " " << display_vector.y << std::endl;
-		// std::cout << res.x << " " << res.y << std::endl;
+	static PixelVector to_pixel(const ClipPoint &point, int16_t width, int16_t height)
+	{
+		// Only finite, clipped [0,1] coordinates reach this conversion.
+		return {static_cast<int16_t>(point.x * (width - 1)),
+		        static_cast<int16_t>((1.0f - point.y) * (height - 1))};
+	}
 
-		return res;
-	};
+	void emit_triangle(const ClipPoint &a, const ClipPoint &b, const ClipPoint &c,
+	                   R5G6B5 color, int16_t width, int16_t height) const
+	{
+		const auto pa = to_pixel(a, width, height), pb = to_pixel(b, width, height), pc = to_pixel(c, width, height);
+		_driver->fillTriangle(pa.x, pa.y, pb.x, pb.y, pc.x, pc.y, color);
+	}
+
+	void fill_clipped_triangle(const ClipPoint &a, const ClipPoint &b, const ClipPoint &c,
+	                           R5G6B5 color, int16_t width, int16_t height) const
+	{
+		ClipPoint polygon[7];
+		const unsigned count = grafici_clipping::clip_triangle(a, b, c, polygon);
+		for (unsigned i = 1; i + 1 < count; ++i)
+			emit_triangle(polygon[0], polygon[i], polygon[i + 1], color, width, height);
+	}
+
 };
 
 #endif /* GRAFICI_DISPLAY_DRIVER_H */

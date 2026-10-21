@@ -8,13 +8,8 @@
  *  @{
  */
 
-// clang-format off
-#define INVALID_DATA_VECTOR  \
-	{                        \
-		{ 0.0, {0.0, 0.0} }, \
-		{ 0.0, {0.0, 0.0} }  \
-	}
-// clang-format on
+// Compatibility alias; prefer DataVector::invalid().
+#define INVALID_DATA_VECTOR DataVector::invalid()
 
 /**
  * @brief Multi component (normalized) data point

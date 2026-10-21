@@ -41,12 +41,14 @@ class DataArrayXY : public DataSource<DataVector>
 	    : DataSource<DataVector>{ size }
 	    , _y_data{ data, size }
 	{
+		_size = _y_data.size();
 	}
 
 	DataArrayXY(const T *data, size_t size, Range<float> range)
 	    : DataSource<DataVector>{ size }
 	    , _y_data{ data, size, range }
 	{
+		_size = _y_data.size();
 	}
 
 	const DataVector operator[](const unsigned long idx) const
@@ -60,7 +62,7 @@ class DataArrayXY : public DataSource<DataVector>
 		}
 		else
 		{
-			return INVALID_DATA_VECTOR;
+			return DataVector::invalid();
 		}
 	}
 
