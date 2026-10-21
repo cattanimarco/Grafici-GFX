@@ -20,6 +20,14 @@
 /*! Importation of librairies*/
 #include "DataParametric.h"
 
+#ifndef GRAFICI_USE_STD_FUNCTION
+#define GRAFICI_USE_STD_FUNCTION 0
+#endif
+
+#if GRAFICI_USE_STD_FUNCTION
+#include <functional>
+#endif
+
 /**
  * @brief Data source generated from a function
  * 
@@ -27,16 +35,23 @@
 class DataFunction : public DataParametric
 {
   public:
+#if GRAFICI_USE_STD_FUNCTION
+	using Callback = std::function<float(size_t)>;
+#else
+	using Callback = float (*)(size_t);
+#endif
+
 	/**
 	 * @brief Construct a data source from a given function [f(0) .. f(size-1)]
 	 * 
 	 * @param size size of the data source
 	 * @param fn function to compute the value of each data point
 	 */
-	DataFunction(size_t size, float (*fn)(size_t))
+	DataFunction(size_t size, Callback fn)
 	    : DataParametric{ size }
-	    , _fn{ fn }
+	    , _fn{ static_cast<Callback &&>(fn) }
 	{
+		if (!_fn) _size = 0;
 		update_range();
 	}
 
@@ -47,10 +62,11 @@ class DataFunction : public DataParametric
 	 * @param fn function to compute the value of each data point
 	 * @param range value range against which f() is normalized
 	 */
-	DataFunction(size_t size, float (*fn)(size_t), Range<float> range)
+	DataFunction(size_t size, Callback fn, Range<float> range)
 	    : DataParametric{ size, range }
-	    , _fn{ fn }
+	    , _fn{ static_cast<Callback &&>(fn) }
 	{
+		if (!_fn) _size = 0;
 	}
 
   protected:
@@ -60,7 +76,7 @@ class DataFunction : public DataParametric
 	}
 
   private:
-	float (*_fn)(size_t);
+	Callback _fn;
 };
 
 #endif /* GRAFICI_DATA_FUNCTION_H */

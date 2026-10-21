@@ -180,6 +180,23 @@ void setup(void) {
 
 For more examples, check out the [examples](examples/) directory and our [Wiki](https://github.com/cattanimarco/Grafici-GFX/wiki).
 
+## Callbacks with captured state
+
+`DataFunction` uses raw function pointers by default, keeping the existing memory footprint and AVR support. On cores that provide `<functional>` (such as ESP32 and RP2040), enable capturing lambdas and callable objects before including Grafici:
+
+```cpp
+#define GRAFICI_USE_STD_FUNCTION 1
+#include <Grafici.h>
+
+// Inside a function, with a local offset:
+float offset = 0.5f;
+DataFunction source(100, [offset](size_t i) {
+  return sin(i / 10.0f) + offset;
+});
+```
+
+Use `[this]` to call member functions. The callback is stored by value; referenced objects must outlive the source. Set the option consistently across translation units. `std::function` uses more storage and may allocate heap memory. Both constructors support it; supply an explicit range when captured state can change the output bounds. Empty callbacks produce zero samples.
+
 ## Documentation
 
 Visit our [Wiki](https://github.com/cattanimarco/Grafici-GFX/wiki) for detailed documentation, including:
