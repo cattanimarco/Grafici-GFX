@@ -59,6 +59,8 @@ class DataSourceNorm : public DataSource<DataNorm>
 		return { _range.low, _range.high };
 	}
 
+	bool valid() const { return size() > 0 && range().valid(); }
+
 	/**
      * @brief Utility funtion to return the minimum size among a list of DataNorm data sources
      * 

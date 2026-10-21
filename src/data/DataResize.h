@@ -45,11 +45,13 @@ class DataResize : public DataSourceNorm
 	{
 		if (idx < DataSource<DataNorm>::size())
 		{
-			return { _range.norm_to_value(_source[idx].norm()), { 0, 1 } };
+			const auto value = _source[idx];
+			if (!value.valid() || !_range.valid()) return DataNorm::invalid();
+			return { _range.normalized_to_value(value.norm()), { 0, 1 } };
 		}
 		else
 		{
-			return INVALID_DATA_NORM;
+			return DataNorm::invalid();
 		}
 	};
 

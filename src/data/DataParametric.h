@@ -51,7 +51,7 @@ class DataParametric : public DataSourceNorm
 		}
 		else
 		{
-			return INVALID_DATA_NORM;
+			return DataNorm::invalid();
 		}
 	}
 
@@ -60,15 +60,11 @@ class DataParametric : public DataSourceNorm
 
 	virtual void update_range()
 	{
-		if (DataSource<DataNorm>::size() > 0)
-		{
-			DataSourceNorm::_range = {at(0),at(0)};
-			for (size_t idx = 1; idx < DataSource<DataNorm>::size(); ++idx)
-			{
-				DataSourceNorm::_range.update(at(idx));
+		_range = Range<float>::invalid();
+		for (size_t idx = 0; idx < size(); ++idx)
+			_range.update(static_cast<float>(at(idx)));
 			}
-		}
-	}
+
 };
 
 #endif /* GRAFICI_DATA_PARAMETRIC_H */

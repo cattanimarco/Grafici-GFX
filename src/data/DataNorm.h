@@ -20,16 +20,8 @@
 /*! Importation of librairies*/
 #include "../Range.h"
 
-// clang-format off
-/*!
-* \def INVALID_DATA_NORM
-* Description
-*/
-#define INVALID_DATA_NORM \
-	{                     \
-		0.0, {0.0, 0.0}     \
-	}
-// clang-format on
+// Compatibility alias; prefer DataNorm::invalid().
+#define INVALID_DATA_NORM DataNorm::invalid()
 
 /**
  * @brief Normalized data point
@@ -40,14 +32,24 @@ class DataNorm
   public:
 	DataNorm()
 	    : _raw{ 0 }
-	    , _range{ 0, 0 }
+	    , _range{ Range<float>::invalid() }
 	{
 	}
 
 	DataNorm(const float value, const Range<float> range = { 0, 1 })
-	    : _raw{ range.trim(value) }
-	    , _range{ range }
+	    : _raw{ 0 }
+	    , _range{ Range<float>::invalid() }
 	{
+		if (!range.valid() || !isfinite(value)) return;
+		_raw = range.trim(value);
+		_range = range;
+	}
+
+	static DataNorm invalid() { return {}; }
+
+	bool valid() const
+	{
+		return _range.valid();
 	}
 
 	float norm() const
@@ -62,7 +64,8 @@ class DataNorm
 
 	void norm(float val)
 	{
-		_raw = _range.norm_to_value(val);
+		if (!valid() || !isfinite(val)) { *this = DataNorm{}; return; }
+		_raw = _range.normalized_to_value(val);
 	}
 
 	Range<float> range() const
@@ -72,12 +75,12 @@ class DataNorm
 
 	bool operator<(const DataNorm &other) const
 	{
-		return norm() < other.norm();
+		return valid() && other.valid() && norm() < other.norm();
 	}
 
 	bool operator>(const DataNorm &other) const
 	{
-		return norm() > other.norm();
+		return valid() && other.valid() && norm() > other.norm();
 	}
 
   private:

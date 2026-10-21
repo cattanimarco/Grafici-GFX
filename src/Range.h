@@ -17,14 +17,10 @@
 #ifndef GRAFICI_RANGE_H
 #define GRAFICI_RANGE_H
 
-/*!
-* \def INVALID_RANGE_FLOAT
-* Value for an invalid range object
-*/
-#define INVALID_RANGE_FLOAT \
-	{                       \
-		0.0, 0.0            \
-	}
+#include <math.h>
+
+// Compatibility alias; prefer Range<float>::invalid().
+#define INVALID_RANGE_FLOAT Range<float>::invalid()
 
 /**
  * @brief Object representing a range between a min and a max limits
@@ -47,14 +43,21 @@ class Range
 	{
 	}
 
+	static Range invalid() { return {T(1), T(0)}; }
+
+	bool valid() const
+	{
+		return isfinite(low) && isfinite(high) && low <= high;
+	}
+
 	/**
 	 * @brief Return the difference between the higher and the lower limits
 	 * 
-	 * @return T difference between the higher and the lower limits
+	 * @return float difference between the higher and the lower limits
 	 */
-	T delta() const
+	float delta() const
 	{
-		return (high - low);
+		return valid() ? difference(high, low) : 0.0f;
 	}
 
 	/**
@@ -64,7 +67,7 @@ class Range
 	 */
 	T mid() const
 	{
-		return (high + low) / 2.0;
+		return normalized_to_value(0.5f);
 	};
 
 	/**
@@ -74,8 +77,10 @@ class Range
 	 */
 	void update(const T value)
 	{
-		low = low < value ? low : value;
-		high = high > value ? high : value;
+		if (!isfinite(value)) return;
+		if (!valid()) { low = high = value; return; }
+		if (value < low) low = value;
+		if (value > high) high = value;
 	}
 
 	/**
@@ -86,18 +91,15 @@ class Range
 	 */
 	float value_to_norm(const T value) const
 	{
-		if (value <= low)
+		if (!valid() || !isfinite(value) || high == low || value <= low) return 0;
+		if (value >= high) return 1;
+		float span = difference(high, low), offset = difference(value, low);
+		if (!isfinite(span))
 		{
-			return 0.0;
+			span = static_cast<float>(high) * 0.5f - static_cast<float>(low) * 0.5f;
+			offset = static_cast<float>(value) * 0.5f - static_cast<float>(low) * 0.5f;
 		}
-		else if (value >= high)
-		{
-			return 1.0;
-		}
-		else
-		{
-			return static_cast<float>(value - low) / static_cast<float>(delta());
-		}
+		return offset / span;
 	}
 
 	/**
@@ -106,20 +108,16 @@ class Range
 	 * @param value normalized number. In case this value is outside of the [0,1] range, it will be clipped before being mapped.
 	 * @return T value within the range limits coreesponding to the given normalized value
 	 */
-	T norm_to_value(const float value) const
+	T normalized_to_value(const float value) const
 	{
-		if (value <= 0.0)
-		{
-			return low;
-		}
-		else if (value >= 1.0)
-		{
-			return high;
-		}
-		else
-		{
-			return static_cast<T>(high * value + low * (1.0 - value));
-		}
+		if (!valid() || !isfinite(value)) return T{};
+		if (value <= 0 || high == low) return low;
+		if (value >= 1) return high;
+		const float result = static_cast<float>(high) * value + static_cast<float>(low) * (1.0f - value);
+		// Check before narrowing, including integer endpoints rounded by FP32.
+		if (result <= static_cast<float>(low)) return low;
+		if (result >= static_cast<float>(high)) return high;
+		return static_cast<T>(result);
 	}
 
 	/**
@@ -145,16 +143,7 @@ class Range
 	 */
 	bool contains(const T value) const
 	{
-		Range<T> tmp_range(*this);
-		tmp_range.sort();
-		if (tmp_range.low <= value && tmp_range.high >= value)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		return valid() && isfinite(value) && low <= value && value <= high;
 	}
 
 	/**
@@ -165,21 +154,8 @@ class Range
 	 */
 	T trim(const T &value) const
 	{
-		if (contains(value))
-		{
-			return value;
-		}
-		else
-		{
-			Range<T> tmp_range(*this);
-			tmp_range.sort();
-			if (value > tmp_range.high)
-				return tmp_range.high;
-			else if (value < tmp_range.low)
-				return tmp_range.low;
-			else
-				return value;
-		}
+		if (!valid() || !isfinite(value)) return T{};
+		return value < low ? low : (value > high ? high : value);
 	}
 
 	/**
@@ -188,17 +164,27 @@ class Range
 	 * @param other the other range to unite
 	 * @return Range<T> the union of the two ranges
 	 */
-	Range<T> operator+(const Range<T> &other)
+	Range<T> operator+(const Range<T> &other) const
 	{
-		Range<T> result{ other.low, other.high };
-		result.sort();
-		result.update(low);
-		result.update(high);
+		if (!valid()) return other;
+		if (!other.valid()) return *this;
+		Range<T> result(*this);
+		result.update(other.low); result.update(other.high);
 		return result;
 	}
 
 	T low{};
 	T high{};
+
+  private:
+	static float difference(T upper, T lower)
+	{
+		// Preserve small integer differences on a large offset, without signed
+		// subtraction overflow when endpoints straddle zero.
+		if ((upper >= 0 && lower >= 0) || (upper < 0 && lower < 0))
+			return static_cast<float>(upper - lower);
+		return static_cast<float>(upper) - static_cast<float>(lower);
+	}
 };
 
 #endif /* GRAFICI_RANGE_H */

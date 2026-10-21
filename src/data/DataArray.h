@@ -40,6 +40,7 @@ class DataArray : public DataSourceNorm
 	    , _arrayPtr{ data }
 
 	{
+		if (!_arrayPtr) _size = 0;
 		update_range();
 	}
 
@@ -48,13 +49,14 @@ class DataArray : public DataSourceNorm
 	    , _arrayPtr{ data }
 
 	{
+		if (!_arrayPtr) _size = 0;
 	}
 
 	/**
 	 * @brief Returns the data point at specified location idx. 
 	 * 
 	 * @param idx position of the element to return. To be valid, idx must be between 0 and size-1.
-	 * @return const DataNorm Copy of the requested element in case the provided idx is valid, INVALID_DATA_NORM otherwise.
+	 * @return const DataNorm Copy of the requested element in case the provided idx is valid, DataNorm::invalid() otherwise.
 	 */
 	const DataNorm operator[](const unsigned long idx) const override
 	{
@@ -64,21 +66,17 @@ class DataArray : public DataSourceNorm
 		}
 		else
 		{
-			return INVALID_DATA_NORM;
+			return DataNorm::invalid();
 		}
 	};
 
   private:
 	void update_range()
 	{
-		if ((_arrayPtr != nullptr) && (DataSource<DataNorm>::size() > 0))
-		{
-			DataSourceNorm::_range = { static_cast<float>(_arrayPtr[0]), static_cast<float>(_arrayPtr[0]) };
-			for (size_t idx = 1; idx < DataSource<DataNorm>::size(); ++idx)
-			{
+		DataSourceNorm::_range = Range<float>::invalid();
+		if (_arrayPtr)
+			for (size_t idx = 0; idx < size(); ++idx)
 				DataSourceNorm::_range.update(static_cast<float>(_arrayPtr[idx]));
-			}
-		}
 	}
 
 	const T *_arrayPtr{ nullptr };

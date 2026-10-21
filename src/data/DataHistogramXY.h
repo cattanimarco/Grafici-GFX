@@ -30,6 +30,7 @@
 template <size_t BINS>
 class DataHistogramXY : public DataSource<DataVector>
 {
+	static_assert(BINS > 0, "DataHistogramXY requires at least one bin");
   public:
 	/* To plot multiple n bar plots, use num_classes = n and use n of this classes for the x axis.
 	 Each class with class_id [0, n-1] */
@@ -45,23 +46,14 @@ class DataHistogramXY : public DataSource<DataVector>
 
 	const DataVector operator[](const unsigned long idx) const
 	{
-		if (idx < size())
-		{
+		if (idx >= size()) return DataVector::invalid();
+		const float center = 0.5f + static_cast<float>(idx) * _num_classes + _class_id;
+		const float extent = static_cast<float>(size()) * _num_classes;
 			if (_normalized)
-				return {
-					{ static_cast<float>(0.5 + idx * _num_classes + _class_id), { 0.0, static_cast<float>(size() * _num_classes) } },
-					{ static_cast<float>(_bins[idx]) / static_cast<float>(_total), { 0, 1 } },
-				};
-			else
-				return {
-					{ static_cast<float>(0.5 + idx * _num_classes + _class_id), { 0.0, static_cast<float>(size() * _num_classes) } },
-					{ static_cast<float>(_bins[idx]), _histogram_y_range },
-				};
-		}
-		else
-		{
-			return INVALID_DATA_VECTOR;
-		}
+			return {{center, {0, static_cast<float>(extent)}},
+			        {_total == 0 ? 0.0f : static_cast<float>(_bins[idx]) / _total, {0, 1}}};
+		return {{center, {0, static_cast<float>(extent)}},
+		        {static_cast<float>(_bins[idx]), _histogram_y_range}};
 	}
 
 	/* methods to get a datasource from the interpolated dataset */
@@ -81,17 +73,24 @@ class DataHistogramXY : public DataSource<DataVector>
 		memset(_bins, 0, sizeof(_bins));
 		_histogram_y_range = { 0, 0 };
 		_total = 0;
+		if (_num_classes == 0 || _class_id >= _num_classes)
+		{
+			_size = 0;
+			return;
+		}
 		for (size_t idx = 0; idx < _source.size(); ++idx)
 		{
 			/* TODO add possiblity to define custom bucket range using a Range */
-			size_t bin_idx = floor(_source[idx].norm() * size());
-			if (bin_idx == size())
-			{
-				bin_idx--;
-			}
-			_bins[bin_idx]++;
-			_total++;
-			_histogram_y_range.update(_bins[bin_idx]);
+			const auto value = _source[idx];
+			if (!value.valid()) continue;
+			const float norm = value.norm();
+			if (!isfinite(norm)) continue;
+			const float scaled = norm * static_cast<float>(BINS);
+			const size_t bin = scaled >= static_cast<float>(BINS) ? BINS - 1
+			    : static_cast<size_t>(scaled);
+			++_bins[bin];
+			++_total;
+			_histogram_y_range.update(static_cast<float>(_bins[bin]));
 		}
 	}
 

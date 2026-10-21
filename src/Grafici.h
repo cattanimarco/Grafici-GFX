@@ -66,7 +66,13 @@ class Grafici
 	{
 	}
 
-	void clear_screen(const Window &window = full_screen, const PlotOptions opts = {})
+	// A default full-screen clear needs no projected triangles or clip buffers.
+	void clear_screen()
+	{
+		_display_driver.fill_screen(black);
+	}
+
+	void clear_screen(const Window &window, const PlotOptions opts = {})
 	{
 		_display_driver.fill_rect({0,0}, {1,1}, black, window, opts.get_segments());
 	}

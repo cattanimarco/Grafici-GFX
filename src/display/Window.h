@@ -60,6 +60,8 @@ class Window : public Vector<Range<float>>
 	{
 	}
 
+	virtual bool valid() const { return x.valid() && y.valid(); }
+
 	/* Transformation functions */
 	Window &set_full_screen()
 	{
@@ -77,6 +79,9 @@ class Window : public Vector<Range<float>>
 
 	Window sub_window(size_t x_slices, size_t y_slices, size_t x_slice_idx, size_t y_slice_idx) const
 	{
+		if (!valid() || x_slices == 0 || y_slices == 0 ||
+		    x_slice_idx >= x_slices || y_slice_idx >= y_slices)
+			return {Range<float>::invalid(), Range<float>::invalid()};
 		auto x_delta_subwindow = x.delta() / x_slices;
 		auto y_delta_subwindow = y.delta() / y_slices;
 		Range<float> new_range_x = { x.low + x_delta_subwindow * x_slice_idx, x.low + x_delta_subwindow * (x_slice_idx + 1) };
@@ -86,6 +91,8 @@ class Window : public Vector<Range<float>>
 
 	Window sub_window(Range<float> new_range_x, Range<float> new_range_y) const
 	{
+		if (!valid() || !new_range_x.valid() || !new_range_y.valid())
+			return {Range<float>::invalid(), Range<float>::invalid()};
 		return { { x.low + x.delta() * new_range_x.low,
 			       x.low + x.delta() * new_range_x.high },
 			     { y.low + y.delta() * new_range_y.low,
@@ -100,33 +107,37 @@ class Window : public Vector<Range<float>>
 	/* from normalized data vector to normalized display vector */
 	virtual DisplayVector data_to_display_vector(float data_x, float data_y) const
 	{
+		if (!valid() || !isfinite(data_x) || !isfinite(data_y))
+			return DisplayVector::invalid();
 		/* handle rotation and transformations here */
 		switch (_transform)
 		{
 		case WindowTransform::h_flip:
-			return DisplayVector{ x.norm_to_value(1 - data_x), y.norm_to_value(data_y) };
+			return DisplayVector{ map_coordinate(x, 1 - data_x), map_coordinate(y, data_y) };
 
 		case WindowTransform::v_flip:
-			return DisplayVector{ x.norm_to_value(data_x), y.norm_to_value(1 - data_y) };
+			return DisplayVector{ map_coordinate(x, data_x), map_coordinate(y, 1 - data_y) };
 
 		case WindowTransform::both_flip:
-			return DisplayVector{ x.norm_to_value(1 - data_x), y.norm_to_value(1 - data_y) };
+			return DisplayVector{ map_coordinate(x, 1 - data_x), map_coordinate(y, 1 - data_y) };
 
 		case WindowTransform::cw_90_rotation:
-			return DisplayVector{ x.norm_to_value(data_y), y.norm_to_value(1 - data_x) };
+			return DisplayVector{ map_coordinate(x, data_y), map_coordinate(y, 1 - data_x) };
 
 		case WindowTransform::ccw_90_rotation:
-			return DisplayVector{ x.norm_to_value(1 - data_y), y.norm_to_value(data_x) };
+			return DisplayVector{ map_coordinate(x, 1 - data_y), map_coordinate(y, data_x) };
 
 		case WindowTransform::none:
 		default:
-			return DisplayVector{ x.norm_to_value(data_x), y.norm_to_value(data_y) };
+			return DisplayVector{ map_coordinate(x, data_x), map_coordinate(y, data_y) };
 		}
 	};
 
 	/* from data vector to normalized display vector */
 	virtual DisplayVector data_to_display_vector(DataVector vector) const
 	{
+		if (!vector.x.valid() || !vector.y.valid())
+			return DisplayVector::invalid();
 		return data_to_display_vector(vector.x.norm(), vector.y.norm());
 	};
 
@@ -142,6 +153,12 @@ class Window : public Vector<Range<float>>
 	};
 
   protected:
+	static float map_coordinate(const Range<float> &range, float value)
+	{
+		return range.low * (1.0f - value) +
+		       range.high * value;
+	}
+
 	WindowTransform _transform{ WindowTransform::none };
 };
 

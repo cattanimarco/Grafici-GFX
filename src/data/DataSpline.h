@@ -35,7 +35,7 @@ class DataSpline : public DataInterpolatorL
 {
   public:
 	DataSpline(const DataSourceNorm &x, const DataSourceNorm &y)
-	    : DataInterpolatorL{ x, y, N }
+	    : DataInterpolatorL{ x, y, N, N }
 	{
 		compute_spline();
 	}
@@ -44,7 +44,7 @@ class DataSpline : public DataInterpolatorL
 	{
 		float raw_x, raw_y;
 		if (idx >= size() || !evaluate_raw(idx, &raw_x, &raw_y))
-			return INVALID_DATA_VECTOR;
+			return DataVector::invalid();
 		return {{raw_x, _x.range()}, {raw_y, _interpolated_y_range}};
 	}
 
@@ -54,15 +54,14 @@ class DataSpline : public DataInterpolatorL
 	{
 		size_t bin;
 		float weight;
-		compute_x_bin(idx, &bin, &weight);
-		if (_src_size < 2 || bin >= _src_size - 1)
+		if (!compute_x_bin(idx, &bin, &weight))
 			return false;
 		const float x0 = _x[bin].raw();
 		const float x1 = _x[bin + 1].raw();
 		*raw_x = x0 * (float(1) - weight) + x1 * weight;
 		const float dx = *raw_x - x0;
 		*raw_y = ((_d[bin] * dx + _c[bin]) * dx + _b[bin]) * dx + _y[bin].raw();
-		return true;
+		return isfinite(*raw_x) && isfinite(*raw_y);
 	}
 
 	bool spline_data()
@@ -87,6 +86,11 @@ class DataSpline : public DataInterpolatorL
 		for (size_t i = 0; i < n; ++i)
 		{
 			h[i] = _x[i + 1].raw() - _x[i].raw();
+			if (!isfinite(h[i]) || h[i] <= 0)
+			{
+				free(h); free(A); free(l); free(u); free(z);
+				return false;
+			}
 		}
 
 		/* interpolate y */
@@ -104,12 +108,15 @@ class DataSpline : public DataInterpolatorL
 			z[i] = (A[i] - h[i - 1] * z[i - 1]) / l[i];
 		}
 
+		bool finite_coefficients = true;
 		for (size_t j = n; j > 0;)
 		{
 			--j;
 			_c[j] = z[j] - u[j] * _c[j + 1];
 			_b[j] = (_y[j + 1].raw() - _y[j].raw()) / h[j] - h[j] * (_c[j + 1] + 2 * _c[j]) / 3;
 			_d[j] = (_c[j + 1] - _c[j]) / (3 * h[j]);
+			finite_coefficients = finite_coefficients && isfinite(_b[j]) &&
+			                      isfinite(_c[j]) && isfinite(_d[j]);
 		}
 
 		free(h);
@@ -117,7 +124,7 @@ class DataSpline : public DataInterpolatorL
 		free(l);
 		free(u);
 		free(z);
-		return true;
+		return finite_coefficients;
 	}
 
 	void compute_spline()

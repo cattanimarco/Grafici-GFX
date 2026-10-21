@@ -28,39 +28,22 @@
 class DataInterpolatorL : public DataSource<DataVector>
 {
   public:
+	// M>=2 samples include both normalized endpoints. M==1 emits the first knot.
 	DataInterpolatorL(const DataSourceNorm &x, const DataSourceNorm &y, size_t interpolationSteps)
-	    : DataSource<DataVector>{ interpolationSteps }
-	    , _x{ x }
-	    , _y{ y }
-	    , _src_size{ DataSourceNorm::min_data_source_size(x, y) }
-	    , _indexRange{ 0, interpolationSteps }
+		: DataInterpolatorL(x, y, interpolationSteps, size_t(-1))
 	{
 	}
 
 	const DataVector operator[](const unsigned long idx) const
 	{
-		if (idx < size())
-		{
-			size_t bin;
-			float norm_bin_weight;
-
-			compute_x_bin(idx, &bin, &norm_bin_weight);
-
-			/* compute the raw range for the right bin on x and y*/
-			Range<float> rawBinRangeX{ _x[bin].raw(), _x[bin + 1].raw() };
-			Range<float> rawBinRangeY{ _y[bin].raw(), _y[bin + 1].raw() };
-
-			/* interpolate x and y by mapping the normalized bin weight over the raw bin ranges */
-			/* note that we compute the normBinWeight on the x axis and interpolate on the y axis */
-			return {
-				{ rawBinRangeX.norm_to_value(norm_bin_weight), _x.range() },
-				{ rawBinRangeY.norm_to_value(norm_bin_weight), _y.range() },
-			};
-		}
-		else
-		{
-			return INVALID_DATA_VECTOR;
-		}
+		size_t bin;
+		float weight;
+		if (!compute_x_bin(idx, &bin, &weight))
+			return DataVector::invalid();
+		const float x0 = _x[bin].raw(), x1 = _x[bin + 1].raw();
+		const float y0 = _y[bin].raw(), y1 = _y[bin + 1].raw();
+		return {{x0 * (1.0f - weight) + x1 * weight, _x.range()},
+				{y0 * (1.0f - weight) + y1 * weight, _y.range()}};
 	}
 
 	/* methods to get a datasource from the interpolated dataset */
@@ -78,33 +61,56 @@ class DataInterpolatorL : public DataSource<DataVector>
 	const DataSourceNorm &_x;
 	const DataSourceNorm &_y;
 	size_t _src_size;
-	Range<size_t> _indexRange{ 0, 0 };
 
-	void compute_x_bin(const unsigned long idx, size_t *bin, float *norm_bin_weight) const
+	// A derived interpolator can reject excessive source counts before reads.
+	DataInterpolatorL(const DataSourceNorm &x, const DataSourceNorm &y,
+					   size_t outputs, size_t max_intervals)
+		: DataSource<DataVector>{outputs}, _x{x}, _y{y},
+		  _src_size{DataSourceNorm::min_data_source_size(x, y)}
 	{
-		*bin = 0;
-		*norm_bin_weight = 1.0;
+		if (_size == 0 || _src_size < 2 || _src_size - 1 > max_intervals || !valid_knots())
+			_size = 0;
+	}
 
-		/* search for the normalized x bin containing the normalized idx */
-		while (*bin < _src_size - 1)
+	bool compute_x_bin(const unsigned long idx, size_t *bin, float *weight) const
+	{
+		if (idx >= _size || _src_size < 2)
+			return false;
+		const float target = _size == 1 ? _x[0].norm()
+			: static_cast<float>(idx) / static_cast<float>(_size - 1);
+		for (size_t i = 0; i < _src_size - 1; ++i)
 		{
-			/* compute the normalized inter-bin range for the x source */
-			Range<float> normBinRangeX = { _x[*bin].norm(), _x[*bin + 1].norm() };
-
-			/* compute the normalized index */
-			float normIndex = _indexRange.value_to_norm(idx);
-			/* compute the normalized position inside the bin (in case we found the right one or we are out of range)*/
-			*norm_bin_weight = normBinRangeX.value_to_norm(normIndex);
-			/* if the normalized index is inside the normalized bin range (on x), then stop */
-			if (normBinRangeX.contains(normIndex))
+			const float left = _x[i].norm(), right = _x[i + 1].norm();
+			if (isfinite(left) && isfinite(right) && right > left && target >= left && target <= right)
 			{
-				return;
-			}
-			else
-			{
-				(*bin)++;
+				*bin = i;
+				*weight = (target - left) / (right - left);
+				return true;
 			}
 		}
+		return false; // No extrapolation beyond the available knot pairs.
+	}
+
+  private:
+	bool valid_knots() const
+	{
+		const auto xr = _x.range(), yr = _y.range();
+		if (!isfinite(static_cast<float>(xr.low)) || !isfinite(static_cast<float>(xr.high)) ||
+			!isfinite(static_cast<float>(yr.low)) || !isfinite(static_cast<float>(yr.high)) ||
+			!(xr.high > xr.low) || yr.high < yr.low)
+			return false;
+		float previous_raw = 0, previous_norm = 0;
+		for (size_t i = 0; i < _src_size; ++i)
+		{
+			const auto x = _x[i], y = _y[i];
+			const float raw = x.raw(), norm = x.norm();
+			if (!x.valid() || !y.valid() || !isfinite(raw) || !isfinite(norm) || !isfinite(static_cast<float>(y.raw())) ||
+				(i > 0 && (!(raw > previous_raw) || !(norm > previous_norm))))
+				return false;
+			previous_raw = raw;
+			previous_norm = norm;
+		}
+		return true;
 	}
 };
 

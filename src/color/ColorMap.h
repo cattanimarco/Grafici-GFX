@@ -22,7 +22,6 @@
 #include "../data/DataNorm.h"
 #include "Color.h"
 
-
 /**
  * @brief ColorMap interface 
  * 
@@ -81,22 +80,34 @@ class GeneratedMapGenerated : public ColorMap
 	{
 	}
 
+	bool valid() const { return _palette_size != 0; }
+
 	Color index_to_color(size_t idx) const override
 	{
-		return norm_to_color(idx/_palette_size);
+		if (!valid()) return {0, 0, 0};
+		// Discrete palettes wrap, matching ColorMapArray. N samples cover [0,1).
+		return norm_to_color(static_cast<float>(idx % _palette_size) /
+		                     static_cast<float>(_palette_size));
 	}
 
 	Color norm_to_color(DataNorm val) const override
 	{
+		if (!valid() || !val.valid()) return {0, 0, 0};
 		// https://iquilezles.org/articles/palettes/
 		Color result;
-		result.red = 255 * ((_a.red / 255.0) + (_b.red / 255.0)*cos( 2 * M_PI *((_c.red / 255.0) * val.norm() + (_d.red / 255.0)) ));
-		result.green = 255 * ((_a.green / 255.0) + (_b.green / 255.0)*cos( 2 * M_PI *((_c.green / 255.0) * val.norm() + (_d.green / 255.0)) ));
-		result.blue = 255 * ((_a.blue / 255.0) + (_b.blue / 255.0)*cos( 2 * M_PI *((_c.blue / 255.0) * val.norm() + (_d.blue / 255.0)) ));
+		result.red = channel(255 * ((_a.red / 255.0) + (_b.red / 255.0)*cos( 2 * M_PI *((_c.red / 255.0) * val.norm() + (_d.red / 255.0)) )));
+		result.green = channel(255 * ((_a.green / 255.0) + (_b.green / 255.0)*cos( 2 * M_PI *((_c.green / 255.0) * val.norm() + (_d.green / 255.0)) )));
+		result.blue = channel(255 * ((_a.blue / 255.0) + (_b.blue / 255.0)*cos( 2 * M_PI *((_c.blue / 255.0) * val.norm() + (_d.blue / 255.0)) )));
 		return result;
 	}
 
   private:
+	static uint8_t channel(double value)
+	{
+		if (!(value > 0)) return 0;
+		if (value >= 255) return 255;
+		return static_cast<uint8_t>(value);
+	}
 	const Color _a;
 	const Color _b;
 	const Color _c;
@@ -112,6 +123,7 @@ class GeneratedMapGenerated : public ColorMap
 template <size_t N>
 class ColorMapArray : public ColorMap
 {
+	static_assert(N > 0, "ColorMapArray requires at least one color");
   public:
 	/**
 	 * @brief Construct a new Color Map Array object
@@ -132,6 +144,7 @@ class ColorMapArray : public ColorMap
 
 	Color norm_to_color(DataNorm val) const override
 	{
+		if (!val.valid()) return {0, 0, 0};
 		return interpolate_color(val.norm());
 	}
 
@@ -159,13 +172,7 @@ class ColorMapArray : public ColorMap
 			fract_between = val - float(idx1);
 		}
 
-		Range<uint8_t> red_range{ _colors[idx1].red, _colors[idx2].red };
-		Range<uint8_t> green_range{ _colors[idx1].green, _colors[idx2].green };
-		Range<uint8_t> blue_range{ _colors[idx1].blue, _colors[idx2].blue };
-
-		return Color{ static_cast<uint8_t>(red_range.norm_to_value(fract_between)),
-			                static_cast<uint8_t>(green_range.norm_to_value(fract_between)),
-			                static_cast<uint8_t>(blue_range.norm_to_value(fract_between)) };
+		return _colors[idx1].interpolate(_colors[idx2], fract_between);
 	}
 };
 

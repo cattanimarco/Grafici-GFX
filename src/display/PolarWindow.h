@@ -36,29 +36,28 @@ class PolarWindow : public Window
 	{
 	}
 
+	bool valid() const override { return Window::valid() && m_parent_window.valid(); }
+
 	PolarWindow sub_polar_window(size_t x_slices, size_t y_slices, size_t x_slice_idx, size_t y_slice_idx) const
 	{
-		auto x_delta_subwindow = x.delta() / x_slices;
-		auto y_delta_subwindow = y.delta() / y_slices;
-		Range<float> new_range_x = { x.low + x_delta_subwindow * x_slice_idx, x.low + x_delta_subwindow * (x_slice_idx + 1) };
-		Range<float> new_range_y = { y.low + y_delta_subwindow * y_slice_idx, y.low + y_delta_subwindow * (y_slice_idx + 1) };
-		return { new_range_x, new_range_y };
+		const auto sub = Window::sub_window(x_slices, y_slices, x_slice_idx, y_slice_idx);
+		return {sub.x, sub.y, m_parent_window};
 	}
 
 	PolarWindow sub_polar_window(Range<float> new_range_x, Range<float> new_range_y) const
 	{
-		return { { x.low + x.delta() * new_range_x.low,
-			       x.low + x.delta() * new_range_x.high },
-			     { y.low + y.delta() * new_range_y.low,
-			       y.low + y.delta() * new_range_y.high } };
+		const auto sub = Window::sub_window(new_range_x, new_range_y);
+		return {sub.x, sub.y, m_parent_window};
 	}
 
 	DisplayVector data_to_display_vector(float data_x, float data_y) const override
 	{
-		float angle = x.norm_to_value(data_x);
-		float radius = y.norm_to_value(data_y);
-		float display_x = 0.5 + (radius * 0.5) * cos(angle * 2 * M_PI);
-		float display_y = 0.5 + (radius * 0.5) * sin(angle * 2 * M_PI);
+		if (!valid() || !isfinite(data_x) || !isfinite(data_y))
+			return DisplayVector::invalid();
+		float angle = Window::map_coordinate(x, data_x);
+		float radius = Window::map_coordinate(y, data_y);
+		float display_x = 0.5f + (radius * 0.5f) * cos(angle * float(6.2831853071795864769));
+		float display_y = 0.5f + (radius * 0.5f) * sin(angle * float(6.2831853071795864769));
 		return m_parent_window.data_to_display_vector(display_x, display_y);
 	};
 

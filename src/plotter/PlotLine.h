@@ -16,7 +16,12 @@ inline void plot_line(const DisplayDriver &display,
 
 	for (size_t idx = 1; idx < source_size; ++idx)
 	{
-		display.draw_line({ x[idx - 1].norm(), y[idx - 1].norm() }, { x[idx].norm(), y[idx].norm() }, colorMap.norm_to_color(c[idx - 1]), colorMap.norm_to_color(c[idx]), window, opts.get_segments());
+		const auto x0 = x[idx - 1], y0 = y[idx - 1], c0 = c[idx - 1];
+		const auto x1 = x[idx], y1 = y[idx], c1 = c[idx];
+		if (!x0.valid() || !y0.valid() || !c0.valid() ||
+		    !x1.valid() || !y1.valid() || !c1.valid()) continue;
+		display.draw_line({x0.norm(), y0.norm()}, {x1.norm(), y1.norm()},
+		                  colorMap.norm_to_color(c0), colorMap.norm_to_color(c1), window, opts.get_segments());
 	}
 }
 

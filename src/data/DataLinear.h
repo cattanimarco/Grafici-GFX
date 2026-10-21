@@ -64,7 +64,16 @@ class DataLinear : public DataParametric
   private:
 	void update_range() override
 	{
-		_range = { at(0), at(size() - 1) };
+		_range = Range<float>::invalid();
+		if (size() == 0) return;
+		const float first = at(0), last = at(size() - 1);
+		if (!isfinite(first) || !isfinite(last))
+		{
+			_size = 0;
+			return;
+		}
+		_range = {first, last};
+		_range.sort();
 	}
 
 	float _offset;
