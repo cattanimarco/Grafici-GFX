@@ -116,13 +116,13 @@ Both pictures use the same samples and colors. Subdivision adds intermediate geo
 
 ## Working with data
 
-`DataArray<T>` borrows an existing C array. `DataFunction` computes values, while distributions retain generated samples. Interpolators and histograms build new sources that can feed the same plotters. The [examples](examples/) include arrays, animation, distributions and histograms; the [contributor guide](CONTRIBUTE.md#sources-and-composition) walks through a spline.
+`DataArray<T>` borrows an existing C array. `DataFunction` computes values, while distributions retain generated samples. Interpolators and histograms build new sources that can feed the same plotters. The [examples](examples/) include arrays, animation, distributions and histograms; the [contributor guide](CONTRIBUTING.md#sources-and-composition) walks through a spline.
 
 Each `DataNorm` sample exposes a raw value through `raw()` and a normalized position through `norm()`. Raw measurements can be signed or larger than one. The normalized interface lets sources, colors and windows work together; samples store float values and range bounds.
 
 Keep borrowed arrays, sources and palettes alive while they are used. Inferred bounds are calculated during construction and do not automatically follow later changes. Supply an explicit range when a scale must remain stable. Plot options return modified copies, so assign or pass the result of a fluent chain.
 
-Default `DataNorm` values and `DataNorm::invalid()` mean missing data; `DataNorm(0.0f)` is a valid zero. Missing line and area samples leave gaps. See the [boundary contracts](CONTRIBUTE.md#boundary-and-invalid-data-contracts) for the remaining rules.
+Default `DataNorm` values and `DataNorm::invalid()` mean missing data; `DataNorm(0.0f)` is a valid zero. Missing line and area samples leave gaps. See the [boundary contracts](CONTRIBUTING.md#boundary-and-invalid-data-contracts) for the remaining rules.
 
 ### Callbacks with captured state
 
@@ -137,15 +137,15 @@ We can then capture a local value, for example `[offset](size_t i) -> float { re
 
 ## Small boards and displays
 
-Grafici draws primitives without retaining a framebuffer; the display driver may use one. Borrowed arrays and computed sources avoid an extra sample buffer. Distributions, histograms and splines retain data or coefficients, and spline construction needs temporary workspace. The [memory guide](CONTRIBUTE.md#rendering-and-memory) gives the costs.
+Grafici draws primitives without retaining a framebuffer; the display driver may use one. Borrowed arrays and computed sources avoid an extra sample buffer. Distributions, histograms and splines retain data or coefficients, and spline construction needs temporary workspace. The [memory guide](CONTRIBUTING.md#rendering-and-memory) gives the costs.
 
 Start with modest sample counts and subdivision. Check flash usage for your chosen board and measure peak SRAM and display timing with the actual hardware. The original examples were display-tested on Uno R4 Minima with an Adafruit 2.8-inch TFT Touch Shield. Host regressions and AVR builds provide additional checks; some bundled examples exceed Uno R3 flash without reducing their complexity.
 
 ## Documentation and tests
 
-The [contributor guide](CONTRIBUTE.md) explains the modules, includes class and sequence diagrams, and describes how to extend the library. The [wiki](https://github.com/cattanimarco/Grafici-GFX/wiki#library-concepts) provides further walkthroughs.
+The [contributor guide](CONTRIBUTING.md) explains the modules, includes class and sequence diagrams, and describes how to extend the library. The [wiki](https://github.com/cattanimarco/Grafici-GFX/wiki#library-concepts) provides further walkthroughs.
 
-The plot pictures in these guides are generated from their marked code examples by [Grafici-Test](https://github.com/cattanimarco/Grafici-Test/tree/d46495439394908570d4ca1df2ae1316bee40c09). That repository owns the image renderer and generated files. See [verification](CONTRIBUTE.md#verification) to regenerate pictures and choose checks for library changes.
+The plot pictures in these guides are generated from their marked code examples by [Grafici-Test](https://github.com/cattanimarco/Grafici-Test/tree/d46495439394908570d4ca1df2ae1316bee40c09). That repository owns the image renderer and generated files. See [verification](CONTRIBUTING.md#verification) to regenerate pictures and choose checks for library changes.
 
 ## Agent assistance
 
@@ -155,7 +155,7 @@ When working in a separate sketch project, give your agent the path to `Grafici-
 
 ## Contributing
 
-Start with the [contributor guide](CONTRIBUTE.md), including its [documentation guidelines](CONTRIBUTE.md#documentation-guidelines). Submit changes with the corresponding checks and regenerated pictures when behavior changes. [Open issues](https://github.com/cattanimarco/Grafici-GFX/issues) are the place to discuss features and report problems.
+Start with the [contributor guide](CONTRIBUTING.md), including its [documentation guidelines](CONTRIBUTING.md#documentation-guidelines). Submit changes with the corresponding checks and regenerated pictures when behavior changes. [Open issues](https://github.com/cattanimarco/Grafici-GFX/issues) are the place to discuss features and report problems.
 
 ## License and dependencies
 

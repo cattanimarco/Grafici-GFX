@@ -5,7 +5,7 @@ description: Change or review Grafici-GFX internals, examples or documentation w
 
 # Contribute to Grafici-GFX
 
-Resolve repository paths from this file: the library root is `../../..`. Read the relevant sections of [CONTRIBUTE.md](../../../CONTRIBUTE.md) before changing behavior. Its architecture diagrams, boundary contracts and documentation guidelines are the reference; check the current implementation when they disagree.
+Resolve repository paths from this file: the library root is `../../..`. Read the relevant sections of [CONTRIBUTING.md](../../../CONTRIBUTING.md) before changing behavior. Its architecture diagrams, boundary contracts and documentation guidelines are the reference; check the current implementation when they disagree.
 
 ## Choose the owning module
 
@@ -32,7 +32,7 @@ Keep diffs narrow, including existing line endings and formatting. Do not reorga
 
 ## Account for small boards
 
-Distinguish retained payload, construction workspace and drawing stack. Use the memory formulas in CONTRIBUTE.md rather than treating on-demand sources as free. Explicit ranges avoid discovery scans; repeated source reads, recursive subdivision and display transfers still cost time. Line subdivision splits in two, while filled-triangle subdivision splits in four, so filled plots can increase drawing work much faster. Options contain Arduino `String`, and optional callbacks may allocate.
+Distinguish retained payload, construction workspace and drawing stack. Use the memory formulas in CONTRIBUTING.md rather than treating on-demand sources as free. Explicit ranges avoid discovery scans; repeated source reads, recursive subdivision and display transfers still cost time. Line subdivision splits in two, while filled-triangle subdivision splits in four, so filled plots can increase drawing work much faster. Options contain Arduino `String`, and optional callbacks may allocate.
 
 Prefer bounded storage appropriate to the task. A full framebuffer, cache or numeric-format redesign needs an explicit resource tradeoff; do not add one to all sources for a single feature. Compile with the target board's toolchain and report flash/global SRAM separately from measured peak SRAM and display timing.
 
@@ -40,6 +40,6 @@ Prefer bounded storage appropriate to the task. A full framebuffer, cache or num
 
 Keep host tests and generated images in Grafici-Test. Locate its checkout and available runners; do not assume a temporary path, branch, or a `tests/run_checks.py` that may be absent from that revision. Test behavior at the changed boundary: empty/invalid inputs and endpoints for sources, emitted geometry and gaps for plotters, screen intersections for projections. A host sanitizer pass complements target compilation; neither proves hardware timing or peak memory use.
 
-For documentation, follow CONTRIBUTE.md's walkthrough style: purpose, a small public API example, then visible or numeric output. Reuse interesting functions such as beats or chirps. Keep the README broad and put implementation detail in CONTRIBUTE.md. Preserve Mermaid diagrams and `grafici-example` markers when editing their subjects.
+For documentation, follow CONTRIBUTING.md's walkthrough style: purpose, a small public API example, then visible or numeric output. Reuse interesting functions such as beats or chirps. Keep the README broad and put implementation detail in CONTRIBUTING.md. Preserve Mermaid diagrams and `grafici-example` markers when editing their subjects.
 
 All plot pictures come from actual Grafici-Test rendering. When an illustrated example changes, use that repository's `grafici-render` skill, inspect the regenerated images, and reference a published image commit in Markdown. Updating documentation alone does not require regenerating unchanged plots. Publishing images or updating the wiki follows the user's requested scope.

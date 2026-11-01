@@ -5,7 +5,7 @@ description: Write or explain Grafici-GFX Arduino sketches and diagnose build er
 
 # Use and debug Grafici on Arduino
 
-The library root is `../../..` relative to this file. Start with [README.md](../../../README.md) and the closest [example](../../../examples/). Check the installed library's headers: an online example or another checkout can expose a different API. For internal fixes, also read [CONTRIBUTE.md](../../../CONTRIBUTE.md) and [grafici-contribute](../grafici-contribute/SKILL.md).
+The library root is `../../..` relative to this file. Start with [README.md](../../../README.md) and the closest [example](../../../examples/). Check the installed library's headers: an online example or another checkout can expose a different API. For internal fixes, also read [CONTRIBUTING.md](../../../CONTRIBUTING.md) and [grafici-contribute](../grafici-contribute/SKILL.md).
 
 ## Establish the actual target
 
@@ -55,7 +55,7 @@ Keep arrays, adapters, views, callbacks and their referenced state alive until d
 
 ## Investigate memory and timing
 
-Use [rendering and memory](../../../CONTRIBUTE.md#rendering-and-memory) for retained and temporary costs. The current library uses float data and geometry; it has no FP16 selection option. Prefer borrowed arrays or computed sources where appropriate, known ranges, modest sample counts and low subdivision. Distribution samples, histogram bins and spline coefficients occupy storage even when drawing is lazy.
+Use [rendering and memory](../../../CONTRIBUTING.md#rendering-and-memory) for retained and temporary costs. The current library uses float data and geometry; it has no FP16 selection option. Prefer borrowed arrays or computed sources where appropriate, known ranges, modest sample counts and low subdivision. Distribution samples, histogram bins and spline coefficients occupy storage even when drawing is lazy.
 
 For resets or corruption, inspect lifetime errors and array bounds alongside stack/heap pressure, including the display driver's buffers and `String`/optional callback allocations. A successful link and the reported global SRAM total do not establish peak memory use. Measure on the actual board; separate source evaluation, geometry and display transfer time before optimizing. Do not propose a full framebuffer as a default memory-saving fix.
 
